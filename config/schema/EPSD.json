@@ -1,6 +1,6 @@
 {
-  "schema_id": "M-02-V94.1",
-  "description": "Evolution Payload Schema Definition (EPSD): Defines the mandatory structure, constraints, and validation requirements for M-02 Mutation Payloads.",
+  "schema_id": "M-02-V94.2-TEST2",
+  "description": "Evolution Payload Schema Definition (EPSD): Defines the mandatory structure, constraints, and validation requirements for M-02 Mutation Payloads, aligning with the V94.2 Integration Phase (TEST-2).",
   "metadata": {
     "current_version": 1.0,
     "last_revision_date": "2024-05-15",
