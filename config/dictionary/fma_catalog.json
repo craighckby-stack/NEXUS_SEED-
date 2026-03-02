@@ -2,49 +2,56 @@
   {
     "id": "FMA_001",
     "name": "SingularityRoot",
-    "status": "active",
+    "status": "RECONCILED",
     "fiber_meta": {
       "lane": 1,
       "work_tag": "SyncFiber",
+      "priority": "Synchronous_Governance",
       "phi_target": 1.0,
       "psr_mode": "STRICT_IMMUTABLE",
-      "ers_limit": 0.0001
+      "ers_limit": 0.0,
+      "expirationTime": 0
     }
   },
   {
     "id": "FMA_002",
     "name": "SemanticCoherence",
-    "status": "active",
+    "status": "TRANSITIONING",
     "fiber_meta": {
       "lane": 1008,
       "work_tag": "TransitionFiber",
       "drift_threshold": 0.20,
-      "huxley_layer": "L3_Critique",
-      "ers_limit": 0.015
+      "huxley_logic": ["L1_Intuition", "L2_Logic", "L3_Critique"],
+      "ers_limit": 0.015,
+      "lambda_limit": 0.618,
+      "expirationTime": 5000
     }
   },
   {
     "id": "FMA_003",
     "name": "PnP_Topology",
-    "status": "active",
+    "status": "ISOLATED",
     "fiber_meta": {
       "lane": 4096,
       "work_tag": "SelectiveHydration",
-      "isolation": "KERNEL_SPACE_STRICT",
-      "pnp_resolution": "PNP_ISOLATED_V4",
-      "virtual_store": "/.nexus/pnp/v4_singularity"
+      "isolation": "KERNEL_SPACE_STRICT_FINAL",
+      "pnp_resolution": "PNP_ISOLATED_V4_FINAL",
+      "virtual_store": "/.nexus/pnp/v4_singularity",
+      "fallbackRetry": false
     }
   },
   {
     "id": "FMA_004",
     "name": "LogicSiphon",
-    "status": "pending",
+    "status": "SIPHONING",
     "fiber_meta": {
       "lane": 8192,
       "work_tag": "SiphoningFiber",
       "lambda_limit": 0.618,
-      "siphon_source": "Meta/React-Core_v19",
-      "ccrr_gate": 1.0
+      "siphon_source": "Meta/React-Core_v19_Fiber",
+      "ccrr_gate": 1.0,
+      "expirationTime": 10000,
+      "reconciliationStrategy": "CONCURRENT_SIPHONING_V2"
     }
   }
 ]
