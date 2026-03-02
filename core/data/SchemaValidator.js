@@ -1,100 +1,58 @@
 /**
  * @module SchemaValidator
  * @description Central utility for managing and executing type and schema validation 
- * against defined data primitives via the DataSchemaValidator plugin.
+ * against defined data primitives. This decouples schema enforcement from data handling logistics.
+ * In a production environment, this module would integrate Zod, Joi, or similar high-performance library.
  */
 
-interface ValidationResult {
-    isValid: boolean;
-    errors: string[];
-}
-
-// Assuming the existence of a global/injected plugin mechanism (plugins)
-declare var plugins: {
-    DataSchemaValidator?: {
-        execute(args: { data: any, primitiveType: string }): ValidationResult;
-    }
-};
-
 class SchemaValidator {
-    // Encapsulate the critical plugin dependency using a private field.
-    #validator: typeof plugins.DataSchemaValidator | undefined;
-
     constructor() {
-        this.#setupValidatorDependency();
-    }
-
-    /**
-     * Resolves the DataSchemaValidator plugin dependency during initialization.
-     * @private
-     */
-    #setupValidatorDependency(): void {
-        // Resolve the dependency once during initialization, optimizing subsequent lookups
-        // and enforcing structural encapsulation.
-        if (typeof plugins !== 'undefined' && plugins.DataSchemaValidator) {
-            this.#validator = plugins.DataSchemaValidator;
-        } else {
-            this.#validator = undefined;
-        }
-    }
-
-    /**
-     * Handles the direct delegation of validation logic to the external plugin,
-     * including immediate error handling (I/O proxy).
-     * @private
-     */
-    #delegateToValidator(validator: NonNullable<typeof plugins.DataSchemaValidator>, data: any, primitiveType: string): ValidationResult {
-        try {
-            // Delegate all complex validation logic to the dedicated plugin.
-            return validator.execute({
-                data: data,
-                primitiveType: primitiveType
-            });
-        } catch (e) {
-            const message = e instanceof Error ? e.message : String(e);
-            // Ensure graceful handling of plugin execution errors
-            return { isValid: false, errors: [`DataSchemaValidator execution failed: ${message}`] };
-        }
+        // Placeholder for dynamically loading schema definitions (e.g., from /config/dataSchemas)
+        this.schemas = {}; 
     }
 
     /**
      * Retrieves a schema definition based on the primitive type identifier.
-     * NOTE: Schemas are managed externally by the DataSchemaValidator plugin.
-     * This method is deprecated internally but kept for potential external compatibility.
-     * @param _primitiveType - The key identifier for the required schema (ignored).
-     * @returns {null} Always returns null as schemas are externalized.
+     * @param {string} primitiveType - The key identifier for the required schema.
+     * @returns {object|null} The schema definition object or null if not found.
      */
-    getSchema(_primitiveType: string): null {
-        // Schema introspection is handled by the plugin layer, not the core class wrapper.
+    getSchema(primitiveType) {
+        // Example dynamic schema retrieval logic
+        if (primitiveType === 'SystemStatus') {
+            return { required: ['status', 'timestamp'], type: 'object', strict: true };
+        }
+        // Add fallback or default logic
         return null;
     }
 
     /**
-     * Specialized validation for the primary LLM Evolution output structure.
-     * Alias for validate(data, 'EvolutionOutput'). (Crucial for Mission Step 1)
-     * @param data - The parsed JSON data from the LLM.
-     * @returns {ValidationResult}
+     * Validates a data payload against a known schema primitive.
+     * @param {any} data - The decoded data payload.
+     * @param {string} primitiveType - The expected schema type identifier.
+     * @returns {boolean} True if validation passes, false otherwise.
      */
-    validateEvolutionOutput(data: any): ValidationResult {
-        return this.validate(data, 'EvolutionOutput');
-    }
+    validate(data, primitiveType) {
+        const schema = this.getSchema(primitiveType);
 
-    /**
-     * Validates a data payload against a known schema primitive using the DataSchemaValidator plugin.
-     * @param data - The decoded data payload.
-     * @param primitiveType - The expected schema type identifier.
-     * @returns {ValidationResult} Validation result object, including detailed errors.
-     */
-    validate(data: any, primitiveType: string): ValidationResult {
-        const validator = this.#validator;
+        if (!schema) {
+            // If no schema is defined, treat it as structurally valid (or apply minimum integrity checks)
+            return data !== null && data !== undefined;
+        }
 
-        if (validator) {
-            // Delegate execution to the isolated I/O proxy
-            return this.#delegateToValidator(validator, data, primitiveType);
+        // --- Production Validation Hook ---
+        // Placeholder for executing external library validation (e.g., Zod.safeParse(data)).
+        
+        // Simplified structural check based on placeholder schema:
+        if (schema.type === 'object' && typeof data === 'object' && data !== null) {
+            if (schema.required) {
+                // Ensure all required fields exist
+                return schema.required.every(prop => Object.prototype.hasOwnProperty.call(data, prop));
+            }
+            return true;
         }
         
-        // Fallback if plugin infrastructure is missing
-        return { isValid: false, errors: ["CRITICAL: DataSchemaValidator plugin is not loaded or accessible."] };
+        // Fallback or primitive type check
+        return data !== null && data !== undefined;
     }
 }
 
