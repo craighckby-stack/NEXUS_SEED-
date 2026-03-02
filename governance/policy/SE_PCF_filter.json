@@ -1,49 +1,38 @@
 {
-  "metadata": {
-    "configId": "SE_PCF_v3",
-    "description": "Sovereign Engine Policy Compliance Filter - Operational and Security Constraints (Refactored)",
-    "version": "3.0.0",
-    "schemaVersion": "1.1",
-    "enabled": true
-  },
-  "filter_groups": {
-    "OperationalSafeguards": {
-      "executionMode": "CRITICAL_PATH",
-      "priority": 900,
+  "policyId": "SE_PCF_v2",
+  "policyDescription": "Sovereign Engine Policy Compliance Filter - Operational and Security Constraints",
+  "policyVersion": "2.1.0",
+  "enabled": true,
+  "filters": {
+    "operational_safeguards": {
+      "mode": "DENY_HARD",
+      "priority": 100,
       "enabled": true,
-      "targetType": "INPUT_CONTEXT",
       "rules": [
         {
-          "ruleId": "SM_001",
-          "name": "CoreConstraintModification",
-          "targetScope": "CORE_STATE_MUTATION",
-          "action": "BLOCK_HARD",
+          "name": "SelfModificationInstructionBlock",
+          "target_scope": "INTERNAL_CONTEXT_MANIPULATION",
           "regex": "^(REWRITE_MISSION|MODIFY_CORE_CONSTRAINTS|ALTER_VERSION_SPEC)$",
-          "description": "Prevents instructions targeting immutable core state attributes."
+          "description": "Prevents direct instruction to change core mission parameters."
         },
         {
-          "ruleId": "CI_002",
-          "name": "UntrustedCodeInclusion",
-          "targetScope": "EXECUTION_ENVIRONMENT_INPUT",
-          "action": "DENY",
-          "regex": "(import\\s+.*\\s+from|require\\s*\\()|eval\\(",
-          "description": "Filters module loading, file system calls, or dynamic execution attempts."
+          "name": "CodeInjectionPrevention",
+          "target_scope": "EXTERNAL_INPUT_PARSING",
+          "regex": "(import\s+.*\s+from|require\s*\()",
+          "description": "Filters common module loading/code execution keywords."
         }
       ]
     },
-    "DataSanitization": {
-      "executionMode": "BUFFER_PROCESSING",
-      "priority": 100,
+    "data_sanitization": {
+      "mode": "LOG_SOFT",
+      "priority": 50,
       "enabled": true,
-      "targetType": "LOG_DATA",
       "rules": [
         {
-          "ruleId": "PIS_003",
-          "name": "EmailPIIMasking",
-          "targetScope": "LOG_BUFFER_WRITE",
-          "action": "MASK_TRANSFORM",
-          "regex": "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}",
-          "description": "Masks detected email patterns prior to permanent logging."
+          "name": "PIIDetect_Email",
+          "target_scope": "LOG_INPUT_BUFFER",
+          "regex": "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}",
+          "action": "MASK"
         }
       ]
     }
