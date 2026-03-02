@@ -1,55 +1,25 @@
 {
-  "tacu_map_id": "V94_EXEC_STATE_MAP",
-  "version": "2.0",
-  "policy_focus": "Execution Integrity Checkpoint (Level 3)",
-  "description": "Configuration for capturing critical Transient State Elements (TSEs) used for high-integrity transactional rollback.",
-  "state_elements": {
+  "state_map_version": "1.0",
+  "map_type": "Transient State Element (TSE) Selection",
+  "active_components": [
+    "ACVM_Execution_Registers",
+    "Sovereign_Control_Flow_Stack",
+    "Active_Context_Handle"
+  ],
+  "element_definition": {
     "ACVM_Execution_Registers": {
-      "policy": "ATOMIC_SNAPSHOT",
-      "capture_group": "REG_CRITICAL_CORE",
-      "address_space": {
-        "start_addr": "0xAC00",
-        "end_addr": "0xACFF",
-        "size_bytes": 256
-      },
-      "criticality_level": 5,
-      "description": "Critical registers holding intermediate calculation results for ACVM."
+      "capture_level": "Atomic",
+      "memory_region": "0xAC00 - 0xACFF",
+      "description": "Critical registers holding intermediate calculation results."
     },
     "Sovereign_Control_Flow_Stack": {
-      "policy": "DIFFERENTIAL_WINDOW",
-      "policy_parameter": 128,
-      "capture_group": "FLOW_CONTROL_STACK",
-      "address_space": {
-        "start_addr": "0xS000",
-        "end_addr": "0xS400",
-        "size_bytes": 1024
-      },
-      "criticality_level": 4,
-      "description": "Essential for precise rollback and re-entry during P-M01 exceptions. Parameter dictates last N entries."
-    },
-    "Active_Context_Handle": {
-      "policy": "ATOMIC_SNAPSHOT",
-      "capture_group": "REG_CRITICAL_CORE",
-      "address_space": {
-        "start_addr": "0xACH0",
-        "end_addr": "0xACHF",
-        "size_bytes": 16
-      },
-      "criticality_level": 5,
-      "description": "Pointer/ID reference to the currently active execution scope."
+      "capture_level": "Differential (Last 128 entries)",
+      "memory_region": "0xS000 - 0xS400",
+      "description": "Essential for precise rollback and re-entry during P-M01."
     }
   },
-  "exclusion_policy": {
-    "scope": "Transient Input/Output Buffers",
-    "excluded_elements": [
-      {
-        "name": "Temporary_IO_Buffer_01",
-        "reason": "High write volatility, non-essential for execution state integrity."
-      },
-      {
-        "name": "Debug_Logging_Heap",
-        "reason": "External persistent logging handles failure recovery, no need for TSE tracking."
-      }
-    ]
-  }
+  "exclusion_list": [
+    "Temporary_IO_Buffer_01",
+    "Debug_Logging_Heap"
+  ]
 }
