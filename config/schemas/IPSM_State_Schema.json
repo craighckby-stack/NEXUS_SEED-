@@ -1,1 +1,76 @@
-Optimized computational efficiency and recursive abstraction for IPSM_Runtime_State JSON schema applied.
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.agi/schemas/IPSM_State_Schema.json",
+  "title": "Intelligent Process Supervision Module (IPSM) Runtime State",
+  "description": "Defines the mandatory, machine-readable state structure for the IPSM. This schema includes resource telemetry, operational status, and active agent tracking.",
+  "type": "object",
+  "properties": {
+    "ipms_version": {
+      "type": "string",
+      "description": "The current version tag of the IPSM instance reporting the state (e.g., v94.1)."
+    },
+    "system_status": {
+      "type": "string",
+      "description": "The overall operational health status of the IPSM.",
+      "enum": ["HEALTHY", "DEGRADED", "CRITICAL", "MAINTENANCE"]
+    },
+    "agent_management": {
+      "description": "Metrics and identifiers related to active agent supervision.",
+      "type": "object",
+      "properties": {
+        "active_agent_ids": {
+          "description": "List of currently supervised agent unique identifiers.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}-[0-9]{4}$"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "total_supervised_processes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total count of distinct processes managed across all active agents."
+        }
+      },
+      "required": ["active_agent_ids", "total_supervised_processes"]
+    },
+    "resource_telemetry": {
+      "description": "Current aggregated infrastructure utilization metrics.",
+      "type": "object",
+      "properties": {
+        "cpu_load_percent": {
+          "type": "number",
+          "format": "float",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Average CPU load percentage over the last observation interval."
+        },
+        "memory_allocated_mb": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total system memory (in MB) allocated to the IPSM and supervised tasks."
+        },
+        "iops_read_per_sec": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Input/Output operations read per second (optional telemetry metric)."
+        }
+      },
+      "required": ["cpu_load_percent", "memory_allocated_mb"]
+    },
+    "last_update_timestamp_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Unix timestamp (milliseconds) indicating when this state report was generated."
+    }
+  },
+  "required": [
+    "ipms_version",
+    "system_status",
+    "agent_management",
+    "resource_telemetry",
+    "last_update_timestamp_ms"
+  ]
+}
