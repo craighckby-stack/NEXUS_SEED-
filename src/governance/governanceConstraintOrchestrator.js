@@ -1,143 +1,63 @@
-/**
- * Required Tool Kernel Interfaces (Existing and Strategic)
- */
-
-interface ILoggerToolKernel { 
-    warn(message: string, context?: object): void; 
-    error(message: string, context?: object): void; 
-}
-
-interface IGovernanceConstantsV2ConfigRegistryKernel {
-    getCriticalGovTargets(): Promise<string[]>;
-    getGsepStages(): Promise<{ [key: string]: string }>;
-}
-
-interface ISpecValidatorKernel {
-    // Assumes a general validation method that throws on failure
-    validate(payload: any, schemaId: string): void;
-}
-
-interface IRiskAttestationManagerToolKernel { 
-    registerPolicyIntent(intent: any): Promise<void>; 
-}
-
-interface IGovernanceStageRouterToolKernel { 
-    prioritizeRoute(destination: string, payload: any): Promise<{ path: string }>; 
-    route(destination: string, payload: any): Promise<{ path: string }>; 
-}
-
-interface IMutationIntentFactoryToolKernel { 
-    createM01Intent(payload: any): any; 
-}
-
-interface IDeepPropertyInclusionCheckerToolKernel {
-    execute(haystackArray: any[], needleList: string[], propertyPath: string): boolean;
-}
-
-interface MutationIntentPayload { targets: Array<{ componentID: string }>; }
+const GovConstants = require('./governanceConstants');
 
 /**
- * Component: Governance Constraint Orchestrator Kernel (GCO-K)
- * ID: GCO-K-v1.0.0
- * Alignment: AIA Enforcement Layer - Constraint Management.
+ * Component: Governance Constraint Orchestrator (GCO)
+ * ID: GCO-v94.3 (Minor iteration for refined constraint handling)
+ * Alignment: GSEP Stage 0/1 Intermediary.
  * Focus: Integrity barrier ensuring all policy-level modifications adhere strictly to the GSEP lifecycle and require
  *        immediate RSAM pre-attestation using the M-01 intent standard for critical targets.
  */
-class GovernanceConstraintOrchestratorKernel {
-    private rsam: IRiskAttestationManagerToolKernel;
-    private router: IGovernanceStageRouterToolKernel;
-    private intentFactory: IMutationIntentFactoryToolKernel;
-    private specValidator: ISpecValidatorKernel | null;
-    private criticalityChecker: IDeepPropertyInclusionCheckerToolKernel;
-    private configRegistry: IGovernanceConstantsV2ConfigRegistryKernel;
-    private logger: ILoggerToolKernel;
-
-    private CRITICAL_TARGETS_LIST: string[] = [];
-    private STAGE_0_VETTING: string | null = null;
-    private STAGE_1_SCOPE: string | null = null;
+class GovernanceConstraintOrchestrator {
     
     /**
-     * @param {IRiskAttestationManagerToolKernel} rsam - Risk Attestation Manager
-     * @param {IGovernanceStageRouterToolKernel} router - GSEP Stage Router
-     * @param {IMutationIntentFactoryToolKernel} intentFactory - Specialized factory for M-01 package creation
-     * @param {IDeepPropertyInclusionCheckerToolKernel} criticalityChecker - Plugin for deep list comparison
-     * @param {IGovernanceConstantsV2ConfigRegistryKernel} configRegistry - Asynchronous constant provider
-     * @param {ILoggerToolKernel} logger - Auditable Logger
-     * @param {ISpecValidatorKernel} [specValidator] - Optional payload validator utility
+     * @param {IRSAMService} rsam - Risk & Security Attestation Manager
+     * @param {SystemRouter} router - System router for GSEP stage progression
+     * @param {PolicyIntentFactory} intentFactory - Specialized factory for M-01 package creation
+     * @param {IntentSchemaValidator} [validator] - Optional payload validator utility (Recommended)
      */
-    constructor(
-        rsam: IRiskAttestationManagerToolKernel, 
-        router: IGovernanceStageRouterToolKernel, 
-        intentFactory: IMutationIntentFactoryToolKernel, 
-        criticalityChecker: IDeepPropertyInclusionCheckerToolKernel,
-        configRegistry: IGovernanceConstantsV2ConfigRegistryKernel,
-        logger: ILoggerToolKernel,
-        specValidator: ISpecValidatorKernel | null = null
-    ) {
-        // Dependencies are injected, eliminating synchronous dependency checks from constructor body.
+    constructor(rsam, router, intentFactory, validator = null) {
+        // Step 0: Robust dependency enforcement
+        if (!rsam) throw new Error("GCO Dependency Error: Missing RSAM Service.");
+        if (!router) throw new Error("GCO Dependency Error: Missing System Router.");
+        if (!intentFactory) throw new Error("GCO Dependency Error: Missing Policy Intent Factory.");
+
         this.rsam = rsam; 
         this.router = router; 
         this.intentFactory = intentFactory;
-        this.criticalityChecker = criticalityChecker;
-        this.configRegistry = configRegistry;
-        this.logger = logger;
-        this.specValidator = specValidator; 
-    }
-    
-    /**
-     * Asynchronously loads governance constants (CRITICAL_TARGETS, GSEP_STAGES) into the kernel state.
-     * This replaces synchronous GovConstants loading.
-     */
-    public async initialize(): Promise<void> {
-        try {
-            const [targets, stages] = await Promise.all([
-                this.configRegistry.getCriticalGovTargets(),
-                this.configRegistry.getGsepStages()
-            ]);
-            
-            this.CRITICAL_TARGETS_LIST = targets || [];
-            
-            // Define expected stage destinations
-            this.STAGE_0_VETTING = stages.STAGE_0_VETTING || null;
-            this.STAGE_1_SCOPE = stages.STAGE_1_SCOPE || null;
-            
-            if (!this.STAGE_1_SCOPE || !this.STAGE_0_VETTING) {
-                 this.logger.warn("GCO-K Initialization Warning: GSEP stage map incomplete. Critical routing may fail.", {
-                     stage0: this.STAGE_0_VETTING,
-                     stage1: this.STAGE_1_SCOPE
-                 });
-            }
-        } catch (error) {
-            // Use auditable logger and throw structured error (GOV_E_005: Config Load Failure)
-            this.logger.error("GCO-K Initialization Failure: Could not load governance constants.", { error });
-            throw new Error(`GCO-K Init Error (GOV_E_005): Failed to load necessary governance configuration.`);
+        this.validator = validator; // Use validator if provided
+
+        // Cache critical constants for faster lookup
+        this.CRITICAL_TARGETS_LIST = GovConstants.CRITICAL_GOV_TARGETS || [];
+        this.GSEP_STAGES_MAP = GovConstants.GSEP_STAGES || {};
+
+        // Define expected stage destinations based on the constant map structure
+        this.STAGE_0_VETTING = this.GSEP_STAGES_MAP.STAGE_0_VETTING;
+        this.STAGE_1_SCOPE = this.GSEP_STAGES_MAP.STAGE_1_SCOPE;
+
+        if (!this.STAGE_1_SCOPE || !this.STAGE_0_VETTING) {
+             console.warn("GCO Init Warning: GSEP stage map incomplete. Critical routing may fail.");
         }
     }
 
     /**
-     * Pre-checks and standardizes the raw request payload structure.
+     * Pre-checks and standardizes the raw request payload structure using the integrated validator 
+     * or minimal internal checks if no dedicated validator is present.
      * @param {MutationIntentPayload} rawRequest
      * @returns {MutationIntentPayload} Validated and standardized payload
      * @throws {Error} if payload is fundamentally invalid
      */
-    private _standardizeAndValidatePayload(rawRequest: MutationIntentPayload): MutationIntentPayload {
-        if (this.specValidator) {
-            try {
-                // Use ISpecValidatorKernel to validate against a known schema ID
-                this.specValidator.validate(rawRequest, 'MutationIntentSchemaID'); 
-                return rawRequest; 
-            } catch (e) {
-                // GOV_E_006: Schema Validation Failure
-                throw new Error("GCO-K Payload Constraint Violation (GOV_E_006): Input failed schema validation.");
-            }
+    _standardizeAndValidatePayload(rawRequest) {
+        if (this.validator) {
+            // Leverage dedicated validator if available
+            return this.validator.validateMutationIntent(rawRequest);
         }
 
         // Fallback minimal internal validation
         if (!rawRequest || typeof rawRequest !== 'object' || Array.isArray(rawRequest)) {
-            // GOV_E_007: Basic Structure Violation
-            throw new Error("GCO-K Payload Constraint Violation (GOV_E_007): Request must be a standard intent object.");
+            throw new Error("GCO Payload Constraint Violation: Request must be a standard intent object.");
         }
         
+        // Ensure targets array exists for constraint checking efficiency
         if (!Array.isArray(rawRequest.targets)) {
              rawRequest.targets = []; 
         }
@@ -145,34 +65,43 @@ class GovernanceConstraintOrchestratorKernel {
     }
 
     /**
-     * Step 1: Detect if the mutation intent targets critical governance policies.
+     * Step 1: Detect if the mutation intent targets critical governance policies using component IDs.
+     * @param {MutationIntentPayload} request - Assumed standardized payload.
+     * @returns {boolean} True if critical targets are affected.
      */
-    private _isTargetingCriticalPolicy(request: MutationIntentPayload): boolean {
-        return this.criticalityChecker.execute(
-            request.targets,
-            this.CRITICAL_TARGETS_LIST,
-            'componentID'
+    _isTargetingCriticalPolicy(request) {
+        // Using cached list for efficient array check
+        if (this.CRITICAL_TARGETS_LIST.length === 0) {
+            return false; // Cannot check constraints if no targets defined
+        }
+
+        return request.targets.some(target => 
+            target && target.componentID && this.CRITICAL_TARGETS_LIST.includes(target.componentID)
         );
     }
     
     /**
-     * Handles the mandatory M-01 Intent Creation -> RSAM Pre-Attestation -> Prioritized Routing pipeline.
+     * Handles the complex, mandatory pipeline for critical policy modifications:
+     * M-01 Intent Creation -> RSAM Pre-Attestation -> Prioritized Routing (Stage 1).
+     * @param {MutationIntentPayload} validatedRequest 
+     * @returns {Promise<Object>} Standardized critical routing decision.
+     * @throws {Error} if routing fails or attestation fails (RSAM handles internal retry logic, GCO handles routing failure)
      */
-    private async _processCriticalRoute(validatedRequest: MutationIntentPayload): Promise<object> {
+    async _processCriticalRoute(validatedRequest) {
          if (!this.STAGE_1_SCOPE) {
-             // GOV_E_008: Stage Configuration Missing
-             throw new Error("GCO-K Critical Route Error (GOV_E_008): GSEP Stage 1 (Scope) destination is undefined. Check initialization.");
+             throw new Error("GCO Critical Route Error: GSEP Stage 1 (Scope) destination is undefined.");
          }
         
          // 1. Create specialized high-risk intent package (M-01)
          const m01IntentPackage = this.intentFactory.createM01Intent(validatedRequest);
 
-         // 2. Mandatory RSAM Pre-Attestation Registration
+         // 2. Mandatory RSAM Pre-Attestation Registration. Awaiting ensures constraint is met before routing.
          await this.rsam.registerPolicyIntent(m01IntentPackage);
         
          // 3. Force route directly to GSEP Stage 1 (Scope) with maximum priority flag.
          const routeResult = await this.router.prioritizeRoute(this.STAGE_1_SCOPE, m01IntentPackage.id);
 
+         // Return high-fidelity routing data
          return {
              routePath: routeResult.path,
              intentId: m01IntentPackage.id,
@@ -184,14 +113,13 @@ class GovernanceConstraintOrchestratorKernel {
 
     /**
      * Primary entry point. Evaluates the intent payload and routes it based on constraint checks.
+     * 
+     * @param {MutationIntentPayload} rawRequest - The input request containing targets and proposed changes.
+     * @returns {Promise<Object>} Standardized routing decision payload.
      */
-    public async evaluateAndRoute(rawRequest: MutationIntentPayload): Promise<object> {
-        // Mandatory state check ensures initialization occurred
-        if (!this.STAGE_0_VETTING) {
-             throw new Error("GCO-K State Error (GOV_E_009): Kernel not initialized. Configuration missing.");
-        }
-        
+    async evaluateAndRoute(rawRequest) {
         try {
+            // Robustness: Input validation and standardization (v94.3 improvement)
             const validatedRequest = this._standardizeAndValidatePayload(rawRequest);
 
             if (this._isTargetingCriticalPolicy(validatedRequest)) {
@@ -199,21 +127,25 @@ class GovernanceConstraintOrchestratorKernel {
             }
 
             // Standard route handling: Non-critical policies go to Stage 0 Vetting
+            if (!this.STAGE_0_VETTING) {
+                 throw new Error("GCO Standard Route Error: GSEP Stage 0 (Vetting) destination is undefined.");
+            }
             
             // Standard asynchronous routing
             const standardRoute = await this.router.route(this.STAGE_0_VETTING, validatedRequest);
             
             return {
                 routePath: standardRoute.path,
-                intentId: null, 
-                status: 'ROUTE_STANDARD_VETTING',
-                targetType: 'STANDARD_GOVERNANCE_POLICY',
-                attestationRequired: false
+                intentId: null, // No M-01 intent created for standard route
+                status: 'ROUTE_STANDARD_CHANGE',
+                targetType: 'GENERAL_SYSTEM_CHANGE',
+                attestationRequired: false // Attestation may happen later in GSEP stages
             };
         } catch (error) {
-            // Auditable logging of routing failure
-            this.logger.error("GCO-K Route Evaluation Failed.", { rawRequest, error: error.message, conceptId: error.conceptId || 'GOV_E_010' });
-            throw error; 
+            // Centralized error handling for GCO constraints
+            throw new Error(`GCO Constraint Orchestration Failure: ${error.message}`);
         }
     }
 }
+
+module.exports = GovernanceConstraintOrchestrator;
