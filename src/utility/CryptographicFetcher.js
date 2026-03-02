@@ -5,24 +5,15 @@
  * Requirement: Must use immutable storage (e.g., PKI root hashes) for signature verification keys.
  */
 class CryptographicFetcher {
-    #http;
-    #KeyRing;
-    #SignedPayloadValidatorUtility;
-
     /**
      * @param {Object} config
-     * @param {Object} config.httpService - Low-level HTTP client (e.g., Axios instance). Must support async get(url).
-     * @param {Object} config.KeyRing - Access to necessary public keys/signature verification utilities. Must support async verify(payload, signature).
-     * @param {Object} config.SignedPayloadValidatorUtility - Injected tool for verification. Must support async execute({ rawData, verifyFunction }).
+     * @param {Object} config.httpService - Low-level HTTP client (e.g., Axios instance).
+     * @param {Object} config.KeyRing - Access to necessary public keys/signature verification utilities.
      */
-    constructor({ httpService, KeyRing, SignedPayloadValidatorUtility }) {
-        if (!httpService || !KeyRing || !SignedPayloadValidatorUtility) {
-            throw new Error("CryptographicFetcher: Missing required dependencies (httpService, KeyRing, or SignedPayloadValidatorUtility).");
-        }
-
-        this.#http = httpService;
-        this.#KeyRing = KeyRing;
-        this.#SignedPayloadValidatorUtility = SignedPayloadValidatorUtility;
+    constructor({ httpService, KeyRing }) {
+        this.http = httpService;
+        this.KeyRing = KeyRing;
+        // Assume KeyRing.verify(payload, signature) exists
     }
 
     /**
@@ -31,35 +22,29 @@ class CryptographicFetcher {
      * @returns {Promise<Object>} Object containing mandates and a verifiable 'tag'.
      */
     async fetch(url) {
-        let response;
-        
-        // 1. Secure Data Retrieval (Transport Layer)
-        try {
-            response = await this.#http.get(url);
-        } catch (error) {
-            // Explicitly catch and wrap transport/network errors, crucial for security context.
-            throw new Error(`CryptographicFetcher: Transport failure retrieving data from ${url}. Details: ${error.message}`);
-        }
-
-        // 2. Basic Response Integrity Check
-        if (!response || !response.data) {
-            throw new Error(`CryptographicFetcher: Received empty or malformed response structure from ${url}.`);
-        }
-        
+        const response = await this.http.get(url);
         const rawData = response.data;
         
-        // 3. Create the specific verification function using the private KeyRing
-        // This closure ensures the KeyRing dependency is correctly scoped for the validator utility.
-        const verificationFunction = (payload, signature) => this.#KeyRing.verify(payload, signature);
-        
-        // 4. Delegate structural validation, cryptographic verification, and parsing to the utility
-        const verifiedData = await this.#SignedPayloadValidatorUtility.execute({
-            rawData: rawData,
-            verifyFunction: verificationFunction
-        });
+        if (!rawData || !rawData.payload || !rawData.signature || !rawData.tag) {
+            throw new Error("Fetcher failed: Response missing critical structure (payload, signature, or tag).");
+        }
 
-        // Return verified data structure
-        return verifiedData;
+        // 1. Cryptographic Verification
+        const isVerified = await this.KeyRing.verify(rawData.payload, rawData.signature);
+        
+        if (!isVerified) {
+            throw new Error("Fetcher failed: Policy signature verification failed. Data integrity compromised.");
+        }
+
+        // 2. Parse payload
+        const mandates = JSON.parse(rawData.payload);
+
+        // Return verified data structure for ExternalPolicyIndex consumption
+        return {
+            mandates: mandates,
+            tag: rawData.tag,
+            sourceTimestamp: rawData.timestamp || Date.now() 
+        };
     }
 }
 
