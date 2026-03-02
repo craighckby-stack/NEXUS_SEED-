@@ -1,14 +1,4 @@
 /**
- * @fileoverview Replaced custom promise timeout logic with the dedicated PromiseTimeoutEnforcer plugin.
- */
-
-/**
- * AGI Kernel Plugin: PromiseTimeoutEnforcer
- * @type {{enforceTimeout: (promise: Promise<T>, ms: number, errorMessage: string) => Promise<T>}}
- */
-const PromiseTimeoutEnforcer = require('AGI_KERNEL').PromiseTimeoutEnforcer;
-
-/**
  * Utility function to impose a timeout on a promise.
  * Rejects if the promise does not settle (resolve or reject) within the specified duration.
  *
@@ -18,13 +8,24 @@ const PromiseTimeoutEnforcer = require('AGI_KERNEL').PromiseTimeoutEnforcer;
  * @returns {Promise<T>} A promise that resolves to the value of the input promise, or rejects on timeout.
  * @template T
  */
-async function pTimeout(promise, ms, errorMessage) {
-    // Delegate the complex race and cleanup logic to the specialized plugin
-    return PromiseTimeoutEnforcer.enforceTimeout(
-        promise,
-        ms,
-        errorMessage || 'Operation timed out'
-    );
+async function pTimeout(promise, ms, errorMessage = 'Operation timed out') {
+    let timerId;
+
+    const timeoutPromise = new Promise((_, reject) => {
+        timerId = setTimeout(() => {
+            const timeoutError = new Error(errorMessage);
+            timeoutError.code = 'ETIMEOUT'; // Standardized code for easier error handling downstream
+            reject(timeoutError);
+        }, ms);
+    });
+
+    try {
+        // Use Promise.race to run the original promise and the timeout concurrently
+        return await Promise.race([promise, timeoutPromise]);
+    } finally {
+        // Always clear the timer regardless of which promise settled first
+        clearTimeout(timerId);
+    }
 }
 
 module.exports = { pTimeout };
