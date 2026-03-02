@@ -1,194 +1,103 @@
-class Config {
-  static get staticConfig() {
-    return {
-      VERSION: "1.0.0",
-      env: process.env.NODE_ENV || "development"
-    };
-  }
+from typing import Dict, Any, List
 
-  constructor(values = {}) {
-    this.setValues(values);
-  }
+class ComplianceReport:
+    """
+    A structured report detailing compliance outcomes.
+    """
+    def __init__(self):
+        self.is_compliant = True
+        self.failures = [] # type: List[Dict[str, str]]
 
-  setValues(values) {
-    Object.assign(this, values);
-  }
+    def add_failure(self, check_id: str, message: str):
+        self.is_compliant = False
+        self.failures.append({
+            "check_id": check_id,
+            "message": message
+        })
 
-  static get defaultConfig() {
-    return {
-      foo: 'bar',
-      baz: true
-    };
-  }
+    def __bool__(self):
+        return self.is_compliant
 
-  static get configSchema() {
-    return {
-      type: 'object',
-      properties: {
-        foo: { type: 'string' },
-        baz: { type: 'boolean' }
-      }
-    };
-  }
+class ConstraintComplianceValidator:
+    """
+    CCV v2.0 (Constraint Compliance Nexus)
+    Ensures volatile runtime configurations adhere strictly to immutable
+    protocol specifications (GAX mandates) prior to Epoch Manifest Sealing (G0).
 
-  validate() {
-    try {
-      const schema = Config.configSchema;
-      const validator = new (require('jsonschema').Validator)();
-      validator.checkSchema(schema);
-      validator.validate(this, schema);
-    } catch (e) {
-      console.error('Config validation error:', e);
-      throw e;
-    }
-  }
-}
+    This version provides detailed, granular validation checks and generates
+    a comprehensive ComplianceReport rather than relying solely on exceptions.
+    Inputs are expected to be pre-parsed structured objects/dictionaries.
+    """
 
-class LifecycleEvent {
-  constructor(event) {
-    this.event = event;
-  }
-}
+    # Define specific Check IDs for granular, machine-readable reporting
+    CHECK_PIM_STRUCTURAL = "PIM.C01" # Structure/completeness checks
+    CHECK_PIM_SEVERITY = "PIM.C02"   # Severity threshold checks
+    CHECK_ORCH_RESOURCES = "ORCH.R01" # Resource boundedness checks (GAX II)
 
-class LifecycleHandler {
-  constructor(handler) {
-    this.handler = handler;
-  }
+    def __init__(
+        self, 
+        GAX_MASTER: Dict[str, Any],
+        PIM_CONSTRAINTS: Dict[str, Any],
+        ORCHESTRATOR_CONFIG: Dict[str, Any]
+    ):
+        # Configuration inputs are now strongly typed dictionaries, improving initialization clarity.
+        self.GAX = GAX_MASTER
+        self.PIM = PIM_CONSTRAINTS
+        self.ORCH = ORCHESTRATOR_CONFIG
 
-  bind(target = this) {
-    this.handler = this.handler.bind(target);
-  }
+    def _validate_required_p_sets(self, report: ComplianceReport):
+        """Checks if all required P-Set types (defined in GAX) are present in PIM_CONSTRAINTS."""
+        required_sets = self.GAX.get('protocol_mandates', {}).get('required_p_sets', [])
+        actual_sets = self.PIM.get('constraint_sets', {}).keys() if self.PIM.get('constraint_sets') else []
 
-  execute() {
-    this.handler();
-  }
-}
+        for required in required_sets:
+            if required not in actual_sets:
+                report.add_failure(
+                    self.CHECK_PIM_STRUCTURAL,
+                    f"PIM configuration is missing required P-Set definition: {required}."
+                )
 
-class NexusCore {
-  #lifecycle = {
-    configured: false,
-    loaded: false,
-    shuttingDown: false
-  };
+    def _validate_severity_thresholds(self, report: ComplianceReport):
+        """Checks PIM severity compliance against hard limits defined in GAX_MASTER."""
+        gax_limits = self.GAX.get('limits', {}).get('severity_thresholds', {}) 
+        pim_thresholds = self.PIM.get('policy', {}).get('severity_levels', {}) 
 
-  #status = "INIT";
+        for level, limit in gax_limits.items():
+            current_threshold = pim_thresholds.get(level)
 
-  get status() {
-    return this.#status;
-  }
+            if current_threshold is None:
+                 # If a mandatory GAX limit is set, the corresponding PIM setting must exist.
+                 report.add_failure(
+                    self.CHECK_PIM_SEVERITY,
+                    f"Required GAX severity level '{level}' is not defined in PIM configuration."
+                )
+                 continue
 
-  set status(value) {
-    this.#status = value;
-    const currentValue = this.#status;
-    const lifecycle = this.#lifecycle;
-    if (value !== 'INIT') {
-      console.log(`NexusCore instance is ${value}.`);
-      if (value === 'SHUTDOWN') {
-        lifecycle.shuttingDown = false;
-      }
-    }
-    if (currentValue === 'INIT' && value !== 'INIT') {
-      lifecycle.configured = true;
-    }
-  }
+            if current_threshold > limit:
+                report.add_failure(
+                    self.CHECK_PIM_SEVERITY,
+                    f"Severity '{level}' ({current_threshold}) exceeds GAX hard limit ({limit})."
+                )
 
-  get lifecycle() {
-    return this.#lifecycle;
-  }
+    def _validate_orchestrator_limits(self, report: ComplianceReport):
+        """Checks resource boundedness and non-zero constraint compliance (GAX II)."""
+        stage_limit = self.ORCH.get('gsep_stage_limit_seconds', 0)
+        
+        if not isinstance(stage_limit, (int, float)) or stage_limit <= 0:
+             report.add_failure(
+                self.CHECK_ORCH_RESOURCES,
+                f"GSEP-C stage limit ({stage_limit}) must be a positive non-zero value, mandated by GAX II."
+            )
 
-  configure(config) {
-    this.validateConfig(config);
-    this.onLifecycleEvent("CONFIGURED");
-    this.#lifecycle.configured = true;
-    this.config = config;
-  }
+    def execute_pre_flight_check(self) -> ComplianceReport:
+        """
+        Executes all compliance checks and returns a comprehensive, structured report.
+        The caller is responsible for handling compliance failure (logging or raising).
+        """
+        report = ComplianceReport()
+        
+        self._validate_required_p_sets(report)
+        self._validate_severity_thresholds(report)
+        self._validate_orchestrator_limits(report)
 
-  validateConfig(config) {
-    const configSchema = Config.configSchema;
-    try {
-      const validator = new (require('jsonschema').Validator)();
-      validator.checkSchema(configSchema);
-      validator.validate(config, configSchema);
-    } catch (e) {
-      console.error('Config validation error:', e);
-      throw e;
-    }
-  }
-
-  onLifecycleEvent(event, handler) {
-    const lifecycleHandler = new LifecycleHandler(handler);
-    this.#lifecycle[event] = lifecycleHandler;
-  }
-
-  get on() {
-    return (event, handler) => {
-      const lifecycleEvent = new LifecycleEvent(event);
-      this.onLifecycleEvent(event, handler);
-    };
-  }
-
-  executeLifecycleEvent(event) {
-    if (this.#lifecycle[event]) {
-      this.#lifecycle[event].bind(this).execute();
-    }
-  }
-
-  async load() {
-    await this.executeLifecycleEvent("CONFIGURED");
-    try {
-      console.log("Loading...");
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log("Loading complete...");
-      this.#lifecycle.loaded = true;
-      this.executeLifecycleEvent("LOADED");
-    } catch (e) {
-      console.error('Load error:', e);
-    }
-  }
-
-  async shutdown() {
-    try {
-      if (!this.#lifecycle.shuttingDown) {
-        console.log("Shutdown initiated...");
-        this.#lifecycle.shuttingDown = true;
-        this.executeLifecycleEvent("SHUTTING_DOWN");
-        console.log("Shutdown complete...");
-        this.status = "SHUTDOWN";
-      }
-    } catch (e) {
-      console.error("Shutdown error:", e);
-    }
-  }
-
-  async start() {
-    const startMethodOrder = ["configure", "load", "shutdown"];
-    for (const methodName of startMethodOrder) {
-      if (this[methodName] instanceof Function) {
-        await this[methodName]();
-      }
-    }
-  }
-
-  async destroy() {
-    this.status = "DESTROYED";
-    this.#lifecycle = {
-      configured: false,
-      loaded: false,
-      shuttingDown: false
-    };
-  }
-
-  async on(event, handler) {
-    await this.onLifecycleEvent(event, handler);
-  }
-}
-
-const nexusCore = new NexusCore();
-nexusCore.on('DESTROYED', () => {
-  console.log("NexusCore instance destroyed.");
-});
-nexusCore.configure(Config.defaultConfig);
-nexusCore.start();
-nexusCore.load();
-nexusCore.shutdown();
-nexusCore.destroy();
+        return report
