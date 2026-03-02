@@ -1,111 +1,47 @@
 /**
- * Sovereign AGI v95.0 - ConfigServiceKernel
+ * Sovereign AGI v95.0 - ConfigService
  * Function: Centralized service for loading, parsing, and providing runtime configuration parameters.
- * Enforces Dependency Injection for all configuration schema, loading logic, environment access, and logging.
+ * Ensures type safety and consistent defaults across all modules.
  */
 
-// --- Required Interfaces for Dependency Injection ---
-
-/** Interface for Configuration Schema Registry (Requires ConfigSchemaRegistryKernel) */
-interface IConfigSchemaRegistryKernel {
-    getConfigDefinition(): Record<string, any>;
-}
-
-/** Interface for abstracting environment variables access (Replaces direct process.env access) */
-interface IEnvironmentAccessKernel {
-    getEnvironmentVariables(): Record<string, string>;
-}
-
-/** Interface for the Config Loader Utility (Replaces synchronous global plugin access) */
-interface IConfigLoaderToolKernel {
-    load(definition: Record<string, any>, envMap: Record<string, string>): Record<string, any>;
-}
-
-/** Interface for Logging Utility (Replaces synchronous console.* calls) */
-interface ILoggerToolKernel {
-    error(message: string, ...args: any[]): void;
-    warn(message: string, ...args: any[]): void;
-}
-
-// Define keys for configuration access (for type hinting)
-type CoreConfigKeys = 'AGI_VERSION' | 'ENVIRONMENT' | 'LOG_LEVEL' | 'LOG_DESTINATION' | 'API_PORT';
-
-class ConfigServiceKernel {
-    private readonly configSchemaRegistry: IConfigSchemaRegistryKernel;
-    private readonly configLoader: IConfigLoaderToolKernel;
-    private readonly envAccess: IEnvironmentAccessKernel;
-    private readonly logger: ILoggerToolKernel;
-    
-    private _config: Readonly<Record<string, any>>;
-
-    /**
-     * Initializes the Kernel using rigorous Dependency Injection.
-     */
-    constructor(
-        configSchemaRegistry: IConfigSchemaRegistryKernel,
-        configLoader: IConfigLoaderToolKernel,
-        envAccess: IEnvironmentAccessKernel,
-        logger: ILoggerToolKernel
-    ) {
-        this.configSchemaRegistry = configSchemaRegistry;
-        this.configLoader = configLoader;
-        this.envAccess = envAccess;
-        this.logger = logger;
-        this._config = {}; 
-        
-        // Configuration initialization is isolated to the setup method
-        this.#setupConfiguration();
+class ConfigService {
+    constructor() {
+        // Load configuration from ENV variables, defaults, or external files
+        this._config = this._loadConfiguration();
     }
 
-    /**
-     * Isolates synchronous setup logic, eliminating configuration loading from the constructor body.
-     * Rigorously replaces synchronous internal coupling with dependency delegation.
-     */
-    #setupConfiguration(): void {
-        const definition = this.configSchemaRegistry.getConfigDefinition();
-        
-        try {
-            // Delegate environment access
-            const envMap = this.envAccess.getEnvironmentVariables();
+    _loadConfiguration() {
+        return {
+            // Core System Settings
+            AGI_VERSION: 'v95.0',
+            ENVIRONMENT: process.env.NODE_ENV || 'development',
             
-            // Delegate configuration loading and coercion
-            this._config = this.configLoader.load(definition, envMap);
-        } catch (e) {
-            // Delegate error handling
-            this.logger.error(
-                `[ConfigServiceKernel] FATAL: Configuration loading failed. Falling back to default configuration defined in the registry. Error: ${e instanceof Error ? e.message : String(e)}`
-            );
-            
-            // Fallback logic relies strictly on the injected schema defaults
-            this._config = Object.keys(definition).reduce((acc, key) => {
-                acc[key] = definition[key].default; 
-                return acc;
-            }, {} as Record<string, any>);
-        }
-        
-        // Enforce immutability after initialization
-        Object.freeze(this._config);
+            // Logging Settings (Used by AgiLogger)
+            LOG_LEVEL: process.env.AGI_LOG_LEVEL || 'INFO',
+            LOG_DESTINATION: process.env.AGI_LOG_DESTINATION || 'stdout',
+
+            // Default ports/resources
+            API_PORT: parseInt(process.env.API_PORT) || 3000,
+            // ... other system settings (SRM limits, Memory capacity, etc.)
+        };
     }
 
     /**
-     * Retrieves a configuration value by key.
+     * Gets a configuration value by key.
+     * @param {string} key - The configuration key (e.g., 'LOG_LEVEL').
+     * @returns {any} The configuration value.
      */
-    public get<T = any>(key: CoreConfigKeys | string): T | null {
-        if (!Object.prototype.hasOwnProperty.call(this._config, key)) {
-            this.logger.warn(`[ConfigServiceKernel] Attempted access to undefined configuration key: ${key}. This should be defined in the injected schema registry.`);
-            return null; 
+    get(key) {
+        if (!this._config.hasOwnProperty(key)) {
+            console.error(`Configuration key not found: ${key}`);
+            return null; // Return null or throw error depending on strictness
         }
-        return this._config[key] as T;
-    }
-    
-    /**
-     * Returns the full immutable configuration object.
-     */
-    public getAllConfig(): Readonly<Record<string, any>> {
-        return this._config;
+        return this._config[key];
     }
 }
 
-// NOTE: The synchronous singleton pattern (module.exports = new ConfigService()) is eliminated.
-// Consumers must use Dependency Injection.
-module.exports = ConfigServiceKernel;
+// Enforce Singleton Pattern
+const instance = new ConfigService();
+Object.freeze(instance);
+
+module.exports = instance;
