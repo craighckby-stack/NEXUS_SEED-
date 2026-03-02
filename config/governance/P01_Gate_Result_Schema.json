@@ -1,1 +1,52 @@
-[object Object]
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "P01_Gate_Result_Schema.json",
+  "title": "P01 Gate Result Schema",
+  "description": "Schema defining the necessary structure for validation results derived from Governance Gate P01 checks, referencing the lawset in G0_Rules.js.",
+  "type": "object",
+  "required": [
+    "gateID",
+    "status",
+    "timestamp",
+    "artifactReference"
+  ],
+  "properties": {
+    "gateID": {
+      "type": "string",
+      "description": "Identifier corresponding to the specific Governance Gate (P01).",
+      "const": "P01"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "COMPLIANT",
+        "NON_COMPLIANT",
+        "BLOCKED",
+        "PENDING_REVIEW"
+      ],
+      "description": "Result state of the governance check."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Time when the gate evaluation occurred."
+    },
+    "artifactReference": {
+      "type": "string",
+      "description": "Hash, path, or identifier of the artifact tested against the gate."
+    },
+    "violations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of specific rules or sections of G0_Rules.js violated, if status is NON_COMPLIANT."
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Auxiliary data related to the execution context.",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}
