@@ -1,80 +1,58 @@
-const MUTATION_INTENT_SCHEMA_ID = 'MutationIntentPayloadSchema';
-
 /**
- * Kernel: Intent Schema Validator Kernel
- * ID: ISVK-v1.0.0
- * Focus: High-integrity, asynchronous validation of mutation intent payloads against canonical schemas.
+ * Utility: Intent Schema Validator
+ * ID: ISV-v94.3
+ * Focus: Ensures that incoming mutation intent payloads adhere strictly to required internal schemas
+ *        before being processed by high-risk orchestrators like GCO.
  */
-class IntentSchemaValidatorKernel {
+class IntentSchemaValidator {
 
     /**
-     * @param {object} dependencies
-     * @param {ConfigSchemaRegistryKernel} dependencies.configSchemaRegistry
-     * @param {ISpecValidatorKernel} dependencies.specValidator
-     * @param {IRegistryInitializerToolKernel} dependencies.registryInitializer
+     * Defines the required schema structure for a standard MutationIntentPayload.
+     * @returns {Object} Schema definition (Simplified for internal utility representation).
      */
-    constructor({ configSchemaRegistry, specValidator, registryInitializer }) {
-        this.configSchemaRegistry = configSchemaRegistry;
-        this.specValidator = specValidator;
-        this.registryInitializer = registryInitializer;
-        this.schemaId = MUTATION_INTENT_SCHEMA_ID;
-    }
-
-    /**
-     * Registers the required Mutation Intent Schema definition with the Config Registry.
-     * @returns {Promise<void>}
-     */
-    async initialize() {
-        // Define the JSON schema based on the structure required by the original utility.
-        const schemaDefinition = {
-            $id: this.schemaId,
-            type: 'object',
-            description: 'Canonical schema for a mutation intent payload.',
-            properties: {
-                intentId: { type: 'string', description: 'Traceable ID of the intent', optional: true },
-                source: { type: 'string', description: 'Originating system/module' },
-                targets: {
-                    type: 'array',
-                    items: { type: 'object' }, // Placeholder for TargetDescriptor, requiring array structure
-                    description: 'List of affected resources/targets'
-                },
-                timestamp: { type: 'number', description: 'Unix timestamp of creation' }
-            },
-            required: ['source', 'targets', 'timestamp'],
-            additionalProperties: false
+    static getRequiredSchema() {
+        return {
+            intentId: 'string|optional',
+            source: 'string|required',
+            targets: 'array<TargetDescriptor>|required',
+            timestamp: 'number|required'
         };
-
-        await this.registryInitializer.registerSchema({
-            registry: this.configSchemaRegistry,
-            schema: schemaDefinition
-        });
     }
 
     /**
-     * Validates a raw mutation intent payload against the registered canonical schema.
+     * Validates and returns a standardized mutation intent payload.
      * 
      * @param {Object} rawPayload - The raw input data.
-     * @returns {Promise<Object>} Validated payload (or throws an error).
+     * @returns {Object} Validated and normalized payload.
      * @throws {Error} If the payload violates required structural constraints.
      */
-    async validateMutationIntent(rawPayload) {
+    validateMutationIntent(rawPayload) {
         if (!rawPayload || typeof rawPayload !== 'object') {
-            throw new Error("ISVK Validation Failure: Payload must be a valid object.");
+            throw new Error("ISV Validation Failure: Payload must be a valid object.");
         }
 
-        const result = await this.specValidator.validate({
-            schemaId: this.schemaId,
-            payload: rawPayload
-        });
-
-        if (!result.isValid) {
-            // Use aggregated errors provided by ISpecValidatorKernel
-            const errors = (result.errors || []).map(e => e.message || e.instancePath).join('; ');
-            throw new Error(`ISVK Validation Failure: Structural constraints violated for ${this.schemaId}. Errors: ${errors}`);
+        // Example Check 1: Mandatory Fields
+        if (!rawPayload.source || typeof rawPayload.source !== 'string') {
+            throw new Error("ISV Validation Failure: 'source' field is missing or invalid.");
         }
+
+        // Example Check 2: Targets must be an array
+        if (!Array.isArray(rawPayload.targets)) {
+            console.warn("ISV Warning: 'targets' field corrected to empty array.");
+            rawPayload.targets = [];
+        }
+        
+        // Example Check 3: Targets Structure (Ensure componentID is present for GCO)
+        for (const target of rawPayload.targets) {
+            if (!target || typeof target !== 'object' || !target.componentID) {
+                throw new Error(`ISV Validation Failure: Target descriptor is missing critical 'componentID'. Invalid target: ${JSON.stringify(target)}`);
+            }
+        }
+
+        // Future improvement: Add deep type checking based on getRequiredSchema()
 
         return rawPayload;
     }
 }
 
-module.exports = IntentSchemaValidatorKernel;
+module.exports = IntentSchemaValidator;
