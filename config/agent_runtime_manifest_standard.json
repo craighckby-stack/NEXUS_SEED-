@@ -1,284 +1,39 @@
-## Mutation Protocol V2.0 Applied
-
-
-### Mutated Class Config
-
-
-class Config {
-  constructor(values = {}) {
-    Object.assign(this, this.defaults);
-    this.merge(values);
-  }
-
-  get defaults() {
-    return {
-      version: '1.0.0',
-      env: 'development',
-      foo: 'bar',
-      baz: true,
-    };
-  }
-
-  get schema() {
-    return {
-      type: 'object',
-      default: this.toObject(),
-      properties: {
-        version: {
-          type: 'string',
+{
+  "$id": "http://agiv94.1.com/config/agent_runtime_manifest_standard_v1.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Agent Runtime Capability Manifest",
+  "description": "Defines the static capabilities, tools, and environmental constraints available to an agent instance.",
+  "type": "object",
+  "properties": {
+    "manifest_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "execution_limits": {
+      "type": "object",
+      "properties": {
+        "max_tokens_per_cycle": { "type": "integer" },
+        "execution_timeout_s": { "type": "integer" },
+        "max_concurrent_tools": { "type": "integer" }
+      }
+    },
+    "available_tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "schema": { "type": "object", "description": "JSON schema defining tool input parameters." }
         },
-        env: {
-          type: 'string',
-        },
-        foo: {
-          type: 'string',
-        },
-        baz: {
-          type: 'boolean',
-        },
-      },
-    };
-  }
-
-  merge(values) {
-    Object.assign(this, values);
-  }
-
-  validate() {
-    const validator = jsonschema.validate(this, this.schema);
-    if (validator.errors.length > 0) {
-      throw validator;
+        "required": ["name", "schema"]
+      }
+    },
+    "persistent_memory_paths": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "File system paths the agent can read/write persistent memory."
     }
-    return this;
-  }
-
-  toObject() {
-    return Object.assign({}, this);
-  }
-
-  toJSON() {
-    return JSON.parse(JSON.stringify(this));
-  }
+  },
+  "required": ["manifest_version", "available_tools", "execution_limits"]
 }
-
-
-### Enhanced AsyncHandlerWrapper
-
-
-class AsyncHandlerWrapper {
-  constructor(handler, context) {
-    this.handler = handler instanceof Function ? handler.bind(context) : handler;
-  }
-
-  async execute(...args) {
-    return this.handler(...args);
-  }
-}
-
-
-### Optimized Context Class
-
-
-class Context {
-  constructor(values = {}) {
-    Object.assign(this, this.defaults);
-  }
-
-  defaults() {
-    return {};
-  }
-
-  validate() {
-    // implement validation logic here
-  }
-}
-
-
-### Mutated Lifecycle Class
-
-
-class Lifecycle {
-  constructor() {
-    this.events = {
-      configured: false,
-      loaded: false,
-      shuttingDown: false,
-    };
-    this.methods = {
-      onCreate: async () => {
-        this.events.configured = true;
-        this.emit('configured');
-      },
-      onLoad: async () => {
-        this.events.loaded = true;
-        this.emit('loaded');
-      },
-      onConfigured: async () => {
-        this.events.configured = true;
-        this.emit('configured');
-      },
-      onShutdown: async () => {
-        this.events.shuttingDown = true;
-        this.emit('shuttingDown');
-      },
-      onDestroy: async () => {
-        this.dispose();
-      },
-    };
-    this.contextChain = [];
-    this.status = 'INIT';
-    this.listeners = this.createEventManager();
-  }
-
-  constructorLifeCycle() {
-    Object.keys(this.methods).some((method) => {
-      this[method] = this.methods[method];
-    });
-  }
-
-  getLifecycleEvent(event) {
-    return this.listeners.getLifecycleHandlers().find((handler) => handler.event === event);
-  }
-
-  getLifecycleListeners() {
-    return this.listeners;
-  }
-
-  getLifecycleHandlers() {
-    return this.listeners.getLifecycleHandlers();
-  }
-
-  dispose() {
-    return this.listeners.dispose();
-  }
-
-  addLifecycleListener(event, handler) {
-    this.listeners.add(event, handler);
-  }
-
-  async applyLifecycle(event, ...args) {
-    const handlers = this.listeners.getLifecycleHandlers().find((handlers) => handlers.event === event);
-    if (handlers) {
-      return await Promise.all(
-        handlers.map(async (handler) => await handler.execute(...args))
-      ).then(() => {
-        const lifecycleMethod = this[lifecycleMethod];
-        return lifecycleMethod(...args);
-      });
-    }
-  }
-
-  async applyConfig(config) {
-    await this.onConfigure().then(() => {
-      this.lifecycle('CONFIGURE', config);
-    });
-  }
-
-  async onConfigure() {
-    const lifecycleHandler = this.configureConfig.bind(this);
-    return await lifecycleHandler();
-  }
-
-  configureConfig() {
-    this.config = new Config();
-    this.config.validate();
-    this.config.merge(this.contextChain);
-    return 'Config applied successfully';
-  }
-
-  async chainContext(context) {
-    this.contextChain = context;
-  }
-
-  async load() {
-    const lifecycleHandler = this.loadLifecycle.bind(this);
-    return await lifecycleHandler();
-  }
-
-  loadLifecycle() {
-    this.events.loaded = true;
-    return 'Load complete';
-  }
-
-  async start() {
-    const methodNameOrder = ["CONFIGURE", "onLoad", "shutdown"];
-    return Promise.all(
-      methodNameOrder.map(async (methodName) => {
-        if (this[methodName] instanceof Function) {
-          return await this[methodName]();
-        }
-      })
-    ).then(() => {
-      this.status = 'STARTED';
-    });
-  }
-
-  async shutdown() {
-    if (!this.events.shuttingDown) {
-      console.log("Shutdown initiated...");
-      this.events.shuttingDown = true;
-      this.lifecycle('SHUTTING_DOWN');
-      console.log("Shutdown complete...");
-      this.status = "SHUTDOWN";
-    }
-  }
-}
-
-
-### Mutated NexusCore Class
-
-
-class NexusCore extends Lifecycle {
-  constructor() {
-    super();
-    this.constructorLifeCycle();
-  }
-
-  constructorLifeCycle() {
-    Object.keys(this.methods).some((method) => {
-      this[method] = this.methods[method];
-    });
-  }
-
-  async applyConfig(config) {
-    await this.applyConfig(config);
-  }
-
-  async chainContext(context) {
-    await super.chainContext(context);
-  }
-
-  async start() {
-    await super.start();
-  }
-
-  async shutdown() {
-    await super.shutdown();
-  }
-
-  async load() {
-    await super.load();
-  }
-
-  async dispose() {
-    await super.dispose();
-  }
-
-  addLifecycleListener(event, handler) {
-    super.addLifecycleListener(event, handler);
-  }
-}
-
-
-### Optimized instance Creation
-
-
-const instance = new NexusCore();
-instance.on('DESTROYED', async () => {
-  console.log('NexusCore instance destroyed.');
-});
-
-await instance.start();
-
-
-Note that this is just one possible implementation outcome from applying the Mutation Protocol. Optimal results may vary depending on specific project needs and constraints.
