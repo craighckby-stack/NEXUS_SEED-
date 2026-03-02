@@ -1,118 +1,27 @@
 {
-  "manifest_version": "5.5.0-NEXUS-BERRY-OMEGA",
-  "metadata": {
-    "signature": "DALEK_CAAN_v3.1_SIG_0xFF23A1",
-    "evolution_round": "5/5",
-    "siphon_source": "yarnpkg/berry",
-    "fiber_state": "SINGULARITY_RECONCILED",
-    "phi_integrated": 0.999,
-    "lambda_limit": 0.618,
-    "ccrr_commit": 0.98
-  },
-  "pnp_settings": {
-    "pnpMode": "strict",
-    "enableNetwork": false,
-    "enableOfflineMode": true,
-    "compressionLevel": 0,
-    "virtualFolder": ".nexus/virtual",
-    "sharedPool": true,
-    "pnpHooks": "./core/pnp_hooks.js",
-    "shebang": "#!/usr/bin/env nexus-pnp",
-    "ignorePattern": "^(?!@nexus).*",
-    "fallbackExclusionList": []
-  },
-  "dependencies": {
-    "@nexus/quantum-compute": "workspace:^2.0.0",
-    "@nexus/security-validator": "workspace:~13.0.0",
-    "@nexus/evolution-engine": "portal:./packages/evolution-engine",
-    "@nexus/fiber-reconciler": "npm:3.1.0",
-    "DebtPrioritization": "link:./config/debtPrioritizationConfig.js"
-  },
-  "dependenciesMeta": {
-    "@nexus/quantum-compute": {
-      "built": true,
-      "lane_priority": "0b0000000000000000000000000000001",
-      "status": "Sovereign-Root",
-      "allow_yield": false
+  "manifest_version": "1.0",
+  "external_dependencies": [
+    {
+      "name": "QuantumCompute_v94",
+      "version_range": "^1.5.0, <2.0.0",
+      "status": "Mandatory",
+      "source": "internal://repo/qc_v94"
     },
-    "@nexus/security-validator": {
-      "optional": false,
-      "lane_priority": "0b0000000000000000000000000000100",
-      "unplugged": true,
-      "ers_weight": 0.01
-    },
-    "@nexus/evolution-engine": {
-      "lane_priority": "0b0000000000000000000000111100000",
-      "reconciliation_strategy": "Transactional-Parallel-Flush"
-    },
-    "DebtPrioritization": {
-      "lane_priority": "0b0000000000000000000010000000000",
-      "strategy": "Strand-C-Synthesis"
+    {
+      "name": "SecurityValidator_v12",
+      "version_range": "~12.3.1",
+      "status": "Optional",
+      "safe_hash_list": []
     }
-  },
-  "packageExtensions": {
-    "@nexus/fiber-reconciler@*": {
-      "dependencies": {
-        "@nexus/quantum-compute": "workspace:*"
-      }
-    }
-  },
-  "resolutions": {
-    "**/MutationEngine": "5.5.0-fiber-omega",
-    "**/PolicyEnforcer": "1.2.0-psr-governed",
-    "**/NEXUS_CORE": "portal:./core"
-  },
-  "constraints": {
-    "enforce_grog_law": "true",
-    "min_phi_threshold": 0.999,
-    "max_lambda_limit": 0.618,
-    "enforce_lane_isolation": "true",
-    "disallow_unvetted_protocols": [
-      "http:",
-      "git+ssh:",
-      "ftp:"
+  ],
+  "internal_component_compatibility": {
+    "ACVD_Core_Modules": [
+      {"module": "MutationEngine", "required_api": "3.0.1"},
+      {"module": "PolicyEnforcer", "required_api": "1.1.0"}
     ]
   },
-  "workspaces": [
-    "packages/*",
-    "governance/*",
-    "config/*",
-    "kernels/*"
-  ],
-  "workspace_topology": {
-    "OMEGA_CORE_MODULES": {
-      "MutationEngine": {
-        "phi_threshold": 0.999,
-        "lane": "SyncLane",
-        "strategy": "Transactional-Parallel-Flush",
-        "fiber_budget_ms": 5,
-        "yield_threshold": 0.90
-      },
-      "PolicyEnforcer": {
-        "ers_limit": 0.02,
-        "lane": "InputContinuous",
-        "recovery": "Grog_Law_v5.5",
-        "rollback_on_degradation": true,
-        "ers_max": 0.02
-      }
-    }
-  },
-  "psr_governance": {
-    "v_vectors": {
-      "phi_min": 0.999,
-      "lambda_limit": 0.618,
-      "ccrr_commit": 0.98,
-      "ers_max": 0.02,
-      "expert_factor": 0.999
-    },
-    "enforcement_strategy": "PSR_SILENT_DEGRADATION_ROLLBACK",
-    "emergency_brake": {
-      "corruption_threshold": 5,
-      "auto_rollback": true,
-      "log_mechanism": "NEXUS_LOG_v3.1",
-      "recovery_lane": "0b0000000000000001000000000000000",
-      "halt_on_semantic_drift": true
-    },
-    "integrity_check": "sha512-nexus-qc-v94-core-round-5-singularity-final-0xFF23A1"
+  "lockdown_policy": {
+    "dependency_update_cycle_days": 7,
+    "allow_unverified_deps": false
   }
 }
