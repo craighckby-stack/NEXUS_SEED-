@@ -1,54 +1,32 @@
 {
-  "transition_policy_version": "2.0",
-  "mode_definitions_ref": "config/system_modes.json",
+  "transition_policy_version": "1.0",
   "triggers": [
     {
-      "trigger_id": "T-001_CRITICAL_FAILURE",
-      "description": "Unacceptable sustained failure rate requiring deep safety mode.",
-      "required_clearance": "L5_AUDIT_TEAM",
-      "persistence_ms": 5000,
-      "conditions": {
-        "logic_operator": "AND",
-        "clauses": [
-          { "metric": "runtime.failure_rate", "operator": ">", "value": 0.01 }
-        ]
-      },
-      "actions": [
-        { "type": "NOTIFY_LEVEL", "level": "CRITICAL" },
-        { "type": "TRANSITION_MODE", "mode": "SAFETY_DEEP_READONLY" }
-      ]
+      "trigger_id": "T-001_CRIT_FAILURE",
+      "source_metric": "failure_rate",
+      "comparison": "GT",
+      "threshold": 0.01,
+      "duration_ms": 5000,
+      "target_mode": "SAFETY_DEEP_READONLY",
+      "required_clearance": "L5_AUDIT_TEAM"
     },
     {
-      "trigger_id": "T-002_HIGH_ENTROPY_DETECTED",
-      "description": "Codebase instability (high entropy) coupled with resource availability.",
-      "required_clearance": "L3_OPERATIONS",
-      "persistence_ms": 60000,
-      "conditions": {
-        "logic_operator": "AND",
-        "clauses": [
-          { "metric": "code_evolution.entropy.normalized_value", "operator": ">", "value": 0.85 },
-          { "metric": "resource.cpu_usage.normalized", "operator": "<", "value": 0.60 }
-        ]
-      },
-      "actions": [
-        { "type": "TRANSITION_MODE", "mode": "SAFETY_DEEP_READONLY" }
-      ]
+      "trigger_id": "T-002_HIGH_ENTROPY",
+      "source_metric": "code_entropy_estimate.normalized_value",
+      "comparison": "GT",
+      "threshold": 0.85,
+      "duration_ms": 60000,
+      "target_mode": "SAFETY_DEEP_READONLY",
+      "required_clearance": "L3_OPERATIONS"
     },
     {
-      "trigger_id": "T-003_NOMINAL_STATE_RESTORED",
-      "description": "Sustained stability allows return to evolutionary mode.",
-      "required_clearance": "AUTO_APPROVAL",
-      "persistence_ms": 300000,
-      "conditions": {
-        "logic_operator": "AND",
-        "clauses": [
-          { "metric": "runtime.failure_rate", "operator": "<", "value": 0.001 },
-          { "metric": "code_evolution.revert_rate", "operator": "<", "value": 0.05 }
-        ]
-      },
-      "actions": [
-        { "type": "TRANSITION_MODE", "mode": "STANDARD_EVOLUTION" }
-      ]
+      "trigger_id": "T-003_NOMINAL_RESTORE",
+      "source_metric": "failure_rate",
+      "comparison": "LT",
+      "threshold": 0.001,
+      "duration_ms": 300000,
+      "target_mode": "STANDARD_EVOLUTION",
+      "required_clearance": "AUTO_APPROVAL"
     }
   ]
 }
