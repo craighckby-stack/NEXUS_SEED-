@@ -1,4 +1,6 @@
-const DEFAULT_OPERATOR = 'GT';
+// governance/lib/DimensionPolicyEngine.js
+
+const MetricOperator = require('../utils/MetricOperator'); 
 
 /**
  * Purpose: Evaluates real-time metrics against defined dimensional thresholds and executes prescribed governance actions.
@@ -7,99 +9,31 @@ const DEFAULT_OPERATOR = 'GT';
  * {
  *   dim_key: string,
  *   breach_threshold: number,
- *   operator: string (e.g., 'GT', 'LT'),
+ *   operator: string (e.g., 'GT', 'LT'), 
  *   governance_action: string,
  *   fail_fast_enabled: boolean
  * }
  */
 class DimensionPolicyEngine {
-    #config;
-    #policies;
-    #actionExecutor;
-    #logger;
-    #metricsClient; // Optional
-    #validator;
-
     /**
      * @param {object} dependencies 
      * @param {object} dependencies.configSource - Source to load dimensional policies.
      * @param {object} dependencies.actionExecutor - Component responsible for executing remediation actions.
      * @param {object} dependencies.logger - Structured logging utility.
-     * @param {object} dependencies.metricThresholdValidator - Extracted tool for metric comparison logic (See Plugin).
      * @param {object} [dependencies.metricsClient] - Client for fetching metrics (optional if metrics are provided externally).
      */
-    constructor(dependencies) {
-        this.#setupDependencies(dependencies);
-    }
-
-    // --- I/O Proxy Methods ---
-
-    #throwSetupError(message) {
-        throw new Error(message);
-    }
-
-    #loadConfiguration(configSource) {
-        // Configuration Source I/O Proxy
-        return configSource.loadConfig('dim_operational_config') || {};
-    }
-
-    #logWarn(message) {
-        this.#logger.warn(message);
-    }
-    
-    #logError(message, metadata) {
-        this.#logger.error(message, metadata);
-    }
-    
-    #logDebug(message) {
-        this.#logger.debug(message);
-    }
-
-    #logAlert(message, metadata) {
-        this.#logger.alert(message, metadata);
-    }
-
-    #logCritical(message, metadata) {
-        this.#logger.critical(message, metadata);
-    }
-
-    #delegateToValidatorExecution(metricValue, operator, breach_threshold) {
-        // External MetricThresholdValidator execution proxy
-        return this.#validator.validate(metricValue, operator, breach_threshold);
-    }
-
-    async #delegateToActionExecution(actionName, definition) {
-        // External ActionExecutor execution proxy
-        return this.#actionExecutor.execute(actionName, definition);
-    }
-
-    // --- Setup Method ---
-
-    /**
-     * Handles synchronous dependency resolution, configuration loading, and initial state setup.
-     */
-    #setupDependencies({ configSource, actionExecutor, logger, metricsClient, metricThresholdValidator }) {
-        if (!configSource || !actionExecutor || !logger || !metricThresholdValidator) {
-            this.#throwSetupError("DimensionPolicyEngine requires configSource, actionExecutor, logger, and metricThresholdValidator dependencies.");
+    constructor({ configSource, actionExecutor, logger, metricsClient }) {
+        if (!configSource || !actionExecutor || !logger) {
+            throw new Error("DimensionPolicyEngine requires configSource, actionExecutor, and logger dependencies.");
         }
-        
-        // 1. Assign dependencies
-        this.#actionExecutor = actionExecutor;
-        this.#logger = logger;
-        this.#metricsClient = metricsClient; // Optional
-        this.#validator = metricThresholdValidator;
 
-        // 2. Load configuration (I/O via proxy)
-        this.#config = this.#loadConfiguration(configSource);
-        
-        // 3. Extract policies
-        this.#policies = Array.isArray(this.#config.dimension_definitions) 
-            ? this.#config.dimension_definitions 
-            : [];
+        this.config = configSource.loadConfig('dim_operational_config');
+        this.actions = actionExecutor;
+        this.logger = logger;
+        this.metrics = metricsClient;
 
-        // 4. Initialization check logging (I/O via proxy)
-        if (this.#policies.length === 0) {
-            this.#logWarn('DimensionPolicyEngine initialized but no dimension policies were loaded.');
+        if (!Array.isArray(this.config.dimension_definitions) || this.config.dimension_definitions.length === 0) {
+            this.logger.warn('DimensionPolicyEngine initialized but no dimension policies were loaded.');
         }
     }
 
@@ -110,20 +44,14 @@ class DimensionPolicyEngine {
      * @returns {boolean}
      */
     checkDimensionBreach(metricValue, definition) {
-        const { breach_threshold, operator = DEFAULT_OPERATOR } = definition;
+        const { breach_threshold, operator = MetricOperator.GT } = definition;
 
         if (typeof metricValue !== 'number' || isNaN(metricValue)) {
-            this.#logError('Attempted breach check with non-numeric metric value.', { key: definition.dim_key, value: metricValue });
+            this.logger.error('Attempted breach check with non-numeric metric value.', { key: definition.dim_key, value: metricValue });
             return false;
         }
         
-        try {
-            // Use the injected validator tool via proxy
-            return this.#delegateToValidatorExecution(metricValue, operator, breach_threshold);
-        } catch (error) {
-             this.#logError(`Validation error for dimension ${definition.dim_key}: ${error.message}`, { operator });
-             return false;
-        }
+        return MetricOperator.validate(metricValue, operator, breach_threshold);
     }
 
     /**
@@ -133,43 +61,37 @@ class DimensionPolicyEngine {
      */
     async evaluateAllDimensions(realTimeMetrics) {
         if (!(realTimeMetrics instanceof Map)) {
-             this.#logError('Input metrics must be provided as a Map (Map<string, number>).');
+             this.logger.error('Input metrics must be provided as a Map (Map<string, number>).');
              return { status: 'Operational' };
         }
         
-        if (this.#policies.length === 0) {
-            this.#logDebug('No policies configured to evaluate.');
-            return { status: 'Operational' };
-        }
-
-        for (const definition of this.#policies) {
+        for (const definition of this.config.dimension_definitions) {
             const dimKey = definition.dim_key;
             const metricValue = realTimeMetrics.get(dimKey);
             
             if (metricValue === undefined) {
-                this.#logDebug(`Skipping policy check for missing metric: ${dimKey}`);
+                this.logger.debug(`Skipping policy check for missing metric: ${dimKey}`);
                 continue;
             }
 
-            const operatorUsed = definition.operator || DEFAULT_OPERATOR;
             const isBreached = this.checkDimensionBreach(metricValue, definition);
 
             if (isBreached) {
-                this.#logAlert(`Dimension policy breach detected. Executing governance action.`, {
+                this.logger.alert(`Dimension policy breach detected. Executing governance action.`, {
                     dimension: dimKey,
                     value: metricValue,
                     threshold: definition.breach_threshold,
-                    operator: operatorUsed,
+                    operator: definition.operator || MetricOperator.GT,
                     action: definition.governance_action
                 });
                 
-                await this.#delegateToActionExecution(definition.governance_action, definition)
+                await this.actions.execute(definition.governance_action, definition)
                     .catch(err => {
-                         this.#logError(`Failed to execute governance action ${definition.governance_action}`, { error: err.message, dimKey });
+                         this.logger.error(`Failed to execute governance action ${definition.governance_action}`, { error: err.message, dimKey });
                     });
 
                 if (definition.fail_fast_enabled) {
-                    this.#logCritical(`Fail-fast triggered for critical dimension: ${dimKey}`);
+                    this.logger.critical(`Fail-fast triggered for critical dimension: ${dimKey}`);
                     return { status: 'CriticalFailure', key: dimKey };
                 }
             }
