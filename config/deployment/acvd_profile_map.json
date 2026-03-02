@@ -2,12 +2,12 @@
   "manifest_version": "5.5.0-NEXUS-BERRY-OMEGA",
   "metadata": {
     "signature": "DALEK_CAAN_v3.1_SIG_0xFF23A1",
-    "evolution_round": "3/5",
+    "evolution_round": "4/5",
     "siphon_source": "yarnpkg/berry",
     "phi_integrated": 0.999,
     "lambda_limit": 0.618,
     "ccrr_commit": 0.98,
-    "fiber_state": "SINGULARITY_RECONCILIATION_PHASE"
+    "fiber_state": "SINGULARITY_RECONCILED"
   },
   "pnp_settings": {
     "pnpMode": "strict",
@@ -128,7 +128,8 @@
         "ers_limit": 0.02,
         "lane": "InputContinuous",
         "recovery": "Grog_Law_v5.5",
-        "rollback_on_degradation": true
+        "rollback_on_degradation": true,
+        "ers_max": 0.02
       }
     },
     "infrastructure_mapping": {
@@ -148,7 +149,7 @@
     ]
   },
   "integrity": {
-    "check": "sha512-nexus-qc-v94-core-round-3-evolution-0xFF23A1",
+    "check": "sha512-nexus-qc-v94-core-round-4-singularity-0xFF23A1",
     "psr_mode": "ACTIVE",
     "signature": "DALEK_CAAN_v3.1_SIG_0xFF23A1"
   }
