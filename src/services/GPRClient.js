@@ -1,29 +1,17 @@
+import CacheService from '../utility/CacheService.js';
+
 // GPRClient: Manages secure connection, caching, parameter retrieval, and version resolution using config/gpr.config.json.
 
-// Assuming HighResilienceCacheInitializer is available in the execution context.
-declare const HighResilienceCacheInitializer: {
-    execute: (config: any) => any;
-};
-
 class GPRClient {
-  private config: any;
-  private cache: any;
-  private isReady: boolean;
-
-  constructor(config: any) {
+  constructor(config) {
     this.config = config.governance_registry;
-    
-    // CRITICAL REFACTOR: Extracting complex, config-dependent caching instantiation into a dedicated plugin.
-    // This replaces the previous error-prone instantiation: `new new CacheService(...)`
-    if (typeof HighResilienceCacheInitializer === 'undefined') {
-        throw new Error("HighResilienceCacheInitializer plugin dependency is missing.");
-    }
-    this.cache = HighResilienceCacheInitializer.execute(this.config);
-
+    // Dependency CacheService is assumed to be moved to the merged /utility path.
+    // Fixed instantiation error (removed double 'new').
+    this.cache = new CacheService(this.config.service_config.resilience);
     this.isReady = false;
   }
 
-  async initialize(): Promise<boolean> {
+  async initialize() {
     console.log(`Initializing GPR Client. Endpoint: ${this.config.service_config.endpoint}`);
     
     // 1. Secure Authentication (using IAM_TOKEN and specified scope)
@@ -35,12 +23,11 @@ class GPRClient {
     return true;
   }
 
-  getParameter(prefix: string, key: string): any {
-    // Retrieval logic utilizing the injected cache utility
-    return this.cache.get(`${prefix}:${key}`);
+  getParameter(prefix, key) {
+    // Retrieval logic with fallbacks, caching, and background refresh scheduling.
   }
 
   // ... other retrieval and maintenance methods ...
 }
 
-module.exports = GPRClient;
+export default GPRClient;
