@@ -1,194 +1,101 @@
-class Config {
-  static get staticConfig() {
-    return {
-      VERSION: "1.0.0",
-      env: process.env.NODE_ENV || "development"
-    };
-  }
-
-  constructor(values = {}) {
-    this.setValues(values);
-  }
-
-  setValues(values) {
-    Object.assign(this, values);
-  }
-
-  static get defaultConfig() {
-    return {
-      foo: 'bar',
-      baz: true
-    };
-  }
-
-  static get configSchema() {
-    return {
-      type: 'object',
-      properties: {
-        foo: { type: 'string' },
-        baz: { type: 'boolean' }
-      }
-    };
-  }
-
-  validate() {
-    try {
-      const schema = Config.configSchema;
-      const validator = new (require('jsonschema').Validator)();
-      validator.checkSchema(schema);
-      validator.validate(this, schema);
-    } catch (e) {
-      console.error('Config validation error:', e);
-      throw e;
+{
+  "manifest_id": "STDM_V100.0_REFRACTOR",
+  "description": "System Telemetry Definition Manifest: Normalized definition of S6-critical performance metrics, tiered resource constraints, structured reporting templates, and mandated ingestion parameters for the Governance Telemetry Bus (GTB). Emphasizes policy mapping and standardized units.",
+  "standards": {
+    "priority_tiers": ["CRITICAL", "HIGH", "MEDIUM", "LOW"],
+    "alert_tiers": {
+      "T2_CRITICAL": "Requires immediate autonomous intervention (S6 Protocol C)",
+      "T1_WARNING": "Requires autonomous assessment and soft mitigation (S6 Protocol W)"
+    },
+    "units": {
+      "GFLOPS": "Giga Floating Point Operations Per Second",
+      "GB": "Gigabytes",
+      "MS": "Milliseconds",
+      "HZ": "Hertz",
+      "UNITLESS": "Unit not applicable (e.g., counts, throughput)"
     }
-  }
-}
-
-class LifecycleEvent {
-  constructor(event) {
-    this.event = event;
-  }
-}
-
-class LifecycleHandler {
-  constructor(handler) {
-    this.handler = handler;
-  }
-
-  bind(target = this) {
-    this.handler = this.handler.bind(target);
-  }
-
-  execute() {
-    this.handler();
-  }
-}
-
-class NexusCore {
-  #lifecycle = {
-    configured: false,
-    loaded: false,
-    shuttingDown: false
-  };
-
-  #status = "INIT";
-
-  get status() {
-    return this.#status;
-  }
-
-  set status(value) {
-    this.#status = value;
-    const currentValue = this.#status;
-    const lifecycle = this.#lifecycle;
-    if (value !== 'INIT') {
-      console.log(`NexusCore instance is ${value}.`);
-      if (value === 'SHUTDOWN') {
-        lifecycle.shuttingDown = false;
+  },
+  "protocol_index": {
+    "RRP_W_C-A_101": "Resource Reaction Protocol: Compute Usage Warning Tier A",
+    "RRP_C_C-B_101": "Resource Reaction Protocol: Compute Usage Critical Tier B",
+    "RRP_W_M-A_102": "Resource Reaction Protocol: Memory Usage Warning Tier A",
+    "RRP_C_M-B_102": "Resource Reaction Protocol: Memory Usage Critical Tier B",
+    "RVP_RT-LATENCY_900": "Required Validation Policy: Real-Time Kernel Latency Constraint",
+    "RVP_CRYPTO_501": "Required Validation Policy: Cryptographic Throughput Degradation",
+    "RVP_GOVERNANCE_302": "Required Validation Policy: Policy Evaluation Time Exceeded"
+  },
+  "resource_budgets": [
+    {
+      "resource_name": "ComputeUtilization",
+      "unit": "GFLOPS",
+      "constraint_levels": {
+        "T1_WARNING": 8500.0,
+        "T2_CRITICAL": 10000.0
+      },
+      "policy_references": {
+        "T1_WARNING": "RRP_W_C-A_101",
+        "T2_CRITICAL": "RRP_C_C-B_101"
+      }
+    },
+    {
+      "resource_name": "PhysicalMemoryCommitment",
+      "unit": "GB",
+      "constraint_levels": {
+        "T1_WARNING": 450.0,
+        "T2_CRITICAL": 512.0
+      },
+      "policy_references": {
+        "T1_WARNING": "RRP_W_M-A_102",
+        "T2_CRITICAL": "RRP_C_M-B_102"
       }
     }
-    if (currentValue === 'INIT' && value !== 'INIT') {
-      lifecycle.configured = true;
+  ],
+  "telemetry_streams": [
+    {
+      "stream_id": "AgentHealthStream",
+      "ingestion_format": "JSON_L",
+      "priority": "CRITICAL",
+      "data_rate": 1.0,
+      "rate_unit": "HZ"
+    },
+    {
+      "stream_id": "CISM_Metadata_Stream",
+      "ingestion_format": "Avro",
+      "priority": "HIGH",
+      "data_rate": 0.1,
+      "rate_unit": "HZ"
     }
-  }
-
-  get lifecycle() {
-    return this.#lifecycle;
-  }
-
-  configure(config) {
-    this.validateConfig(config);
-    this.onLifecycleEvent("CONFIGURED");
-    this.#lifecycle.configured = true;
-    this.config = config;
-  }
-
-  validateConfig(config) {
-    const configSchema = Config.configSchema;
-    try {
-      const validator = new (require('jsonschema').Validator)();
-      validator.checkSchema(configSchema);
-      validator.validate(config, configSchema);
-    } catch (e) {
-      console.error('Config validation error:', e);
-      throw e;
-    }
-  }
-
-  onLifecycleEvent(event, handler) {
-    const lifecycleHandler = new LifecycleHandler(handler);
-    this.#lifecycle[event] = lifecycleHandler;
-  }
-
-  get on() {
-    return (event, handler) => {
-      const lifecycleEvent = new LifecycleEvent(event);
-      this.onLifecycleEvent(event, handler);
-    };
-  }
-
-  executeLifecycleEvent(event) {
-    if (this.#lifecycle[event]) {
-      this.#lifecycle[event].bind(this).execute();
-    }
-  }
-
-  async load() {
-    await this.executeLifecycleEvent("CONFIGURED");
-    try {
-      console.log("Loading...");
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log("Loading complete...");
-      this.#lifecycle.loaded = true;
-      this.executeLifecycleEvent("LOADED");
-    } catch (e) {
-      console.error('Load error:', e);
-    }
-  }
-
-  async shutdown() {
-    try {
-      if (!this.#lifecycle.shuttingDown) {
-        console.log("Shutdown initiated...");
-        this.#lifecycle.shuttingDown = true;
-        this.executeLifecycleEvent("SHUTTING_DOWN");
-        console.log("Shutdown complete...");
-        this.status = "SHUTDOWN";
+  ],
+  "required_operational_metrics": [
+    {
+      "metric_name": "Agent_Heartbeat_Latency",
+      "unit": "MS",
+      "target_system": "Kernel_RTOS",
+      "reporting_interval_ms": 1000,
+      "validation_criteria": {
+        "target_range": [10, 50],
+        "violation_policy": "RVP_RT-LATENCY_900"
       }
-    } catch (e) {
-      console.error("Shutdown error:", e);
-    }
-  }
-
-  async start() {
-    const startMethodOrder = ["configure", "load", "shutdown"];
-    for (const methodName of startMethodOrder) {
-      if (this[methodName] instanceof Function) {
-        await this[methodName]();
+    },
+    {
+      "metric_name": "CRoT_Signing_Throughput",
+      "unit": "UNITLESS",
+      "target_system": "Trust_Anchor",
+      "reporting_interval_ms": 5000,
+      "validation_criteria": {
+        "target_range": [100, 500],
+        "violation_policy": "RVP_CRYPTO_501"
+      }
+    },
+    {
+      "metric_name": "GAX_Policy_Evaluation_Time",
+      "unit": "MS",
+      "target_system": "Governance_Engine",
+      "reporting_interval_ms": 500,
+      "validation_criteria": {
+        "target_range": [5, 20],
+        "violation_policy": "RVP_GOVERNANCE_302"
       }
     }
-  }
-
-  async destroy() {
-    this.status = "DESTROYED";
-    this.#lifecycle = {
-      configured: false,
-      loaded: false,
-      shuttingDown: false
-    };
-  }
-
-  async on(event, handler) {
-    await this.onLifecycleEvent(event, handler);
-  }
+  ]
 }
-
-const nexusCore = new NexusCore();
-nexusCore.on('DESTROYED', () => {
-  console.log("NexusCore instance destroyed.");
-});
-nexusCore.configure(Config.defaultConfig);
-nexusCore.start();
-nexusCore.load();
-nexusCore.shutdown();
-nexusCore.destroy();
