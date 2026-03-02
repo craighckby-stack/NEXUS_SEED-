@@ -1,91 +1,40 @@
 {
-  "config_version": "v2.0.0",
+  "config_version": "v1.2.0",
   "deployment_env": "${ENV:CURRENT}",
-  "system_defaults": {
+  "global_operation_params": {
     "default_reporting_frequency_minutes": 5,
-    "default_check_frequency_seconds": 60,
     "data_quality_schema_check_enabled": true,
     "alerting_backend": "SovereignAlertsService"
   },
-  "governance_tiers": {
-    "CRITICAL": {
-      "p_level": "P0",
-      "severity_score": 100,
-      "default_escalation_timeout_minutes": 5
-    },
-    "HIGH": {
-      "p_level": "P1",
-      "severity_score": 75,
-      "default_escalation_timeout_minutes": 15
-    },
-    "WARNING": {
-      "p_level": "P2",
-      "severity_score": 50,
-      "default_escalation_timeout_minutes": 60
-    }
+  "severity_threshold_definitions": {
+    "P0_CRITICAL_SLO_BREACH": 3,
+    "P1_HIGH_GOVERNANCE_WARNING": 10,
+    "P2_MEDIUM_OBSERVATIONAL": 50
   },
-  "governance_actions_map": {
-    "SCALE_RESPONSE": {
-      "action_type": "RESOURCE_MANAGEMENT",
-      "action_handler": "ScalingEngine/v1",
-      "description": "Trigger dynamic scaling for the breached service.",
-      "parameters_template": {
-        "strategy": "AUTOSCALE_DYNAMIC",
-        "scaling_factor": 1.2
-      }
-    },
-    "ISSUE_REPORT": {
-      "action_type": "COMMUNICATION",
-      "action_handler": "ReportingService/v2",
-      "description": "Generate degradation report for data ops review.",
-      "parameters_template": {
-        "report_type": "DEGRADATION",
-        "recipient_group": "DATA_OPS"
-      }
-    }
-  },
-  "operational_dimensions": [
+  "dimension_definitions": [
     {
       "dim_key": "SERVICE_A_CORE_LATENCY_P95",
       "display_name": "Service A Core API Latency P95",
       "unit": "milliseconds",
       "metric_source_id": "MTRX-SA-001",
-      "slo_rules": {
-        "rule_type": "ABOVE_THRESHOLD",
-        "check_frequency_seconds": 30,
-        "critical_threshold": {
-          "value": 450,
-          "governance_tier": "CRITICAL",
-          "action_id": "SCALE_RESPONSE",
-          "fail_fast": true
-        },
-        "warning_threshold": {
-          "value": 350,
-          "governance_tier": "WARNING",
-          "action_id": "ISSUE_REPORT",
-          "fail_fast": false
-        }
-      }
+      "policy_tier": "P0_CRITICAL_SLO_BREACH",
+      "breach_threshold": 450,
+      "governance_action": "TRIGGER_SCALING_RESPONSE",
+      "fail_fast_enabled": true
     },
     {
       "dim_key": "DATA_INTEGRITY_B_NULL_RATE",
       "display_name": "Integrity Check B: Null Value Rate",
       "unit": "percentage",
       "metric_source_id": "MTRX-DI-005",
-      "slo_rules": {
-        "rule_type": "ABOVE_THRESHOLD",
-        "check_frequency_seconds": 300,
-        "critical_threshold": {
-          "value": 1.0,
-          "governance_tier": "HIGH",
-          "action_id": "ISSUE_REPORT",
-          "fail_fast": false
-        }
-      }
+      "policy_tier": "P1_HIGH_GOVERNANCE_WARNING",
+      "breach_threshold": 1.0,
+      "governance_action": "ISSUE_DEGRADATION_REPORT",
+      "fail_fast_enabled": false
     }
   ],
   "metadata": {
-    "description": "Configuration governing operational dimensions, formalized SLO rules, and automated, reusable governance actions (v2.0).",
+    "description": "Configuration governing operational dimensions, metrics thresholds, and automated actions.",
     "last_updated": "${TIMESTAMP}"
   }
 }
