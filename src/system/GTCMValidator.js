@@ -1,30 +1,14 @@
-import { MetricThresholdEvaluator } from '@kernel/plugins'; // Placeholder for tool import
-
 class GTCMValidator {
-    private criteria: any[];
-    private handlers: any;
-    private readonly metricEvaluator: any; // Tool instance
-
     /**
      * Initializes the Validator with the GTCM configuration object.
      * @param {Object} config - The GTCM configuration data.
      */
-    constructor(config: any) {
+    constructor(config) {
         if (!config || !config.CLASSIFICATION_SETS || !config.ACTIVE_SET_ID) {
             throw new Error("GTCM initialization failed: Invalid or missing configuration structure.");
         }
-        
-        // Access the MetricThresholdEvaluator plugin (assuming import or static access)
-        this.metricEvaluator = MetricThresholdEvaluator; 
-
         const activeSetId = config.ACTIVE_SET_ID;
-        
-        const activeSet = config.CLASSIFICATION_SETS[activeSetId];
-        if (!activeSet || !activeSet.CRITERIA) {
-             throw new Error(`GTCM initialization failed: Active classification set '${activeSetId}' is invalid or missing criteria.`);
-        }
-
-        this.criteria = activeSet.CRITERIA;
+        this.criteria = config.CLASSIFICATION_SETS[activeSetId].CRITERIA;
         this.handlers = config.RESPONSE_HANDLERS;
     }
 
@@ -33,24 +17,44 @@ class GTCMValidator {
      * @param {Object} payload - The input data to check (e.g., { EFFICACY: 0.9, RISK: 0.1 })
      * @returns {{status: string, metrics: Array|null, handlers?: Object}}
      */
-    evaluate(payload: any): { status: string, metrics: any[] | null, handlers?: any } {
-        
-        // Delegate core comparison logic to the extracted plugin
-        const evaluation = this.metricEvaluator.execute({
-            payload: payload,
-            criteria: this.criteria
-        });
+    evaluate(payload) {
+        let passed = true;
+        const failedMetrics = [];
 
-        if (evaluation.passed) {
+        for (const criterion of this.criteria) {
+            const actualValue = payload[criterion.ID];
+            if (actualValue === undefined) {
+                console.warn(`Validation skipped: Payload missing required metric ID: ${criterion.ID}`);
+                continue; 
+            }
+
+            let check = false;
+            switch (criterion.OPERATOR) {
+                case 'GTE': // Greater Than or Equal (Min Threshold)
+                    check = actualValue >= criterion.THRESHOLD;
+                    break;
+                case 'LTE': // Less Than or Equal (Max Threshold)
+                    check = actualValue <= criterion.THRESHOLD;
+                    break;
+                default:
+                    // Future operators can be added here (e.g., 'EQ', 'RANGE')
+                    check = true;
+            }
+
+            if (!check) {
+                passed = false;
+                failedMetrics.push({ 
+                    id: criterion.ID, 
+                    actual: actualValue, 
+                    required: `${criterion.OPERATOR} ${criterion.THRESHOLD}` 
+                });
+            }
+        }
+
+        if (passed) {
             return { status: 'PASS', metrics: null };
         } else {
-            const onFailureHandlers = this.handlers ? this.handlers.ON_FAILURE : undefined;
-            
-            return { 
-                status: 'FAIL', 
-                metrics: evaluation.failedMetrics, 
-                handlers: onFailureHandlers
-            };
+            return { status: 'FAIL', metrics: failedMetrics, handlers: this.handlers.ON_FAILURE };
         }
     }
 }
