@@ -1,108 +1,68 @@
-declare const ResilientQueueFactory: any;
-
 const EventEmitter = require('events');
 const CORE_LOGGER = global.CORE_LOGGER || console;
 
 /**
- * Standard configuration defaults for the Metrics Audit Logger.
- * Freeze this object to ensure immutability during runtime.
+ * Default Configuration for Metrics Audit Logger
  */
-const DEFAULT_CONFIG = Object.freeze({
-    flushIntervalMs: 5000, 
-    maxQueueSize: 500,     
-    suppressInternalErrors: true, 
-});
-
-// Helper type definition based on the plugin interface
-type ResilientQueue = {
-    start: () => void;
-    stop: () => void;
-    push: (item: any) => boolean;
-    process: (force?: boolean) => Promise<number>;
-    getQueueLength: () => number;
+const DEFAULT_CONFIG = {
+    flushIntervalMs: 5000, // Time-based trigger (5 seconds)
+    maxQueueSize: 500,     // Size-based trigger (Flush if 500 entries are queued)
+    suppressInternalErrors: true, // If true, logs error internally but doesn't throw during timed/size flush
 };
 
 /**
- * Metrics Audit Logger (MAL) v94.1 - Autonomous Code Evolution Module
- * Provides a standardized interface for persistent logging of critical decision metrics.
- * It uses time-based or size-based triggers for asynchronous flushing via a stream adapter.
+ * Metrics Audit Logger (MAL) v2.0 - ARCH-ATM Integration Module
+ * Provides a standardized interface for logging critical decision metrics and calibration
+ * parameters into a streamable, persistent audit trail. Essential for post-hoc analysis.
  *
  * Requirements for streamAdapter: Must implement write(entries: Array<AuditEntry>): Promise<void>
  */
 class MetricsAuditLogger extends EventEmitter {
-    private adapter: any;
-    private processor: ResilientQueue;
-    public config: typeof DEFAULT_CONFIG;
-
-    /**
-     * @param {object} streamAdapter - Must implement write(entries: Array<AuditEntry>): Promise<void>.
-     * @param {object} config - Overrides for DEFAULT_CONFIG.
-     */
-    constructor(streamAdapter: any, config: any = {}) {
+    constructor(streamAdapter, config = {}) {
         super();
         this.config = { ...DEFAULT_CONFIG, ...config };
         
         if (!streamAdapter || typeof streamAdapter.write !== 'function') {
-            throw new Error("MetricsAuditLogger requires a streamAdapter with a 'write(data)' method signature.");
+            throw new Error("MetricsAuditLogger requires a streamAdapter with a 'write(data)' method.");
         }
         
         this.adapter = streamAdapter; 
-        
-        // 1. Define the batch processing function (wraps adapter.write)
-        const processBatch = async (entries: any[]) => {
-            await this.adapter.write(entries);
-            
-            // Success event handling
-            this.emit('flushSuccess', { 
-                count: entries.length, 
-                adapter: this.adapter.constructor?.name || 'UnknownAdapter' 
-            });
-        };
-        
-        // 2. Initialize the ResilientQueueFactory plugin
-        this.processor = ResilientQueueFactory.create({
-            processBatch: processBatch,
-            intervalMs: this.config.flushIntervalMs,
-            maxSize: this.config.maxQueueSize,
-            suppressErrors: this.config.suppressInternalErrors,
-            logger: CORE_LOGGER 
-        });
-        
+        this.logQueue = [];
+        this.isFlushing = false;
+        this.isRunning = false;
+
         this.start();
     }
     
-    /** 
-     * Initializes periodic flushing timer and starts the logger loop. 
-     */
+    /** Initializes periodic flushing. */
     start() {
-        // Start the processor's internal timing loop
-        this.processor.start();
-        CORE_LOGGER.info('MAL started.', { flushInterval: this.config.flushIntervalMs });
+        if (this.isRunning) return;
+        this.isRunning = true;
+        this.flushTimer = setInterval(() => this._triggerFlushIfScheduled(), this.config.flushIntervalMs);
+        if (this.flushTimer.unref) {
+            this.flushTimer.unref(); // Ensures timer doesn't hold the process open unnecessarily
+        }
     }
 
-    /** 
-     * Clears the timer and executes a final, forced flush, ensuring clean shutdown. 
-     */
+    /** Clears the timer and executes a final, forced flush, ensuring clean shutdown. */
     async shutdown() {
-        if (this.processor.getQueueLength() === 0) {
-            CORE_LOGGER.info('MAL shutting down (queue empty).');
-            this.processor.stop();
-            return Promise.resolve();
-        }
+        if (!this.isRunning) return Promise.resolve();
         
-        CORE_LOGGER.info('MAL shutting down...');
-        this.processor.stop(); // Stop timers immediately
+        this.isRunning = false;
+        clearInterval(this.flushTimer);
         
         try {
-            // Force flush remaining data, ignoring state locks
-            await this.processor.process(true); 
+            // Flush remaining data
+            await this.flush(true); 
             this.emit('shutdownComplete');
         } catch (e) {
-            const queueLength = this.processor.getQueueLength();
-            CORE_LOGGER.error('MAL Shutdown failed during final flush.', { 
-                error: (e as Error).message, 
-                queueSize: queueLength // Items re-queued due to final failure
-            });
+            CORE_LOGGER.error('MAL Shutdown failed during final flush.', { error: e.message, queueSize: this.logQueue.length });
+        }
+    }
+
+    _triggerFlushIfScheduled() {
+        if (this.logQueue.length > 0) {
+            this.flush();
         }
     }
 
@@ -111,7 +71,11 @@ class MetricsAuditLogger extends EventEmitter {
      * @param {string} metricType - Defines the class of metric (e.g., 'CALIBRATION', 'EXECUTION').
      * @param {object} data - The payload containing context, inputs, and outputs.
      */
-    log(metricType: string, data: any) {
+    log(metricType, data) {
+        if (!this.isRunning) {
+            this.emit('metricDropped', { reason: 'Shutdown', metricType });
+            return;
+        }
         
         const entry = {
             timestamp: new Date().toISOString(),
@@ -119,40 +83,49 @@ class MetricsAuditLogger extends EventEmitter {
             data
         };
         
-        const pushed = this.processor.push(entry);
-        
-        if (pushed) {
-            this.emit('metricLogged', entry);
-        } else {
-            // Push returns false if the queue processor is stopped.
-            this.emit('metricDropped', { reason: 'Logger stopped', metricType });
+        this.logQueue.push(entry);
+        this.emit('metricLogged', entry);
+
+        // Immediate flush trigger if queue size exceeds threshold and we are not currently flushing
+        if (this.logQueue.length >= this.config.maxQueueSize && !this.isFlushing) {
+            this.flush();
         }
     }
 
     /**
      * Executes the asynchronous persistence of queued metrics.
-     * @param {boolean} force - If true, ignores the flushing state lock.
+     * @param {boolean} force - If true, ignores the isFlushing lock (used during startup/shutdown).
      */
     async flush(force = false) {
-        try {
-            // The processor handles checking queue size, locking, atomic swap, and success event trigger.
-            await this.processor.process(force);
-        } catch (error) {
-            // Catch errors re-thrown by the processor (persistence failure)
-            
-            // Resilience: the plugin has already re-queued the items if suppressInternalErrors is true.
-            const countOfRequeued = this.processor.getQueueLength();
-            
-            // Log top-level context for the adapter failure
-            const adapterName = this.adapter.constructor?.name || 'UnknownAdapter';
-            CORE_LOGGER.error('MAL Flush Failure: Persistence mechanism reported an error.', { 
-                error: (error as Error).message, 
-                targetAdapter: adapterName,
-                count: countOfRequeued,
-                isForced: force
-            });
+        if (this.logQueue.length === 0 || (this.isFlushing && !force)) {
+            return;
+        }
 
-            this.emit('flushFailure', { error, count: countOfRequeued });
+        this.isFlushing = true;
+        
+        // Atomically grab the current queue entries
+        const entriesToFlush = this.logQueue;
+        this.logQueue = [];
+
+        try {
+            await this.adapter.write(entriesToFlush);
+            this.emit('flushSuccess', { count: entriesToFlush.length });
+        } catch (error) {
+            CORE_LOGGER.error('MAL: Data persistence failure during flush.', { 
+                error: error.message, 
+                targetAdapter: this.adapter.constructor.name,
+                count: entriesToFlush.length 
+            });
+            
+            // Re-queue failed entries for resilience
+            if (this.config.suppressInternalErrors || force) {
+                this.logQueue.unshift(...entriesToFlush);
+            }
+            
+            this.emit('flushFailure', { error, count: entriesToFlush.length });
+            
+        } finally {
+            this.isFlushing = false;
         }
     }
 }
