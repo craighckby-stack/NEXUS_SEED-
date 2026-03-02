@@ -1,92 +1,56 @@
-const LogLevels = {
-    TRACE: 0,
-    DEBUG: 1,
-    INFO: 2,
-    SUCCESS: 2,
-    WARN: 3,
-    ERROR: 4,
-    FATAL: 5,
-};
-
 /**
  * Component ID: TLY (Telemetry Logger)
  * Functional Focus: Structured, persistent, and severity-controlled logging system for AGI operational events.
  * GSEP Alignment: Mandatory for all Stages (M-07 Audit Trail).
  *
  * Provides structured logging for operational data, warnings, and critical failures, ensuring all events are timestamped,
- * tagged by component, and easily queryable for auditing purposes. Utilizes non-blocking persistence.
+ * tagged by component, and easily queryable for auditing purposes.
  */
 class TelemetryLogger {
-    constructor(persistenceClient, serviceId, logLevelThreshold = null) {
-        if (!persistenceClient || typeof persistenceClient.writeLog !== 'function') {
-            throw new Error('TLY initialization requires a valid persistenceClient with a writeLog method.');
-        }
-
-        this.client = persistenceClient;
-        this.serviceId = serviceId;
-        
-        // Determine the effective numeric log level threshold
-        const thresholdName = (logLevelThreshold || process.env.LOG_LEVEL_THRESHOLD || 'INFO').toUpperCase();
-        this.currentLogLevel = LogLevels[thresholdName] !== undefined 
-                               ? LogLevels[thresholdName] 
-                               : LogLevels.INFO;
-        
-        // Map convenience methods to the log function
-        this.trace = (eventCode, payload) => this.log('TRACE', eventCode, payload);
-        this.debug = (eventCode, payload) => this.log('DEBUG', eventCode, payload);
-        this.info = (eventCode, payload) => this.log('INFO', eventCode, payload);
-        this.success = (eventCode, payload) => this.log('SUCCESS', eventCode, payload);
-        this.warn = (eventCode, payload) => this.log('WARN', eventCode, payload);
-        this.error = (eventCode, payload) => this.log('ERROR', eventCode, payload); // Replaces old 'critical'
-        this.critical = this.error; // Backwards compatibility alias
-        this.fatal = (eventCode, payload) => this.log('FATAL', eventCode, payload);
+    constructor(persistenceClient, serviceId) {
+        this.client = persistenceClient; // E.g., database or dedicated logging stream connector
+        this.serviceId = serviceId; // e.g., 'RSAM', 'CIM', 'KTAM'
+        this.logLevelMap = { 
+            'DEBUG': 1, 'INFO': 2, 'WARN': 3, 'CRITICAL': 4, 'SUCCESS': 2 
+        };
+        this.currentLogLevel = process.env.LOG_LEVEL_THRESHOLD || 2; // Default to INFO
     }
 
     /**
-     * Internal generic logging function.
-     * Uses StructuralLogFormatterTool for filtering and record creation, ensuring fast exit if threshold is not met.
-     * Persistence handling is delegated to a non-blocking internal method.
+     * Logs a structured event asynchronously.
+     * @param {string} level - Log level (e.g., 'INFO', 'CRITICAL').
+     * @param {string} eventCode - Specific event identifier (e.g., 'RSAM_POLICY_STAGED').
+     * @param {object} payload - Structured data associated with the event.
      */
-    async log(level, eventCode, payload = {}) {
-        // Use the extracted tool to handle filtering and formatting
-        const record = StructuralLogFormatterTool.execute({
-            level: level,
+    async log(level, eventCode, payload) {
+        const levelNumeric = this.logLevelMap[level.toUpperCase()];
+        if (levelNumeric < this.currentLogLevel) {
+            return;
+        }
+
+        const record = {
+            timestamp: new Date().toISOString(),
+            level: level.toUpperCase(),
+            component: this.serviceId,
             eventCode: eventCode,
-            payload: payload,
-            serviceId: this.serviceId,
-            currentLogLevel: this.currentLogLevel,
-            LogLevels: LogLevels // Pass the constant map for lookup
-        });
-
-        if (!record) {
-            return; // Log level filtered out
-        }
-
-        // Non-blocking call to the persistence layer.
-        this._persistRecord(record);
-    }
-
-    /**
-     * Handles the actual persistence attempt and failure fallback.
-     */
-    async _persistRecord(record) {
-        // Fallback for immediate visibility during dev/testing (avoid noisy trace/debug logs)
-        if (record.levelNumeric >= LogLevels.INFO) {
-             console.log(`[${record.level}:${record.levelNumeric}][${record.component}] ${record.eventCode}:`, record.data);
-        }
+            data: payload
+        };
 
         try {
+            // In a real system, this would queue or persist the log entry
             await this.client.writeLog(record);
+            // Fallback for immediate visibility during dev/testing
+            console.log(`[${record.level}][${record.component}] ${eventCode}:`, payload);
         } catch (error) {
-            // CRITICAL FAILURE: Immediate breach of M-07 Audit Trail governance.
-            const failureTime = new Date().toISOString();
-            console.error(
-                `[${failureTime}] TLY PERSISTENCE FAILED (Audit Trail Compromise):`, 
-                error.message, 
-                `Attempted Record: ${JSON.stringify(record).substring(0, 200)}...`
-            );
+            console.error('TLY Persistence Failure:', error, record);
+            // Note: If persistence fails, the critical governance audit trail is broken.
         }
     }
+
+    info(eventCode, payload) { this.log('INFO', eventCode, payload); }
+    warn(eventCode, payload) { this.log('WARN', eventCode, payload); }
+    critical(eventCode, payload) { this.log('CRITICAL', eventCode, payload); }
+    success(eventCode, payload) { this.log('SUCCESS', eventCode, payload); }
 }
 
-module.exports = { TelemetryLogger, LogLevels };
+module.exports = TelemetryLogger;
