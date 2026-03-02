@@ -1,76 +1,44 @@
-import { SecureMathEvaluator } from '../plugins/SecureMathEvaluator.js';
-
 /**
  * Sovereign AGI - Secure Expression Evaluator
  * Safely parses and executes mathematical and logical formulas provided by CRCM or other configuration sources.
- * This utility delegates execution to a strictly sandboxed Math Evaluator plugin to prevent arbitrary code execution.
- * It operates as a stateless, static utility wrapper for secure formula processing.
+ * This utility must prevent arbitrary code execution by replacing native 'eval()' with an AST parser or a dedicated secure VM.
  */
 class SecureExpressionEvaluator {
-    
-    // Regex to find variables formatted as Context.VariableName, ensuring strict character validation.
-    static CONTEXT_VAR_REGEX = /Context\.([A-Za-z0-9_]+)/g;
-
-    /**
-     * Delegates secure execution to the sandboxed math evaluator plugin.
-     * @param {string} formula - The prepared formula string.
-     * @returns {number} The evaluated result.
-     * @private
-     */
-    static #delegateToMathEvaluator(formula) {
-        // Isolated interaction with the external dependency
-        return SecureMathEvaluator.execute(formula);
-    }
-
-    /**
-     * Replaces Context variables in the formula with values from the context map.
-     * This ensures the formula is purely mathematical before execution.
-     * @param {string} formula 
-     * @param {Object<string, number>} context 
-     * @returns {string} The formula with variables substituted by numerical values (or 0).
-     * @private
-     */
-    static #prepareExecutableFormula(formula, context) {
-        const executionContext = context || {};
-
-        return formula.replace(
-            SecureExpressionEvaluator.CONTEXT_VAR_REGEX, 
-            (match, varName) => {
-                const value = executionContext[varName];
-                
-                // Robust safety check: Ensure substituted value is a finite number.
-                // If missing, null, or invalid (NaN, Infinity), substitute 0.
-                if (typeof value === 'number' && isFinite(value)) {
-                    return value;
-                }
-                
-                return 0;
-            }
-        );
+    constructor() {
+        // Placeholder for initialization of secure parsing mechanisms (e.g., mathjs or custom AST parser configuration)
+        this.allowedFunctions = ['MAX', 'MIN', 'ABS', 'ROUND', 'LOG'];
     }
 
     /**
      * Executes a formula securely against a provided context map.
      * @param {string} formula - The mathematical/logical expression (e.g., 'Context.TCS * 1.5 + MAX(10, Context.Urgency)')
-     * @param {Object<string, number>} context - Key-value map of runtime variables (TCS, Urgency, etc.).
-     * @returns {number} The evaluated numeric result, or 0 on failure/invalid input.
+     * @param {Object} context - Key-value map of runtime variables (Context.TCS, Context.Urgency, etc.)
+     * @returns {number} The evaluated numeric result.
      */
-    static evaluate(formula, context) {
-        // Input validation
-        if (typeof formula !== 'string' || formula.trim() === '') {
-            return 0;
-        }
-
+    evaluate(formula, context) {
         try {
-            // Step 1: Prepare the formula (Synchronous Data Preparation)
-            const executableFormula = this.#prepareExecutableFormula(formula, context);
+            // Step 1: Replace Context variables (e.g., Context.TCS -> 50)
+            let executableFormula = formula.replace(/Context\.([^\s\)]+)/g, (match, p1) => {
+                const value = context[p1];
+                return (typeof value === 'number' && !isNaN(value)) ? value : 0;
+            });
 
-            // Step 2: Delegate secure execution (I/O Proxy)
-            return this.#delegateToMathEvaluator(executableFormula);
+            // Step 2: Secure Execution Placeholder
+            // WARNING: The following implementation uses the Function constructor, which is NOT fully safe against complex injection.
+            // This must be replaced by a dedicated AST parser or sandboxed VM (e.g., Node's 'vm' module) in a production environment.
+            const contextProxy = {
+                MAX: Math.max,
+                MIN: Math.min,
+                ABS: Math.abs,
+                ROUND: Math.round
+            };
+            
+            // Construct function to isolate execution scope
+            const evaluator = new Function('ctx', `with(ctx) { return (${executableFormula}); }`);
+            return evaluator(contextProxy);
 
         } catch (e) {
-            // Use a specific prefix for high-integrity governance logging
-            console.error(`AGI Kernel SECURE_EVAL_FAIL: Formula "${formula.substring(0, 80).trim()}..." failed execution. Error: ${e.message}`);
+            console.error(`Secure Expression Evaluation failed for formula "${formula}": ${e.message}`);
             return 0;
         }
     }
