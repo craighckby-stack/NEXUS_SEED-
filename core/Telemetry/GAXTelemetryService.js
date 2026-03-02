@@ -1,107 +1,143 @@
-import { ITelemetryService } from '../Plugins/Telemetry/ITelemetryService';
+// core/Telemetry/GAXTelemetryService.js
+// Purpose: Centralized, structured logging and event emission for the GAX lifecycle, ensuring auditability and traceability.
 
-// Standard no-operation function to use as a fallback executor.
-const NO_OP = () => {};
+const { TelemetryProvider } = require('./TelemetryProvider.js'); 
+const { IdGenerator } = require('../Utils/IdGenerator.js'); 
+const GAXEvents = require('./GAXEventRegistry.js'); // Standardized event names
 
 /**
- * Service implementation for Google Analytics (or equivalent GA-like backend).
- * Assumes the GA tracking script (analytics.js or gtag.js) is loaded globally.
- * @implements {ITelemetryService}
+ * @typedef {object} TelemetryContext
+ * @property {string} component - The source component (e.g., 'CORE', 'PVF', 'GSEP').
+ * @property {string} runId - The unique ID tracking the specific execution run (required for auditing cycles).
+ * @property {string=} policyId - The ID of the policy being processed, if applicable.
  */
-export class GAXTelemetryService {
-    #trackingId = null;
-    #isEnabled = false;
-    // Stores the resolved GA function (window.ga) or the NO_OP fallback.
-    #gaExecutor = NO_OP; 
+
+/**
+ * GAX Telemetry Service facilitates auditing and monitoring of Policy Evolution cycles.
+ * It standardizes logging output structure and acts as the official entry point for all GAX system events.
+ */
+class GAXTelemetryService {
 
     /**
-     * Delegates the command arguments to the resolved GA executor function.
-     * This acts as the I/O proxy for the external GA dependency (window.ga).
-     * @private
+     * Generates a robust, unique run ID prefixed for easy identification.
+     * @param {string} prefix - The component prefix (e.g., 'PVF', 'GSEP-C').
+     * @returns {string} The generated unique ID.
      */
-    #executeGACommand(...args) {
-        this.#gaExecutor(...args);
+    static createRunId(prefix) {
+        // IdGenerator is assumed to use high-integrity methods (e.g., UUIDs or similar transaction IDs)
+        return IdGenerator.create(`RUN_${prefix}`); 
     }
 
     /**
-     * Helper to resolve the global GA function reference.
-     * @returns {function} The window.ga function or a NO_OP function.
+     * Publishes a generic structured event to the underlying TelemetryProvider.
+     * Enforces structure using explicit context and data separation.
+     * @param {string} eventName - Standardized event name (should be retrieved from GAXEventRegistry).
+     * @param {TelemetryContext} context - Structured contextual metadata (component, runId).
+     * @param {object} [data={}] - Detailed event payload data.
+     * @param {string} [level='info'] - Log level ('info', 'warn', 'error', 'debug', 'fatal').
      */
-    #resolveGAFunction() {
-        if (typeof window !== 'undefined' && typeof window.ga === 'function') {
-            return window.ga;
+    static publish(eventName, context, data = {}, level = 'info') {
+        // Input validation for critical context elements
+        if (!context || !context.component || !context.runId) {
+            // Self-logging error if crucial context is missing for traceability.
+            TelemetryProvider.log('error', GAXEvents.DIAG_CONTEXT_MISSING, {
+                requiredFields: ['component', 'runId'],
+                receivedContext: context,
+                originalEvent: eventName,
+                timestamp: Date.now()
+            });
+            // Assign safe defaults for the compromised event
+            context = { component: 'GAX_CORE', runId: 'N/A', ...context };
         }
-        return NO_OP;
-    }
 
-    /**
-     * Initializes the GA tracker.
-     * @param {{ trackingId: string, enabled: boolean }} config - Configuration object.
-     * @returns {Promise<void>}
-     */
-    async init(config) {
-        this.#trackingId = config.trackingId;
-        this.#isEnabled = config.enabled;
-
-        if (!this.#isEnabled) {
-            console.log(`[GAXTelemetryService] Initialized but disabled.`);
-            return;
-        }
+        const standardPayload = {
+            eventName: eventName,
+            metadata: {
+                timestamp: Date.now(),
+                level: level,
+                ...context
+            },
+            data: data
+        };
         
-        if (!this.#trackingId) {
-            console.error('[GAXTelemetryService Setup Error] A trackingId is required.');
-            this.#isEnabled = false;
-            return;
-        }
+        // Use a standardized, concise message for human readability/grepping,
+        // while relying on the structured payload for machine analysis.
+        const message = `[GAX][${context.runId}][${context.component}] ${eventName}`;
 
-        // Resolve dependency once upon initialization
-        this.#gaExecutor = this.#resolveGAFunction();
-
-        if (this.#gaExecutor === NO_OP) {
-            console.warn('[GAXTelemetryService Warning] Global GA function (window.ga) not found. Tracking commands will be ignored.');
-        }
-
-        // Initialize GA tracker
-        this.#executeGACommand('create', this.#trackingId, 'auto');
-        console.info(`[GAXTelemetryService] Initialized successfully for ID: ${this.#trackingId}.`);
+        TelemetryProvider.log(level, message, standardPayload);
     }
 
-    /**
-     * Tracks a page view event.
+    // --- Specialized High-Level Wrappers (Simplified signatures) ---
+
+    /** 
+     * Logs debug information.
+     * @param {string} eventName - Must be a key from GAXEventRegistry. 
+     * @param {TelemetryContext} context 
+     * @param {object=} data 
      */
-    trackPageView(path, properties = {}) {
-        if (!this.#isEnabled) return;
-        
-        this.#executeGACommand('set', { page: path, ...properties });
-        this.#executeGACommand('send', 'pageview');
+    static debug(eventName, context, data) {
+        this.publish(eventName, context, data, 'debug');
     }
 
-    /**
-     * Tracks a specific user action or custom event using GA's event model.
+    /** 
+     * Logs routine information. 
+     * @param {string} eventName - Must be a key from GAXEventRegistry. 
+     * @param {TelemetryContext} context 
+     * @param {object=} data 
      */
-    trackEvent(eventName, properties) {
-        if (!this.#isEnabled) return;
-        
-        const category = properties.category || 'App Interaction';
-        const action = eventName;
-        const label = properties.label || JSON.stringify(properties);
-        // Value must be an integer in GA
-        const value = properties.value ? parseInt(properties.value, 10) : 0;
+    static info(eventName, context, data) {
+        this.publish(eventName, context, data, 'info');
+    }
 
-        this.#executeGACommand('send', 'event', category, action, label, value);
+    /** 
+     * Logs warnings about non-critical issues. 
+     * @param {string} eventName - Must be a key from GAXEventRegistry. 
+     * @param {TelemetryContext} context 
+     * @param {object=} data 
+     */
+    static warn(eventName, context, data) {
+        this.publish(eventName, context, data, 'warn');
+    }
+
+    /** 
+     * Logs errors indicating failures that might require intervention. 
+     * @param {string} eventName - Must be a key from GAXEventRegistry. 
+     * @param {TelemetryContext} context 
+     * @param {object=} data 
+     */
+    static error(eventName, context, data) {
+        this.publish(eventName, context, data, 'error');
+    }
+
+    /** 
+     * Logs fatal errors leading to system halt or critical failure. 
+     * @param {string} eventName - Must be a key from GAXEventRegistry. 
+     * @param {TelemetryContext} context 
+     * @param {object=} data 
+     */
+    static fatal(eventName, context, data) {
+        this.publish(eventName, context, data, 'fatal');
     }
     
-    /**
-     * Identifies the current user by setting the GA User ID.
+    /** 
+     * Logs successful operations (alias for info). 
+     * @param {string} eventName - Must be a key from GAXEventRegistry.
+     * @param {TelemetryContext} context 
+     * @param {object=} data 
      */
-    identify(userId, traits) {
-        if (!this.#isEnabled) return;
-
-        this.#executeGACommand('set', 'userId', userId); 
-        
-        // In a complex implementation, traits would map to custom dimensions.
-        if (traits) {
-            // Example: this.#executeGACommand('set', 'dimension1', traits.accountType);
-        }
+    static success(eventName, context, data) {
+        this.publish(eventName, context, data, 'info');
+    }
+    
+    /** 
+     * Logs operational failures (alias for error). 
+     * @param {string} eventName - Must be a key from GAXEventRegistry.
+     * @param {TelemetryContext} context 
+     * @param {object=} data 
+     */
+    static failure(eventName, context, data) {
+        this.publish(eventName, context, data, 'error');
     }
 }
+
+module.exports = GAXTelemetryService;
