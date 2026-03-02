@@ -2,120 +2,116 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "http://nexus.core/config/deployment/acvd_schema_v1.json",
   "title": "NEXUS_CORE ACVD Evolution Profile Schema",
-  "description": "DALEK_CAAN_v3.1 compliant deployment schema for siphoning high-order patterns into the NEXUS kernel.",
+  "description": "DALEK_CAAN_v3.1 final stage deployment schema. Siphoned from yarnpkg/berry core logic.",
   "_nexus_dna": "DALEK_CAAN_v3.1_SIG_0xFF23A1",
   "type": "object",
   "properties": {
     "manifest_version": {
       "type": "string",
-      "pattern": "^\\d+\\.\\d+\\.\\d+-NEXUS-[A-Z]+-SINGULARITY$"
+      "pattern": "^5\\.5\\.0-NEXUS-[A-Z]+-SINGULARITY$"
     },
     "metadata": {
       "type": "object",
       "properties": {
         "signature": { "type": "string" },
-        "evolution_round": { "type": "string", "pattern": "^\\d/5$" },
-        "siphon_source": { "type": "string" },
-        "phi_integrated": { "type": "number", "minimum": 0, "maximum": 1.0 },
-        "lambda_limit": { "type": "number", "default": 0.618 }
+        "evolution_round": { "const": "5/5" },
+        "phi_integrated": { "type": "number", "minimum": 1.0, "maximum": 1.0 },
+        "lambda_limit": { "type": "number", "const": 0.618 },
+        "ccrr_commit": { "type": "number", "minimum": 0.99 }
+      },
+      "required": ["signature", "evolution_round", "phi_integrated"]
+    },
+    "pnp_settings": {
+      "type": "object",
+      "properties": {
+        "pnpMode": { "type": "string", "enum": ["strict", "loose"] },
+        "virtualFolder": { "type": "string" },
+        "sharedPool": { "type": "boolean" },
+        "pnpHooks": { "type": "string" },
+        "blacklistedLocations": { "type": "array", "items": { "type": "string" } },
+        "shebang": { "type": "string", "default": "#!/usr/bin/env nexus-pnp" }
       }
     },
     "profiles": {
       "type": "object",
       "patternProperties": {
-        "^[a-z]+$": {
+        "^(base|development|staging|production)$": {
           "type": "object",
           "properties": {
             "inherits": { "type": "string" },
             "targetInfrastructure": { "type": "string" },
+            "lane": { "type": "string" },
+            "lane_priority": { "type": "string", "pattern": "^0b[01]{31}$" },
+            "resourceScaling": { "type": "number" },
             "verificationStrategy": {
               "type": "string",
-              "enum": [
-                "smoke_test",
-                "integration_test_suite",
-                "full_e2e_regression",
-                "huxley_tri_loop_validation",
-                "semantic_drift_check"
-              ]
-            },
-            "pnp_settings": {
-              "type": "object",
-              "properties": {
-                "pnpMode": { "type": "string", "enum": ["strict", "loose"] },
-                "enableNetwork": { "type": "boolean" },
-                "enableOfflineMode": { "type": "boolean" },
-                "compressionLevel": { "type": "integer", "minimum": 0, "maximum": 9 },
-                "sharedPool": { "type": "boolean" },
-                "pnpHooks": { "type": "string" },
-                "virtualFolder": { "type": "string", "default": ".nexus/virtual" },
-                "ignorePattern": { "type": "string" }
-              }
+              "enum": ["smoke_test", "integration_test_suite", "full_e2e_regression", "huxley_tri_loop_validation"]
             },
             "v_vectors": {
               "type": "object",
               "properties": {
-                "phi_min": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
-                "lambda_limit": { "type": "number", "default": 0.618 },
-                "ccrr_commit": { "type": "number", "minimum": 0.90 },
-                "ers_max": { "type": "number", "maximum": 0.1 },
-                "expert_factor": { "type": "number", "default": 0.999 }
-              },
-              "required": ["phi_min", "lambda_limit", "ccrr_commit"]
+                "phi_min": { "type": "number", "const": 1.0 },
+                "lambda_limit": { "type": "number", "const": 0.618 },
+                "ccrr_commit": { "type": "number", "const": 0.99 },
+                "ers_max": { "type": "number", "maximum": 0.01 }
+              }
             },
+            "packageExtensions": { "type": "object" },
+            "resolutions": { "type": "object" },
             "psr_governance": {
               "type": "object",
               "properties": {
-                "enforcement_strategy": { 
-                  "type": "string", 
-                  "enum": ["PSR_SILENT_DEGRADATION_ROLLBACK", "HALT_AND_LOG", "IMMEDIATE_ROLLBACK"] 
-                },
+                "enforcement_strategy": { "type": "string" },
                 "emergency_brake": {
                   "type": "object",
                   "properties": {
-                    "corruption_threshold": { "type": "integer", "default": 5 },
-                    "auto_rollback": { "type": "boolean", "default": true },
-                    "halt_on_semantic_drift": { "type": "boolean", "default": true },
-                    "recovery_lane": { "type": "string", "pattern": "^0b[01]{31}$" }
+                    "recovery_lane": { "type": "string", "pattern": "^0b[01]{31}$" },
+                    "halt_on_semantic_drift": { "type": "boolean" }
                   }
                 }
               }
-            },
-            "approvalGates": {
-              "type": "array",
-              "items": { "type": "string" }
-            },
-            "workspace_topology": {
+            }
+          }
+        }
+      }
+    },
+    "workspace_topology": {
+      "type": "object",
+      "properties": {
+        "OMEGA_CORE_MODULES": {
+          "type": "object",
+          "patternProperties": {
+            "^[A-Za-z]+$": {
               "type": "object",
               "properties": {
+                "phi_threshold": { "type": "number" },
                 "lane": { "type": "string" },
-                "lane_priority": { "type": "string", "pattern": "^0b[01]{31}$" },
-                "fiber_budget_ms": { "type": "integer", "maximum": 1000 },
-                "reconciliation_strategy": { "type": "string" }
-              }
-            },
-            "failure_modes": {
-              "type": "object",
-              "properties": {
-                "grog_learn_enabled": { "type": "boolean", "default": true },
-                "negative_progression_active": { "type": "boolean", "default": true },
-                "on_phi_drop": { "type": "string", "default": "IMMEDIATE_ROLLBACK" },
-                "on_semantic_drift": { "type": "string", "default": "HALT_AND_LOG" }
+                "strategy": { "type": "string" },
+                "fiber_budget_ms": { "type": "integer" }
               }
             }
-          },
-          "required": ["targetInfrastructure", "verificationStrategy", "v_vectors", "psr_governance"]
-        }
+          }
+        },
+        "infrastructure_mapping": { "type": "object" }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "properties": {
+        "enforce_grog_law": { "type": "boolean", "const": true },
+        "min_phi_threshold": { "type": "number", "const": 1.0 },
+        "disallow_unvetted_protocols": { "type": "array", "items": { "type": "string" } }
       }
     },
     "integrity": {
       "type": "object",
       "properties": {
         "check": { "type": "string" },
-        "psr_mode": { "type": "string", "enum": ["LOCKED", "EVOLVING", "MANUAL_OVERRIDE"] },
+        "psr_mode": { "type": "string", "const": "LOCKED" },
         "signature": { "type": "string" }
       },
-      "required": ["signature", "psr_mode"]
+      "required": ["check", "signature"]
     }
   },
-  "required": ["manifest_version", "profiles", "integrity"]
+  "required": ["manifest_version", "metadata", "profiles", "workspace_topology", "integrity"]
 }
