@@ -4,34 +4,34 @@ import * as fs from 'fs';
 
 /**
  * loadEnvironment
- * Loads environment variables from .env files based on NODE_ENV.
- * Precedence: .env.<NODE_ENV> is loaded first, ensuring it takes precedence over .env
- * which is loaded subsequently only for variables not yet defined.
+ * Scans for .env files (.env.development, .env, etc.) and loads them into process.env.
+ * This ensures that ConfigurationService can correctly access environment variables 
+ * during local development before they are potentially injected by a runtime environment.
+ * 
+ * NOTE: This utility assumes 'dotenv' is a dependency for production standard use.
  */
 export function loadEnvironment(): void {
-    const cwd = process.cwd();
-    const env = process.env.NODE_ENV || 'development';
-    const messages: string[] = [];
+    const nodeEnv = process.env.NODE_ENV || 'development';
+    const specificEnvPath = path.resolve(process.cwd(), `.env.${nodeEnv}`);
+    const defaultEnvPath = path.resolve(process.cwd(), '.env');
 
-    // 1. Load environment-specific .env file (Highest Precedence)
-    const specificFilename = `.env.${env}`;
-    const specificPath = path.resolve(cwd, specificFilename);
+    let loaded = false;
+
+    // 1. Load environment-specific file (e.g., .env.test)
+    if (fs.existsSync(specificEnvPath)) {
+        dotenv.config({ path: specificEnvPath });
+        console.log(`[Config Loader] Loaded environment variables from: ${specificEnvPath}`);
+        loaded = true;
+    }
+
+    // 2. Load general .env file (if not already loaded via specific path and if it exists)
+    if (!loaded && fs.existsSync(defaultEnvPath)) {
+        dotenv.config({ path: defaultEnvPath });
+        console.log(`[Config Loader] Loaded environment variables from: ${defaultEnvPath}`);
+        loaded = true;
+    }
     
-    if (fs.existsSync(specificPath)) {
-        // dotenv.config() loads variables only if they are not already set in process.env
-        dotenv.config({ path: specificPath });
-        messages.push(`Loaded environment-specific configuration from ${specificFilename}`);
+    if (!loaded && nodeEnv !== 'production') {
+        console.warn("[Config Loader] No .env file found. Relying solely on shell environment variables or defaults.");
     }
-
-    // 2. Load general .env file (Fallback Defaults)
-    const generalPath = path.resolve(cwd, '.env');
-    if (fs.existsSync(generalPath)) {
-        // This ensures variables defined in .env only load if they weren't set by the specific file or system environment.
-        dotenv.config({ path: generalPath });
-        messages.push('Loaded general configuration from .env (as fallback)');
-    }
-
-    messages.forEach(msg => {
-        console.log(`[Config Loader] ${msg}`);
-    });
 }
