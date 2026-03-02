@@ -1,1 +1,71 @@
-{  "$schema": "http://json-schema.org/draft-07/schema#",  "$id": "http://agi.sovereign/protocol_definition_schema_v3.0.json",  "title": "Sovereign Protocol Definition Schema (v3.0)",  "description": "Standardized definition schema for Protocol Integrity Manager (PIM) protocols, introducing explicit control flow and detailed failure strategies for robust state execution.",  "type": "object",  "properties": {    "metadata": {      "type": "object",      "description": "Descriptive metadata about the protocol.",      "properties": {        "protocol_id": {          "type": "string",          "description": "Unique, immutable identifier for the protocol (e.g., PIM-GAX-941).",          "pattern": "^[A-Z0-9_-]{3,50}$"        },        "name": { "type": "string", "minLength": 3 },        "description": { "type": "string" },        "version": {          "type": "string",          "pattern": "^v(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?$",          "description": "Semantic versioning (semver) required."        },        "security_level": { "$ref": "#/$defs/SecurityLevel" },        "dependencies": {          "type": "array",          "description": "List of external modules or resources required before protocol execution.",          "items": { "type": "string" },          "default": []        }      },      "required": ["protocol_id", "version", "security_level", "name"]    },    "logging_policy": {      "type": "string",      "enum": ["FullTrace", "ExecutionSummary", "FailureOnly", "Custom"],      "default": "FailureOnly",      "description": "Level of detail recorded during protocol execution."    },    "required_steps": {      "type": "array",      "description": "Ordered execution path defining the sequence of verification sub-routines.",      "minItems": 1,      "items": { "$ref": "#/$defs/StepDefinition" }    }  },  "required": ["metadata", "required_steps"],  "$defs": {    "SecurityLevel": {      "type": "string",      "enum": ["L0_Debug", "L1_Low", "L2_Medium", "L3_High", "L4_Critical", "L5_Extreme"],      "description": "The security classification quantifying the risk associated with protocol failure."    },    "RetryPolicy": {      "type": "object",      "properties": {        "max_retries": { "type": "integer", "minimum": 1, "default": 3 },        "backoff_strategy": {          "type": "string",          "enum": ["None", "Linear", "Exponential"],          "default": "Exponential"        },        "initial_delay_ms": { "type": "integer", "minimum": 50, "default": 100 }      },      "required": ["max_retries", "backoff_strategy"]    },    "FailureStrategy": {      "type": "object",      "description": "Action taken if this specific step fails.",      "properties": {        "action_type": {          "type": "string",          "enum": ["HaltExecution", "ContinueWarning", "RetryStep", "ExecuteFallback"]        },        "retry_policy": {          "description": "Required if action_type is 'RetryStep'.",          "$ref": "#/$defs/RetryPolicy"        },        "fallback_step_id": {          "type": "string",          "description": "The step ID to jump to if action_type is 'ExecuteFallback'."        }      },      "required": ["action_type"],      "oneOf": [        { "properties": { "action_type": { "const": "RetryStep" } }, "required": ["retry_policy"] },        { "properties": { "action_type": { "const": "ExecuteFallback" } }, "required": ["fallback_step_id"] },        { "properties": { "action_type": { "enum": ["HaltExecution", "ContinueWarning"] } } }      ]    },    "ControlFlow": {      "type": "object",      "description": "Defines logic for conditional step execution based on preceding step outcomes.",      "properties": {        "condition_type": {          "type": "string",          "enum": ["AlwaysRun", "OnSuccess", "OnFailure", "CustomExpression"],          "default": "AlwaysRun"        },        "custom_expression": {          "type": "string",          "description": "A programmatic expression (e.g., JEXL or proprietary syntax) evaluated against previous step outputs. Only applicable if condition_type is CustomExpression."        },        "skip_on_match": {          "type": "boolean",          "default": false,          "description": "If true, execute the step if the condition FAILS; skip if it passes."        }      },      "required": ["condition_type"]    },    "StepDefinition": {      "type": "object",      "description": "Configuration for a single verification step.",      "properties": {        "step_id": {          "type": "string",          "description": "Unique identifier for this step within the protocol."        },        "description": { "type": "string" },        "verifier_module": {          "type": "string",          "format": "uri-reference",          "description": "URI reference or internal system path to the executable module (e.g., 'modules/crypto/hash_check_v1')."        },        "timeout_ms": {          "type": "integer",          "minimum": 100,          "default": 5000        },        "input_parameters": {          "type": "object",          "description": "Key/value configuration parameters and input data passed directly to the verifier module instance (replaces 'configuration')."        },        "on_failure": {          "$ref": "#/$defs/FailureStrategy",          "default": { "action_type": "HaltExecution" }        },        "control_flow": {          "$ref": "#/$defs/ControlFlow",          "default": { "condition_type": "AlwaysRun" }        }      },      "required": ["step_id", "verifier_module"]    }  }}
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://agi.sovereign/protocol_definition_schema.json",
+  "title": "Protocol Definition Schema",
+  "description": "Schema for defining and standardizing integrity protocols used by the Protocol Integrity Manager (PIM), enabling systematic versioning and execution by the PIM engine.",
+  "type": "object",
+  "properties": {
+    "protocol_id": {
+      "type": "string",
+      "description": "Unique identifier for the protocol (e.g., GAX_III)."
+    },
+    "name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^v\\d+\\.\\d+\\.\\d+$"
+    },
+    "security_level": {
+      "type": "string",
+      "enum": [
+        "Low",
+        "Medium",
+        "High",
+        "Critical",
+        "Extreme"
+      ],
+      "description": "The security classification of the protocol."
+    },
+    "description": {
+      "type": "string"
+    },
+    "required_steps": {
+      "type": "array",
+      "description": "Ordered list of verification steps or sub-routines required by the protocol execution wrapper.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step_name": {
+            "type": "string"
+          },
+          "verifier_module": {
+            "type": "string",
+            "description": "Reference to the executable module path/name/version."
+          },
+          "timeout_ms": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "step_name",
+          "verifier_module"
+        ]
+      }
+    },
+    "logging_policy": {
+      "type": "string",
+      "enum": [
+        "Full",
+        "Minimal",
+        "FailureOnly"
+      ]
+    }
+  },
+  "required": [
+    "protocol_id",
+    "version",
+    "security_level",
+    "required_steps"
+  ]
+}
