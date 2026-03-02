@@ -1,1 +1,10 @@
-[object Object]
+{
+  "title": "Governance Integrity and Compliance Monitoring Schema",
+  "type": "object",
+  "properties": {
+    "ruleId": { "type": "string", "description": "Identifier for the governance rule." },
+    "status": { "type": "string", "enum": ["Active", "Deprecated", "Pending"], "default": "Active" },
+    "validationLogic": { "type": "string", "description": "Reference to the validation function." }
+  },
+  "required": ["ruleId", "status"]
+}
