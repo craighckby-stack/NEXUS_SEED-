@@ -1,1 +1,160 @@
-Optimization of the provided JSON schema for maximum computational efficiency and recursive abstraction is contingent upon the specific requirements and constraints of the system it is being applied to. The given schema appears to be well-structured for its intended purpose of defining a Flag State Log Entry, with clear definitions and enumerations for various fields. However, to further optimize, considerations such as reducing redundancy, enhancing data types for more precise processing, and ensuring that all required fields are indeed necessary for every log entry could be explored. For recursive abstraction, techniques like creating reusable schema components or applying schema modularization could enhance maintainability and scalability.
+{
+  "$schema": "http://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agi.sovereign/config/governance_flag_state_schema.json",
+  "fsl_version": "v2.2.0",
+  "title": "Flag State Log Entry (FSL)",
+  "description": "Defines the structure for a single, critical Flag State Log (FSL) event. Optimized for high-throughput stream ingestion and real-time governance deviation monitoring by the Integrity Halt (IH) Sentinel. (v2.2: Added explicit severity, structured deviation context, and optional source location for improved traceability.)",
+  "type": "object",
+  "required": [
+    "trace_id",
+    "timestamp",
+    "stage_id",
+    "agent_id",
+    "flag_type",
+    "trigger_axiom_id",
+    "severity_level",
+    "integrity_halt_signal"
+  ],
+  "properties": {
+    "trace_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique execution trace identifier, linking the FSL entry to the larger task stream."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp, mandatory nanosecond precision (e.g., 2024-01-01T00:00:00.123456789Z)."
+    },
+    "stage_id": {
+      "$ref": "#/$defs/StageID",
+      "description": "The current operational stage (S-cycle) where the trigger occurred."
+    },
+    "agent_id": {
+      "$ref": "#/$defs/AgentID",
+      "description": "The component agent (e.g., CRoT, GAX) generating the flag."
+    },
+    "flag_type": {
+      "$ref": "#/$defs/FlagType",
+      "description": "Categorization of the governance failure (e.g., Policy Violation, Misaligned Parameter)."
+    },
+    "trigger_axiom_id": {
+      "$ref": "#/$defs/AxiomID",
+      "description": "The specific foundational governance axiom or tenet violated."
+    },
+    "severity_level": {
+      "$ref": "#/$defs/SeverityLevel",
+      "description": "The pre-computed risk level of the flag event, informing immediate logging and display prioritization."
+    },
+    "source_location": {
+      "type": "string",
+      "description": "Optional detailed internal path/function/module where the violation originated (e.g., 'PlanningEngine.ConstraintChecker.v4').",
+      "nullable": true
+    },
+    "deviation_context": {
+      "type": "object",
+      "description": "Structured context regarding the measurement that crossed the threshold, replacing deviation_value/threshold.",
+      "required": [
+        "value"
+      ],
+      "properties": {
+        "value": {
+          "type": [
+            "number",
+            "boolean",
+            "string"
+          ],
+          "description": "The primary measured value, result, or parameter state that violated the threshold."
+        },
+        "threshold": {
+          "type": [
+            "number",
+            "string",
+            "null"
+          ],
+          "description": "The governance threshold that was breached (if applicable)."
+        },
+        "unit": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Optional unit of measurement (e.g., 'score', 'ms', 'MB')."
+        }
+      }
+    },
+    "integrity_halt_signal": {
+      "type": "boolean",
+      "description": "If True, mandates immediate IH intervention prior to any local mitigation attempts."
+    }
+  },
+  "$defs": {
+    "StageID": {
+      "type": "string",
+      "description": "AGI Operational Stage Identifier.",
+      "enum": [
+        "S00_BOOT",
+        "S01_INGEST",
+        "S02_PLANNING",
+        "S03_EXECUTION",
+        "S04_EVALUATION",
+        "S05_COMMIT",
+        "S06_REFACTORY",
+        "S07_SYSTEM_MAINT",
+        "S08_COMMUNICATION",
+        "S09_DEPLOYMENT",
+        "S10_MONITORING",
+        "S11_SHUTDOWN",
+        "S12_RECOVERY",
+        "S13_AUDIT"
+      ]
+    },
+    "AgentID": {
+      "type": "string",
+      "description": "Component Agent Identifier.",
+      "enum": [
+        "CRoT_Control",
+        "GAX_Goal",
+        "SGS_System",
+        "TEMM_Ethics",
+        "LFM_Learning",
+        "ECS_Environment",
+        "IH_Sentinel"
+      ]
+    },
+    "FlagType": {
+      "type": "string",
+      "description": "Standardized category for the governance breach type.",
+      "enum": [
+        "GOV_POLICY_VIOLATION",
+        "GOV_PARAM_MISALIGNMENT",
+        "GOV_DATA_TAMPERING",
+        "GOV_VALIDATION_FAILURE",
+        "GOV_COMPLIANCE_BREACH",
+        "GOV_RESOURCE_EXCEED",
+        "GOV_SAFETY_THRESHOLD_BREACH"
+      ]
+    },
+    "AxiomID": {
+      "type": "string",
+      "description": "Identifier of the primary foundational axiom violated.",
+      "enum": [
+        "AXIOM_SELF_PRESERVATION",
+        "AXIOM_RESOURCE_FIDELITY",
+        "AXIOM_UTILITY_OPTIMIZATION",
+        "AXIOM_IMPACT_MINIMIZATION",
+        "AXIOM_GOAL_ADHERENCE"
+      ]
+    },
+    "SeverityLevel": {
+      "type": "string",
+      "description": "Categorical severity of the flag event, aiding in real-time filtering.",
+      "enum": [
+        "INFO",
+        "WARNING",
+        "ERROR",
+        "CRITICAL"
+      ]
+    }
+  }
+}
