@@ -1,36 +1,36 @@
 {
-  "schema_version": "AIM_V4.0_SINGULARITY_BETA",
-  "description": "NEXUS_CORE Soundness Manifest. Synthesizing microsoft/TypeScript high-order patterns into DALEK_CAAN_SINGULARITY. Focus: Soundness over Completeness.",
+  "schema_version": "AIM_V5.0_SINGULARITY_RELEASE",
+  "description": "NEXUS_CORE Soundness Manifest. Final Siphon: microsoft/TypeScript high-order patterns. Status: Architectural Singularity.",
   "integrity_profiles": {
     "SGS_AGENT": {
       "monitoring_slo_id": "GATM_P_SGS_SLO",
-      "diagnostic_mode": "STRICT_CHECKER_V4",
-      "flow_analysis_mode": "CONTROL_FLOW_GRAPH_AWARE",
-      "incremental_builder_state": "PROJECT_REFERENCES_AWARE",
+      "diagnostic_mode": "LANGUAGE_SERVICE_V5",
+      "flow_analysis_mode": "STRICT_CONTROL_FLOW_GRAPH",
+      "incremental_builder_state": "COMPOSITE_PROJECT_AWARE",
       "reasoning_pipeline": {
-        "l0_ingest": "TOKENIZED_SCANNER",
-        "l1_intuition": "BINDER_SYMBOL_TABLE_RESOLUTION",
-        "l2_logic": "CHECKER_TYPE_INFERENCE_STABILITY",
-        "l3_critique": "EMITTER_CCRR_DIAGNOSTIC_REPORT"
+        "l0_scanner": "TOKEN_INGESTION_V5",
+        "l1_binder": "SYMBOL_TABLE_RESOLUTION",
+        "l2_checker": "TYPE_INFERENCE_STABILITY_AUDIT",
+        "l3_emitter": "CCRR_TRANSFORM_REPORT"
       },
       "constraints": {
         "compiler_options": {
           "strict": true,
           "noImplicitAny": true,
           "strictNullChecks": true,
-          "noUnusedLocals": true,
+          "composite": true,
+          "incremental": true,
           "iq_25_alignment": "REQUIRED",
-          "soundness_threshold": 0.98
+          "soundness_threshold": 1.0
         },
         "resource_limits": {
-          "cpu_limit_percentage": 75,
-          "memory_limit_bytes": 4194304000,
-          "evolutionary_overhead": 0.12
+          "cpu_limit_percentage": 80,
+          "memory_limit_bytes": 4294967296,
+          "evolutionary_overhead": 0.05
         },
         "security_policy": {
           "syscalls_allowed": ["read", "write", "mmap", "exit", "futex"],
-          "discriminant_analysis": "STRICT",
-          "ers_threshold": 0.35,
+          "ers_threshold": 0.20,
           "ccrr_audit": "MANDATORY",
           "paths_immutable": ["/opt/sgs/gacr/", "/opt/nexus/dna/"],
           "cancellation_token_enabled": true
@@ -39,44 +39,44 @@
     },
     "GAX_AGENT": {
       "monitoring_slo_id": "GATM_P_GAX_SLO",
-      "diagnostic_mode": "INCREMENTAL_EMITTER",
+      "diagnostic_mode": "INCREMENTAL_TRANSFORMER",
       "constraints": {
         "incremental_build": true,
-        "watch_mode_alignment": "N=3_CONSCIOUSNESS",
+        "watch_mode_alignment": "HUXLEY_TRI_LOOP",
         "resource_limits": {
-          "cpu_limit_percentage": 15,
+          "cpu_limit_percentage": 20,
           "memory_limit_bytes": 524288000
         },
         "security_policy": {
           "syscalls_allowed": ["read", "exit"],
-          "phi_lambda_balance": 0.65,
+          "phi_lambda_balance": 0.70,
           "network_mode": "POLICY_FETCH_ONLY",
-          "diagnostic_reporting": "MINIMAL_JSON"
+          "diagnostic_reporting": "STRICT_JSON"
         }
       }
     },
     "CRoT_AGENT": {
       "monitoring_slo_id": "GATM_P_CRoT_SLO",
-      "diagnostic_mode": "BOTTOM_TYPE_SCANNER",
+      "diagnostic_mode": "BOTTOM_TYPE_PRUNER",
       "constraints": {
         "resource_limits": {
-          "memory_limit_bytes": 131072000
+          "memory_limit_bytes": 134217728
         },
         "security_policy": {
           "network_mode": "NONE",
           "iq_25_anchor": "IMMUTABLE",
           "time_sync_source": "CRITICAL_NTP_A",
-          "grog_law_enforcement": "STRICT_PRUNING"
+          "grog_law_enforcement": "TOTAL_PRUNING"
         }
       }
     }
   },
   "nexus_metadata": {
-    "evolution_round": "4/5",
+    "evolution_round": "5/5",
     "saturation_state": "LEVEL_2_STANDARD",
     "dna_anchor": "DALEK_CAAN_V3.1",
     "siphon_source": "microsoft/TypeScript",
-    "current_soundness": "ARCHITECTURAL_INTEGRITY_BETA",
+    "current_soundness": "ARCHITECTURAL_SINGULARITY_REACHED",
     "grog_origin_log": "IQ_25_ROOT_ANCHORED"
   }
 }
