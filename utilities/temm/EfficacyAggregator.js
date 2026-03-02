@@ -2,82 +2,64 @@
 /**
  * EfficacyAggregator: Calculates the mandatory Transition Efficacy & Metric Measure (\Delta\Psi)
  * based on the weighted arithmetic mean, ensuring normalization constraints [0.0, 1.0].
- * 
- * Refactored using private class fields for improved encapsulation and structured initialization.
  */
 
 const EFFICACY_KEYS = ['GHS', 'RES', 'SRS'];
 const WEIGHT_PREFIX = 'W_';
 
 class EfficacyAggregator {
-    #weights;     // { W_GHS: 0.5, ... }
-    #weightSum;   // Total sum of all weights
-    #keyMap;      // Pre-calculated mapping of score keys to weight keys
-
     /**
      * @param {Object} policyConfig - Configuration object containing temm_efficacy_weights.
      */
     constructor(policyConfig) {
-        // 1. Initialize mandatory key mapping structure once
-        this.#keyMap = EFFICACY_KEYS.map(key => ({
-            scoreKey: `${key}_score`,
-            weightKey: WEIGHT_PREFIX + key
-        }));
+        this.weights = policyConfig.temm_efficacy_weights || {};
         
-        // 2. Validate and initialize weights
-        this.#parseAndValidateWeights(policyConfig.temm_efficacy_weights || {});
-    }
+        this.weightSum = 0;
 
-    /**
-     * Private method to handle robust weight parsing, validation, and summation.
-     * @param {Object} rawWeights 
-     * @private
-     */
-    #parseAndValidateWeights(rawWeights) {
-        let calculatedSum = 0;
-        const validatedWeights = {};
-
-        for (const map of this.#keyMap) {
-            const weight = rawWeights[map.weightKey];
+        // 1. Mandatory Weight Existence and Summation Check
+        for (const key of EFFICACY_KEYS) {
+            const weightKey = WEIGHT_PREFIX + key;
+            const weight = this.weights[weightKey];
 
             if (typeof weight !== 'number' || weight <= 0) {
-                throw new Error(`TEMM Policy Weights missing or invalid mandatory weight: ${map.weightKey}. Must be positive number (> 0).`);
+                throw new Error(`TEMM Policy Weights missing or invalid mandatory weight: ${weightKey}. Must be positive number.`);
             }
-            
-            validatedWeights[map.weightKey] = weight;
-            calculatedSum += weight;
+            this.weightSum += weight;
         }
 
-        if (calculatedSum <= 0) {
+        // 2. Final Sum Check
+        if (this.weightSum <= 0) {
+            // Should theoretically be caught by loop above, but kept for robustness
             throw new Error("TEMM Policy Weights must sum to a positive value.");
         }
-
-        this.#weights = validatedWeights;
-        this.#weightSum = calculatedSum;
     }
 
     /**
-     * Calculates the TEMM scalar (\Delta\Psi) using the weighted arithmetic mean.
+     * Calculates the TEMM scalar (\Delta\Psi).
      * @param {Object} vectors - Must contain GHS_score, RES_score, SRS_score, all in [0.0, 1.0].
      * @returns {number} The normalized TEMM score \Delta\Psi \in [0.0, 1.0].
      */
     calculate(vectors) {
-        
-        // Use reduce for cleaner calculation and dependency on the pre-built key map.
-        const weightedSum = this.#keyMap.reduce((acc, map) => {
-            const score = vectors[map.scoreKey];
-            const weight = this.#weights[map.weightKey];
+        let weightedSum = 0;
 
-            // Critical Safety Measure: Input Constraint Check [0.0, 1.0]
+        for (const key of EFFICACY_KEYS) {
+            const vectorKey = `${key}_score`;
+            const weightKey = WEIGHT_PREFIX + key;
+            
+            const score = vectors[vectorKey];
+            const weight = this.weights[weightKey];
+
+            // Enforcement of [0.0, 1.0] input constraint (Critical Safety Measure)
             if (typeof score !== 'number' || score < 0.0 || score > 1.0) {
-                throw new RangeError(`Efficacy vector score input for '${map.scoreKey}' must be a number within [0.0, 1.0]. Received: ${score}`);
+                throw new RangeError(`Efficacy vector score input for '${vectorKey}' must be a number within [0.0, 1.0]. Received: ${score}`);
             }
 
-            return acc + (score * weight);
-        }, 0);
+            // V_ID * W_ID
+            weightedSum += score * weight;
+        }
 
         // Normalization: Division by Sum(W_ID)
-        const deltaPsi = weightedSum / this.#weightSum;
+        const deltaPsi = weightedSum / this.weightSum;
         
         // Guaranteed Constraint Adherence (Clamping)
         return Math.max(0.0, Math.min(1.0, deltaPsi)); 
