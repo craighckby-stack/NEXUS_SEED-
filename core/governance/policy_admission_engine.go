@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 )
 
 // ConstraintEvaluatorFunc defines the signature for a function that evaluates a specific constraint key.
@@ -27,69 +26,6 @@ type manifestWrapper struct {
 	SchemaVersion string            `json:"schema_version"`
 	Policies      []IsolationPolicy `json:"policies"`
 }
-
-// evaluateBoolean is a reusable helper for simple boolean checks.
-func evaluateBoolean(current bool, requiredStr string) (bool, error) {
-	required, err := strconv.ParseBool(requiredStr)
-	if err != nil {
-		return false, fmt.Errorf("constraint value '%s' is not a valid boolean: %w", requiredStr, err)
-	}
-	return current == required, nil
-}
-
-// evaluateNumeric is a reusable helper for evaluating numerical constraints (e.g., minimum memory, version checks).
-// It parses operators like >=, <=, >, <, or = from the required string.
-func evaluateNumeric(current int, constraint PolicyConstraint) (bool, error) {
-	reqStr := strings.TrimSpace(constraint.Required)
-	var op string
-	var valStr string
-
-	// Parse operator
-	if len(reqStr) >= 2 {
-		if reqStr[:2] == ">=" || reqStr[:2] == "<=" || reqStr[:2] == "!=" {
-			op = reqStr[:2]
-			valStr = reqStr[2:]
-		}
-	}
-	if op == "" && len(reqStr) >= 1 {
-		if reqStr[0] == '>' || reqStr[0] == '<' {
-			op = reqStr[:1]
-			valStr = reqStr[1:]
-		} else if reqStr[0] == '=' {
-			// Handle simple equality or error on unrecognized single character ops
-			op = "="
-			valStr = reqStr[1:]
-		}
-	}
-	if op == "" { 
-		// If no operator is explicitly found, assume strict equality
-		op = "="
-		valStr = reqStr
-	}
-
-	requiredVal, err := strconv.Atoi(strings.TrimSpace(valStr))
-	if err != nil {
-		return false, fmt.Errorf("numeric constraint value '%s' (parsed from %s) is not a valid integer: %w", valStr, constraint.Required, err)
-	}
-
-	// Perform comparison
-	switch op {
-	case ">=":
-		return current >= requiredVal, nil
-	case "<=":
-		return current <= requiredVal, nil
-	case ">":
-		return current > requiredVal, nil
-	case "<":
-		return current < requiredVal, nil
-	case "=", "==":
-		return current == requiredVal, nil
-	default:
-		// Should be unreachable if parsing logic is sound
-		return false, fmt.Errorf("unsupported comparison operator '%s' in constraint '%s'", op, constraint.Required)
-	}
-}
-
 
 // RegisterConstraint adds an evaluator function for a specific constraint key.
 func (pae *PolicyAdmissionEngine) RegisterConstraint(key string, fn ConstraintEvaluatorFunc) {
@@ -133,25 +69,23 @@ func NewPolicyAdmissionEngine(path string) (*PolicyAdmissionEngine, error) {
 // registerDefaultEvaluators sets up the common constraint logic dynamically, decoupling evaluation from the core loop.
 // Constraint values (PolicyConstraint.Required) are treated as strings to allow flexible comparison logic.
 func (pae *PolicyAdmissionEngine) registerDefaultEvaluators() {
+	// Generic evaluator for mandatory boolean hardware flags
+	boolEvaluator := func(current bool, requiredStr string) (bool, error) {
+		required, err := strconv.ParseBool(requiredStr)
+		if err != nil {
+			return false, fmt.Errorf("constraint value '%s' is not a valid boolean: %w", requiredStr, err)
+		}
+		return current == required, nil
+	}
 
-	// Hardware Boolean Evaluators (now using the package function helper)
 	pae.RegisterConstraint("Hardware.TEE_Support", func(context SystemContext, constraint PolicyConstraint) (bool, error) {
-		return evaluateBoolean(context.Hardware.TEE_Support, constraint.Required)
+		return boolEvaluator(context.Hardware.TEE_Support, constraint.Required)
 	})
 
 	pae.RegisterConstraint("Hardware.SR_IOV_Enabled", func(context SystemContext, constraint PolicyConstraint) (bool, error) {
-		return evaluateBoolean(context.Hardware.SR_IOV_Enabled, constraint.Required)
+		return boolEvaluator(context.Hardware.SR_IOV_Enabled, constraint.Required)
 	})
-	
-	// --- Numerical Constraints Registration ---
-	// Register evaluator for numerical constraints based on resources (assuming TotalMemoryKB exists in SystemContext.Hardware)
-	pae.RegisterConstraint("Resource.MinMemoryKB", func(context SystemContext, constraint PolicyConstraint) (bool, error) {
-		// Example usage: constraint.Required might be ">= 4096"
-		// Assumes context.Hardware.TotalMemoryKB is available and integer-typed.
-		currentMemory := context.Hardware.TotalMemoryKB 
-		return evaluateNumeric(currentMemory, constraint)
-	})
-	
+
 	// Future constraints (e.g., minimum version, required resource level) would be registered here.
 }
 
