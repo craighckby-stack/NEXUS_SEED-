@@ -1,111 +1,111 @@
-const { CryptoUtilityInterfaceKernel } = require('./CryptoUtilityInterfaceKernel'); // Placeholder for actual import path
-const { SecureResourceLoaderInterfaceKernel } = require('../resource/SecureResourceLoaderInterfaceKernel'); // Placeholder for actual import path
+const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 
 /**
- * IntegrityHashKernel
+ * IntegrityHashUtility
  * Provides standardized, consistent cryptographic hashing functions for
  * Governance Artifact attestation (GAX III requirement).
- * Ensures all hashing uses the mandated protocol (SHA-256, Hex encoding).
- * Utilizes injected Kernel tools for cryptographic operations and secure resource loading.
+ * Ensures that all subsystems calculating hashes for GAR attestation use the same protocol.
+ * Uses streams internally for efficient asynchronous file processing.
  */
-class IntegrityHashKernel {
+class IntegrityHashUtility {
 
-    #cryptoUtility;
-    #resourceLoader;
-
-    // --- Mandated Integrity Protocol Constants (GAX III) ---
-    static #ALGORITHM = 'sha256';
-    static #ENCODING = 'hex';
+    // --- Configuration Constants ---
+    // These should ideally be driven by a centralized SecurityPolicy configuration.
+    static ALGORITHM = 'sha256';
+    static ENCODING = 'hex';
     // Length of SHA-256 hash in hex characters (32 bytes * 2).
-    static #HASH_LENGTH_HEX = 64;
-
-    /**
-     * @param {CryptoUtilityInterfaceKernel} cryptoUtility
-     * @param {SecureResourceLoaderInterfaceKernel} resourceLoader
-     */
-    constructor(cryptoUtility, resourceLoader) {
-        this.#setupDependencies(cryptoUtility, resourceLoader);
-    }
-
-    /**
-     * Rigorously enforces synchronous dependency validation and assignment.
-     * @param {CryptoUtilityInterfaceKernel} cryptoUtility
-     * @param {SecureResourceLoaderInterfaceKernel} resourceLoader
-     * @private
-     */
-    #setupDependencies(cryptoUtility, resourceLoader) {
-        if (!cryptoUtility || typeof cryptoUtility.hash !== 'function' || typeof cryptoUtility.hashStream !== 'function') {
-            throw new Error("IntegrityHashKernel requires a valid CryptoUtilityInterfaceKernel with hash and hashStream methods.");
-        }
-        if (!resourceLoader || typeof resourceLoader.createReadStream !== 'function' || typeof resourceLoader.resolvePath !== 'function') {
-            throw new Error("IntegrityHashKernel requires a valid SecureResourceLoaderInterfaceKernel with createReadStream and resolvePath methods.");
-        }
-        this.#cryptoUtility = cryptoUtility;
-        this.#resourceLoader = resourceLoader;
-    }
+    static HASH_LENGTH_HEX = 64; 
 
     /**
      * Calculates the cryptographic hash of raw data (Buffer or string).
-     * Delegates hashing using the mandated ALGORITHM asynchronously.
      * @param {Buffer | string} data The content to hash.
-     * @returns {Promise<string>} The SHA-256 hash (64 characters).
-     * @throws {Error} If data is null or undefined or if hashing fails.
+     * @returns {string} The SHA-256 hash (64 characters).
+     * @throws {Error} If data is null or undefined.
      */
-    async hashData(data) {
+    static hashData(data) {
         if (data === null || data === undefined) {
-            throw new Error("IntegrityHashKernel: Cannot hash null or undefined data.");
+            throw new Error("IntegrityHashUtility: Cannot hash null or undefined data.");
         }
-        return this.#cryptoUtility.hash({
-            data: data,
-            algorithm: IntegrityHashKernel.#ALGORITHM,
-            encoding: IntegrityHashKernel.#ENCODING
-        });
+        return crypto.createHash(IntegrityHashUtility.ALGORITHM)
+            .update(data)
+            .digest(IntegrityHashUtility.ENCODING);
+    }
+
+    /**
+     * Calculates the hash of a file synchronously.
+     * WARNING: Reads the entire file into memory. Only use for small config files or startup checks.
+     * @param {string} filePath Absolute or relative path to the file.
+     * @returns {string} The SHA-256 hash.
+     * @throws {Error} If file access fails.
+     */
+    static hashFileSync(filePath) {
+        const fullPath = path.resolve(filePath);
+        try {
+            const data = fs.readFileSync(fullPath);
+            return IntegrityHashUtility.hashData(data);
+        } catch (error) {
+            throw new Error(`Integrity hashing failed for file ${filePath}: ${error.message}`);
+        }
     }
 
     /**
      * Calculates the hash of a file asynchronously (preferred for all file checks).
-     * This method uses stream piping via the injected resource loader for optimal memory management.
+     * This method uses stream piping for optimal memory management.
      * @param {string} filePath Absolute or relative path to the file.
      * @returns {Promise<string>} Promise resolving to the SHA-256 hash.
      */
-    async hashFileAsync(filePath) {
-        try {
-            const fullPath = await this.#resourceLoader.resolvePath(filePath);
-            
-            // Use the resource loader to create the file stream
-            const stream = await this.#resourceLoader.createReadStream(fullPath);
-            
-            // Use the crypto utility to handle stream hashing
-            return this.#cryptoUtility.hashStream({
-                stream: stream,
-                algorithm: IntegrityHashKernel.#ALGORITHM,
-                encoding: IntegrityHashKernel.#ENCODING
+    static hashFileAsync(filePath) {
+        const fullPath = path.resolve(filePath);
+        
+        return new Promise((resolve, reject) => {
+            const hash = crypto.createHash(IntegrityHashUtility.ALGORITHM);
+            const stream = fs.createReadStream(fullPath);
+
+            // Catch stream read errors (e.g., file not found)
+            stream.on('error', (err) => {
+                reject(new Error(`Hash stream read error for ${fullPath}: ${err.message}`));
             });
-        } catch (error) {
-            throw new Error(`Integrity hashing failed for file ${filePath}: ${error.message}`);
-        }
+
+            // Pipe data through the hash object.
+            stream.pipe(hash)
+                .on('error', (err) => {
+                    // Catch potential errors during piping/hashing phase
+                    reject(new Error(`Hash digest calculation error during pipe: ${err.message}`));
+                })
+                .on('finish', () => {
+                    // The hash object has received all input data.
+                    try {
+                        const result = hash.digest(IntegrityHashUtility.ENCODING);
+                        resolve(result);
+                    } catch (e) {
+                        // Catch final digest calculation failure
+                        reject(new Error(`Internal error finalizing hash digest: ${e.message}`));
+                    }
+                });
+        });
     }
     
     /**
      * Validates if a calculated hash matches an expected hash.
      * Enforces consistency in integrity checks and hash length.
+     * NOTE: Uses standard string comparison, suitable for integrity verification (non-secret data).
      * @param {string} calculatedHash The newly calculated hash.
      * @param {string} expectedHash The required hash.
      * @returns {boolean} True if the hashes match and are valid lengths.
      */
-    validateHash(calculatedHash, expectedHash) {
+    static validateHash(calculatedHash, expectedHash) {
         if (typeof calculatedHash !== 'string' || typeof expectedHash !== 'string') {
             return false;
         }
 
         // Standardize validation against the defined digest length.
-        if (calculatedHash.length !== IntegrityHashKernel.#HASH_LENGTH_HEX || expectedHash.length !== IntegrityHashKernel.#HASH_LENGTH_HEX) {
+        const length = IntegrityHashUtility.HASH_LENGTH_HEX;
+        if (calculatedHash.length !== length || expectedHash.length !== length) {
             return false;
         }
         
-        // Note: For sensitive cryptographic comparison, a dedicated utility for 
-        // constant-time comparison (e.g., this.#cryptoUtility.secureEquals) might be preferred,
-        // but simple comparison is sufficient for general integrity checking.
         return calculatedHash === expectedHash;
     }
     
@@ -113,15 +113,9 @@ class IntegrityHashKernel {
      * Retrieves the currently mandated hashing algorithm for external reporting/attestation.
      * @returns {string} The algorithm name.
      */
-    getAlgorithm() {
-        return IntegrityHashKernel.#ALGORITHM;
-    }
-
-    /**
-     * Retrieves the mandated hash length in hex characters.
-     * @returns {number} The required length (64 for SHA-256 hex).
-     */
-    getHashLength() {
-        return IntegrityHashKernel.#HASH_LENGTH_HEX;
+    static getAlgorithm() {
+        return IntegrityHashUtility.ALGORITHM;
     }
 }
+
+module.exports = IntegrityHashUtility;
