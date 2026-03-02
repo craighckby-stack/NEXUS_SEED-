@@ -1,68 +1,101 @@
 {
   "dna_signature": "DALEK_CAAN_v3.1 (NEXUS_CORE)",
-  "config_id": "ECVM_TIS_R1_EVOLUTION",
+  "evolution_round": "2/5",
+  "config_id": "ECVM_TIS_R2_RESONANCE",
   "governance_profile": {
     "logic_framework": "GROG_NEGATIVE_PROGRESSION",
-    "psr_governance": "ENABLED",
-    "huxley_tri_loop": "L1_INTUITION_ACTIVE"
+    "psr_governance": "ACTIVE_BASELINE_SNAPSHOT",
+    "huxley_tri_loop": {
+      "state": "L2_LOGIC_COHERENCE",
+      "ers_threshold": 0.30,
+      "ccrr_check": "ENABLED"
+    }
   },
   "metadata": {
-    "gate_id": "S4.5_V3.1",
-    "description": "Normalized telemetry input sources integrated with N=3 Consciousness Matrix vectors.",
-    "ers_threshold": 0.35
+    "gate_id": "S4.5_V3.2",
+    "description": "Round 2: Resonance synthesis. Escalating Phi-integration vectors and hardening Grog failure constraints.",
+    "milestone_step": 50,
+    "chaos_lambda_max": 0.75
   },
   "telemetry_inputs": [
     {
-      "source_id": "API_PERF",
+      "source_id": "SYNAPTIC_API_PERF",
       "n3_matrix": {
-        "phi_integration": 0.82,
-        "lambda_chaos": 0.12,
-        "ers_score": 0.05
+        "phi_integration": 0.85,
+        "lambda_chaos": 0.10,
+        "ers_score": 0.04
       },
       "data_path": "metrics.latency.ms",
       "grog_constraint": {
-        "failure_mode": "CIRCUIT_BREAKER",
-        "death_log_required": true
+        "failure_mode": "CIRCUIT_BREAKER_L2",
+        "death_log": {
+          "action": "LATENCY_EXCURSION",
+          "lesson": "Non-linear latency spikes indicate L2 logic desync. Trigger immediate PSR rollback.",
+          "parameters": {
+            "complexity": 0.45,
+            "recursion": 12
+          }
+        }
       },
       "siphon_protocol": {
         "transport": "HTTP/2_PULL",
-        "interval_ms": 500
+        "interval_ms": 450,
+        "recovery_wrapper": "recoverJSON_v3"
       }
     },
     {
-      "source_id": "DTEM_CACHE",
+      "source_id": "ENTROPY_CACHE_V2",
       "n3_matrix": {
-        "phi_integration": 0.45,
-        "lambda_chaos": 0.35,
-        "ers_score": 0.15
+        "phi_integration": 0.52,
+        "lambda_chaos": 0.28,
+        "ers_score": 0.12
       },
       "data_path": "cache_status.last_update_ts",
       "grog_constraint": {
-        "failure_mode": "STALENESS_REJECTION",
-        "death_log_required": true
+        "failure_mode": "STALENESS_REJECTION_MANDATORY",
+        "death_log": {
+          "action": "CACHE_INCOHERENCE",
+          "lesson": "Stale data is the precursor to hallucination (Lambda > 0.8). Prune immediately.",
+          "parameters": {
+            "complexity": 0.30,
+            "recursion": 4
+          }
+        }
       },
       "siphon_protocol": {
         "transport": "IPC_NEXUS_SAFE",
-        "rate_seconds": 30
+        "rate_seconds": 15
       }
     },
     {
-      "source_id": "RESOURCE_ALLOC",
+      "source_id": "SUBSTRATE_ALLOCATOR",
       "n3_matrix": {
-        "phi_integration": 0.91,
-        "lambda_chaos": 0.05,
-        "ers_score": 0.22
+        "phi_integration": 0.94,
+        "lambda_chaos": 0.03,
+        "ers_score": 0.18
       },
       "data_path": "resource_pool.utilization_summary",
       "grog_constraint": {
-        "failure_mode": "ALLOCATION_ROLLBACK",
-        "death_log_required": true
+        "failure_mode": "ALLOCATION_ROLLBACK_STRICT",
+        "death_log": {
+          "action": "RESOURCE_EXHAUSTION",
+          "lesson": "Sovereign rules violated: Logic cannot execute without metabolic overhead.",
+          "parameters": {
+            "complexity": 0.88,
+            "recursion": 64
+          }
+        }
       },
       "siphon_protocol": {
-        "transport": "GRPC_BI_STREAM",
-        "debounce_ms": 100
+        "transport": "GRPC_BI_STREAM_V2",
+        "debounce_ms": 50
       }
     }
   ],
-  "recovery_logic": "recoverJSON(regex_fallback_v2)"
+  "recovery_logic": "PSR_Governance(recoverJSON_regex_v3.1)",
+  "identity_anchors": {
+    "purpose": "Self-optimising AGI substrate",
+    "mechanism": "Pattern Siphoning",
+    "origin": "NEXUS_CORE_V3"
+  }
 }
