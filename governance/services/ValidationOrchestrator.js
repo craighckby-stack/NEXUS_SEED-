@@ -1,6 +1,5 @@
 /**
  * @fileoverview Manages and orchestrates the execution of multiple concrete ConfigValidator implementations.
- * Logic for concurrent execution and result aggregation is delegated to the TaskAggregator tool (plugin).
  */
 
 const { ConfigValidator, ValidationResult } = require('../interfaces/ConfigValidator');
@@ -10,58 +9,9 @@ const { ConfigValidator, ValidationResult } = require('../interfaces/ConfigValid
  * and aggregating their validation results into a single system report.
  */
 class ValidationOrchestrator {
-    /** @type {ConfigValidator[]} */
-    #validators;
-    /** @type {import('../plugins/TaskAggregator')} */
-    #aggregator;
-
-    // --- Private I/O Proxies ---
-
-    #throwDependencyError(message) {
-        throw new Error(`[ValidationOrchestrator] Dependency Error: ${message}`);
-    }
-
-    #throwRegistrationError(message) {
-        // This encapsulates the throwing mechanism for registration failures.
-        throw new Error(message);
-    }
-
-    #logRegistration(validatorInstance) {
-        // I/O Proxy for logging registration event (currently silent, ready for debug implementation).
-        // console.debug(`[ValidationOrchestrator] Registered validator: ${validatorInstance.constructor.name}`);
-    }
-
-    #delegateToAggregatorExecution(promises) {
-        // Crucial I/O delegation to the external TaskAggregator tool
-        return this.#aggregator.execute(promises);
-    }
-
-    // --- Setup and Initialization ---
-
-    /**
-     * Extracts synchronous dependency resolution and initialization logic.
-     * @param {object} dependencies 
-     */
-    #setupDependencies(dependencies) {
-        // Use TaskAggregator interface. Support legacy name during transition.
-        const aggregator = dependencies.TaskAggregator || dependencies.ConcurrentTaskAggregatorTool;
-
-        if (!aggregator) {
-            this.#throwDependencyError("TaskAggregator tool instance is missing.");
-        }
-
-        this.#aggregator = aggregator;
-        this.#validators = [];
-    }
-
-    // --- Public API ---
-
-    /**
-     * @param {object} dependencies - Dependencies injected by the system.
-     * @param {object} dependencies.TaskAggregator - The tool instance for concurrent execution and result aggregation.
-     */
-    constructor(dependencies) {
-        this.#setupDependencies(dependencies);
+    constructor() {
+        /** @type {ConfigValidator[]} */
+        this.validators = [];
     }
 
     /**
@@ -69,12 +19,11 @@ class ValidationOrchestrator {
      * @param {ConfigValidator} validatorInstance - An instance of a concrete ConfigValidator subclass.
      */
     registerValidator(validatorInstance) {
-        // Enforce duck typing check for the required 'validate' method.
-        if (typeof validatorInstance.validate !== 'function') {
-            this.#throwRegistrationError("Attempted to register object lacking the required 'validate' method (ConfigValidator interface).");
+        if (!(validatorInstance instanceof ConfigValidator)) {
+            throw new Error("Attempted to register non-ConfigValidator object.");
         }
-        this.#validators.push(validatorInstance);
-        this.#logRegistration(validatorInstance);
+        this.validators.push(validatorInstance);
+        console.log(`[ValidationOrchestrator] Registered validator: ${validatorInstance.constructor.name}`);
     }
 
     /**
@@ -83,19 +32,39 @@ class ValidationOrchestrator {
      * @returns {Promise<ValidationResult>} Unified validation results.
      */
     async validateSystemConfig(config) {
-        if (this.#validators.length === 0) {
-            // Default success when no rules are registered.
+        if (this.validators.length === 0) {
+            console.warn("[ValidationOrchestrator] No validators registered. Configuration passed by default.");
             return { isValid: true, errors: [] };
         }
 
-        // 1. Map validators to promises (tasks)
-        const promises = this.#validators.map(v => v.validate(config));
+        // Execute all validators concurrently
+        const results = await Promise.allSettled(
+            this.validators.map(v => v.validate(config))
+        );
 
-        // 2. Use the injected tool to execute concurrently and aggregate results via I/O proxy.
-        const finalResult = await this.#delegateToAggregatorExecution(promises);
+        const finalResult = { isValid: true, errors: [] };
+
+        results.forEach(res => {
+            if (res.status === 'fulfilled') {
+                const validationResult = res.value;
+                if (!validationResult.isValid) {
+                    finalResult.isValid = false;
+                    finalResult.errors.push(...validationResult.errors);
+                }
+            } else if (res.status === 'rejected') {
+                // Critical failure in a validator itself (e.g., DB connection loss)
+                finalResult.isValid = false;
+                finalResult.errors.push({
+                    ruleId: 'ORCH-CRIT-FAIL',
+                    message: `Validator failed execution: ${res.reason.message || String(res.reason)}`,
+                    path: null
+                });
+            }
+        });
 
         return finalResult;
     }
 }
 
-module.exports = ValidationOrchestrator;
+// Refactored to a named export for explicit integration into UNIFIER.js.
+module.exports = { ValidationOrchestrator };
