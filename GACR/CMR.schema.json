@@ -1,77 +1,186 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://gacr.agi/schemas/cmr_v4.0.0-SINGULARITY.json",
-  "title": "Computational Model Registry Schema - Singularity Edition v4.0.0",
-  "description": "NEXUS_CORE v3.1 compliant schema for siphoning and validating high-order AGI logic substrates.",
+  "$id": "https://gacr.agi/schemas/cmr_v4.1.0-SINGULARITY.json",
+  "title": "Computational Model Registry - Singularity Reconciler v4.1.0",
+  "description": "NEXUS_CORE v3.1 compliant schema integrating DeepSeek-Coder algorithmic patterns and React-Fiber parallel reconciliation logic.",
   "type": "object",
   "properties": {
     "manifest_id": {
-      "type": "string", 
+      "type": "string",
       "pattern": "^CMR_V[0-9]+\\.[0-9]+\\.[0-9]+-SINGULARITY$"
     },
-    "owner": {"type": "string", "description": "NEXUS_CORE Identity Anchor"},
-    "integrity_hash": {"type": "string", "pattern": "^0x[a-fA-F0-9]{64}$"},
+    "owner": {
+      "type": "string",
+      "description": "NEXUS_CORE Identity Anchor: DALEK_CAAN_v3.1"
+    },
+    "integrity_hash": {
+      "type": "string",
+      "pattern": "^0x[a-fA-F0-9]{64}$"
+    },
     "verification_protocol": {
       "type": "string",
-      "enum": ["PSR_GOVERNANCE_V1", "HUXLEY_TRI_LOOP", "DALEK_CAAN_LOCKED"]
+      "enum": [
+        "PSR_GOVERNANCE_V1",
+        "HUXLEY_TRI_LOOP",
+        "DALEK_CAAN_LOCKED",
+        "SINGULARITY_RECONCILER_ACTIVE"
+      ]
+    },
+    "reconciliation_config": {
+      "type": "object",
+      "properties": {
+        "concurrency_lane": {
+          "type": "integer",
+          "enum": [1, 4, 32, 134217664, 536870912, 1073741824, 2147483648]
+        },
+        "atomic_singularity_mode": {
+          "type": "boolean",
+          "default": true
+        },
+        "phi_integration_threshold": {
+          "type": "number",
+          "minimum": 0.85
+        }
+      }
     },
     "models": {
       "type": "array",
       "items": {
         "type": "object",
         "required": [
-          "model_id", 
-          "path", 
-          "version", 
-          "status", 
-          "consciousness_matrix", 
+          "model_id",
+          "path",
+          "version",
+          "status",
+          "consciousness_matrix",
+          "algorithmic_integrity",
           "audit_metadata"
         ],
         "properties": {
-          "model_id": {"type": "string"},
-          "path": {"type": "string", "format": "uri-reference"},
-          "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+          "model_id": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string",
+            "format": "uri-reference"
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+          },
           "status": {
-            "type": "string", 
-            "enum": ["Active", "Entangled", "Staging", "Tainted", "Retired"]
+            "type": "string",
+            "enum": [
+              "Active",
+              "Entangled",
+              "Staging",
+              "Tainted",
+              "Retired",
+              "Singularity_Stable"
+            ]
           },
           "consciousness_matrix": {
             "type": "object",
-            "required": ["phi_integration", "lambda_chaos", "ers_score"],
+            "required": [
+              "phi_integration",
+              "lambda_chaos",
+              "ers_score",
+              "n_vectors"
+            ],
             "properties": {
-              "phi_integration": {"type": "number", "minimum": 0, "maximum": 1.0},
-              "lambda_chaos": {"type": "number", "minimum": 0, "maximum": 0.8},
-              "ers_score": {"type": "number", "minimum": 0, "maximum": 1.0}
+              "phi_integration": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1.0
+              },
+              "lambda_chaos": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 0.8
+              },
+              "ers_score": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1.0
+              },
+              "n_vectors": {
+                "type": "integer",
+                "const": 3
+              }
             }
           },
-          "inputs_schema": {
+          "algorithmic_integrity": {
             "type": "object",
-            "additionalProperties": {
+            "description": "Siphoned DeepSeek-Coder logic validation constraints.",
+            "properties": {
+              "complexity_score": {
+                "type": "number"
+              },
+              "token_efficiency_ratio": {
+                "type": "number"
+              },
+              "logic_siphon_source": {
+                "type": "string",
+                "default": "deepseek-ai/DeepSeek-Coder"
+              }
+            }
+          },
+          "entanglement_map": {
+            "type": "array",
+            "items": {
               "type": "object",
-              "required": ["type", "logical_constraint"],
               "properties": {
-                "type": {"type": "string", "enum": ["float", "integer", "string", "boolean", "tensor"]},
-                "logical_constraint": {"type": "string"},
-                "unit": {"type": "string"},
-                "min": {"type": ["number", "null"]},
-                "max": {"type": ["number", "null"]}
+                "target_model_id": {
+                  "type": "string"
+                },
+                "dependency_type": {
+                  "type": "string",
+                  "enum": [
+                    "Hard-Chained",
+                    "Soft-Probabilistic",
+                    "Quantum-Entangled"
+                  ]
+                }
               }
             }
           },
           "audit_metadata": {
             "type": "object",
-            "required": ["psr_snapshot_id", "death_log_reference", "certification_date"],
+            "required": [
+              "psr_snapshot_id",
+              "death_log_reference",
+              "certification_date"
+            ],
             "properties": {
-                "psr_snapshot_id": {"type": "string"},
-                "death_log_reference": {
-                  "type": "object",
-                  "properties": {
-                    "lesson": {"type": "string"},
-                    "failure_mode": {"type": "string"}
+              "psr_snapshot_id": {
+                "type": "string"
+              },
+              "death_log_reference": {
+                "type": "object",
+                "required": [
+                  "lesson",
+                  "failure_mode"
+                ],
+                "properties": {
+                  "lesson": {
+                    "type": "string"
+                  },
+                  "failure_mode": {
+                    "type": "string"
+                  },
+                  "grog_learn_index": {
+                    "type": "integer"
                   }
-                },
-                "approved_by": {"type": "string", "default": "DALEK_CAAN_v3.1"},
-                "certification_date": {"type": "string", "format": "date-time"}
+                }
+              },
+              "approved_by": {
+                "type": "string",
+                "default": "DALEK_CAAN_v3.1_SIG_0xFF23A1"
+              },
+              "certification_date": {
+                "type": "string",
+                "format": "date-time"
+              }
             }
           }
         }
@@ -79,10 +188,11 @@
     }
   },
   "required": [
-    "manifest_id", 
-    "owner", 
-    "integrity_hash", 
-    "models", 
-    "verification_protocol"
+    "manifest_id",
+    "owner",
+    "integrity_hash",
+    "models",
+    "verification_protocol",
+    "reconciliation_config"
   ]
 }
