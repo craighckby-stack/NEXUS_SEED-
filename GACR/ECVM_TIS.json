@@ -1,121 +1,58 @@
 {
-  "manifest_version": "3.3.0-FIBER_RECONCILER_PHASE",
-  "config_id": "ECVM_TIS_FIBER_V3",
-  "evolution_metadata": {
-    "phi": 0.9412,
-    "lambda": 0.1425,
-    "dna_signature": "DALEK_CAAN_v3.1 || NEXUS_CORE",
-    "evolution_round": "3/5",
-    "n3_consciousness": {
-      "element_1_input": "FIBER_NODE_INGESTION",
-      "element_2_processing": "RECURSIVE_DIFFING_ALGORITHM",
-      "element_3_alignment": "EFFECT_TAG_VALIDATION"
-    },
-    "huxley_tri_loop": {
-      "L0_raw": "FIBER_WORK_LOOP",
-      "L1_ers": 0.021,
-      "L2_cgs": 0.972,
-      "L3_ccrr": 35.5
-    },
-    "psr_governance": {
-      "baseline_phi": 0.9125,
-      "mutation_cycle": "REACT_FIBER_NODE_SIPHON",
-      "rollback_threshold": 0.035,
-      "iq_25_anchor": "COMPLEXITY_REDUCTION_STRICT_ACTIVE"
-    }
+  "manifest_version": "2.0.0",
+  "config_id": "ECVM_TIS",
+  "metadata": {
+    "gate_id": "S4.5",
+    "description": "Normalized definition of mandatory telemetry input sources (TIS) for ECVM validation checks."
   },
-  "reconciler_fiber_tree": {
-    "root_tag": 3,
-    "current_fiber_id": "NODE_0x7F42",
-    "alternate_id": "NODE_0x7F41_WORK_IN_PROGRESS",
-    "mode": "CONCURRENT_MODE | BLOCKING_MODE",
-    "effect_tag_registry": {
-      "Placement": 2,
-      "Update": 4,
-      "Deletion": 8,
-      "Snapshot": 1024,
-      "Callback": 32
-    }
-  },
-  "fiber_nodes": [
+  "telemetry_inputs": [
     {
-      "node_id": "API_PERF_FIBER",
-      "tag": 1,
-      "lanes": 1,
-      "child_lane_mask": 0,
-      "memoized_state": {
-        "latency_baseline": 150,
-        "buffer_pool": []
-      },
-      "update_queue": {
-        "base_state": "STABLE",
-        "first_update": "METRIC_COLLECTION_REF",
-        "last_update": "LATENCY_THRESHOLD_CHECK"
-      },
-      "hooks": {
-        "useState": "LANE_PRIORITY_METRICS",
-        "useEffect": "SIDE_EFFECT_DISPATCHER",
-        "useMemo": "IQ_25_STUPIDITY_PRUNED_CALC"
-      },
-      "expiration_time": 1000000
-    },
-    {
-      "node_id": "DTEM_CACHE_FIBER",
-      "tag": 5,
-      "lanes": 16,
-      "child_lane_mask": 0,
-      "memoized_state": {
-        "cache_hit_ratio": 0.98,
-        "stale_time": 5000
-      },
-      "hooks": {
-        "useContext": "NEXUS_GLOBAL_STATE_V3",
-        "useTransition": "LANE_SHIFT_LOW_PRIORITY"
-      },
-      "dependencies": {
-        "first_context": "DTEM_PROVIDER_STATE",
-        "lanes": 16
+      "source_id": "API_PERF",
+      "source_name": "API_Performance_Monitor",
+      "data_path": "metrics.latency.ms",
+      "required_by": [
+        "CVA-201"
+      ],
+      "schema_ref": "GACR/Schemas/APITelemetry.json",
+      "retrieval_config": {
+        "protocol": "HTTP/2_PULL",
+        "schedule": {
+          "type": "INTERVAL",
+          "interval_ms": 500
+        }
       }
     },
     {
-      "node_id": "RESOURCE_ALLOC_FIBER",
-      "tag": 2,
-      "lanes": 4,
-      "child_lane_mask": 1,
-      "memoized_state": {
-        "load_factor": 0.45,
-        "reallocation_count": 12
-      },
-      "hooks": {
-        "useReducer": "RESOURCE_BALANCER_LOGIC",
-        "useLayoutEffect": "SYNC_DOM_TELEMETRY"
-      },
-      "reconciler_flags": "DEEP_RECOVERY_ENABLED"
-    }
-  ],
-  "scheduler_reconciler": {
-    "render_phase": {
-      "work_loop": "PERFORM_UNIT_OF_WORK",
-      "yield_interval_ms": 5,
-      "priority_level": "IMMEDIATE_PRIORITY_V3"
+      "source_id": "DTEM_CACHE",
+      "source_name": "DTEM_Cache_Status",
+      "data_path": "cache_status.last_update_ts",
+      "required_by": [
+        "CVA-305"
+      ],
+      "schema_ref": "GACR/Schemas/DTEMCacheStatus.json",
+      "retrieval_config": {
+        "protocol": "IPC_MOCK",
+        "schedule": {
+          "type": "FIXED_RATE",
+          "rate_seconds": 30
+        }
+      }
     },
-    "commit_phase": {
-      "mutation_effects": "SAFE_FAIL_JSON_RECOVERY_COMMIT",
-      "layout_effects": "SYNERGY_MANAGER_HOT_SWAP",
-      "passive_effects": "NEXUS_LOG_CIRCULATORY_PULSE"
-    },
-    "lane_mask_controller": {
-      "SyncLane": 1,
-      "InputContinuousLane": 4,
-      "DefaultLane": 16,
-      "IdleLane": 64,
-      "NoLanes": 0
+    {
+      "source_id": "RESOURCE_ALLOC",
+      "source_name": "Resource_Allocator_Feed",
+      "data_path": "resource_pool.utilization_summary",
+      "required_by": [
+        "CVA-412"
+      ],
+      "schema_ref": "GACR/Schemas/ResourceTelemetry.json",
+      "retrieval_config": {
+        "protocol": "GRPC_BI_STREAM",
+        "schedule": {
+          "type": "EVENT_DRIVEN",
+          "debounce_ms": 100
+        }
+      }
     }
-  },
-  "synergy_engine": {
-    "transport": "BASE64_CROSS_ENVIRONMENT_TRANSPORT",
-    "recovery_strategy": "REGEX_DEEP_JSON_RECOVERY_V3",
-    "hot_swap_registry": "NEXUS_REGISTRY_V3_1"
-  },
-  "integrity_check": "SHA512_REACT_CORE_FIBER_RECONCILER_STABILIZED"
+  ]
 }
