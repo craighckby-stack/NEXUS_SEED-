@@ -1,6 +1,6 @@
 {
   "config_schema_version": "1.1",
-  "system_version": "v7.4.4",
+  "system_version": "v94.1.0",
   "governance_security": {
     "constants": {
       "MAX_RISK_TOLERANCE_L4": 0.05,
@@ -9,25 +9,15 @@
       "ACM_ENTRY_SCHEMA": "SHA256_STRICT"
     }
   },
-  "agi_kernel_parameters": {
-    "maturity_tracking": true,
-    "current_maturity_percent": 0.0,
-    "exploration_strategy": "PRIORITY_DIVERSITY",
-    "navigator_limits": {
-      "max_blacklist_size": 50,
-      "diversity_enforcement": true
-    },
-    "emergent_directory_path": "/emergent"
-  },
   "operational_control": {
-    "current_mode": "EXPLORATION_INITIALIZATION",
+    "current_mode": "EVALUATION_HIGH_FIDELITY",
     "core_loop_settings": {
-      "synthesis_efficacy_threshold": 0.95,
+      "synthesis_efficacy_threshold": 0.985,
       "autonomous_rollback_timeout_ms": 30000
     },
     "telemetry": {
       "SDR_report_rate_hz": 10,
-      "log_level": "INFO"
+      "log_level": "WARNING"
     }
   },
   "integration_endpoints": {
