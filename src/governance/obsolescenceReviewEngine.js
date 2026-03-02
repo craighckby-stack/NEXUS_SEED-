@@ -1,118 +1,87 @@
 /**
- * Component Obsolescence Review Kernel (CORE) - src/governance/obsolescenceReviewKernel.js
- * ID: CORE v95.0 (AIA Enforcement Layer Compliant)
+ * Component Obsolescence Review Engine (CORE) - src/governance/obsolescenceReviewEngine.js
+ * ID: CORE v94.1 (Autonomous Refactor: Intelligence & Safety)
  * Role: Integrity Maintenance / Governance
  *
- * CORE initiates and governs component lifecycle actions (deprecation/retirement) using
- * specialized, auditable, asynchronous Tool Kernels for all decision points and execution.
- * Ensures non-blocking execution and strict adherence to architectural mandates.
+ * CORE initiates and governs component lifecycle actions (deprecation/retirement).
+ * It leverages the specialized Trust Calculus Engine (TCE) for high-stakes decision
+ * scoring based on dependency stability and long-term complexity reduction metrics.
+ * Decoupled execution trigger via ComponentLifecycleActuator (CLA).
  */
 
+import { policyEngine } from '../core/policyEngine.js';
+import { auditLogger } from '../core/decisionAuditLogger.js';
+import { retirementMetricsService } from './retirementMetricsService.js';
+import { trustCalculusEngine } from './trustCalculusEngine.js';
+import { lifecycleActuator } from './componentLifecycleActuator.js';
+import { governanceStateRegistry } from './governanceStateRegistry.js'; // NEW: Essential for idempotency and state tracking
+
 // --- Constants ---
+const POLICY_ID_DEPRECATION = 'C-15';
 const RETIREMENT_ACTION_TYPE = 'RETIREMENT';
-const GOVERNANCE_THRESHOLD_KEY = 'OBSOLESCENCE_RISK_TOLERANCE';
-const OBSOLESCENCE_POLICY_RULE_ID = 'GOV_RULE_C15_DEPRECATION_PERMISSION';
+const GOVERNANCE_THRESHOLD_KEY = 'obs_risk_tolerance';
 
-// Dependencies are injected as asynchronous Tool Kernels
-
-class ObsolescenceReviewKernel {
-    #thresholdManager; // GovernanceThresholdManager
-    #auditDisperser;   // MultiTargetAuditDisperserToolKernel
-    #stateManager;     // ActiveStateContextManagerKernel
-    #vetoEvaluator;    // VetoTriggerEvaluationKernel
-    #metricExecutor;   // IExternalMetricExecutionToolKernel
-    #policyEvaluator;  // IConceptualPolicyEvaluatorKernel
-    #ruleEngine;       // IRuleEvaluationEngineToolKernel
-    #lifecycleActuator; // ILifecycleActuatorToolKernel
-
+export class ObsolescenceReviewEngine {
+    // Private fields for enhanced encapsulation and state management
     #retirementThreshold = 0.85; 
 
-    constructor(
-        thresholdManager,
-        auditDisperser,
-        stateManager,
-        vetoEvaluator,
-        metricExecutor,
-        policyEvaluator,
-        ruleEngine,
-        lifecycleActuator
-    ) {
-        if (!thresholdManager || !auditDisperser || !stateManager || !policyEvaluator || !lifecycleActuator) {
-             throw new Error("CORE Kernel initialization failure: Missing required Tool Kernel dependencies.");
+    constructor() {
+        // Runtime validation to ensure core dependencies are loaded (v94 robustness)
+        if (!trustCalculusEngine || !policyEngine || !governanceStateRegistry) {
+            throw new Error("CORE initialization failure: Required governance dependencies are missing.");
         }
-
-        this.#thresholdManager = thresholdManager;
-        this.#auditDisperser = auditDisperser;
-        this.#stateManager = stateManager;
-        this.#vetoEvaluator = vetoEvaluator;
-        this.#metricExecutor = metricExecutor;
-        this.#policyEvaluator = policyEvaluator;
-        this.#ruleEngine = ruleEngine;
-        this.#lifecycleActuator = lifecycleActuator;
-
-        Object.freeze(this);
     }
 
     /**
-     * Initializes the kernel, ensuring required configurations are loaded asynchronously.
+     * Initializes the engine, ensuring required configurations are loaded.
      */
-    async initialize() {
+    async init() {
         try {
-            // 1. Load System Threshold asynchronously via dedicated Registry Kernel
-            const configuredThreshold = await this.#thresholdManager.getGovernanceThreshold(GOVERNANCE_THRESHOLD_KEY);
-            
+            // 1. Load System Threshold
+            const configuredThreshold = policyEngine.getSystemConfiguration(GOVERNANCE_THRESHOLD_KEY);
             if (typeof configuredThreshold === 'number' && configuredThreshold >= 0 && configuredThreshold <= 1) {
                 this.#retirementThreshold = configuredThreshold;
             }
             
-            // 2. Log Success via auditable kernel
-            await this.#auditDisperser.auditEvent('CORE_INIT', {
-                level: 'INFO',
-                details: {
-                    requiredThreshold: this.#retirementThreshold,
-                    status: 'Initialized successfully'
-                }
+            // 2. Initialize Dependencies (e.g., configuring TCE context)
+            await trustCalculusEngine.init('RETIREMENT_CALCULUS');
+            
+            // 3. Log Success
+            auditLogger.logSystemInfo('CORE_INIT', { 
+                version: 'v94.1_Refactored', 
+                requiredThreshold: this.#retirementThreshold 
             });
 
         } catch (error) {
-            await this.#auditDisperser.auditEvent('CORE_INIT_FAIL', {
-                level: 'FATAL',
-                detail: 'Configuration or Dependency initialization failed.',
-                error: error.message
-            });
-            throw error;
+            auditLogger.logFatalError('CORE_INIT_FAIL', { detail: 'Configuration or Dependency initialization failed.', error: error.message });
+            throw error; // Propagate severe initialization failure
         }
     }
 
     /**
-     * Executes the asynchronous pre-flight check based on immediate policy constraints 
+     * Executes the synchronous pre-flight check based on immediate policy constraints 
      * and checks governance state to prevent double execution.
      * @param {string} componentId
-     * @returns {Promise<{pass: boolean, reason?: string, skipExecution?: boolean}>}
+     * @returns {{pass: boolean, reason?: string, skipExecution?: boolean}}
      */
-    async #runPreflightCheck(componentId) {
+    #runPreflightCheck(componentId) {
         if (!componentId) {
             const reason = 'Component ID required for review.';
-            await this.#auditDisperser.auditEvent('CORE_REVIEW_INPUT_FAIL', { componentId, reason, level: 'ERROR' });
+            auditLogger.logError('CORE_REVIEW_INPUT_FAIL', { message: reason });
             return { pass: false, reason };
         }
 
-        // Intelligence Check 1: Idempotency safety using ActiveStateContextManagerKernel
-        const isRetired = await this.#stateManager.isEntityInState(componentId, RETIREMENT_ACTION_TYPE, 'RETIRED');
-        const isPending = await this.#stateManager.isEntityInState(componentId, RETIREMENT_ACTION_TYPE, 'PENDING');
-        
-        if (isRetired || isPending) {
+        // Intelligence Check 1: Idempotency safety
+        if (governanceStateRegistry.isComponentRetired(componentId) || governanceStateRegistry.isComponentPending(componentId, RETIREMENT_ACTION_TYPE)) {
              const reason = `Component is already scheduled for or is currently in ${RETIREMENT_ACTION_TYPE} status. Skipping review.`;
-             await this.#auditDisperser.auditDecision('CORE_RETIREMENT_PREFLIGHT_SKIP', { componentId, reason });
+             auditLogger.logDecision('CORE_RETIREMENT_PREFLIGHT_SKIP', { componentId, reason });
              return { pass: false, reason, skipExecution: true };
         }
 
-        // Policy Constraint Check 2: Asynchronously evaluate prerequisite rule
-        const policyCheck = await this.#ruleEngine.evaluateRuleSet(OBSOLESCENCE_POLICY_RULE_ID, { componentId });
-
-        if (policyCheck.outcome !== 'PASS') {
-            const reason = `Policy constraint violation (${OBSOLESCENCE_POLICY_RULE_ID}). Deprecation not permitted. Outcome: ${policyCheck.outcome}`;
-            await this.#auditDisperser.auditDecision('CORE_RETIREMENT_PREFLIGHT_FAIL', { componentId, reason });
+        // Policy Constraint Check 2
+        if (!policyEngine.checkPolicy(componentId, POLICY_ID_DEPRECATION)) {
+            const reason = `Policy constraint violation (${POLICY_ID_DEPRECATION}). Deprecation not permitted.`;
+            auditLogger.logDecision('CORE_RETIREMENT_PREFLIGHT_FAIL', { componentId, reason });
             return { pass: false, reason };
         }
 
@@ -120,47 +89,35 @@ class ObsolescenceReviewKernel {
     }
 
     /**
-     * Calculates the Trust Calculus Score using the Conceptual Policy Evaluator Kernel.
+     * Calculates the Trust Calculus Score using the external engine.
+     * @param {string} componentId
      * @param {object} metricData
      * @returns {Promise<number>} Score (0.0 to 1.0)
      */
-    async #calculateRetirementScore(metricData) {
-        // Delegation to IConceptualPolicyEvaluatorKernel for R-Index derivation.
-        const scoreReport = await this.#policyEvaluator.evaluateConceptualPolicy({
-            policyContext: 'RETIREMENT_CALCULUS',
-            inputData: metricData 
-        });
-        
-        return scoreReport.R_Index_Normalized || 0.0; 
+    async #calculateRetirementScore(componentId, metricData) {
+        // Delegate complex calculation to the specialized engine
+        return trustCalculusEngine.calculateScore('RETIREMENT_CALCULUS', metricData);
     }
 
     /**
-     * Internal governance function to asynchronously adjudicate the decision based on score, 
-     * threshold, and real-time veto signals.
+     * Internal governance function to adjudicate the decision based on score, constraints, and external signals.
      * @param {string} componentId
      * @param {number} retirementScore
      * @param {object} metricData
-     * @returns {Promise<Readonly<object>>} The full decision report.
+     * @returns {object} The full decision report.
      */
-    async #adjudicateDecision(componentId, retirementScore, metricData) {
+    #adjudicateDecision(componentId, retirementScore, metricData) {
         const requiredThreshold = this.#retirementThreshold;
-
-        // 1. Check for Governance Veto using VetoTriggerEvaluationKernel
-        const vetoCheck = await this.#vetoEvaluator.evaluateVetoTriggers(RETIREMENT_ACTION_TYPE, { componentId, score: retirementScore });
-        const globalVeto = vetoCheck.vetoTriggered;
+        const globalVeto = policyEngine.getGlobalVetoSignal(); // High-level, immediate veto check
         
-        let pass = false;
+        let pass = (retirementScore >= requiredThreshold) && (!globalVeto);
         let failureReason = '';
 
         if (globalVeto) {
-            failureReason = `Global Veto triggered: ${vetoCheck.reason}`;
             pass = false;
-        } else if (retirementScore >= requiredThreshold) {
-            pass = true;
-            failureReason = 'Threshold met or exceeded.';
-        } else {
-            failureReason = `Score (${retirementScore.toFixed(4)}) below required threshold (${requiredThreshold.toFixed(4)}).`;
-            pass = false;
+            failureReason = 'Policy mandated global veto is currently active.';
+        } else if (retirementScore < requiredThreshold) {
+            failureReason = `Trust score (${retirementScore.toFixed(4)}) is below required threshold (${requiredThreshold.toFixed(4)}).`;
         }
 
         const report = {
@@ -171,85 +128,79 @@ class ObsolescenceReviewKernel {
             metricsUsed: metricData,
             vetoActive: globalVeto,
             action: RETIREMENT_ACTION_TYPE,
-            reason: failureReason,
-            vetoDetails: vetoCheck
+            reason: pass ? 'Governance thresholds met and no veto issued.' : failureReason
         };
 
         if (pass) {
-            await this.#auditDisperser.auditDecision('CORE_RETIREMENT_PASS', report);
+            auditLogger.logDecision('CORE_RETIREMENT_PASS', report);
         } else {
-            await this.#auditDisperser.auditDecision('CORE_RETIREMENT_FAIL', report);
+            auditLogger.logDecision('CORE_RETIREMENT_FAIL', report);
         }
 
-        return Object.freeze(report);
-    }
-
-    /**
-     * Triggers the final retirement execution procedure via the specialized Kernel.
-     * @param {string} componentId 
-     * @param {Readonly<object>} finalReport 
-     */
-    async #executeRetirementProcedure(componentId, finalReport) {
-        // Delegation to the specialized, auditable ILifecycleActuatorToolKernel
-        await this.#lifecycleActuator.initiateLifecycleAction(componentId, finalReport);
+        return report;
     }
 
     /**
      * Triggers a comprehensive review of a component, handling lifecycle state transition safety.
      * @param {string} componentId - ID of the component under review.
-     * @returns {Promise<Readonly<object>>} The final decision report.
+     * @returns {Promise<object>} The final decision report.
      */
     async reviewComponentForRetirement(componentId) {
-        let finalReport = { pass: false, componentId, action: RETIREMENT_ACTION_TYPE };
+        let finalReport = { pass: false, componentId };
 
         try {
-            // 1. Asynchronous Pre-flight Check
-            const preflight = await this.#runPreflightCheck(componentId);
+            // 1. Synchronous Pre-flight Check
+            const preflight = this.#runPreflightCheck(componentId);
             if (!preflight.pass) {
-                return Object.freeze(preflight);
+                return preflight; // Returns immediate reason/skip if preflight fails
             }
             
-            // Set state to PENDING_REVIEW (async)
-            await this.#stateManager.registerEntityState(componentId, RETIREMENT_ACTION_TYPE, 'PENDING');
+            // Set state to PENDING_REVIEW immediately after preflight
+            governanceStateRegistry.registerPendingReview(componentId, RETIREMENT_ACTION_TYPE);
 
-            // 2. Data Acquisition (Async, delegated)
-            const metricData = await this.#metricExecutor.executeMetricProfile('OBSOLESCENCE_METRICS', componentId);
+            // 2. Data Acquisition (Async)
+            const metricData = await retirementMetricsService.getComponentMetrics(componentId);
             
             // 3. Score Calculation (Async, delegated)
-            const retirementScore = await this.#calculateRetirementScore(metricData);
+            const retirementScore = await this.#calculateRetirementScore(componentId, metricData);
             
-            // 4. Adjudication & Governance Veto (Async)
-            finalReport = await this.#adjudicateDecision(componentId, retirementScore, metricData);
+            // 4. Adjudication & Governance Veto (Sync)
+            finalReport = this.#adjudicateDecision(componentId, retirementScore, metricData);
             
             // 5. Execution Trigger & State Persistence
             if (finalReport.pass) {
-                // Update state to reflect decision and schedule execution
-                await this.#stateManager.registerEntityState(componentId, RETIREMENT_ACTION_TYPE, 'SCHEDULED', finalReport);
-                await this.#executeRetirementProcedure(componentId, finalReport); 
+                // Register the action as SCHEDULED before actual execution trigger
+                governanceStateRegistry.registerActionScheduled(componentId, finalReport);
+                this.#executeRetirementProcedure(componentId, finalReport); 
             } else {
                 // If adjudication fails, clear the temporary PENDING state.
-                await this.#stateManager.clearEntityState(componentId, RETIREMENT_ACTION_TYPE, 'PENDING');
+                governanceStateRegistry.clearPendingReview(componentId, RETIREMENT_ACTION_TYPE);
             }
-            
+
             return finalReport;
 
         } catch (error) {
-            // Ensure state is cleaned up upon failure before decision point
-            await this.#stateManager.clearEntityState(componentId, RETIREMENT_ACTION_TYPE, 'PENDING');
-            
-            const errorReport = { 
-                ...finalReport, 
+            // Critical failure handling during review pipeline
+            auditLogger.logError('CORE_REVIEW_CRITICAL_FAIL', { componentId, error: error.message, stack: error.stack });
+            // Attempt to clean up pending state regardless of error type
+            governanceStateRegistry.clearPendingReview(componentId, RETIREMENT_ACTION_TYPE);
+            return { 
                 pass: false, 
-                reason: `Fatal internal error during review: ${error.message}` 
+                componentId, 
+                reason: `Critical system failure during review pipeline: ${error.message}` 
             };
-            
-            await this.#auditDisperser.auditEvent('CORE_REVIEW_CRITICAL_FAIL', {
-                componentId,
-                error: error.message,
-                stack: error.stack,
-                level: 'CRITICAL'
-            });
-            return Object.freeze(errorReport);
         }
     }
+    
+    /**
+     * Delegates the non-reversible action to the Actuator (non-blocking trigger).
+     */
+    async #executeRetirementProcedure(componentId, report) {
+        auditLogger.logExecution('CORE_ACTUATION_TRIGGER', { componentId, score: report.score, target: 'CLA', status: 'SCHEDULED' });
+        // Delegation for execution and final state mutation (ACTUATOR handles the rest)
+        lifecycleActuator.retireComponent(componentId, report);
+    }
 }
+
+// Export a singleton instance
+export const CORE = new ObsolescenceReviewEngine();
