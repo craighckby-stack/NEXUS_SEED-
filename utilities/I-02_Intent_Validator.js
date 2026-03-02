@@ -2,48 +2,52 @@
  * Sovereign AGI v94.1 - Intent Validator Utility (Refactored)
  * Ensures structural integrity and M-01 schema compliance for incoming Intents.
  * Utilizes specialized error types for predictable failure handling.
- *
- * Note: Direct Ajv instantiation is replaced by abstraction via SchemaCompilerAndValidator plugin.
  */
 
+import Ajv from 'ajv';
+// Architectural Assumption: Utilize structured error type for validation failures.
 import { IntentValidationError } from '../core/errors/IntentValidationError.js';
+// Assumes the schema is resolvable relative to the core path structure.
 import intentSchema from '../governance/M-01_Intent_Schema.json';
 
-// Assumed imports from kernel plugin system
-import { SchemaCompilerAndValidator } from '@plugins/SchemaCompilerAndValidator';
-import { SchemaErrorFormatterTool } from '@plugins/SchemaErrorFormatterTool';
-
-// Configuration specific to Intent validation, aligned with Ajv options
-const INTENT_VALIDATOR_CONFIG = {
+const ajv = new Ajv({
     allErrors: true,
     removeAdditional: true, 
     // Optimization: Coerce types (e.g., '10' -> 10) to increase robustness against API input variations.
     coerceTypes: 'array' 
-};
+});
 
-// Use the service to compile the schema with the desired configuration
-// The service abstracts the underlying validator (e.g., Ajv) dependency.
-const validateIntent = SchemaCompilerAndValidator.compile(intentSchema, INTENT_VALIDATOR_CONFIG);
+const validateIntent = ajv.compile(intentSchema);
+
+/**
+ * Transforms verbose Ajv errors into a cleaner, actionable format.
+ * @param {Array} errors - The raw Ajv error array.
+ * @returns {Array<Object>} - Formatted errors.
+ */
+function formatErrors(errors) {
+    if (!errors) return [];
+    return errors.map(err => ({
+        path: err.instancePath,
+        keyword: err.keyword,
+        message: err.message,
+        schema: err.schemaPath,
+        params: err.params
+    }));
+}
 
 /**
  * Validates the Intent object against the M-01 schema.
- * Note: The input object is mutated if 'removeAdditional' or 'coerceTypes' are active by the validator implementation.
- * @param {object} intentObject - The Intent payload.
- * @returns {{valid: boolean, errors?: Array<object>, data?: object}} Validation result.
+ * Note: The input object is mutated if 'removeAdditional' or 'coerceTypes' are active.
+ * @param {Object} intentObject - The Intent payload.
+ * @returns {{valid: boolean, errors?: Array<Object>, data?: Object}} Validation result.
  */
-export function validate(intentObject: object): { valid: boolean; errors?: Array<object>; data?: object } {
-    // The compiled validator function executes the validation.
-    const valid = validateIntent(intentObject); 
+export function validate(intentObject) {
+    const valid = validateIntent(intentObject);
     
     if (!valid) {
-        // Use the extracted tool to format errors
-        const formattedErrors = SchemaErrorFormatterTool.execute({
-            errors: validateIntent.errors
-        });
-
         return {
             valid: false,
-            errors: formattedErrors
+            errors: formatErrors(validateIntent.errors)
         };
     }
     
@@ -53,11 +57,11 @@ export function validate(intentObject: object): { valid: boolean; errors?: Array
 
 /**
  * Asserts the validity of an Intent, throwing a structured error upon failure.
- * @param {object} intentObject - The Intent payload.
- * @returns {object} The guaranteed compliant (potentially modified) valid Intent object.
+ * @param {Object} intentObject - The Intent payload.
+ * @returns {Object} The guaranteed compliant (potentially modified) valid Intent object.
  * @throws {IntentValidationError} If validation fails.
  */
-export function assertValid(intentObject: object): object {
+export function assertValid(intentObject) {
     const result = validate(intentObject);
 
     if (!result.valid) {
