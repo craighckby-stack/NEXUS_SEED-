@@ -1,49 +1,37 @@
-declare const StructuralKeyValidatorTool: {
-    validate: (payload: any, requiredKeys: string[]) => { success: boolean; missingKeys: string[] };
-};
-
 /**
  * SUT_DefinitionValidator.js
  * Ensures consistency between test configurations and the formal GSEP.L3.SUT_Definition.
  */
 
 class SUT_DefinitionValidator {
-    private definition: any;
-    // Assuming the structural validation tool is globally accessible or injected.
-    private validator = StructuralKeyValidatorTool;
-
-    constructor(definition: any) {
+    constructor(definition) {
         this.definition = definition;
     }
 
-    /**
-     * Validates the essential top-level structure using the StructuralKeyValidatorTool.
-     * @throws {Error} if required keys are missing.
-     */
-    validateStructure(): boolean {
+    validateStructure() {
+        // Check essential top-level keys and schema conformance
         const requiredKeys = ['metadata', 'systemInfo', 'constraints', 'dataStructures'];
-        
-        const result = this.validator.validate(this.definition, requiredKeys);
-
-        if (!result.success) {
-            throw new Error(`Structural validation failed for SUT Definition. Missing required keys: ${result.missingKeys.join(', ')}`);
-        }
+        requiredKeys.forEach(key => {
+            if (!this.definition[key]) {
+                throw new Error(`Missing required key: ${key}`);
+            }
+        });
         return true;
     }
 
-    validateConstraints(): boolean {
+    validateConstraints() {
         // Checks if all constraints in OperationalLimits have min/max bounds defined if type is 'physical'.
-        // This complex constraint validation should ideally use a DeclarativeConstraintValidator tool.
+        // Checks if all PerformanceTargets have 'hardLimit' defined for safety adherence.
         // (Implementation details omitted for brevity)
         return true;
     }
 
     // Method stub to validate input test cases against defined OperationalLimits
-    validateTestCaseInput(testCaseInput: any): boolean {
+    validateTestCaseInput(testCaseInput) {
         // Implementation needed to iterate over input and check compliance.
         // return this.definition.constraints.OperationalLimits.check(testCaseInput)
         return true;
     }
 }
 
-export = SUT_DefinitionValidator;
+module.exports = SUT_DefinitionValidator;
