@@ -1,119 +1,47 @@
-**CHOSEN PATH:**
-
-*   **Architectural Repository:** Meta/React-Core
-
-**VOTED KEY FEATURES:**
-
-1.  **Higher-Order Component (HOC) Pattern:** Modularize code with HOCs to enable code reuse and separation of concerns.
-2.  **Function as a Child (FAC) Pattern:** Create function components that return JSX or other React elements as children.
-
-**SIPHONED DNA:**
-
-markdown
-# DNA SIGNATURE: Meta/React-Core
-
-**Architectural Version:** 2.0.0
-**Paradigm:** Higher-Order Components (HOCs) and Function as a Child (FAC) Patterns
-
-## 1. HIGHER-ORDER COMPONENT HIERARCHY
-Each function is a HOC with its corresponding properties.
-
-## 2. ADVANCED ARCHITECTURAL PATTERNS
-
-### A. FAC: Component-Based Renderings
-
-Render components as functions that return JSX or other React elements as children
-
-### B. AOP: Aspect-Oriented Programming
-
-Component lifecycle events as separate modules that can be stacked with other HOCs for more complex behavior.
-
-### C. CONSOLE-DRIVEN API DESIGN
-
-Error handling and event propagation using `console.error` and `console.warn` instead of conventional `catch` blocks.
-
-
-**MUTATED CODE:**
-
-
-import React from 'react';
-import { useState, useEffect } from 'react';
-import { withSubscription } from './withSubscription';
-import { withLoading } from './withLoading';
-import { withErrorHandling } from './withErrorHandling';
-
-// HOCs
-const withSubscription = (WrappedComponent) => {
-  const SubscriptionHOC = ({ subscription }) => {
-    const [data, setData] = useState(null);
-    useEffect(() => {
-      (async () => {
-        try {
-          const response = await fetch(subscription.endpoint);
-          const data = await response.json();
-          setData(data);
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        }
-      })();
-    }, [subscription]);
-    return <WrappedComponent data={data} />;
-  };
-  return SubscriptionHOC;
-};
-
-const withLoading = (WrappedComponent) => {
-  const LoadingHOC = ({ data }) => {
-    if (!data) return <div>Loading...</div>;
-    return <WrappedComponent data={data} />;
-  };
-  return LoadingHOC;
-};
-
-const withErrorHandling = (WrappedComponent) => {
-  const ErrorHandlingHOC = ({ data }) => {
-    if (data.error) return <div>Error: {data.error.message}</div>;
-    return <WrappedComponent data={data} />;
-  };
-  return ErrorHandlingHOC;
-};
-
-// Function as a Child (FAC) Pattern
-const App = () => {
-  const [subscription, setSubscription] = useState({
-    endpoint: 'https://example.com/api/data',
-  });
-
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setSubscription({
-        endpoint: 'https://example.com/api/data',
-      });
-    }, 1000);
-    return () => clearTimeout(timeoutId);
-  }, []);
-
-  return (
-    <>
-      <input
-        type="text"
-        value={subscription.endpoint}
-        onChange={(e) => setSubscription({ endpoint: e.target.value })}
-      />
-      <Subscription
-        subscription={subscription}
-        data={data}
-      />
-    </>
-  );
-};
-
-// HOC usage
-const AppWithSubscription = withSubscription(App);
-const AppWithLoading = withLoading(AppWithSubscription);
-const AppWithErrorHandling = withErrorHandling(AppWithLoading);
-
-export default AppWithErrorHandling;
-
-
-This mutated code incorporates Meta/React-Core's Higher-Order Components (HOCs) and Function as a Child (FAC) Patterns to create a modular and reusable application structure.
+{
+  "schema_version": "v94.2",
+  "description": "Defines the baseline qualitative (Policy) and quantitative (Constraint) invariants enforced by the GAX Axiomatics Agent during GSEP-C Stages. This structure separates static constraints from dynamic state manifests (MPAM, PVLM).",
+  "constraint_vector_id": "CVD-2024Q3-02-REVISED",
+  "policy_prohibitions": [
+    {
+      "id": "P001",
+      "type": "SECURITY_MANDATE",
+      "rule": "Evolution must not introduce or increase dependency on external non-certified third-party registries.",
+      "severity": "CRITICAL",
+      "scope": "SYSTEM_INTEGRATION",
+      "action_on_breach": "HARD_VETO"
+    },
+    {
+      "id": "P002",
+      "type": "RESOURCE_BOUNDARY",
+      "rule": "Evolution must not breach the hard-coded resource allocation ceiling (CPU/Memory/Disk I/O) defined in the system's runtime environment configuration.",
+      "severity": "FATAL",
+      "scope": "RUNTIME_ENVIRONMENT",
+      "action_on_breach": "HARD_VETO"
+    }
+  ],
+  "quantitative_constraints": [
+    {
+      "constraint_id": "QC101",
+      "constraint_type": "PERFORMANCE_LATENCY",
+      "target_artifact": "LatencyService",
+      "comparison_operator": "MAX_THRESHOLD",
+      "threshold_value": 150,
+      "threshold_units": "ms",
+      "time_window_sec": 300,
+      "comparison_margin": "STRICT_BOUND",
+      "action_on_breach": "REQUIRE_JUSTIFICATION"
+    },
+    {
+      "constraint_id": "QC102",
+      "constraint_type": "STABILITY_ERROR_RATE",
+      "target_artifact": "ErrorRateComponent",
+      "comparison_operator": "MAX_THRESHOLD",
+      "threshold_value": 0.005,
+      "threshold_units": "ratio",
+      "time_window_sec": 600,
+      "comparison_margin": "BASELINE_DELTA",
+      "action_on_breach": "HARD_VETO"
+    }
+  ]
+}
