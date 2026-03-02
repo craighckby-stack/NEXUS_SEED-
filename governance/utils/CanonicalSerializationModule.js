@@ -1,75 +1,60 @@
 /**
- * governance/utils/CanonicalSerializationModule.js
- * Optimized Canonical Serialization Module leveraging the DeterministicSerializer plugin.
+ * Canonical Serialization Module (CSM)
+ * Responsible for converting structured configuration objects into a
+ * deterministically ordered, byte-for-byte reproducible byte stream.
+ * This is crucial for cryptographic attestation (CCH-384 generation) across systems.
  */
-
-class CanonicalSerializationModuleImpl {
-    #serializerInstance;
-
-    constructor() {
-        this.#setupDependencies();
-    }
+class CanonicalSerializationModule {
 
     /**
-     * Extracts synchronous dependency resolution and initialization logic.
+     * Serializes an object into a canonical JSON string.
+     * Enforces lexicographical key sorting to guarantee hash determinism.
+     * @param {Object} configPayload - The M-02 configuration object.
+     * @returns {string} The canonical JSON string.
      */
-    #setupDependencies() {
-        try {
-            // 1. Resolve the dependency synchronously (I/O Proxy)
-            const Serializer = this.#resolveDeterministicSerializerDependency();
-            
-            // 2. Instantiate the tool
-            this.#serializerInstance = new Serializer();
-        } catch (error) {
-            this.#throwDependencyError("DeterministicSerializer initialization failed.", error);
+    static serializeToJson(configPayload) {
+        if (!configPayload || typeof configPayload !== 'object') {
+            return JSON.stringify(configPayload);
         }
+
+        const canonicalize = (obj) => {
+            if (Array.isArray(obj)) {
+                return obj.map(canonicalize);
+            }
+            if (obj !== null && typeof obj === 'object') {
+                // Critical step: Sort keys lexicographically
+                const sortedKeys = Object.keys(obj).sort();
+                const canonicalObj = {};
+                for (const key of sortedKeys) {
+                    canonicalObj[key] = canonicalize(obj[key]);
+                }
+                return canonicalObj;
+            }
+            return obj;
+        };
+
+        const canonicalObject = canonicalize(configPayload);
+        return JSON.stringify(canonicalObject);
     }
 
     /**
-     * I/O Proxy: Isolates the synchronous dependency retrieval (require).
+     * Converts the canonical JSON string into a guaranteed UTF-8 byte array.
+     * @param {Object} configPayload
+     * @returns {Uint8Array}
      */
-    #resolveDeterministicSerializerDependency() {
-        // Assuming plugins are stored here as per original source structure
-        // NOTE: This is inherently synchronous I/O via the module loader.
-        return require('./plugins/DeterministicSerializer'); 
-    }
-
-    /**
-     * I/O Proxy: Isolates error throwing.
-     */
-    #throwDependencyError(message, cause) {
-        throw new Error(`[CanonicalSerializationModule Setup Error] ${message}`, { cause });
-    }
-
-    /**
-     * I/O Proxy: Isolates external dependency execution.
-     * @param {*} data 
-     * @returns {string | undefined}
-     */
-    #delegateToSerializerExecution(data) {
-        // Original logic check: if input is undefined, return undefined.
-        if (data === undefined) {
-            return undefined;
+    static getCanonicalBytes(configPayload) {
+        const jsonString = this.serializeToJson(configPayload);
+        // Must use guaranteed UTF-8 encoding standard (e.g., Node Buffer or TextEncoder)
+        if (typeof Buffer !== 'undefined') {
+            return new Uint8Array(Buffer.from(jsonString, 'utf8'));
         }
-        
-        // Execute the external tool method
-        return this.#serializerInstance.serialize(data);
-    }
-
-    /**
-     * Serializes data into a canonical JSON string.
-     * Ensures deterministic output crucial for hashing or signing.
-     * @param {*} data 
-     * @returns {string | undefined} The canonical JSON string, or undefined if the input is undefined.
-     */
-    canonicalSerialize(data) {
-        return this.#delegateToSerializerExecution(data);
+        if (typeof TextEncoder !== 'undefined') {
+            return new TextEncoder().encode(jsonString);
+        }
+        throw new Error("CSM: UTF-8 Encoder not found.");
     }
 }
 
-// Use a private singleton instance to maintain state and control initialization.
-const instance = new CanonicalSerializationModuleImpl();
-
-module.exports = {
-    canonicalSerialize: instance.canonicalSerialize.bind(instance),
-};
+// Enforce immutability and restrict modification.
+Object.freeze(CanonicalSerializationModule);
+module.exports = CanonicalSerializationModule;
