@@ -1,1 +1,10 @@
-[object Object]
+{
+  "ComponentType": "CTG_Governance",
+  "Status": "Active",
+  "Version": "94.2",
+  "IntegrityCheck": {
+    "Frequency": "Daily",
+    "TargetModules": ["UNIFIER.js", "kernel.js"]
+  },
+  "AxiomReference": "G0_Rules.js"
+}
