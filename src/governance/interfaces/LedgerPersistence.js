@@ -2,31 +2,28 @@
 // Defines the required interface for ledger persistence used by the MutationChainRegistrar (MCR).
 
 /**
- * @interface IMutationChainPersistenceToolKernel
- * @description A high-integrity, asynchronous Tool Kernel responsible for
- * managing I/O operations for the core Mutation Chain Ledger. This replaces
- * the generic LedgerPersistence interface, ensuring auditable, non-blocking
- * persistence compliant with AIA Enforcement Layer mandates.
+ * @interface LedgerPersistence
+ * @description Handles asynchronous I/O operations for the mutation chain ledger, ensuring non-blocking persistence.
  */
-class IMutationChainPersistenceToolKernel {
+class LedgerPersistence {
 
     /**
-     * Asynchronously loads the entire validated history of MutationRecords from persistent storage.
-     * @returns {Promise<ReadonlyArray<MutationRecord>>} A promise that resolves to an immutable array of records.
+     * Asynchronously loads the entire history of MutationRecords.
+     * @returns {Promise<MutationRecord[]>}
      */
     async loadChainHistory() {
-        throw new Error("Kernel method 'loadChainHistory' must be implemented.");
+        throw new Error("Method 'loadChainHistory' must be implemented by the persistence layer.");
     }
 
     /**
-     * Asynchronously commits a single, validated MutationRecord to persistent storage.
+     * Asynchronously appends a single, fully formed MutationRecord to the ledger.
      * This ensures efficient, atomic commitment for new chain links.
-     * @param {MutationRecord} record - The immutable record to commit, containing cryptographic hashes.
+     * @param {MutationRecord} record - The new record to commit, including the calculated selfHash.
      * @returns {Promise<void>}
      */
     async persistRecord(record) {
-        throw new Error("Kernel method 'persistRecord' must be implemented.");
+        throw new Error("Method 'persistRecord' must be implemented by the persistence layer.");
     }
 }
 
-module.exports = IMutationChainPersistenceToolKernel;
+module.exports = LedgerPersistence;
