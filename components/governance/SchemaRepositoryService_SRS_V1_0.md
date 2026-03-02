@@ -1,194 +1,29 @@
-class Config {
-  static get staticConfig() {
-    return {
-      VERSION: "1.0.0",
-      env: process.env.NODE_ENV || "development"
-    };
-  }
+## Schema Repository Service (SRS) Specification V2.0: Attested Schema Integrity
 
-  constructor(values = {}) {
-    this.setValues(values);
-  }
+**MISSION:** To provide the Sovereign AGI stack with a single, cryptographically attested, versioned, and state-managed source of truth for all governance-critical schemas. The SRS guarantees the immutability and verifiable integrity of schema definitions, critical for ensuring adherence to `GIRM` constraints and `IDR` integrity.
 
-  setValues(values) {
-    Object.assign(this, values);
-  }
+**INTEGRATION:** Primary dependency for the Governance Incident Response Mechanism (GIRAM), the Constraint Orchestrator (GCO), and the Root Governance Interpreter (RGI).
 
-  static get defaultConfig() {
-    return {
-      foo: 'bar',
-      baz: true
-    };
-  }
+### 1. Schema Lifecycle States:
+Schemas transition through defined states to ensure rigorous vetting and attestation:
+*   `DRAFT`: Initial design state, uncommitted.
+*   `PROPOSED`: Vetted internally, awaiting GRTA signature.
+*   `ATTESTED`: Signed by GRTA, committed to DILS, and active for use (READ-ONLY).
+*   `DEPRECATED`: Replaced by a newer version, retained for historical integrity checks.
 
-  static get configSchema() {
-    return {
-      type: 'object',
-      properties: {
-        foo: { type: 'string' },
-        baz: { type: 'boolean' }
-      }
-    };
-  }
+### 2. Core Functionality:
+1.  **Integrity & State Management:** Tracks schema state and ensures integrity via cryptographic attestation tied to DILS.
+2.  **Versioned Lookup (Deterministic):** Provides specific schema versions using an index hash.
+3.  **Efficiency Lookup (Latest):** Allows consumers to retrieve the most recent `ATTESTED` version without prior knowledge of the latest hash.
+4.  **Dependency Mapping:** Maintains a metadata map linking schemas to the specific governance components they constrain (e.g., linking `IDR_Schema_V02` to `GIRAM`).
 
-  validate() {
-    try {
-      const schema = Config.configSchema;
-      const validator = new (require('jsonschema').Validator)();
-      validator.checkSchema(schema);
-      validator.validate(this, schema);
-    } catch (e) {
-      console.error('Config validation error:', e);
-      throw e;
-    }
-  }
-}
+### 3. Interface Contract (ISRS V2.0):
 
-class LifecycleEvent {
-  constructor(event) {
-    this.event = event;
-  }
-}
+| Function | Parameters | Returns | Notes |
+| :--- | :--- | :--- | :--- |
+| `ISRS_RequestByHash` | `SchemaName: string`, `VersionHash: CryptographicHash` | `{ SchemaDef: JSON, AttestationHash: CryptographicHash }` | Verifies full integrity chain. |
+| `ISRS_RequestLatest` | `SchemaName: string` | `{ SchemaDef: JSON, AttestationHash: CryptographicHash }` | Returns the schema in `ATTESTED` state with the highest version.
+| `ISRS_AuditLog` | `SchemaName: string`, `VersionHash?: CryptographicHash` | `[ DILS_TransactionRef, Timestamp, SchemaState ]` | Provides the ledger trail for state changes.
+| `ISRS_CommitNewVersion` | `SchemaDef: JSON`, `Metadata: JSON` | `CryptographicHash` | (GRTA-ONLY access) Submits schema for signing and DILS commitment.
 
-class LifecycleHandler {
-  constructor(handler) {
-    this.handler = handler;
-  }
-
-  bind(target = this) {
-    this.handler = this.handler.bind(target);
-  }
-
-  execute() {
-    this.handler();
-  }
-}
-
-class NexusCore {
-  #lifecycle = {
-    configured: false,
-    loaded: false,
-    shuttingDown: false
-  };
-
-  #status = "INIT";
-
-  get status() {
-    return this.#status;
-  }
-
-  set status(value) {
-    this.#status = value;
-    const currentValue = this.#status;
-    const lifecycle = this.#lifecycle;
-    if (value !== 'INIT') {
-      console.log(`NexusCore instance is ${value}.`);
-      if (value === 'SHUTDOWN') {
-        lifecycle.shuttingDown = false;
-      }
-    }
-    if (currentValue === 'INIT' && value !== 'INIT') {
-      lifecycle.configured = true;
-    }
-  }
-
-  get lifecycle() {
-    return this.#lifecycle;
-  }
-
-  configure(config) {
-    this.validateConfig(config);
-    this.onLifecycleEvent("CONFIGURED");
-    this.#lifecycle.configured = true;
-    this.config = config;
-  }
-
-  validateConfig(config) {
-    const configSchema = Config.configSchema;
-    try {
-      const validator = new (require('jsonschema').Validator)();
-      validator.checkSchema(configSchema);
-      validator.validate(config, configSchema);
-    } catch (e) {
-      console.error('Config validation error:', e);
-      throw e;
-    }
-  }
-
-  onLifecycleEvent(event, handler) {
-    const lifecycleHandler = new LifecycleHandler(handler);
-    this.#lifecycle[event] = lifecycleHandler;
-  }
-
-  get on() {
-    return (event, handler) => {
-      const lifecycleEvent = new LifecycleEvent(event);
-      this.onLifecycleEvent(event, handler);
-    };
-  }
-
-  executeLifecycleEvent(event) {
-    if (this.#lifecycle[event]) {
-      this.#lifecycle[event].bind(this).execute();
-    }
-  }
-
-  async load() {
-    await this.executeLifecycleEvent("CONFIGURED");
-    try {
-      console.log("Loading...");
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log("Loading complete...");
-      this.#lifecycle.loaded = true;
-      this.executeLifecycleEvent("LOADED");
-    } catch (e) {
-      console.error('Load error:', e);
-    }
-  }
-
-  async shutdown() {
-    try {
-      if (!this.#lifecycle.shuttingDown) {
-        console.log("Shutdown initiated...");
-        this.#lifecycle.shuttingDown = true;
-        this.executeLifecycleEvent("SHUTTING_DOWN");
-        console.log("Shutdown complete...");
-        this.status = "SHUTDOWN";
-      }
-    } catch (e) {
-      console.error("Shutdown error:", e);
-    }
-  }
-
-  async start() {
-    const startMethodOrder = ["configure", "load", "shutdown"];
-    for (const methodName of startMethodOrder) {
-      if (this[methodName] instanceof Function) {
-        await this[methodName]();
-      }
-    }
-  }
-
-  async destroy() {
-    this.status = "DESTROYED";
-    this.#lifecycle = {
-      configured: false,
-      loaded: false,
-      shuttingDown: false
-    };
-  }
-
-  async on(event, handler) {
-    await this.onLifecycleEvent(event, handler);
-  }
-}
-
-const nexusCore = new NexusCore();
-nexusCore.on('DESTROYED', () => {
-  console.log("NexusCore instance destroyed.");
-});
-nexusCore.configure(Config.defaultConfig);
-nexusCore.start();
-nexusCore.load();
-nexusCore.shutdown();
-nexusCore.destroy();
+**Data Types:** `CryptographicHash` is defined as SHA3-512(SchemaDefinition + GRTA_Signature) committed via DILS.
