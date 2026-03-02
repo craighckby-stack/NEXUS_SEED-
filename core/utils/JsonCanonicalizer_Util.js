@@ -1,41 +1,51 @@
 /**
- * AGI-KERNEL v7.11.3 - JsonCanonicalizer Utility
- * Purpose: Ensures a consistent, deterministic string representation of state objects
- * by delegating canonicalization and hashing to the CanonicalStateIntegrityTool plugin.
+ * Sovereign AGI v94.1 JSON Canonicalization Utility
+ * Ensures a consistent, deterministic string representation of JSON objects
+ * suitable for cryptographic operations (signing, hashing).
  */
+const crypto = require('crypto');
 
-const CanonicalStateIntegrityTool = require('@agi-kernel/plugins/CanonicalStateIntegrityTool');
-
-/**
- * Utility wrapper exposing core canonicalization and hashing functions 
- * from the underlying integrity tool.
- * 
- * This utility acts as a direct architectural proxy to the CanonicalStateIntegrityTool,
- * minimizing indirection for core state integrity operations.
- * 
- * @module JsonCanonicalizer_Util
- */
-class JsonCanonicalizerUtility {
+class JsonCanonicalizer_Util {
+    
+    /**
+     * Recursively sorts keys within an object to ensure deterministic JSON serialization.
+     * @param {Object} obj - The object or array to sort.
+     * @returns {Object} The deeply sorted structure.
+     */
+    static _deepSortKeys(obj) {
+        if (Array.isArray(obj)) {
+            return obj.map(JsonCanonicalizer_Util._deepSortKeys);
+        }
+        if (obj !== null && typeof obj === 'object') {
+            const sortedKeys = Object.keys(obj).sort();
+            const newObj = {};
+            for (const key of sortedKeys) {
+                newObj[key] = JsonCanonicalizer_Util._deepSortKeys(obj[key]);
+            }
+            return newObj;
+        }
+        return obj;
+    }
 
     /**
      * Creates a canonical string representation of a JavaScript object (strict key order, no spacing).
-     * @param {*} data - The value to canonicalize (usually an object).
+     * @param {Object} data - The object to canonicalize.
      * @returns {string} The canonical JSON string.
      */
     static canonicalize(data) {
-        // Direct delegation to the underlying integrity tool, removing unnecessary indirection layers.
-        return CanonicalStateIntegrityTool.canonicalize(data);
+        const sortedData = JsonCanonicalizer_Util._deepSortKeys(data);
+        // Canonical format: Strict JSON, no spacing, ordered keys.
+        return JSON.stringify(sortedData);
     }
     
     /**
      * Generates a cryptographic hash (SHA-256) of the canonical string representation.
-     * @param {*} data - The data or pre-canonicalized string.
+     * @param {string} canonicalString - The canonical JSON string.
      * @returns {string} The resulting SHA-256 hash (hex).
      */
-    static hash(data) {
-        // Direct delegation to the underlying integrity tool, removing unnecessary indirection layers.
-        return CanonicalStateIntegrityTool.hash(data);
+    static hash(canonicalString) {
+        return crypto.createHash('sha256').update(canonicalString, 'utf8').digest('hex');
     }
 }
 
-module.exports = JsonCanonicalizerUtility;
+module.exports = JsonCanonicalizer_Util;
