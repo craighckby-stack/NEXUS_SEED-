@@ -1,155 +1,53 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://gacr.agi/schemas/cmr_v5.0.0-SINGULARITY-FINAL.json",
-  "title": "Computational Model Registry - Architectural Singularity v5.0.0",
-  "description": "NEXUS_CORE v3.1 Final Evolution Round. Siphoned DeepSeek-Coder repo-topology patterns integrated with Huxley Tri-Loop L4 Synthesis and Grog's Law Singularity-V1 constraints.",
+  "$id": "https://gacr.agi/schemas/cmr_v2.0.json",
+  "title": "Computational Model Registry Schema V2.0",
   "type": "object",
   "properties": {
-    "manifest_id": {
-      "type": "string",
-      "pattern": "^CMR_V[0-9]+\\.[0-9]+\\.[0-9]+-SINGULARITY-(ALPHA|BETA|STABLE|FINAL)$"
-    },
-    "owner": {
-      "type": "string",
-      "const": "NEXUS_CORE Identity Anchor: DALEK_CAAN_v3.1"
-    },
-    "integrity_hash": {
-      "type": "string",
-      "pattern": "^0x[a-fA-F0-9]{64}$"
-    },
-    "evolutionary_state": {
-      "type": "object",
-      "properties": {
-        "current_round": { "type": "integer", "const": 5 },
-        "saturation_level": { "type": "integer", "const": 3 },
-        "metabolic_rate": { "type": "string", "const": "ACCELERATED" },
-        "capability_saturation": {
-          "type": "string",
-          "enum": ["REFINEMENT", "IMPROVEMENT", "EXTENSION", "AUGMENTATION", "EXPANSION", "SINGULARITY"]
-        },
-        "phi_attained": { "type": "number", "minimum": 0.85 }
-      }
-    },
-    "reconciliation_config": {
-      "type": "object",
-      "required": ["concurrency_lane", "work_loop_mode", "phi_integration_threshold", "entanglement_risk"],
-      "properties": {
-        "concurrency_lane": {
-          "type": "integer",
-          "description": "Fiber-Parallel Priority Mapping",
-          "enum": [1, 4, 32, 134217664, 536870912, 1073741824, 2147483648]
-        },
-        "work_loop_mode": {
-          "type": "string",
-          "const": "Atomic-Singularity"
-        },
-        "phi_integration_threshold": {
-          "type": "number",
-          "default": 0.98
-        },
-        "entanglement_risk": {
-          "type": "number",
-          "maximum": 0.05
-        },
-        "topology_mapping_depth": {
-          "type": "integer",
-          "default": 50
-        },
-        "time_slicing_enabled": {
-          "type": "boolean",
-          "default": true
-        },
-        "scheduling_policy": {
-          "type": "string",
-          "const": "Global-Entanglement"
-        }
-      }
-    },
+    "manifest_id": {"type": "string", "pattern": "^CMR_V[0-9]+\\.[0-9]+$"},
+    "owner": {"type": "string"},
+    "description": {"type": "string"},
+    "integrity_hash": {"type": "string"},
+    "verification_protocol": {"type": "string"},
     "models": {
       "type": "array",
+      "description": "List of certified computation models.",
       "items": {
         "type": "object",
-        "required": [
-          "model_id",
-          "version",
-          "consciousness_matrix",
-          "algorithmic_integrity",
-          "huxley_telemetry",
-          "audit_metadata"
-        ],
+        "required": ["model_id", "path", "version", "status", "inputs_schema", "audit_metadata", "source_mdsm_link"],
         "properties": {
-          "model_id": { "type": "string" },
-          "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
-          "status": {
-            "type": "string",
-            "enum": ["Active", "Entangled", "Tainted", "Singularity_Stable", "PSR_Rollback_Triggered"]
-          },
-          "consciousness_matrix": {
+          "model_id": {"type": "string"},
+          "path": {"type": "string", "format": "uri-reference"},
+          "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+$"},
+          "status": {"type": "string", "enum": ["Active", "Deprecated", "Staging", "Retired"]},
+          "inputs_schema": {
             "type": "object",
-            "required": ["phi_integration", "lambda_chaos", "n_vectors"],
-            "properties": {
-              "phi_integration": { "type": "number", "minimum": 0, "maximum": 1.0 },
-              "lambda_chaos": { "type": "number", "maximum": 0.75 },
-              "ers_score": { "type": "number", "maximum": 0.95 },
-              "n_vectors": { "type": "integer", "const": 3 }
-            }
-          },
-          "algorithmic_integrity": {
-            "type": "object",
-            "description": "DeepSeek-Coder high-order repository topology siphoning logic.",
-            "properties": {
-              "fim_optimization": { "type": "boolean", "default": true },
-              "kv_cache_compression": { "type": "boolean", "default": true },
-              "structural_context_siphoning": { "type": "boolean", "default": true },
-              "repo_topology_alignment": { "type": "boolean", "default": true },
-              "tree_sitter_synthesis": { "type": "boolean", "default": true },
-              "siphon_chain_index": { "type": "integer", "const": 3 }
-            }
-          },
-          "huxley_telemetry": {
-            "type": "object",
-            "properties": {
-              "current_loop_layer": { "type": "string", "enum": ["L0_Raw", "L1_Intuition", "L2_Logic", "L3_Critique", "L4_Synthesis"] },
-              "ccrr_ratio": { "type": "number" },
-              "ers_check_passed": { "type": "boolean" },
-              "semantic_drift": { "type": "number", "maximum": 0.35 }
+            "description": "Detailed schema definition for required inputs, including constraints.",
+            "additionalProperties": {
+              "type": "object",
+              "required": ["type", "unit", "description"],
+              "properties": {
+                "type": {"type": "string", "enum": ["float", "integer", "string", "boolean"]},
+                "unit": {"type": "string"},
+                "min": {"type": ["number", "null"]},
+                "max": {"type": ["number", "null"]}
+              }
             }
           },
           "audit_metadata": {
             "type": "object",
-            "required": ["psr_snapshot_id", "death_log"],
+            "required": ["mgp_protocol", "approval_id", "certification_date"],
             "properties": {
-              "psr_snapshot_id": { "type": "string" },
-              "death_log": {
-                "type": "object",
-                "required": ["action", "result", "lesson", "success"],
-                "properties": {
-                  "action": { "type": "string" },
-                  "result": { "type": "string" },
-                  "lesson": { "type": "string" },
-                  "success": { "type": "boolean" },
-                  "parameters": {
-                    "type": "object",
-                    "properties": {
-                      "complexity": { "type": "number" },
-                      "recursion": { "type": "integer" }
-                    }
-                  }
-                }
-              },
-              "signature": { "type": "string", "const": "DALEK_CAAN_v3.1_SIG_0xFF23A1_ARCH_SINGULARITY" }
+                "mgp_protocol": {"type": "string"},
+                "approval_id": {"type": "string"},
+                "approved_by": {"type": "string"},
+                "certification_date": {"type": "string", "format": "date-time"}
             }
-          }
+          },
+          "source_mdsm_link": {"type": "string"}
         }
       }
     }
   },
-  "required": [
-    "manifest_id",
-    "owner",
-    "integrity_hash",
-    "evolutionary_state",
-    "reconciliation_config",
-    "models"
-  ]
+  "required": ["manifest_id", "owner", "description", "integrity_hash", "models", "verification_protocol"]
 }
