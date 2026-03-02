@@ -1,43 +1,28 @@
 {
-  "metadata": {
-    "file_version": "2.0.0",
-    "description": "Governing operational and safety parameters for the MCRE engine.",
-    "governing_entity": "GCO (Governance & Control Oversight)",
-    "last_reviewed": "YYYY-MM-DD"
-  },
-  "operational_control": {
-    "recalibration_priority": {
-      "value": "STANDARD",
-      "type": "enum",
-      "valid_values": [
-        "EMERGENCY",
-        "STANDARD",
-        "DEFERRED"
-      ],
-      "note": "Determines scheduling urgency for model recalibration cycles."
-    }
-  },
-  "threshold_management": {
-    "trigger_MRA_delta": {
-      "value": 0.015,
+  "description": "Governing parameters and thresholds for the MCRE engine, securely managed by GCO.",
+  "version": "1.0.0",
+  "parameters": {
+    "beta_MCRE": {
       "type": "float",
-      "units": "S-01 Delta (Absolute)",
-      "trigger_mechanism": "Rolling Average TEDA",
-      "note": "Maximum allowable rolling average TEDA before MRA (Mitigation/Response Action) is signaled."
+      "value": 0.015, 
+      "units": "Absolute S-01 Delta",
+      "note": "Maximum allowable rolling average TEDA before MRA is triggered."
     },
-    "MRA_lock_duration": {
-      "value": 300,
+    "t_hold": {
       "type": "integer",
+      "value": 300, 
       "units": "Seconds",
-      "note": "Duration threshold must be continuously exceeded to initiate MRA lock-in."
-    }
-  },
-  "data_integrity": {
-    "required_schema": {
-      "key_identifier": "V_data_schema_version",
-      "value": "D-02_v3.4",
+      "note": "Duration TEDA must exceed beta_MCRE before MRA locks in."
+    },
+    "V_data_schema_version": {
       "type": "string",
-      "note": "Mandatory schema version for all incoming ESIC payloads/validation checks."
+      "value": "D-02_v3.4",
+      "note": "Required schema version for ESIC validation."
+    },
+    "recalibration_priority": {
+      "type": "string",
+      "value": "STANDARD",
+      "valid_values": ["EMERGENCY", "STANDARD", "DEFERRED"]
     }
   }
 }
