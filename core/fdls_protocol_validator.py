@@ -1,3 +1,10 @@
+'''
+FDLS Protocol Validator (Core Component)
+
+This module enforces the structural (Pydantic schema) and logical (Constraint Engine)
+integrity of all Federated Data Layer Specification (FDLS) artifacts,
+acting as the primary enforcement mechanism derived from the system's governance axioms.
+'''
 import json
 from pydantic import BaseModel, Field, ValidationError
 from typing import List, Literal, Optional, Dict, Any, Callable, Type
@@ -118,6 +125,7 @@ class ProtocolValidator(ProtocolConstraintEngine):
     """
     Validates an FDLS specification, enforcing both structural correctness (schema)
     and internal logical consistency (constraints), utilizing a constraint engine.
+    This validator serves as a core enforcement mechanism for the system's governance rules.
     """
 
     def __init__(self, raw_data: Dict[str, Any]):
