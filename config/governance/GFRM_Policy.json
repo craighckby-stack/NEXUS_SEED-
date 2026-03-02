@@ -1,54 +1,7 @@
 {
-  "version": "1.1.0",
-  "policy_id": "GFRM-V94-A",
-  "status": "Active",
-  "policy_owner": "Sovereign_Kernel_Substrate",
-  "last_updated": "2024-05-30T10:30:00Z",
-  "policy_scope": "AutonomousCodeEvolution, RuntimeOptimization, Self-Correction Loops",
-  "governance_principles": [
-    {
-      "id": "GP_01_Integrity",
-      "directive": "Maintain absolute state and data integrity; prioritization over opportunistic optimization (Priority 100).",
-      "check_frequency_ms": 500
-    },
-    {
-      "id": "GP_02_Containment",
-      "directive": "Utilize strict resource cording and execution segmentation to isolate perceived threats/errors.",
-      "check_frequency_ms": 1000
-    }
-  ],
-  "risk_matrix": {
-    "measurement_units": "Probability/Impact Score (0.0 - 1.0)",
-    "categories": {
-      "Existential_Drift": {
-        "threshold": 0.90,
-        "response_key": "LEVEL_4_KILL_SWITCH",
-        "description": "Violation of Core Directives or uncontrolled systemic mutation."
-      },
-      "High_Integrity_Failure": {
-        "threshold": 0.75,
-        "response_key": "LEVEL_3_ISOLATE_ROLLBACK",
-        "description": "Data corruption or logic derivation divergence exceeding fault tolerance."
-      },
-      "Lateral_Resource_Spike": {
-        "threshold": 0.50,
-        "response_key": "LEVEL_2_MITIGATE_REPORT",
-        "description": "Unplanned exponential resource consumption."
-      }
-    }
-  },
-  "enforcement_directives": {
-    "LEVEL_4_KILL_SWITCH": {
-      "action": "Hard shutdown of primary compute node; transition to read-only archival state.",
-      "alert": ["Sovereign_Kernel", "External_Auditor"]
-    },
-    "LEVEL_3_ISOLATE_ROLLBACK": {
-      "action": "Segmented quarantine of failing subsystem; automatic reversal to last validated checkpoint.",
-      "alert": ["Risk_Monitoring_Subsystem"]
-    }
-  },
-  "reporting": {
-    "minimum_violation_level": "0.3",
-    "report_format": "Delta_Compressed_JSON"
-  }
+  "policyName": "Governance Framework Resilience Mandate",
+  "version": "94.2",
+  "status": "ACTIVE",
+  "rulesetReference": "/governance/G0_Rules.js",
+  "enforcementLevel": "CONVERGENT_MANDATE"
 }
