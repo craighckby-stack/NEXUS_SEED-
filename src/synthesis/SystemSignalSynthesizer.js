@@ -4,8 +4,6 @@
  * canonical Mutation Requirement object based on predefined evolutionary heuristics.
  */
 
-// Assuming WeightedScorerUtility is available via injection or import in the AGI runtime environment
-
 class SystemSignalSynthesizer {
     
     constructor() {
@@ -31,22 +29,17 @@ class SystemSignalSynthesizer {
      * @returns {Object | null} Canonical requirement object or null if threshold not met.
      */
     synthesize(signals) {
-        // Safety checks and initialization
+        // Default empty objects for safe destructuring
         const { edpSchedule = [], seaReport = {}, fbaData = {} } = signals;
+        let priority = 0;
         let component = null;
         let intentType = this.INTENT_MAP.DEFAULT;
         const sources = [];
-        const factors = [];
 
         // --- 1. Assess EDP (Efficiency Debt Prioritizer) ---
         if (edpSchedule.length > 0) {
             const topDebt = edpSchedule[0]; // Assuming schedule is sorted by debt priority
-            
-            factors.push({ 
-                value: topDebt.score,
-                weight: this.WEIGHTS.EDP_DEBT_FACTOR
-            });
-
+            priority += topDebt.score * this.WEIGHTS.EDP_DEBT_FACTOR;
             component = component || topDebt.component;
             intentType = this.INTENT_MAP.HIGH_DEBT;
             sources.push('EDP');
@@ -54,11 +47,7 @@ class SystemSignalSynthesizer {
 
         // --- 2. Assess SEA (Systemic Entropy Auditor) ---
         if (seaReport.entropyLevel && seaReport.entropyLevel > 0.6) {
-            factors.push({ 
-                value: seaReport.entropyLevel,
-                weight: this.WEIGHTS.SEA_ENTROPY_RISK
-            });
-
+            priority += seaReport.entropyLevel * this.WEIGHTS.SEA_ENTROPY_RISK;
             component = component || seaReport.mostEntropicComponent || 'SystemCore';
             
             // Entropy usually mandates refactoring unless a higher priority bugfix exists
@@ -70,34 +59,20 @@ class SystemSignalSynthesizer {
 
         // --- 3. Assess FBA (Feedback Loop Aggregator) ---
         if (fbaData.criticalBugs && fbaData.criticalBugs > 0) {
-            factors.push({ 
-                value: fbaData.criticalBugs,
-                weight: this.WEIGHTS.FBA_CRITICAL_BUG_BOOST
-            });
-
+            priority += fbaData.criticalBugs * this.WEIGHTS.FBA_CRITICAL_BUG_BOOST;
             // Critical bugs overwrite all other intent types
             intentType = this.INTENT_MAP.CRITICAL_FAILURE;
             component = component || fbaData.targetComponent || 'Unknown/Patch'; 
             sources.push('FBA');
         }
         
-        // --- 4. Final Calculation using WeightedScorerUtility ---
-        
-        const scoringConfig = {
-            minThreshold: this.WEIGHTS.MIN_INTENT_THRESHOLD,
-            maxCap: 100,
-            roundResult: true
-        };
-        
-        // Use the existing kernel utility to handle summation, capping, and threshold checking
-        // Note: Assumes WeightedScorerUtility.score(factors, config) returns { finalScore, meetsThreshold }
-        const scoreResult = WeightedScorerUtility.score(factors, scoringConfig);
-        
-        if (!scoreResult.meetsThreshold) {
+        // Final normalization (cap score at 100)
+        priority = Math.min(100, Math.round(priority));
+
+        if (priority < this.WEIGHTS.MIN_INTENT_THRESHOLD) {
              return null; // System not under enough pressure for mutation
         }
-        
-        const priority = scoreResult.finalScore;
+
         const justification = `P:${priority}. Derived from (${sources.join(', ')}).`;
 
         return {
