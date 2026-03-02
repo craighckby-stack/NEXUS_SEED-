@@ -1,1 +1,49 @@
-[object Object]
+{
+  "specVersion": "1.1.0",
+  "description": "Specification defining processing rules for all telemetry data streams to ensure privacy, performance, and legal compliance (GDPR/CCPA/etc.).",
+  "defaultPolicy": "AGGREGATE_AND_ANONYMIZE",
+  "samplingRateGlobal": 0.05,
+  "sensitivityClassifications": [
+    "LOW",
+    "MEDIUM",
+    "HIGH_SYSTEM",
+    "HIGH_PII"
+  ],
+  "vettingActions": [
+    "PASS_THROUGH",
+    "AGGREGATE_DAILY_IP_DROP",
+    "DROP_IMMEDIATELY",
+    "PASS_THROUGH_HASHED_SESSION",
+    "MASK_FIELDS"
+  ],
+  "metrics": {
+    "System.Runtime.UptimeMilliseconds": {
+      "sensitivity": "LOW",
+      "action": "PASS_THROUGH",
+      "justification": "Non-identifying performance metric.",
+      "retention_days": 90
+    },
+    "User.Interaction.ButtonClicks": {
+      "sensitivity": "MEDIUM",
+      "action": "AGGREGATE_DAILY_IP_DROP",
+      "justification": "Performance optimization and removal of transient PII correlation vectors.",
+      "retention_days": 180,
+      "sample_rate_override": 0.1
+    },
+    "User.Authentication.FailedAttempts": {
+      "sensitivity": "HIGH_PII",
+      "action": "DROP_IMMEDIATELY",
+      "justification": "Security sensitive event, only logged securely internally, prohibited from external telemetry stream."
+    },
+    "System.Configuration.ActiveFeatures": {
+      "sensitivity": "MEDIUM",
+      "action": "PASS_THROUGH_HASHED_SESSION",
+      "hashingAlgorithm": "SHA256_SESSION_SALT"
+    }
+  },
+  "complianceAuditLog": {
+    "enabled": true,
+    "threshold": "HIGH_PII",
+    "target": "InternalSecureAuditStream"
+  }
+}
