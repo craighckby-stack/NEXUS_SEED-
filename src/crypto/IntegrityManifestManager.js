@@ -1,94 +1,54 @@
+const fs = require('fs/promises');
+const IntegrityHashUtility = require('./IntegrityHashUtility');
+const IntegrityManifestError = require('./IntegrityManifestError');
+
 /**
- * IntegrityManifestKernel
+ * IntegrityManifestManager
  * Manages the creation, loading, and comprehensive validation of system integrity manifests.
  * A manifest (e.g., integrity.json) maps relative file paths to their expected cryptographic hashes (SHA-256 assumed).
+ * 
+ * NOTE: Hashing and validation operations are performed concurrently for maximum efficiency.
  */
-class IntegrityManifestKernel {
+class IntegrityManifestManager {
     
-    // Dependencies
-    #integrityHashKernel;
-    #batchProcessorTool;
-    #secureResourceLoader;
-    #manifestErrorConstructor; // Reference to the IntegrityManifestError class/constructor
-
-    /**
-     * @param {object} dependencies
-     * @param {IIntegrityHashKernel} dependencies.integrityHashKernel
-     * @param {IBatchProcessorToolKernel} dependencies.batchProcessorTool
-     * @param {SecureResourceLoaderInterfaceKernel} dependencies.secureResourceLoader
-     * @param {new (...args: any[]) => IntegrityManifestError} dependencies.manifestErrorConstructor
-     */
-    constructor(dependencies = {}) {
-        this.#setupDependencies(dependencies);
-    }
-
-    /**
-     * Private method to enforce synchronous setup extraction mandate.
-     * @param {object} dependencies 
-     */
-    #setupDependencies(dependencies) {
-        const { 
-            integrityHashKernel, 
-            batchProcessorTool, 
-            secureResourceLoader, 
-            manifestErrorConstructor 
-        } = dependencies;
-
-        if (!integrityHashKernel || typeof integrityHashKernel.hashFileAsync !== 'function') {
-            throw new Error(`${this.constructor.name}: Missing or invalid integrityHashKernel dependency.`);
-        }
-        if (!batchProcessorTool || typeof batchProcessorTool.execute !== 'function') {
-            throw new Error(`${this.constructor.name}: Missing or invalid batchProcessorTool dependency.`);
-        }
-        if (!secureResourceLoader || typeof secureResourceLoader.loadJson !== 'function' || typeof secureResourceLoader.saveJson !== 'function') {
-            throw new Error(`${this.constructor.name}: Missing or invalid secureResourceLoader dependency.`);
-        }
-        if (!manifestErrorConstructor || typeof manifestErrorConstructor !== 'function') {
-             throw new Error(`${this.constructor.name}: Missing or invalid manifestErrorConstructor dependency.`);
-        }
-        
-        this.#integrityHashKernel = integrityHashKernel;
-        this.#batchProcessorTool = batchProcessorTool;
-        this.#secureResourceLoader = secureResourceLoader;
-        this.#manifestErrorConstructor = manifestErrorConstructor;
-    }
-
-    async initialize() {
-        // Standard kernel initialization hook
-    }
-
     /**
      * Generates a manifest for a list of file paths.
-     *
+     * All provided paths should be relative to a known root if the manifest is intended for portability.
+     * Processes files concurrently using Promise.all.
+     * 
      * @param {string[]} filePaths Array of relative file paths.
      * @returns {Promise<Record<string, string>>} A map of relativePath -> hash.
-     * @throws {this.#manifestErrorConstructor} If any file fails to hash.
+     * @throws {IntegrityManifestError} If any file fails to hash.
      */
-    async generateManifest(filePaths) {
-        
-        const workerFn = async (filePath) => {
-            // Use injected IntegrityHashKernel (previously IntegrityHashUtility)
-            const hash = await this.#integrityHashKernel.hashFileAsync(filePath);
-            return hash;
-        };
-
-        // Use injected BatchProcessorTool (previously AsyncBatchProcessor)
-        const { successes, failures } = await this.#batchProcessorTool.execute(filePaths, workerFn);
-        
-        const manifest = {};
-        
-        successes.forEach(s => {
-            manifest[s.item] = s.result; 
+    static async generateManifest(filePaths) {
+        const hashPromises = filePaths.map(async (filePath) => {
+            try {
+                // Assuming IntegrityHashUtility handles file reading robustly
+                const hash = await IntegrityHashUtility.hashFileAsync(filePath);
+                return { filePath, hash };
+            } catch (error) {
+                // Capture the error object for centralized handling later
+                return { filePath, error: error };
+            }
         });
 
-        if (failures.length > 0) {
-            const errors = failures.map(f => 
-                `${f.item}: Failed to hash file: ${f.error.message || f.error}`
-            );
+        const results = await Promise.all(hashPromises);
+        const manifest = {};
+        const errors = [];
 
-            // Use injected error constructor
-            throw new this.#manifestErrorConstructor(
-                `Manifest generation failed for ${failures.length} file(s).`,
+        for (const result of results) {
+            if (result.error) {
+                // Use a standard error message format for aggregation
+                errors.push(`${result.filePath}: Failed to hash file: ${result.error.message || result.error}`);
+            } else {
+                // Ensure paths are stored as received (should be relative for portability)
+                manifest[result.filePath] = result.hash;
+            }
+        }
+
+        if (errors.length > 0) {
+            throw new IntegrityManifestError(
+                `Manifest generation failed for ${errors.length} file(s).`,
                 errors,
                 'GENERATION'
             );
@@ -102,9 +62,9 @@ class IntegrityManifestKernel {
      * @param {string} manifestPath Path where the manifest should be saved.
      * @param {Record<string, string>} manifest The manifest object (relativePath -> hash).
      */
-    async saveManifest(manifestPath, manifest) {
-        // Use injected SecureResourceLoaderInterfaceKernel (previously FileUtility)
-        await this.#secureResourceLoader.saveJson(manifestPath, manifest);
+    static async saveManifest(manifestPath, manifest) {
+        const jsonContent = JSON.stringify(manifest, null, 2);
+        await fs.writeFile(manifestPath, jsonContent, 'utf8');
     }
 
     /**
@@ -113,54 +73,48 @@ class IntegrityManifestKernel {
      * 
      * @param {string} manifestPath Path to the stored manifest file.
      * @returns {Promise<{valid: boolean, errors: string[]}>} Detailed validation result.
-     * @throws {this.#manifestErrorConstructor} If the manifest file cannot be loaded or parsed.
+     * @throws {IntegrityManifestError} If the manifest file cannot be loaded or parsed.
      */
-    async validateManifest(manifestPath) {
+    static async validateManifest(manifestPath) {
         let expectedManifest;
         
         try {
-            // Use injected SecureResourceLoaderInterfaceKernel
-            expectedManifest = await this.#secureResourceLoader.loadJson(manifestPath);
+            const data = await fs.readFile(manifestPath, 'utf8');
+            // Manifest structure is { filePath: hashString }
+            expectedManifest = JSON.parse(data);
         } catch (e) {
-            const error = e instanceof Error ? e.message : String(e);
-            // Use injected error constructor
-            throw new this.#manifestErrorConstructor(
+            throw new IntegrityManifestError(
                 `Failed to load or parse manifest file ${manifestPath}.`,
-                [error],
+                [e.message],
                 'LOAD'
             );
         }
 
-        const fileEntries = Object.entries(expectedManifest);
-
-        const workerFn = async ([filePath, expectedHash]) => {
-            // Use injected IntegrityHashKernel
-            const calculatedHash = await this.#integrityHashKernel.hashFileAsync(filePath);
-            
-            if (calculatedHash !== expectedHash) {
-                const truncatedExpected = expectedHash.substring(0, 10);
-                const truncatedCalculated = calculatedHash.substring(0, 10);
+        const validationPromises = Object.entries(expectedManifest).map(async ([filePath, expectedHash]) => {
+            try {
+                // 1. Calculate hash of the existing file
+                const calculatedHash = await IntegrityHashUtility.hashFileAsync(filePath);
                 
-                throw new Error(`Integrity mismatch. Expected: ${truncatedExpected}..., Got: ${truncatedCalculated}...`);
+                // 2. Direct string comparison (simplified: removed redundant utility call)
+                if (calculatedHash !== expectedHash) {
+                    // Provide truncated hashes for concise error logs
+                    const truncatedExpected = expectedHash.substring(0, 10);
+                    const truncatedCalculated = calculatedHash.substring(0, 10);
+                    return `Integrity mismatch for ${filePath}. Expected: ${truncatedExpected}..., Got: ${truncatedCalculated}...`;
+                }
+            } catch (e) {
+                // Handle cases where file is deleted, permissions error, or read error
+                return `Validation failure (file access/hashing) for ${filePath}: ${e.message}`;
             }
-            return true;
-        };
-
-        // Use injected BatchProcessorTool
-        const { failures } = await this.#batchProcessorTool.execute(fileEntries, workerFn);
-        
-        const errors = failures.map(f => {
-            const [filePath] = f.item; 
-            
-            if (f.error.message.startsWith('Integrity mismatch')) {
-                 return `Integrity mismatch for ${filePath}. ${f.error.message}`;
-            }
-            
-            return `Validation failure (file access/hashing) for ${filePath}: ${f.error.message}`;
+            return null; // Indicates successful validation for this file
         });
+
+        const validationResults = await Promise.all(validationPromises);
+        
+        const errors = validationResults.filter(result => result !== null);
         
         return { valid: errors.length === 0, errors };
     }
 }
 
-module.exports = IntegrityManifestKernel;
+module.exports = IntegrityManifestManager;
