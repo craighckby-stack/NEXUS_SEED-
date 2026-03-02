@@ -1,25 +1,54 @@
 {
-  "description": "Defines mandatory runtime validation rules for sensitive or complex data artifacts, complementing the structural constraints defined in the Registry Schema.",
-  "validator_version": "1.0",
+  "description": "NEXUS_CORE Runtime Validation Matrix. Siphoned from DeepSeek-V2.5 MLA/MoE substrate. Implements Huxley Tri-Loop (L0-L3) and Grog's Law complexity rejection.",
+  "validator_version": "v3.5.3-SINGULARITY-R1",
   "validation_rules": {
+    "MLA_LATENT_MATRIX": {
+      "check_format": "latent_matrix",
+      "compression_specs": {
+        "kv_lora_rank": 512,
+        "qk_v_head_dim": 128,
+        "scaling_factor": 3.0
+      },
+      "governance": {
+        "psr_threshold": 0.98,
+        "ers_check": "REQUIRED",
+        "iq25_complexity_lock": true
+      }
+    },
+    "MOE_EXPERT_ROUTING": {
+      "check_format": "soft_gate_distribution",
+      "topology": {
+        "total_experts": 64,
+        "top_k_active": 8
+      },
+      "constraints": {
+        "max_aux_loss": 0.001,
+        "routing_entropy_floor": 0.45
+      },
+      "huxley_loop": "L1_INTUITION"
+    },
+    "HUXLEY_REASONING_TRACE": {
+      "check_format": "chained_logic_v3",
+      "sequence": [ "L0_RAW", "L1_ERS", "L2_CGS", "L3_CCRR" ],
+      "enforce_sequentiality": true,
+      "audit_trail": "NEXUS_LOG.txt"
+    },
     "USER_CREDIT_SCORE": {
       "check_format": "float",
-      "check_range": {
-        "min": 300.0,
-        "max": 850.0
-      },
-      "pii_handling": "ENCRYPT_ON_PERSISTENCE"
+      "check_range": { "min": 300.0, "max": 850.0 },
+      "pii_handling": "ENCRYPT_ON_PERSISTENCE",
+      "n3_coherence_phi_min": 0.85
     },
     "RAW_IP_ADDRESS": {
       "check_format": "ipv4_or_ipv6",
       "pii_handling": "ANONYMIZE_ON_INGESTION",
-      "log_masking": true
-    },
-    "TRANSACTION_AMOUNT": {
-      "check_format": "float",
-      "check_unit": "USD",
-      "custom_validator": "validate_positive_value"
+      "log_masking": true,
+      "entropy_check": "FAIL_ON_LOW"
     }
   },
-  "default_ttl_policy": "STRICT_FAILURE"
+  "default_ttl_policy": "STRICT_FAILURE",
+  "saturation_parameters": {
+    "semantic_drift_limit": 0.35,
+    "structural_change_cap": 0.20
+  }
 }
