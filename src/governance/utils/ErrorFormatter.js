@@ -1,58 +1,53 @@
 /**
- * @fileoverview High-integrity, asynchronous Kernel responsible for standardizing and serializing error objects.
- * This kernel strictly delegates all formatting and security masking logic to the IErrorDetailNormalizationToolKernel,
- * adhering to the principles of Maximum Recursive Abstraction (MRA).
+ * @fileoverview Standard utility to format Errors into a consistent, safe, and consumable JSON structure
+ * for API responses and structured logging.
  */
 
-/**
- * Placeholder interface constant for dependency resolution.
- * @type {string}
- */
-const IErrorDetailNormalizationToolKernel = 'IErrorDetailNormalizationToolKernel'; 
-
-/**
- * @class ErrorFormatterKernel
- * @description Provides a high-integrity, asynchronous interface for standardizing error objects
- * using the specialized IErrorDetailNormalizationToolKernel.
- */
-class ErrorFormatterKernel {
+class ErrorFormatter {
     /**
-     * @param {IErrorDetailNormalizationToolKernel} errorNormalizer - Tool for canonical error serialization.
-     */
-    constructor(errorNormalizer) {
-        if (!errorNormalizer) {
-            throw new Error("ErrorFormatterKernel requires IErrorDetailNormalizationToolKernel.");
-        }
-        /** @private {IErrorDetailNormalizationToolKernel} */
-        this.errorNormalizer = errorNormalizer;
-    }
-
-    /**
-     * @async
-     * Mandatory asynchronous initialization hook. Performs interface validation.
-     */
-    async initialize() {
-        // Validate the required interface methods exist on the injected tool
-        if (typeof this.errorNormalizer.normalizeError !== 'function') {
-            throw new Error("Injected IErrorDetailNormalizationToolKernel is invalid: missing 'normalizeError' method.");
-        }
-        // Initialization complete. No synchronous configuration loading is performed.
-    }
-
-    /**
-     * Converts an Error object into a serializable plain object using the specialized kernel tool.
-     * Delegates all formatting, masking, and stacking logic to the external tool.
-     * 
+     * Converts an Error object into a serializable plain object.
+     * Handles both operational (client-facing) and critical (internal) errors.
      * @param {Error} err - The error object to format.
-     * @param {Object} [options={}] - Formatting options, e.g., { includeStack: false, context: {} }.
-     * @returns {Promise<Object>} Standardized error structure.
+     * @param {boolean} [includeStack=false] - Whether to include the stack trace (default for logging, false for API response).
+     * @returns {Object} Standardized error structure.
      */
-    async formatError(err, options = {}) {
-        // Strict delegation to achieve Maximum Recursive Abstraction (MRA).
-        // The options parameter maps directly to the original includeStack boolean, plus any other context.
-        const includeStack = options.includeStack || false; 
-        return this.errorNormalizer.normalizeError(err, { ...options, includeStack });
+    static format(err, includeStack = false) {
+        // 1. Handle errors with defined operational serialization (e.g., PayloadSchemaError)
+        if (err.isOperational && typeof err.toJSON === 'function') {
+            const formatted = err.toJSON();
+            if (includeStack) {
+                formatted.stack = err.stack;
+            }
+            return formatted;
+        }
+
+        // 2. Handle generic/critical non-operational errors (System crash, unhandled exceptions)
+        const status = err.status || 500;
+        const code = err.code || 'SYS_INTERNAL_ERROR';
+        
+        // Mask sensitive internal messages for 5xx errors
+        const message = status >= 500
+            ? "An internal server error occurred."
+            : err.message || "An unknown error occurred.";
+
+        const genericFormat = {
+            name: err.name || 'InternalError',
+            code: code,
+            status: status,
+            message: message
+        };
+
+        if (includeStack) {
+            genericFormat.stack = err.stack;
+        }
+
+        // Preserve validation details if they exist on a non-standard error
+        if (err.validationDetails) {
+            genericFormat.validationDetails = err.validationDetails;
+        }
+
+        return genericFormat;
     }
 }
 
-module.exports = ErrorFormatterKernel;
+module.exports = ErrorFormatter;
