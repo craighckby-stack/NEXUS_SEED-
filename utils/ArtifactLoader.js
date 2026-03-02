@@ -1,3 +1,5 @@
+const fs = require('fs/promises');
+const path = require('path');
 const ContractArtifactValidator = require('./ContractArtifactValidator');
 const { InvalidArtifactError } = require('./errors/InvalidArtifactError');
 
@@ -10,29 +12,31 @@ class ArtifactLoader {
     
     /**
      * Loads a contract artifact JSON file, parses it, and validates its structure.
+     * This implements the functionality previously noted as missing in ContractArtifactValidator.loadAndValidate.
      * @param {string} artifactPath - Absolute or relative path to the artifact JSON file.
      * @returns {Promise<object>} The validated contract artifact object.
      */
     static async load(artifactPath) {
-        
-        // Use the FsJsonLoaderUtility for safe I/O and parsing
-        const result = await this.FsJsonLoaderUtility.execute({ filePath: artifactPath });
-        
-        if (!result.success) {
-            const errorDetails = result.error;
-
-            // Map structured plugin error back to application-specific error
+        let rawData;
+        try {
+            const absolutePath = path.resolve(artifactPath);
+            rawData = await fs.readFile(absolutePath, 'utf8');
+        } catch (error) {
             throw new InvalidArtifactError(
-                errorDetails.message,
-                { 
-                    originalError: errorDetails.details,
-                    path: artifactPath, 
-                    reason: errorDetails.code 
-                }
+                `Failed to read contract artifact file at path: ${artifactPath}.`,
+                { originalError: error.message, path: artifactPath, reason: 'IO_READ_FAILURE' }
             );
         }
 
-        const artifact = result.data;
+        let artifact;
+        try {
+            artifact = JSON.parse(rawData);
+        } catch (error) {
+            throw new InvalidArtifactError(
+                `Failed to parse contract artifact JSON: ${artifactPath}.`,
+                { originalError: error.message, path: artifactPath, reason: 'JSON_PARSE_FAILURE' }
+            );
+        }
 
         // Delegate integrity checking to the specialized Validator utility
         return ContractArtifactValidator.validate(artifact);
