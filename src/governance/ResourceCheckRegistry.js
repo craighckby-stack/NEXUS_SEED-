@@ -1,9 +1,9 @@
 /**
- * RESOURCE CHECK REGISTRY KERNEL (RCRK)
- * ID: RCRK-G01
+ * RESOURCE CHECK REGISTRY (RCR)
+ * ID: RCR-G01
  * GSEP Role: Centralized store and execution manager for standardized resource checks.
  *
- * The RCRK provides a formal interface for defining new environmental prerequisites,
+ * The RCR provides a formal interface for defining new environmental prerequisites,
  * decoupling the specifics of resource measurement (like memory usage or latency)
  * from the main Resource Attestation Module (RAM) governance flow.
  */
@@ -39,43 +39,13 @@ const CHECK_STATUS = Object.freeze({
 });
 
 /**
- * Manages and executes resource prerequisite checks, leveraging injected tools for execution standardization and logging.
+ * Manages and executes resource prerequisite checks.
  */
-class ResourceCheckRegistryKernel {
-    
-    /**
-     * @param {IAsyncCheckExecutionWrapperToolKernel} asyncExecutionWrapperToolKernel - Executes and standardizes check results.
-     * @param {ILoggerToolKernel} loggerToolKernel - Standardized logging interface.
-     */
-    constructor(asyncExecutionWrapperToolKernel, loggerToolKernel) {
+class ResourceCheckRegistry {
+    constructor() {
         /** @type {Map<string, ResourceCheckFunction>} */
         this.checks = new Map();
         this.STATUS = CHECK_STATUS;
-        this.asyncExecutionWrapper = asyncExecutionWrapperToolKernel;
-        this.logger = loggerToolKernel;
-        
-        this.#setupDependencies();
-    }
-
-    /**
-     * Synchronously validates required dependencies.
-     * @private
-     */
-    #setupDependencies() {
-        if (!this.asyncExecutionWrapper || typeof this.asyncExecutionWrapper.execute !== 'function') {
-            throw new Error("RCRK-D01: IAsyncCheckExecutionWrapperToolKernel dependency is required and must implement 'execute'.");
-        }
-        if (!this.logger || typeof this.logger.warn !== 'function' || typeof this.logger.error !== 'function') {
-            throw new Error("RCRK-D02: ILoggerToolKernel dependency is required.");
-        }
-    }
-
-    /**
-     * Asynchronously initializes the kernel.
-     * @returns {Promise<void>}
-     */
-    async initialize() {
-        // Adheres to the mandate for high-integrity kernel initialization.
     }
 
     /**
@@ -86,11 +56,10 @@ class ResourceCheckRegistryKernel {
      */
     registerCheck(id, checkFn) {
         if (typeof checkFn !== 'function') {
-            this.logger.error(`RCRK-E01: Check function for ID ${id} must be a function.`);
-            throw new TypeError(`RCRK-E01: Check function for ID ${id} must be a function.`);
+            throw new TypeError(`RCR-E01: Check function for ID ${id} must be a function.`);
         }
         if (this.checks.has(id)) {
-            this.logger.warn(`RCRK-W01: Check ID ${id} already registered. Overwriting definition.`);
+            console.warn(`RCR-W01: Check ID ${id} already registered. Overwriting definition.`);
         }
         this.checks.set(id, checkFn);
     }
@@ -106,26 +75,48 @@ class ResourceCheckRegistryKernel {
 
     /**
      * Executes all registered checks concurrently, providing necessary context.
-     * 
      * @param {Object} monitor - System monitoring dependency.
      * @param {Object} governanceConfig - Baseline configuration.
      * @param {Object} payloadMetadata - Mutation-specific requirements.
      * @returns {Promise<CheckExecutionResult[]>} A promise resolving to an array of standardized check results.
      */
-    async runAllChecks(monitor, governanceConfig, payloadMetadata) {
+    runAllChecks(monitor, governanceConfig, payloadMetadata) {
         const checkPromises = [];
-        const args = [monitor, governanceConfig, payloadMetadata];
 
         for (const [id, checkFn] of this.checks.entries()) {
             
-            // Delegation of execution, error handling, and result standardization to the specialized wrapper tool kernel
-            const runnerPromise = this.asyncExecutionWrapper.execute(
-                checkFn, 
-                id, 
-                args,
-                this.STATUS
-            );
-            checkPromises.push(runnerPromise);
+            // Runner wraps the check function for standardized error handling and result formatting.
+            const runner = async () => {
+                const executionResult = {
+                    check: id,
+                    status: this.STATUS.ERROR, // Default status is ERROR until successfully resolved
+                    success: false,
+                    details: {},
+                };
+
+                try {
+                    /** @type {CheckResult} */
+                    const checkResult = await checkFn(monitor, governanceConfig, payloadMetadata);
+                    
+                    // Standardize successful/failed check result
+                    executionResult.success = !!checkResult.success;
+                    executionResult.status = checkResult.success ? this.STATUS.PASS : this.STATUS.FAIL;
+                    executionResult.details = checkResult.details || {};
+                    
+                    return executionResult;
+
+                } catch (error) {
+                    // Handle critical error during check execution (e.g., internal bug, dependency failure)
+                    executionResult.details = { 
+                        errorType: error.name,
+                        message: `Critical RCR execution error in ${id}: ${error.message}`, 
+                        stack: error.stack
+                    };
+                    // status remains ERROR, success remains false.
+                    return executionResult;
+                }
+            };
+            checkPromises.push(runner());
         }
         
         // Execute all checks concurrently and wait for all results
@@ -133,4 +124,4 @@ class ResourceCheckRegistryKernel {
     }
 }
 
-module.exports = ResourceCheckRegistryKernel;
+module.exports = ResourceCheckRegistry;
