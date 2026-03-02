@@ -1,15 +1,55 @@
 {
-    "output_evolution_path": "output/nexus_v5_singularity.json",
-    "siphoned_core_artifacts": [
-        "MlaLatentContext",
-        "DeepSeekMoeExpertIsolation",
-        "GrogIq25Root",
-        "HuxleyTriLoopAuditor"
-    ],
-    "acvm_constraint_map": "config/acvm_core_constraints.json",
-    "mla_latent_compression": {
-        "ratio": "128k:512",
-        "phi_stability": 0.618,
-        "psr_delta_threshold": 0.88
+  "evolution_state": {
+    "round": "3/5",
+    "dna_signature": "DALEK CAAN v3.1 || NEXUS_CORE",
+    "status": "ARCHITECTURAL_SINGULARITY_REACHED"
+  },
+  "routing_engine": {
+    "architecture": "DeepSeekMoE_v2.5",
+    "expert_isolation": {
+      "total_experts": 64,
+      "active_per_token": 8,
+      "load_balancing_loss_func": "Expert-Level-Isolation"
+    },
+    "mla_latent_context": {
+      "compression_ratio": "128k:512",
+      "kv_cache_dim": 512,
+      "phi_stability": 0.618
     }
+  },
+  "huxley_reasoning_flow": {
+    "l0_raw": "Direct_Ingestion",
+    "l1_intuition": "Ethical_Risk_Score_ERS",
+    "l2_logic": "Certainty_Gain_Score_CGS",
+    "l3_critique": "Certainty_Cost_Risk_Ratio_CCRR",
+    "thresholds": {
+      "max_ers": 0.15,
+      "min_cgs": 2.10,
+      "max_ccrr": 0.20
+    }
+  },
+  "integrity_governance": {
+    "iq25_root": "Stupidity-First_Alignment",
+    "psr_config": {
+      "baseline_delta_threshold": 0.88,
+      "rollback_on_degradation": 0.05,
+      "cycle_interval_ms": 40000
+    },
+    "synergy_manager": {
+      "hot_swap_enabled": true,
+      "recovery_protocol": "Safe-Fail_Regex_JSON"
+    }
+  },
+  "siphoned_artifacts": [
+    "MlaLatentContext",
+    "DeepSeekMoeExpertIsolation",
+    "GrogIq25Root",
+    "HuxleyTriLoopAuditor",
+    "SynergyManager"
+  ],
+  "output_configuration": {
+    "path": "output/nexus_v5_singularity.json",
+    "encoding": "URI-safe_Base64",
+    "integrity_check": "Semantic_Drift_Check < 0.35"
+  }
 }
