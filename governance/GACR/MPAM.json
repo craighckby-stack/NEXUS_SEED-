@@ -1,31 +1,29 @@
 {
   "policyDomain": "MultiPurposeAccessManagement",
   "domainId": "MPAM-GACR",
-  "version": "3.0.0",
-  "schemaHash": "SHA256:4d6f8c2b1e7a3f0d5c9b2e1f4a7b3c8d",
+  "version": "2.1.0",
+  "schemaHash": "SHA256:c2d7e0f81a4b5d92e6f37c0a9b81d2f7",
   "status": "PRODUCTION",
   "policyRules": [
     {
       "ruleId": "R-MPAM-001",
       "priority": 100,
       "effect": "DENY",
-      "actionSet": ["*"],
-      "description": "Block unauthorized attempts on critical resources unless explicit maintenance mode is globally active.",
+      "description": "Block unauthorized core access unless explicit maintenance mode is active.",
       "target": {
         "principal": "ALL",
         "resourceType": ["CORE_INFRASTRUCTURE", "ROOT_SECRETS"]
       },
-      "criteriaLogic": "ALL_MUST_FAIL",
-      "criteria": [
-        {
-          "attributePath": "system.isMaintenanceMode",
-          "comparisonOp": "EQUAL",
+      "condition": {
+        "operator": "NOT",
+        "clause": {
+          "field": "system.isMaintenanceMode",
+          "check": "EQUAL",
           "value": true
         }
-      ],
+      },
       "metadata": {
         "auditLevel": "CRITICAL",
-        "tags": ["CRITICAL_INFRA", "DENIAL_DEFAULT"],
         "enforcementEngine": "AURA_VM"
       }
     },
@@ -33,29 +31,28 @@
       "ruleId": "R-MPAM-002",
       "priority": 200,
       "effect": "ALLOW",
-      "actionSet": ["READ", "LOG_ACCESS"],
-      "description": "Scheduled telemetry data retrieval access for Sovereign AGI service account during low-activity window.",
+      "description": "Scheduled telemetry access for Sovereign AGI service account.",
       "target": {
         "principalType": "SERVICE_ACCOUNT",
         "principalId": "SovereignAGI"
       },
-      "criteriaLogic": "ALL_MUST_PASS",
-      "criteria": [
-        {
-          "attributePath": "resource.scope",
-          "comparisonOp": "EQUAL",
-          "value": "telemetry"
-        },
-        {
-          "attributePath": "request.time.local24h",
-          "comparisonOp": "BETWEEN",
-          "value": ["00:00", "05:00"],
-          "format": "HH:MM"
-        }
-      ],
+      "condition": {
+        "operator": "AND",
+        "clauses": [
+          {
+            "field": "resource.scope",
+            "check": "EQUAL",
+            "value": "telemetry"
+          },
+          {
+            "field": "time.hour",
+            "check": "BETWEEN",
+            "value": ["00:00", "05:00"]
+          }
+        ]
+      },
       "metadata": {
-        "auditLevel": "VERBOSE",
-        "tags": ["TELEMETRY", "SCHEDULED_TASK"]
+        "auditLevel": "INFO"
       }
     }
   ]
