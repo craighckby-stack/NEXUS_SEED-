@@ -1,10 +1,10 @@
-import { TRUST_METRICS_SCHEMA } from '../config/trustCalculusSchema';
+const { TRUST_METRICS_SCHEMA } = require('../config/trustCalculusSchema');
 
 /**
  * Trust Calculus Service (TC-SERVICE)
  * Implements the P-01 Trust Calculus Score calculation based on the defined schema.
  */
-export class TrustCalculusService {
+class TrustCalculusService {
 
     /**
      * Calculates the final P-01 Trust Calculus Score based on the weighted and polarized schema.
@@ -19,22 +19,25 @@ export class TrustCalculusService {
 
         for (const [metricName, definition] of Object.entries(TRUST_METRICS_SCHEMA)) {
             const metricValue = metrics[metricName];
-            const { weight, polarity } = definition; // Destructuring for explicit access
             
             if (typeof metricValue !== 'number' || metricValue < 0 || metricValue > 1) {
                  throw new Error(`[TC-SERVICE] Invalid or missing metric value for '${metricName}'. Received: ${metricValue}. Metrics must be normalized (0.0 - 1.0).`);
             }
 
-            // Apply Polarity Adjustment: If polarity is -1 (Inverse correlation/Risk metric),
-            // invert the value (1 - V) to ensure the metric contributes positively to the overall Trust Score.
-            const adjustedValue = (polarity === -1)
-                ? (1 - metricValue)
-                : metricValue;
+            let adjustedValue = metricValue;
 
-            weightedSum += adjustedValue * weight;
+            // Apply Polarity Adjustment: If polarity is -1 (Inverse correlation/Risk metric),
+            // invert the value (1 - V) to make it contribute positively to the "Trust/Safety" score.
+            if (definition.polarity === -1) {
+                adjustedValue = 1 - metricValue;
+            }
+
+            weightedSum += adjustedValue * definition.weight;
         }
 
         // Clamp the final score between 0.0 and 1.0
         return Math.min(1.0, Math.max(0.0, weightedSum));
     }
 }
+
+module.exports = { TrustCalculusService };
