@@ -2,8 +2,6 @@ class TaskSequencerEngine {
     constructor(dependencyRegistry) {
         this.logger = dependencyRegistry.getLogger('PCRA_TSE');
         this.actionMap = dependencyRegistry.getActionMap();
-        // Assuming plugin registration or dependency injection provides the utility
-        this.executionRetryManager = dependencyRegistry.getUtility('ExecutionRetryManager');
     }
 
     /**
@@ -14,45 +12,41 @@ class TaskSequencerEngine {
     async executeStrategy(sequence, incidentContext) {
         this.logger.debug(`Starting sequenced execution for incident: ${incidentContext.id}`);
 
-        if (!this.executionRetryManager) {
-            throw new Error("ExecutionRetryManager utility is required but missing.");
-        }
-
         for (const task of sequence) {
+            const maxRetries = this.getMaxRetries(task.on_failure);
+            let attempts = 0;
+            let successful = false;
 
-            // Define the worker function for the plugin
-            const workerFn = async () => {
-                await this.runTask(task, incidentContext);
-            };
+            while (attempts <= maxRetries && !successful) {
+                attempts++;
+                try {
+                    await this.runTaskWithTimeout(task, incidentContext);
+                    successful = true;
+                } catch (error) {
+                    this.logger.warn(`Task ${task.step_id} failed (Attempt ${attempts}/${maxRetries + 1}). Mode: ${task.on_failure}`);
 
-            try {
-                const result = await this.executionRetryManager.executeWithRetries(
-                    workerFn,
-                    task.on_failure,
-                    this.logger,
-                    { step_id: task.step_id } // Context required by the plugin's logging/status
-                );
-
-                if (result.status === "WAITING_OVERSIGHT") {
-                    this.handleFailureEscalation(task.on_failure, task, incidentContext);
-                    return { status: "WAITING_OVERSIGHT", step: task.step_id };
+                    if (attempts > maxRetries || task.on_failure === "FAIL_FAST") {
+                        this.handleFailureEscalation(task.on_failure, task, incidentContext);
+                        throw new Error(`Strategy aborted: Task ${task.step_id} failed permanently.`);
+                    }
+                    if (task.on_failure.startsWith("INITIATE_HUMAN")) {
+                        this.handleFailureEscalation(task.on_failure, task, incidentContext);
+                        return { status: "WAITING_OVERSIGHT", step: task.step_id };
+                    }
+                    // Exponential backoff or standardized wait
+                    await new Promise(resolve => setTimeout(resolve, Math.min(100 * attempts * 2, 5000)));
                 }
-
-                this.logger.debug(`Task ${task.step_id} succeeded after ${result.attempts} attempt(s).`);
-
-            } catch (error) {
-                // This catch block handles permanent failure (max retries reached or FAIL_FAST)
-                this.handleFailureEscalation(task.on_failure, task, incidentContext);
-                throw new Error(`Strategy aborted: Task ${task.step_id} failed permanently. Reason: ${error.message}`);
             }
         }
         return { status: "SUCCESS" };
     }
 
-    /**
-     * Runs the defined action, passing along the timeout parameter.
-     */
-    async runTask(task, context) {
+    getMaxRetries(failureMode) {
+        const match = failureMode.match(/^RETRY_(\d+)X$/);
+        return match ? parseInt(match[1], 10) : 0;
+    }
+
+    async runTaskWithTimeout(task, context) {
         if (!this.actionMap[task.action]) {
             throw new Error(`Action handler missing for: ${task.action}`);
         }
