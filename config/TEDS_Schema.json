@@ -1,194 +1,202 @@
-class Config {
-  static get staticConfig() {
-    return {
-      VERSION: "1.0.0",
-      env: process.env.NODE_ENV || "development"
-    };
-  }
-
-  constructor(values = {}) {
-    this.setValues(values);
-  }
-
-  setValues(values) {
-    Object.assign(this, values);
-  }
-
-  static get defaultConfig() {
-    return {
-      foo: 'bar',
-      baz: true
-    };
-  }
-
-  static get configSchema() {
-    return {
-      type: 'object',
-      properties: {
-        foo: { type: 'string' },
-        baz: { type: 'boolean' }
-      }
-    };
-  }
-
-  validate() {
-    try {
-      const schema = Config.configSchema;
-      const validator = new (require('jsonschema').Validator)();
-      validator.checkSchema(schema);
-      validator.validate(this, schema);
-    } catch (e) {
-      console.error('Config validation error:', e);
-      throw e;
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.ai/schemas/TEDS_Schema.json",
+  "title": "TEDS_V2_0_0",
+  "description": "Technical Evidence Data Set (TEDS) Schema for RRP forensic capture. Refined version emphasizing strict type adherence, cryptographic linkage, and structured metrics.",
+  "type": "object",
+  "required": [
+    "metadata",
+    "components",
+    "attestation"
+  ],
+  "$defs": {
+    "CryptographicHash": {
+      "type": "string",
+      "description": "A mandatory, high-entropy SHA-256 cryptographic hash (64 characters).",
+      "minLength": 64,
+      "maxLength": 64,
+      "pattern": "^[0-9a-fA-F]{64}$"
+    },
+    "SignaturePayload": {
+      "type": "string",
+      "description": "Cryptographic signature of the canonicalized TEDS artifact (e.g., Base64 encoded signature).",
+      "minLength": 128
+    },
+    "FailureStageCode": {
+      "type": "string",
+      "pattern": "^S(0[2-9]|1[0-1])$",
+      "description": "The specific RRP stage (S02 through S11) that triggered the capture."
+    }
+  },
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "description": "Mandatory descriptive data about the capture event.",
+      "required": [
+        "TEDS_Version",
+        "capture_timestamp",
+        "failure_stage",
+        "protocol_failure_code"
+      ],
+      "properties": {
+        "TEDS_Version": {
+          "type": "string",
+          "const": "2.0.0",
+          "description": "Schema version used (must be 2.0.0)."
+        },
+        "capture_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 UTC timestamp of TEDS initiation."
+        },
+        "failure_stage": {
+          "$ref": "#/$defs/FailureStageCode"
+        },
+        "protocol_failure_code": {
+          "type": "string",
+          "description": "Specific violation code or RRP trigger identifier (e.g., GAX-V003)."
+        }
+      },
+      "additionalProperties": false
+    },
+    "components": {
+      "type": "object",
+      "description": "Captured system snapshots and evidence artifacts.",
+      "required": [
+        "Current_ASM_Snapshot",
+        "Active_Configuration_Roots",
+        "Execution_Environment_Context"
+      ],
+      "properties": {
+        "Current_ASM_Snapshot": {
+          "type": "object",
+          "description": "Snapshot of the Active System Memory (ASM) component states.",
+          "required": [
+            "artifact_id",
+            "TEMM",
+            "ECVM",
+            "PVLM",
+            "MPAM",
+            "ADTM"
+          ],
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "const": "ASM"
+            },
+            "TEMM": {
+              "$ref": "#/$defs/CryptographicHash",
+              "description": "Trusted Execution Manager Model state hash."
+            },
+            "ECVM": {
+              "$ref": "#/$defs/CryptographicHash",
+              "description": "Execution Control Vector Map hash."
+            },
+            "PVLM": {
+              "$ref": "#/$defs/CryptographicHash",
+              "description": "Physical Virtual Link Map hash."
+            },
+            "MPAM": {
+              "$ref": "#/$defs/CryptographicHash",
+              "description": "Micro-Program Access Map hash."
+            },
+            "ADTM": {
+              "$ref": "#/$defs/CryptographicHash",
+              "description": "Autonomous Drift Tolerance Model hash."
+            }
+          },
+          "additionalProperties": false
+        },
+        "Active_Configuration_Roots": {
+          "type": "object",
+          "description": "Bundle of critical immutable configuration root hashes.",
+          "required": [
+            "artifact_id",
+            "CSR_Hash",
+            "ACVD_Hash",
+            "FASV_Hash",
+            "EPB_Hash"
+          ],
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "const": "CR_Bundle"
+            },
+            "CSR_Hash": {
+              "$ref": "#/$defs/CryptographicHash",
+              "description": "Configuration Set Root Hash."
+            },
+            "ACVD_Hash": {
+              "$ref": "#/$defs/CryptographicHash",
+              "description": "Active Core Version Delta Hash."
+            },
+            "FASV_Hash": {
+              "$ref": "#/$defs/CryptographicHash",
+              "description": "Forensic Archive Security Vector Hash."
+            },
+            "EPB_Hash": {
+              "$ref": "#/$defs/CryptographicHash",
+              "description": "Execution Policy Bundle Hash."
+            }
+          },
+          "additionalProperties": false
+        },
+        "Execution_Environment_Context": {
+          "type": "object",
+          "description": "Runtime metrics and log snippets leading to failure.",
+          "required": [
+            "artifact_id",
+            "ResourceUtilizationMetrics",
+            "ExecutionLogSlice"
+          ],
+          "properties": {
+            "artifact_id": {
+              "type": "string",
+              "const": "EEC"
+            },
+            "ResourceUtilizationMetrics": {
+              "type": "array",
+              "$ref": "metrics/RUM_Schema.json",
+              "description": "Structured time series metrics (CPU, Memory, I/O)."
+            },
+            "ExecutionLogSlice": {
+              "type": "string",
+              "description": "Log excerpt. Enforced minimum length of 4KB data for forensic context.",
+              "minLength": 4096
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "attestation": {
+      "type": "object",
+      "description": "Cryptographic proof of TEDS integrity and capture authority.",
+      "required": [
+        "signing_agent",
+        "signature_payload",
+        "signing_public_key_id"
+      ],
+      "properties": {
+        "signing_agent": {
+          "type": "string",
+          "const": "CRoT",
+          "description": "The designated signing authority (Core Root of Trust)."
+        },
+        "signing_mandate": {
+          "type": "string",
+          "description": "Mandate identifier or summary."
+        },
+        "signing_public_key_id": {
+          "type": "string",
+          "description": "Identifier (e.g., key ID or public key hash) used for verification of the signature."
+        },
+        "signature_payload": {
+          "$ref": "#/$defs/SignaturePayload"
+        }
+      },
+      "additionalProperties": false
     }
   }
 }
-
-class LifecycleEvent {
-  constructor(event) {
-    this.event = event;
-  }
-}
-
-class LifecycleHandler {
-  constructor(handler) {
-    this.handler = handler;
-  }
-
-  bind(target = this) {
-    this.handler = this.handler.bind(target);
-  }
-
-  execute() {
-    this.handler();
-  }
-}
-
-class NexusCore {
-  #lifecycle = {
-    configured: false,
-    loaded: false,
-    shuttingDown: false
-  };
-
-  #status = "INIT";
-
-  get status() {
-    return this.#status;
-  }
-
-  set status(value) {
-    this.#status = value;
-    const currentValue = this.#status;
-    const lifecycle = this.#lifecycle;
-    if (value !== 'INIT') {
-      console.log(`NexusCore instance is ${value}.`);
-      if (value === 'SHUTDOWN') {
-        lifecycle.shuttingDown = false;
-      }
-    }
-    if (currentValue === 'INIT' && value !== 'INIT') {
-      lifecycle.configured = true;
-    }
-  }
-
-  get lifecycle() {
-    return this.#lifecycle;
-  }
-
-  configure(config) {
-    this.validateConfig(config);
-    this.onLifecycleEvent("CONFIGURED");
-    this.#lifecycle.configured = true;
-    this.config = config;
-  }
-
-  validateConfig(config) {
-    const configSchema = Config.configSchema;
-    try {
-      const validator = new (require('jsonschema').Validator)();
-      validator.checkSchema(configSchema);
-      validator.validate(config, configSchema);
-    } catch (e) {
-      console.error('Config validation error:', e);
-      throw e;
-    }
-  }
-
-  onLifecycleEvent(event, handler) {
-    const lifecycleHandler = new LifecycleHandler(handler);
-    this.#lifecycle[event] = lifecycleHandler;
-  }
-
-  get on() {
-    return (event, handler) => {
-      const lifecycleEvent = new LifecycleEvent(event);
-      this.onLifecycleEvent(event, handler);
-    };
-  }
-
-  executeLifecycleEvent(event) {
-    if (this.#lifecycle[event]) {
-      this.#lifecycle[event].bind(this).execute();
-    }
-  }
-
-  async load() {
-    await this.executeLifecycleEvent("CONFIGURED");
-    try {
-      console.log("Loading...");
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log("Loading complete...");
-      this.#lifecycle.loaded = true;
-      this.executeLifecycleEvent("LOADED");
-    } catch (e) {
-      console.error('Load error:', e);
-    }
-  }
-
-  async shutdown() {
-    try {
-      if (!this.#lifecycle.shuttingDown) {
-        console.log("Shutdown initiated...");
-        this.#lifecycle.shuttingDown = true;
-        this.executeLifecycleEvent("SHUTTING_DOWN");
-        console.log("Shutdown complete...");
-        this.status = "SHUTDOWN";
-      }
-    } catch (e) {
-      console.error("Shutdown error:", e);
-    }
-  }
-
-  async start() {
-    const startMethodOrder = ["configure", "load", "shutdown"];
-    for (const methodName of startMethodOrder) {
-      if (this[methodName] instanceof Function) {
-        await this[methodName]();
-      }
-    }
-  }
-
-  async destroy() {
-    this.status = "DESTROYED";
-    this.#lifecycle = {
-      configured: false,
-      loaded: false,
-      shuttingDown: false
-    };
-  }
-
-  async on(event, handler) {
-    await this.onLifecycleEvent(event, handler);
-  }
-}
-
-const nexusCore = new NexusCore();
-nexusCore.on('DESTROYED', () => {
-  console.log("NexusCore instance destroyed.");
-});
-nexusCore.configure(Config.defaultConfig);
-nexusCore.start();
-nexusCore.load();
-nexusCore.shutdown();
-nexusCore.destroy();
