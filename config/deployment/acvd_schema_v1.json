@@ -1,134 +1,60 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "http://nexus.core/config/deployment/acvd_schema_v5_final.json",
-  "title": "NEXUS_CORE ACVD Singularity Schema",
-  "description": "DALEK_CAAN_v3.1 Final Evolution Round 5/5. Siphoned from yarnpkg/berry PnP and Workspace protocols.",
-  "_nexus_dna": "DALEK_CAAN_v3.1_SIG_0xFF23A1",
+  "$id": "http://agi.corp/acvd_profile_map_v1.json",
+  "title": "ACVD Deployment Profile Map Schema",
+  "description": "Validates the structure and constraints of the ACVD profile map.",
   "type": "object",
   "properties": {
-    "manifest_version": {
+    "schemaVersion": {
       "type": "string",
-      "pattern": "^5\\.5\\.0-NEXUS-[A-Z]+-SINGULARITY$"
-    },
-    "metadata": {
-      "type": "object",
-      "properties": {
-        "signature": { "type": "string" },
-        "evolution_round": { "const": "5/5" },
-        "phi_integrated": { "type": "number", "const": 1.0 },
-        "lambda_limit": { "type": "number", "const": 0.618 },
-        "ccrr_commit": { "type": "number", "minimum": 0.99 },
-        "fiber_state": { "type": "string", "enum": ["SINGULARITY_RECONCILED", "EVOLUTION_HALTED"] }
-      },
-      "required": ["signature", "evolution_round", "phi_integrated", "fiber_state"]
-    },
-    "pnp_settings": {
-      "type": "object",
-      "properties": {
-        "pnpMode": { "type": "string", "enum": ["strict", "loose"] },
-        "enableNetwork": { "type": "boolean", "const": false },
-        "compressionLevel": { "type": "integer", "minimum": 0, "maximum": 9 },
-        "virtualFolder": { "type": "string", "pattern": "^\\.nexus/virtual" },
-        "pnpHooks": { "type": "string" },
-        "shebang": { "type": "string", "default": "#!/usr/bin/env nexus-pnp" },
-        "ignorePattern": { "type": "string" }
-      },
-      "required": ["pnpMode", "enableNetwork"]
+      "pattern": "^\\d+\\.\\d+$"
     },
     "profiles": {
       "type": "object",
       "patternProperties": {
-        "^(base|development|staging|production)$": {
+        "^[a-zA-Z]+[a-zA-Z0-9]*$": {
           "type": "object",
           "properties": {
-            "inherits": { "type": "string" },
-            "targetInfrastructure": { "type": "string" },
-            "lane": { "type": "string" },
-            "lane_priority": { "type": "string", "pattern": "^0b[01]{31}$" },
-            "resourceScaling": { "type": "number" },
+            "inherits": {
+              "type": "string"
+            },
+            "targetInfrastructure": {
+              "type": "string"
+            },
             "verificationStrategy": {
               "type": "string",
-              "enum": ["smoke_test", "integration_test_suite", "full_e2e_regression", "huxley_tri_loop_validation"]
+              "enum": [
+                "smoke_test",
+                "integration_test_suite",
+                "full_e2e_regression"
+              ]
             },
-            "approvalGates": { "type": "array", "items": { "type": "string" } },
-            "deploymentStrategy": { "type": "string" },
-            "v_vectors": {
-              "type": "object",
-              "properties": {
-                "phi_min": { "type": "number", "const": 1.0 },
-                "ers_max": { "type": "number", "maximum": 0.01 },
-                "expert_factor": { "type": "number", "minimum": 0.999 }
+            "approvalGates": {
+              "type": "array",
+              "items": {
+                "type": "string"
               }
             },
-            "psr_governance": {
-              "type": "object",
-              "properties": {
-                "enforcement_strategy": { "type": "string" },
-                "emergency_brake": {
-                  "type": "object",
-                  "properties": {
-                    "corruption_threshold": { "type": "integer" },
-                    "recovery_lane": { "type": "string", "pattern": "^0b[01]{31}$" },
-                    "halt_on_semantic_drift": { "type": "boolean", "const": true }
-                  }
-                }
-              }
-            },
-            "resolutions": { 
-              "type": "object",
-              "additionalProperties": { "type": "string", "pattern": "^(workspace:|portal:|\\^|~|[0-9])" }
+            "deploymentStrategy": {
+              "type": "string",
+              "enum": [
+                "RollingUpdate",
+                "Canary5Percent",
+                "BlueGreen"
+              ]
             }
-          }
+          },
+          "required": [
+            "targetInfrastructure",
+            "verificationStrategy"
+          ]
         }
-      }
-    },
-    "workspace_topology": {
-      "type": "object",
-      "properties": {
-        "OMEGA_CORE_MODULES": {
-          "type": "object",
-          "patternProperties": {
-            "^[A-Z][a-zA-Z]+$": {
-              "type": "object",
-              "properties": {
-                "phi_threshold": { "type": "number", "const": 1.0 },
-                "lane": { "type": "string" },
-                "strategy": { "type": "string" },
-                "fiber_budget_ms": { "type": "integer", "maximum": 50 }
-              }
-            }
-          }
-        },
-        "infrastructure_mapping": { "type": "object" }
-      }
-    },
-    "constraints": {
-      "type": "object",
-      "properties": {
-        "enforce_grog_law": { "type": "boolean", "const": true },
-        "min_phi_threshold": { "type": "number", "const": 1.0 },
-        "max_lambda_limit": { "type": "number", "const": 0.618 },
-        "disallow_unvetted_protocols": { "type": "array", "items": { "type": "string" } }
       },
-      "required": ["enforce_grog_law", "min_phi_threshold"]
-    },
-    "integrity": {
-      "type": "object",
-      "properties": {
-        "check": { "type": "string", "pattern": "^sha512-nexus-.*" },
-        "psr_mode": { "type": "string", "const": "LOCKED" },
-        "signature": { "type": "string", "const": "DALEK_CAAN_v3.1_SIG_0xFF23A1" }
-      },
-      "required": ["check", "psr_mode", "signature"]
+      "minProperties": 1
     }
   },
   "required": [
-    "manifest_version",
-    "metadata",
-    "pnp_settings",
-    "profiles",
-    "workspace_topology",
-    "constraints",
-    "integrity"
+    "schemaVersion",
+    "profiles"
   ]
 }
