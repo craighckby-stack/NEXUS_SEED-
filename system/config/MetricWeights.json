@@ -1,60 +1,20 @@
 {
-  "SchemaVersion": "AETM-v2.0",
-  "Description": "Configuration file defining weights and properties for the Core Adaptive Evolution Target Metric (CAETM). Weights are adjustable based on context (CSR assessment).",
-  "MetricsDefinition": {
-    "EfficiencyScore": {
-      "unit": "%",
-      "range": [0.0, 100.0],
-      "optimization_goal": "Maximize",
-      "description": "Composite score reflecting runtime performance and quality against planned execution."
-    },
-    "ResourceUtilization": {
-      "unit": "Ratio",
-      "range": [0.0, 1.0],
-      "optimization_goal": "Minimize",
-      "description": "Normalized usage of assigned computational and storage resources."
-    },
-    "MandateFulfillmentRatio": {
-      "unit": "Ratio",
-      "range": [0.0, 1.0],
-      "optimization_goal": "Maximize",
-      "description": "Percentage completion and acceptance criteria met for the defined mandate scope."
-    },
-    "RiskMitigationIndex": {
-      "unit": "Index",
-      "range": [0.0, 1.0],
-      "optimization_goal": "Maximize",
-      "description": "Measure of successful anticipation and mitigation of identified architectural or operational risks."
-    }
-  },
-  "WeightingProfiles": {
-    "Default_Standard": {
-      "description": "Baseline weights suitable for standard complexity tasks (Low CSR).
-      "metrics": {
-        "EfficiencyScore": 0.35,
-        "ResourceUtilization": 0.25,
-        "MandateFulfillmentRatio": 0.30,
-        "RiskMitigationIndex": 0.10
+  "TEMM_Weights_V1": {
+    "description": "Canonical weights and ranges for Total Evolved Mandate Metric (TEMM). Should be adjustable based on mandate Complexity, Scope, and Risk (CSR assessment).",
+    "metrics": {
+      "EfficiencyScore": {
+        "range": [0.0, 100.0],
+        "weight": 0.45
+      },
+      "ResourceUtilization": {
+        "range": [0.0, 1.0],
+        "weight": 0.30
+      },
+      "MandateFulfillmentRatio": {
+        "range": [0.5, 1.0],
+        "weight": 0.25
       }
     },
-    "High_Complexity_Focus": {
-      "description": "Weights emphasizing precision and successful completion (High Complexity/Scope).",
-      "metrics": {
-        "EfficiencyScore": 0.20,
-        "ResourceUtilization": 0.15,
-        "MandateFulfillmentRatio": 0.50,
-        "RiskMitigationIndex": 0.15
-      }
-    },
-    "High_Risk_Control": {
-      "description": "Weights emphasizing safety, controlled resource usage, and robust risk management (High Risk).",
-      "metrics": {
-        "EfficiencyScore": 0.20,
-        "ResourceUtilization": 0.35,
-        "MandateFulfillmentRatio": 0.25,
-        "RiskMitigationIndex": 0.20
-      }
-    }
-  },
-  "target_version": "v94.1"
+    "target_version": "v94.1"
+  }
 }
