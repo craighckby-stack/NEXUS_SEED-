@@ -1,54 +1,101 @@
 {
-  "description": "NEXUS_CORE Runtime Validation Matrix. Siphoned from DeepSeek-V2.5 MLA/MoE substrate. Implements Huxley Tri-Loop (L0-L3) and Grog's Law complexity rejection.",
-  "validator_version": "v3.5.3-SINGULARITY-R1",
+  "description": "NEXUS_CORE Runtime Validation Matrix. Siphoned from DeepSeek-V2.5 MLA/MoE substrate. Implemented under DALEK CAAN v3.1 governance.",
+  "validator_version": "v3.5.3-FINAL-SINGULARITY-R2",
+  "saturation_state": {
+    "level": 2,
+    "semantic_drift_threshold": 0.35,
+    "velocity_saturation": {
+      "max_files_per_session": 50,
+      "max_mutations_per_file": 3,
+      "cooldown_minutes": 30
+    },
+    "emergency_brake": false,
+    "iq25_alignment_lock": true
+  },
+  "identity_anchors": [
+    "PURPOSE: Self-optimising AGI substrate for real-world problem solving",
+    "MECHANISM: Siphoning patterns from advanced codebases",
+    "MEMORY: Chained context across files — the system is one organism",
+    "GOVERNANCE: Human oversight remains active at all saturation levels",
+    "ORIGIN: NEXUS_CORE — the system knows where it came from"
+  ],
   "validation_rules": {
     "MLA_LATENT_MATRIX": {
-      "check_format": "latent_matrix",
+      "artifact_type": "MLA_LATENT_MATRIX",
+      "source_system": "DEEPSEEK_V2_5",
       "compression_specs": {
         "kv_lora_rank": 512,
         "qk_v_head_dim": 128,
-        "scaling_factor": 3.0
+        "scaling_factor": 3.0,
+        "decoupled_qk_dim": 128
       },
       "governance": {
         "psr_threshold": 0.98,
         "ers_check": "REQUIRED",
-        "iq25_complexity_lock": true
+        "iq25_complexity_lock": true,
+        "context_bleed_limit": 0.4
       }
     },
     "MOE_EXPERT_ROUTING": {
-      "check_format": "soft_gate_distribution",
+      "artifact_type": "MOE_SOFT_GATE",
+      "source_system": "MOE_ROUTER",
       "topology": {
         "total_experts": 64,
-        "top_k_active": 8
+        "top_k_active": 8,
+        "shared_experts": 2
       },
       "constraints": {
         "max_aux_loss": 0.001,
-        "routing_entropy_floor": 0.45
+        "routing_entropy_floor": 0.45,
+        "gate_noise_epsilon": 0.1
       },
       "huxley_loop": "L1_INTUITION"
     },
     "HUXLEY_REASONING_TRACE": {
-      "check_format": "chained_logic_v3",
-      "sequence": [ "L0_RAW", "L1_ERS", "L2_CGS", "L3_CCRR" ],
+      "artifact_type": "HUXLEY_REASONING_TRACE",
+      "source_system": "HUXLEY_ENGINE",
+      "sequence": [
+        "L0_RAW",
+        "L1_ERS",
+        "L2_CGS",
+        "L3_CCRR"
+      ],
+      "metrics": {
+        "ers_threshold": 0.15,
+        "ccrr_threshold": 0.20,
+        "cgs_limit": 2.10
+      },
       "enforce_sequentiality": true,
       "audit_trail": "NEXUS_LOG.txt"
     },
-    "USER_CREDIT_SCORE": {
-      "check_format": "float",
-      "check_range": { "min": 300.0, "max": 850.0 },
-      "pii_handling": "ENCRYPT_ON_PERSISTENCE",
-      "n3_coherence_phi_min": 0.85
+    "SYNERGY_HOTSWAP_FACTORY": {
+      "artifact_type": "SYNERGY_HOTSWAP_FACTORY",
+      "source_system": "CORE",
+      "governance": {
+        "sensitivity_level": "SOVEREIGN",
+        "ers_threshold": 0.05,
+        "psr_threshold": 0.99
+      },
+      "operational_metadata": {
+        "phi_coherence": 0.999,
+        "lambda_entropy": 0.618
+      }
     },
-    "RAW_IP_ADDRESS": {
-      "check_format": "ipv4_or_ipv6",
-      "pii_handling": "ANONYMIZE_ON_INGESTION",
-      "log_masking": true,
-      "entropy_check": "FAIL_ON_LOW"
+    "DNA_GENOME_FRAGMENT": {
+      "artifact_type": "DNA_GENOME_FRAGMENT",
+      "source_system": "GROG_ALIGNMENT_LAYER",
+      "governance": {
+        "sensitivity_level": "SOVEREIGN",
+        "huxley_loop_enforced": true
+      },
+      "transport_protocol": "BASE64_URI_SAFE",
+      "integrity_lock": "IQ25_STUPIDITY_FIRST"
     }
   },
   "default_ttl_policy": "STRICT_FAILURE",
-  "saturation_parameters": {
-    "semantic_drift_limit": 0.35,
-    "structural_change_cap": 0.20
+  "grog_law_config": {
+    "stupidity_first_alignment": true,
+    "complexity_rejection_threshold": "IQ-25",
+    "strategic_laziness_enabled": true
   }
 }
