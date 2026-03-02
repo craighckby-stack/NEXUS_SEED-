@@ -1,1 +1,40 @@
-[object Object]
+{
+  "schema_version": "v6.0-R1",
+  "name": "Core Failure Thresholds Manifest (CFTM)",
+  "system_identifier": "GAX/P-01",
+  "metadata": {
+    "status": "Production/Immutable",
+    "updated_at": "2024-07-25T10:00:00Z"
+  },
+  "critical_parameters": {
+    "STABILITY_EPSILON_TAU": {
+      "id": "S-02.1.TAU",
+      "value": 0.0001,
+      "specification": {
+        "data_type": "float64",
+        "units": "scalar",
+        "precision": 4,
+        "source": "IEEE 754 Compliance Check"
+      },
+      "policy": {
+        "severity_level": "WARNING",
+        "enforcement": "DENOMINATOR_CLAMPING",
+        "notes": "Computational safeguard against division by zero during risk assessment."
+      }
+    },
+    "REQUIRED_SAFETY_MARGIN_ALPHA": {
+      "id": "P-01.2.ALPHA",
+      "value": 0.05,
+      "specification": {
+        "data_type": "ratio",
+        "units": "percent_delta",
+        "min_allowable": 0.01
+      },
+      "policy": {
+        "severity_level": "CRITICAL",
+        "enforcement": "P-01_FINALITY_DENIAL",
+        "notes": "Mandatory safety buffer: Efficacy > Risk + Alpha margin. Breach triggers hard fail (P-01 denial)."
+      }
+    }
+  }
+}
