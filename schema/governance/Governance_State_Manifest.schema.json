@@ -18,7 +18,7 @@
     },
     "systemVersion": {
       "type": "string",
-      "description": "The specific Sovereign AGI runtime version this state was captured against (e.g., v94.1).
+      "description": "The specific Sovereign AGI runtime version this state was captured against (e.g., v94.2)."
     },
     "timestamp": {
       "type": "string",
