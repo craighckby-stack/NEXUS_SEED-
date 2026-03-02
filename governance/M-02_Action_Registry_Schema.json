@@ -5,14 +5,20 @@
   "description": "Schema defining the structure of the internal Action Registry, listing all available Capabilities (Target Components), the specific Action Verbs they support, and their full operational definitions (Input/Output schemas, effects, and cost metrics). This registry is the backbone for the Planner (M-03).",
   "type": "object",
   "patternProperties": {
-    "^[A-Z][a-zA-Z0-9]+$": { 
+    "^[A-Z][a-zA-Z0-9]+$": {
       "type": "object",
       "description": "Definitions for all actions available within a specific target component (Capability).",
       "patternProperties": {
-        "^[A-Z_]+$": { 
+        "^[A-Z_]+$": {
           "type": "object",
           "description": "Definition of a specific action verb or primitive operation.",
-          "required": ["description", "parameter_schema", "egress_schema", "side_effects", "cost_metric"],
+          "required": [
+            "description",
+            "parameter_schema",
+            "egress_schema",
+            "side_effects",
+            "cost_metric"
+          ],
           "properties": {
             "description": {
               "type": "string",
@@ -20,13 +26,26 @@
             },
             "status": {
               "type": "string",
-              "enum": ["ACTIVE", "DEPRECATED", "EXPERIMENTAL"],
+              "enum": [
+                "ACTIVE",
+                "DEPRECATED",
+                "EXPERIMENTAL"
+              ],
               "default": "ACTIVE",
               "description": "Operational lifecycle status of the action."
             },
             "side_effects": {
               "type": "array",
-              "items": { "type": "string", "enum": ["FILE_MUTATION", "MEMORY_WRITE", "ENVIRONMENT_CHANGE", "NETWORK_EGRESS", "NONE"] },
+              "items": {
+                "type": "string",
+                "enum": [
+                  "FILE_MUTATION",
+                  "MEMORY_WRITE",
+                  "ENVIRONMENT_CHANGE",
+                  "NETWORK_EGRESS",
+                  "NONE"
+                ]
+              },
               "description": "List of system state changes guaranteed or observed upon successful execution."
             },
             "parameter_schema": {
@@ -39,7 +58,14 @@
             },
             "cost_metric": {
               "type": "string",
-              "enum": ["O(1)", "O(log N)", "O(N)", "O(N^2)", "HIGH_IO", "HEAVY_COMPUTATION"],
+              "enum": [
+                "O(1)",
+                "O(log N)",
+                "O(N)",
+                "O(N^2)",
+                "HIGH_IO",
+                "HEAVY_COMPUTATION"
+              ],
               "default": "O(1)",
               "description": "Approximation of computational or resource complexity (essential for Planner M-03 resource optimization)."
             },
@@ -52,6 +78,28 @@
               "type": "boolean",
               "default": false,
               "description": "Indicates if the action is read-only (i.e., NO_MUTATION should be in side_effects)."
+            }
+          },
+          "if": {
+            "properties": {
+              "is_query_only": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "side_effects": {
+                "not": {
+                  "contains": {
+                    "enum": [
+                      "FILE_MUTATION",
+                      "MEMORY_WRITE",
+                      "ENVIRONMENT_CHANGE"
+                    ]
+                  }
+                }
+              }
             }
           },
           "additionalProperties": false
