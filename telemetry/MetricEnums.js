@@ -1,4 +1,4 @@
-export const MetricType = {
+const MetricType = {
     PERFORMANCE_INDICATOR: 'PERFORMANCE_INDICATOR',
     BUSINESS_LOGIC: 'BUSINESS_LOGIC',
     SYSTEM_HEALTH: 'SYSTEM_HEALTH',
@@ -6,13 +6,13 @@ export const MetricType = {
     SECURITY: 'SECURITY'
 };
 
-export const DataType = {
+const DataType = {
     INTEGER: 'INTEGER',
     FLOAT: 'FLOAT',
     BOOLEAN: 'BOOLEAN'
 };
 
-export const AggregationMethod = {
+const AggregationMethod = {
     AVERAGE: 'AVERAGE',
     COUNT: 'COUNT',
     SUM: 'SUM',
@@ -23,9 +23,16 @@ export const AggregationMethod = {
     P99: 'P99'
 };
 
-export const CriticalityLevel = {
+const CriticalityLevel = {
     CRITICAL: 'CRITICAL',
     MAJOR: 'MAJOR',
     MINOR: 'MINOR',
     INFORMATIONAL: 'INFORMATIONAL'
+};
+
+module.exports = {
+    MetricType,
+    DataType,
+    AggregationMethod,
+    CriticalityLevel
 };
