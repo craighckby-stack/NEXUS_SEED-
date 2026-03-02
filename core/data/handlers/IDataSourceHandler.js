@@ -7,13 +7,6 @@
  */
 class IDataSourceHandler {
     
-    constructor() {
-        // Enforces that this class cannot be instantiated directly, only subclassed.
-        if (new.target === IDataSourceHandler) {
-            throw new TypeError("Cannot instantiate abstract class IDataSourceHandler directly.");
-        }
-    }
-
     /**
      * Executes the specific data interaction strategy.
      * @param {Object} context - Execution context data (e.g., query details, payload, connection info).
