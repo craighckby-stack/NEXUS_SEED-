@@ -14,7 +14,7 @@
     "policyVersion": {
       "type": "string",
       "description": "Semantic versioning identifier for the configuration.",
-      "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$"
+      "pattern": "^v[0-9]+\.[0-9]+\.[0-9]+$"
     },
     "temporalSettings": {
       "type": "object",
