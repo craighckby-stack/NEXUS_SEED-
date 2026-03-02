@@ -1,62 +1,32 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://agiv94.1/schemas/rfse-config-v3.0.json",
-  "title": "RFSE (Rollback Feasibility Scoring Engine) Configuration",
-  "description": "Configuration schema for calculating the R-01 Complexity Index, utilized for risk assessment in autonomous deployments. V3.0 introduces internal definitions and configurable fallback multipliers.",
+  "$id": "https://agiv94.1/schemas/rfse-config-v1.0.json",
+  "title": "Rollback Feasibility Scoring Engine Configuration",
+  "description": "Configuration schema defining base complexity weights for R-01 calculation (Rollback Complexity Index), directly utilized by MEE/L2 simulation.",
   "type": "object",
-  "required": ["base_complexity_factors", "deployment_target_multipliers"],
-  "$defs": {
-    "WeightFactor": {
-      "type": "number",
-      "minimum": 0.001,
-      "description": "A positive numerical factor or exponent used in the complexity calculation."
-    }
-  },
+  "required": ["default_weights", "target_specific_multipliers"],
   "properties": {
-    "base_complexity_factors": {
+    "default_weights": {
       "type": "object",
-      "description": "Core quantitative coefficients applied to various change metrics.",
+      "description": "Base complexity scores and functional dependencies used in R-01 formula.",
       "properties": {
-        "change_metrics": {
-          "type": "object",
-          "description": "Factors derived from the change set itself (e.g., size, depth).",
-          "properties": {
-            "artifact_size_exponent": { "$ref": "#/$defs/WeightFactor", "maximum": 5.0, "description": "Exponent applied to normalized artifact size. High value increases size impact." }, 
-            "manifest_depth_linear_factor": { "$ref": "#/$defs/WeightFactor", "maximum": 1.0, "description": "Linear weight for the count of manifest entries (depth/scope)." }
-          },
-          "required": ["artifact_size_exponent", "manifest_depth_linear_factor"]
-        },
-        "system_impact_modifiers": {
-          "type": "object",
-          "description": "Modifiers applied based on the nature of the systems involved.",
-          "properties": {
-            "persistence_layer_factor": { "$ref": "#/$defs/WeightFactor", "minimum": 1.0, "description": "Multiplier applied if the deployment touches stateful persistence layers." }
-          },
-          "required": ["persistence_layer_factor"]
-        }
+        "artifact_size_exponent": {"type": "number", "minimum": 0.1, "description": "Exponent applied to artifact size (scaled units) in R-01 score."}, 
+        "manifest_depth_linear_factor": {"type": "number", "minimum": 0.01, "description": "Linear factor for complexity based on the count of change manifest entries."}, 
+        "persistence_impact_modifier": {"type": "number", "minimum": 1, "description": "Modifier applied when the transition involves stateful persistence layers."}
       },
-      "required": ["change_metrics", "system_impact_modifiers"]
+      "required": ["artifact_size_exponent", "manifest_depth_linear_factor", "persistence_impact_modifier"]
     },
-    "deployment_target_multipliers": {
+    "target_specific_multipliers": {
       "type": "object",
-      "description": "Multipliers indexed by GSC V4.0 transition target type. Represents inherent systemic risk. Includes a mandatory fallback for undefined targets.",
+      "description": "Multipliers applied based on the GSC V4.0 transition target type (LOGIC_CORE typically carries higher intrinsic risk).",
       "properties": {
-        "CONFIG": { "$ref": "#/$defs/WeightFactor", "minimum": 1.0 }, 
-        "LOGIC_CORE": { "$ref": "#/$defs/WeightFactor", "minimum": 5.0 }, 
-        "MODEL_WEIGHTS": { "$ref": "#/$defs/WeightFactor", "minimum": 10.0 }, 
-        "DATA_SET": { "$ref": "#/$defs/WeightFactor", "minimum": 2.0 }, 
-        "INFRA_STRUCT": { "$ref": "#/$defs/WeightFactor", "minimum": 8.0 },
-        "default_fallback_multiplier": { 
-            "type": "number", 
-            "minimum": 1.0,
-            "description": "The multiplier applied to any transition target type not explicitly listed above."
-        }
+        "CONFIG": {"type": "number", "minimum": 1}, 
+        "LOGIC_CORE": {"type": "number", "minimum": 5}, 
+        "MODEL_WEIGHTS": {"type": "number", "minimum": 10}, 
+        "DATA_SET": {"type": "number", "minimum": 2}, 
+        "INFRA_STRUCT": {"type": "number", "minimum": 8}
       },
-      "required": ["CONFIG", "LOGIC_CORE", "MODEL_WEIGHTS", "DATA_SET", "INFRA_STRUCT", "default_fallback_multiplier"],
-      "patternProperties": {
-        "^[A-Z_]+$": { "$ref": "#/$defs/WeightFactor" }
-      },
-      "additionalProperties": false
+      "required": ["CONFIG", "LOGIC_CORE", "MODEL_WEIGHTS", "DATA_SET", "INFRA_STRUCT"]
     }
   },
   "additionalProperties": false
