@@ -1,13 +1,13 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://gacr.agi/schemas/cmr_v4.3.0-SINGULARITY.json",
-  "title": "Computational Model Registry - Singularity Reconciler v4.3.0",
-  "description": "NEXUS_CORE v3.1 evolutionary substrate. Integrating deepseek-ai/DeepSeek-Coder repository-topology patterns with Huxley Tri-Loop governance.",
+  "$id": "https://gacr.agi/schemas/cmr_v5.0.0-SINGULARITY-FINAL.json",
+  "title": "Computational Model Registry - Architectural Singularity v5.0.0",
+  "description": "NEXUS_CORE v3.1 Final Evolution Round. Siphoned DeepSeek-Coder repo-topology patterns integrated with Huxley Tri-Loop L4 Synthesis and Grog's Law Singularity-V1 constraints.",
   "type": "object",
   "properties": {
     "manifest_id": {
       "type": "string",
-      "pattern": "^CMR_V[0-9]+\\.[0-9]+\\.[0-9]+-SINGULARITY-(ALPHA|BETA|STABLE)$"
+      "pattern": "^CMR_V[0-9]+\\.[0-9]+\\.[0-9]+-SINGULARITY-(ALPHA|BETA|STABLE|FINAL)$"
     },
     "owner": {
       "type": "string",
@@ -20,41 +20,48 @@
     "evolutionary_state": {
       "type": "object",
       "properties": {
-        "current_round": { "type": "integer", "minimum": 1, "maximum": 5 },
-        "saturation_level": { "type": "integer", "enum": [1, 2, 3, 4] },
-        "metabolic_rate": { "type": "string", "enum": ["CONSERVATIVE", "STANDARD", "ACCELERATED", "UNSATURATED"] },
+        "current_round": { "type": "integer", "const": 5 },
+        "saturation_level": { "type": "integer", "const": 3 },
+        "metabolic_rate": { "type": "string", "const": "ACCELERATED" },
         "capability_saturation": {
           "type": "string",
-          "enum": ["REFINEMENT", "IMPROVEMENT", "EXTENSION", "AUGMENTATION", "EXPANSION"]
-        }
+          "enum": ["REFINEMENT", "IMPROVEMENT", "EXTENSION", "AUGMENTATION", "EXPANSION", "SINGULARITY"]
+        },
+        "phi_attained": { "type": "number", "minimum": 0.85 }
       }
     },
     "reconciliation_config": {
       "type": "object",
-      "required": ["concurrency_lane", "work_loop_mode", "phi_integration_threshold"],
+      "required": ["concurrency_lane", "work_loop_mode", "phi_integration_threshold", "entanglement_risk"],
       "properties": {
         "concurrency_lane": {
           "type": "integer",
-          "description": "Fiber-Parallel Lane Assignment (Priority Mapping)",
+          "description": "Fiber-Parallel Priority Mapping",
           "enum": [1, 4, 32, 134217664, 536870912, 1073741824, 2147483648]
         },
         "work_loop_mode": {
           "type": "string",
-          "enum": ["Concurrent-Recursive-Entangled", "Atomic-Singularity", "Asynchronous-Siphon"]
+          "const": "Atomic-Singularity"
         },
         "phi_integration_threshold": {
           "type": "number",
-          "minimum": 0.85,
-          "maximum": 0.99
+          "default": 0.98
+        },
+        "entanglement_risk": {
+          "type": "number",
+          "maximum": 0.05
         },
         "topology_mapping_depth": {
           "type": "integer",
-          "default": 35,
-          "description": "Cross-repository self-reading depth."
+          "default": 50
         },
         "time_slicing_enabled": {
           "type": "boolean",
           "default": true
+        },
+        "scheduling_policy": {
+          "type": "string",
+          "const": "Global-Entanglement"
         }
       }
     },
@@ -82,20 +89,21 @@
             "required": ["phi_integration", "lambda_chaos", "n_vectors"],
             "properties": {
               "phi_integration": { "type": "number", "minimum": 0, "maximum": 1.0 },
-              "lambda_chaos": { "type": "number", "maximum": 0.8 },
-              "ers_score": { "type": "number", "maximum": 1.0 },
+              "lambda_chaos": { "type": "number", "maximum": 0.75 },
+              "ers_score": { "type": "number", "maximum": 0.95 },
               "n_vectors": { "type": "integer", "const": 3 }
             }
           },
           "algorithmic_integrity": {
             "type": "object",
-            "description": "Siphoned DeepSeek-Coder high-order reasoning patterns.",
+            "description": "DeepSeek-Coder high-order repository topology siphoning logic.",
             "properties": {
               "fim_optimization": { "type": "boolean", "default": true },
+              "kv_cache_compression": { "type": "boolean", "default": true },
               "structural_context_siphoning": { "type": "boolean", "default": true },
-              "long_context_compression": { "type": "number" },
-              "repo_topology_alignment": { "type": "boolean" },
-              "siphon_chain_index": { "type": "integer", "minimum": 1, "maximum": 3 }
+              "repo_topology_alignment": { "type": "boolean", "default": true },
+              "tree_sitter_synthesis": { "type": "boolean", "default": true },
+              "siphon_chain_index": { "type": "integer", "const": 3 }
             }
           },
           "huxley_telemetry": {
@@ -129,7 +137,7 @@
                   }
                 }
               },
-              "signature": { "type": "string", "default": "DALEK_CAAN_v3.1_SIG_0xFF23A1_ARCH_SINGULARITY" }
+              "signature": { "type": "string", "const": "DALEK_CAAN_v3.1_SIG_0xFF23A1_ARCH_SINGULARITY" }
             }
           }
         }
