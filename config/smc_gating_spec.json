@@ -1,185 +1,85 @@
 {
-  "description": "GSEP-C State Machine Controller (SMC) Configuration: Defining atomic stage constraints, explicit transition gates, and mandated I/O contracts. (Refactored v94.1)",
+  "description": "GSEP-C State Machine Controller (SMC) Configuration: Defining atomic stage constraints, explicit transition gates, and mandated I/O contracts.",
   "pipeline_id": "GSEP-C",
-  "version": "3.0.0",
+  "version": "2.0.0",
   "metadata": {
     "system_criticality": "Tier 1",
-    "transition_strategy": "Mandatory Gated Sequencing"
-  },
-  "artifact_catalog": {
-    "A01_BOOT_TOKEN": {
-      "description": "System Bootstrap Confirmation Token."
-    },
-    "A02_CSR": {
-      "description": "Certified Signing Request (CSR)."
-    },
-    "A03_VALIDATION_PASS": {
-      "description": "Stage 02 Validation Success Signal."
-    },
-    "A04_ECVM": {
-      "description": "EC Validation Metric."
-    },
-    "A05_TEMM": {
-      "description": "Temporal Metric Map."
-    },
-    "A06_COMMITMENT_LOCK": {
-      "description": "Final P01 Commitment Lock Artifact."
-    },
-    "A07_RECEIPT": {
-      "description": "State Transition Receipt."
-    }
+    "transition_policy": "Strict Sequential Gating"
   },
   "stages": {
     "S00_INIT": {
-      "inputs": [
-        {
-          "artifact_key": "SYSTEM_BOOTSTRAP_SIGNAL",
-          "required": true
-        }
-      ],
+      "inputs": ["SYSTEM_BOOTSTRAP_SIGNAL"],
       "actor": "System Host",
       "outputs": [
-        {
-          "artifact_key": "A01_BOOT_TOKEN"
-        }
+        {"name": "S00_START_TOKEN", "artifact_id": "GSEP-C-A01"}
       ],
       "transitions": {
-        "T_SUCCESS": "S01_CRT_GEN",
-        "T_FAILURE": "E99_HALT"
+        "success": "S01_CRT_GEN",
+        "default_failure": "E99_HALT"
       }
     },
     "S01_CRT_GEN": {
-      "inputs": [
-        {
-          "artifact_key": "A01_BOOT_TOKEN",
-          "required": true
-        }
-      ],
+      "inputs": ["S00_START_TOKEN"],
       "actor": "CRoT Agent",
       "outputs": [
-        {
-          "artifact_key": "A02_CSR"
-        }
+        {"name": "CSR", "artifact_id": "GSEP-C-A02"}
       ],
       "transitions": {
-        "T_SUCCESS": "S02_PASS_VALIDATE"
+        "success": "S02_PASS_VALIDATE"
       }
     },
     "S02_PASS_VALIDATE": {
-      "inputs": [
-        {
-          "artifact_key": "A02_CSR",
-          "required": true
-        }
-      ],
+      "inputs": ["CSR"],
       "actor": "Verifier Node",
       "timeout_s": 30,
       "outputs": [
-        {
-          "artifact_key": "A03_VALIDATION_PASS"
-        }
+        {"name": "S02_PASS", "artifact_id": "GSEP-C-A03"}
       ],
       "transitions": {
-        "T_SUCCESS": "S07_ECVM_CALC",
-        "T_VALIDATION_FAIL": "S98_AUDIT_FALLBACK"
+        "success": "S07_ECVM_CALC"
       }
     },
     "S07_ECVM_CALC": {
-      "inputs": [
-        {
-          "artifact_key": "A03_VALIDATION_PASS",
-          "required": true,
-          "note": "Assumes S02 output satisfies prerequisite derived from skipped S03-S06 stages."
-        },
-        {
-          "artifact_key": "A02_CSR",
-          "required": true
-        }
-      ],
+      "inputs": ["S06_PASS"],
       "actor": "EMS",
       "outputs": [
-        {
-          "artifact_key": "A04_ECVM"
-        }
+        {"name": "ECVM", "artifact_id": "GSEP-C-A04"}
       ],
       "transitions": {
-        "T_SUCCESS": "S08_TEMM_CALC"
+        "success": "S08_TEMM_CALC"
       }
     },
     "S08_TEMM_CALC": {
-      "inputs": [
-        {
-          "artifact_key": "A04_ECVM",
-          "required": true
-        }
-      ],
+      "inputs": ["ECVM"],
       "actor": "EMS",
       "outputs": [
-        {
-          "artifact_key": "A05_TEMM"
-        }
+        {"name": "TEMM", "artifact_id": "GSEP-C-A05"}
       ],
       "transitions": {
-        "T_SUCCESS": "S11_COMMITMENT_LOCK"
+        "success": "S11_COMMITMENT_LOCK"
       }
     },
     "S11_COMMITMENT_LOCK": {
-      "inputs": [
-        {
-          "artifact_key": "A02_CSR",
-          "required": true
-        },
-        {
-          "artifact_key": "A04_ECVM",
-          "required": true
-        },
-        {
-          "artifact_key": "A05_TEMM",
-          "required": true
-        }
-      ],
+      "inputs": ["CSR", "ECVM", "TEMM"],
       "actor": "GAX Executor",
-      "gating_policy_id": "P-01_ACVD_FINALITY",
+      "gating_rule": "P-01 Finality (ACVD)",
       "outputs": [
-        {
-          "artifact_key": "A06_COMMITMENT_LOCK"
-        }
+        {"name": "P01_COMMITMENT_LOCK", "artifact_id": "GSEP-C-A06"}
       ],
       "transitions": {
-        "T_SUCCESS": "S14_RECEIPT_GEN",
-        "T_POLICY_FAIL": "S11_AUDIT_LOG_FALLBACK"
+        "success": "S14_RECEIPT_GEN",
+        "validation_fail": "S11_AUDIT_LOG_FALLBACK"
       }
     },
     "S14_RECEIPT_GEN": {
-      "inputs": [
-        {
-          "artifact_key": "A06_COMMITMENT_LOCK",
-          "required": true
-        }
-      ],
+      "inputs": ["P01_COMMITMENT_LOCK"],
       "actor": "Sentinel",
       "outputs": [
-        {
-          "artifact_key": "A07_RECEIPT"
-        }
+        {"name": "STATE_TRANSITION_RECEIPT", "artifact_id": "GSEP-C-A07"}
       ],
       "transitions": {
-        "T_SUCCESS": "F99_COMPLETED"
+        "success": "F99_COMPLETED"
       }
-    },
-    "E99_HALT": {
-      "actor": "System Controller",
-      "policy": "Halt and Log Critical Error.",
-      "terminal": true
-    },
-    "F99_COMPLETED": {
-      "actor": "System Controller",
-      "policy": "Final success state.",
-      "terminal": true
-    },
-    "S98_AUDIT_FALLBACK": {
-        "actor": "System Auditor",
-        "policy": "Standardized failure path for non-critical validation issues."
     }
   }
 }
