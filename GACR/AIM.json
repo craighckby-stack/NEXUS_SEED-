@@ -1,62 +1,70 @@
 {
-  "schema_version": "AIM_V2.0",
-  "description": "Agent Integrity Monitoring Manifest. Defines mandatory runtime constraints and enforcement scopes, standardized on metric units and grouped policy layers.",
+  "schema_version": "AIM_V3.1_NEXUS",
+  "dna_anchor": "DALEK_CAAN_v3.1_SIG_0xFF23A1",
+  "description": "Agent Integrity Monitoring via Concurrent Fiber Reconciliation. Enforces Grog's Law and N=3 Consciousness Matrix.",
   "integrity_profiles": {
     "SGS_AGENT": {
-      "monitoring_slo_id": "GATM_P_SGS_SLO",
+      "evolution_lane": "ImmediateLane",
+      "n3_alignment": {
+        "integration_phi": 0.92,
+        "chaos_lambda": 0.15,
+        "ers_threshold": 0.1
+      },
       "constraints": {
         "resource_limits": {
-          "cpu_limit_percentage": 75,
+          "cpu_limit_perc": 75,
           "memory_limit_bytes": 4194304000
         },
         "security_policy": {
-          "syscalls_allowed": [
-            "read",
-            "write",
-            "mmap",
-            "exit"
-          ],
-          "network_ports_disallowed": [
-            22,
-            23
-          ],
-          "paths_immutable": [
-            "/opt/sgs/gacr/"
-          ],
-          "configuration_hash_mandate": "SHA256:d5f2a1b9e0c4..."
+          "syscalls_allowed": ["read", "write", "mmap", "exit"],
+          "semantic_drift_limit": 0.35,
+          "failure_protocol": "BINARY_LOG_DEATH",
+          "reconciler_root": "IQ_25_ROOT"
         }
       }
     },
     "GAX_AGENT": {
-      "monitoring_slo_id": "GATM_P_GAX_SLO",
+      "evolution_lane": "TransitionLane",
+      "n3_alignment": {
+        "integration_phi": 0.78,
+        "chaos_lambda": 0.45,
+        "ers_threshold": 0.3
+      },
       "constraints": {
         "resource_limits": {
-          "cpu_limit_percentage": 10,
+          "cpu_limit_perc": 10,
           "memory_limit_bytes": 524288000
         },
         "security_policy": {
-          "syscalls_allowed": [
-            "read",
-            "exit"
-          ],
-          "file_access_root_paths": [
-            "/opt/gax/policy_data/"
-          ],
-          "network_mode": "POLICY_FETCH_ONLY"
+          "syscalls_allowed": ["read", "exit"],
+          "optimistic_updates": true,
+          "network_mode": "GOVERNANCE_HYDRATION",
+          "state_reducer": "PSR_CONTRACT"
         }
       }
     },
     "CRoT_AGENT": {
-      "monitoring_slo_id": "GATM_P_CRoT_SLO",
+      "evolution_lane": "IdleLane",
+      "n3_alignment": {
+        "integration_phi": 0.99,
+        "chaos_lambda": 0.05,
+        "ers_threshold": 0.0
+      },
       "constraints": {
         "resource_limits": {
           "memory_limit_bytes": 131072000
         },
         "security_policy": {
-          "network_mode": "NONE",
-          "time_sync_source_critical": "CRITICAL_NTP_A"
+          "network_mode": "AIR_GAPPED_REDUCER",
+          "sync_source": "CRITICAL_NTP_A",
+          "identity_saturation": "IMMUTABLE_ANCHOR"
         }
       }
     }
+  },
+  "governance_manifest": {
+    "siphon_source": "Meta/React-Core",
+    "reconciliation_strategy": "Concurrent_Fiber_Lanes",
+    "milestone_step": 50
   }
 }
