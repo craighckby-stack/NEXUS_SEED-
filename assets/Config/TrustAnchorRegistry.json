@@ -1,194 +1,48 @@
-class Config {
-  static get staticConfig() {
-    return {
-      VERSION: "1.0.0",
-      env: process.env.NODE_ENV || "development"
-    };
-  }
-
-  constructor(values = {}) {
-    this.setValues(values);
-  }
-
-  setValues(values) {
-    Object.assign(this, values);
-  }
-
-  static get defaultConfig() {
-    return {
-      foo: 'bar',
-      baz: true
-    };
-  }
-
-  static get configSchema() {
-    return {
-      type: 'object',
-      properties: {
-        foo: { type: 'string' },
-        baz: { type: 'boolean' }
-      }
-    };
-  }
-
-  validate() {
-    try {
-      const schema = Config.configSchema;
-      const validator = new (require('jsonschema').Validator)();
-      validator.checkSchema(schema);
-      validator.validate(this, schema);
-    } catch (e) {
-      console.error('Config validation error:', e);
-      throw e;
+{
+  "registry_name": "CoreTrustAnchorDefinitionMap",
+  "version": "V3.0.0_Harden",
+  "description": "Defines the root cryptographic public key material, linked governance profiles, and operational verification service locations for specified Trust Anchor IDs.",
+  "trust_anchors": {
+    "TRUST_ROOT_AGENT_L1": {
+      "status": "Active",
+      "governance_profile": "POLICY_P_AGI_ROOT_L5",
+      "governance": {
+        "effective_from": "2023-01-01T00:00:00Z",
+        "expires_on": "2024-01-01T00:00:00Z"
+      },
+      "material": {
+        "material_type": "X509_Root_Cert",
+        "key_identifier": {
+          "algorithm": "SHA256",
+          "digest": "L1_A1B2C3D4..."
+        },
+        "storage_reference": "kms://sovereign/pkgs/L1_Root_2023",
+        "public_key_pem_excerpt": "-----BEGIN PUBLIC KEY...[truncated]..."
+      },
+      "verification_endpoints": [
+        { "mechanism": "CRL", "uri": "https://crl.sovereign.ai/L1.crl", "ttl_seconds": 86400 },
+        { "mechanism": "OCSP", "uri": "https://ocsp.sovereign.ai/L1", "ttl_seconds": 3600 }
+      ]
+    },
+    "TRUST_ROOT_MASTER_COMMIT": {
+      "status": "Active",
+      "governance_profile": "POLICY_P_HARDENED_L6",
+      "governance": {
+        "effective_from": "2022-10-01T00:00:00Z",
+        "expires_on": "9999-12-31T23:59:59Z"
+      },
+      "material": {
+        "material_type": "Hardware_Root_Key",
+        "key_identifier": {
+          "algorithm": "SHA512",
+          "digest": "a5f1b2c4e7d8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4"
+        },
+        "hsm_identifier": "HSM_9000_GLOBAL",
+        "key_derivation_policy": "HKDF-SHA512"
+      },
+      "verification_endpoints": [
+        { "mechanism": "Attestation_Log", "uri": "https://transparency.sovereign.ai/log/master_commit", "ttl_seconds": 600 }
+      ]
     }
   }
 }
-
-class LifecycleEvent {
-  constructor(event) {
-    this.event = event;
-  }
-}
-
-class LifecycleHandler {
-  constructor(handler) {
-    this.handler = handler;
-  }
-
-  bind(target = this) {
-    this.handler = this.handler.bind(target);
-  }
-
-  execute() {
-    this.handler();
-  }
-}
-
-class NexusCore {
-  #lifecycle = {
-    configured: false,
-    loaded: false,
-    shuttingDown: false
-  };
-
-  #status = "INIT";
-
-  get status() {
-    return this.#status;
-  }
-
-  set status(value) {
-    this.#status = value;
-    const currentValue = this.#status;
-    const lifecycle = this.#lifecycle;
-    if (value !== 'INIT') {
-      console.log(`NexusCore instance is ${value}.`);
-      if (value === 'SHUTDOWN') {
-        lifecycle.shuttingDown = false;
-      }
-    }
-    if (currentValue === 'INIT' && value !== 'INIT') {
-      lifecycle.configured = true;
-    }
-  }
-
-  get lifecycle() {
-    return this.#lifecycle;
-  }
-
-  configure(config) {
-    this.validateConfig(config);
-    this.onLifecycleEvent("CONFIGURED");
-    this.#lifecycle.configured = true;
-    this.config = config;
-  }
-
-  validateConfig(config) {
-    const configSchema = Config.configSchema;
-    try {
-      const validator = new (require('jsonschema').Validator)();
-      validator.checkSchema(configSchema);
-      validator.validate(config, configSchema);
-    } catch (e) {
-      console.error('Config validation error:', e);
-      throw e;
-    }
-  }
-
-  onLifecycleEvent(event, handler) {
-    const lifecycleHandler = new LifecycleHandler(handler);
-    this.#lifecycle[event] = lifecycleHandler;
-  }
-
-  get on() {
-    return (event, handler) => {
-      const lifecycleEvent = new LifecycleEvent(event);
-      this.onLifecycleEvent(event, handler);
-    };
-  }
-
-  executeLifecycleEvent(event) {
-    if (this.#lifecycle[event]) {
-      this.#lifecycle[event].bind(this).execute();
-    }
-  }
-
-  async load() {
-    await this.executeLifecycleEvent("CONFIGURED");
-    try {
-      console.log("Loading...");
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log("Loading complete...");
-      this.#lifecycle.loaded = true;
-      this.executeLifecycleEvent("LOADED");
-    } catch (e) {
-      console.error('Load error:', e);
-    }
-  }
-
-  async shutdown() {
-    try {
-      if (!this.#lifecycle.shuttingDown) {
-        console.log("Shutdown initiated...");
-        this.#lifecycle.shuttingDown = true;
-        this.executeLifecycleEvent("SHUTTING_DOWN");
-        console.log("Shutdown complete...");
-        this.status = "SHUTDOWN";
-      }
-    } catch (e) {
-      console.error("Shutdown error:", e);
-    }
-  }
-
-  async start() {
-    const startMethodOrder = ["configure", "load", "shutdown"];
-    for (const methodName of startMethodOrder) {
-      if (this[methodName] instanceof Function) {
-        await this[methodName]();
-      }
-    }
-  }
-
-  async destroy() {
-    this.status = "DESTROYED";
-    this.#lifecycle = {
-      configured: false,
-      loaded: false,
-      shuttingDown: false
-    };
-  }
-
-  async on(event, handler) {
-    await this.onLifecycleEvent(event, handler);
-  }
-}
-
-const nexusCore = new NexusCore();
-nexusCore.on('DESTROYED', () => {
-  console.log("NexusCore instance destroyed.");
-});
-nexusCore.configure(Config.defaultConfig);
-nexusCore.start();
-nexusCore.load();
-nexusCore.shutdown();
-nexusCore.destroy();
