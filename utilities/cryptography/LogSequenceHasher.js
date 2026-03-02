@@ -1,13 +1,13 @@
 /**
  * Component: LogSequenceHasher (LSH)
  * Role: Ensures the immutability and verifiable ordering of the Governance Decision Log.
- *
- * This component utilizes the CanonicalIntegrityHasher tool to guarantee deterministic
- * hashing (LCH_hash) of the decision log sequence.
+ * 
+ * The LSH takes the raw 'decision_log' array, serializes it canonically (consistent key ordering, no whitespace),
+ * and computes a SHA-256 hash (LCH_hash) which is then embedded in the GICM.
  */
 
-// Placeholder for injected tool access
-declare const CanonicalIntegrityHasher: { execute: (args: { payload: any }) => string };
+import { canonicalizeJson } from '../serialization/canonicalizer';
+import { generateSha256Hash } from './hasher';
 
 export class LogSequenceHasher {
     /**
@@ -15,17 +15,16 @@ export class LogSequenceHasher {
      * @param {Array<object>} decisionLog - The ordered array of stage results.
      * @returns {string} The SHA-256 hash of the canonically serialized log.
      */
-    static generateLogChainHash(decisionLog: Array<object>): string {
+    static generateLogChainHash(decisionLog) {
         if (!Array.isArray(decisionLog) || decisionLog.length === 0) {
             throw new Error('Decision log cannot be empty or invalid.');
         }
 
-        // Use the specialized kernel tool for canonical serialization and hashing.
+        // 1. Canonicalize the JSON array for deterministic serialization.
         // This ensures the hash is identical regardless of runtime serialization quirks.
-        const lchHash = CanonicalIntegrityHasher.execute({ 
-            payload: decisionLog 
-        });
+        const canonicalString = canonicalizeJson(decisionLog);
 
-        return lchHash;
+        // 2. Generate the SHA-256 hash.
+        return generateSha256Hash(canonicalString);
     }
 }
