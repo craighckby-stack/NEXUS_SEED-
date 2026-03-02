@@ -15,15 +15,15 @@
 function renderTemplate(templateString, data, options = {}) {
     // Placeholder implementation using basic substitution for demonstration.
     // In a real system, this would invoke a dedicated template engine library.
-
+    
     const finalMessage = Object.entries(data || {}).reduce((msg, [key, value]) => {
-        const replacement = String(value ?? '');
+        const replacement = String(value ?? ''); 
         const regex = new RegExp(`{{\s*${key}\s*}}`, 'g');
         return msg.replace(regex, replacement);
     }, templateString);
-
+    
     // TODO: Integrate Handlebars, Nunjucks, or similar for complex logic.
-
+    
     return finalMessage;
 }
 
