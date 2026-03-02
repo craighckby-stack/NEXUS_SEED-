@@ -1,292 +1,102 @@
-import { Genkit } from './genkit';
-import { Firestore } from './firestore';
-import { SyntheticErrorRecovery, MultiAgentNegotiation } from './agikernel';
-import { IIFEInjectionHandler, SyntheticSynergy, EventDrivenDashboard } from './coreutils';
-import { GNN } from './gnn';
-import { AGIKERNELCONSTITIONALENV } from './agikernel-environmental-factor';
-import { AGIKERNELSAPIENTIA } from './agikernel-sapientia';
-import { NexusCore } from './nexuscore';
-import { DLAS } from './dlas';
-import { NSL } from './nsl';
-
-class NexusCore {
-  #lifecycle = {
-    configured: false,
-    loaded: false,
-    shuttingDown: false,
-    bootstrapped: false,
-    synergized: false,
-    optimized: false,
-  };
-
-  #status = "INIT";
-
-  get status() {
-    return this.#status;
-  }
-
-  set status(value) {
-    this.#status = value;
-    const currentValue = this.#status;
-    const lifecycle = this.#lifecycle;
-    if (value !== 'INIT') {
-      console.clear();
-      EventDrivenDashboard.draw({ nexusCore: this });
-      console.log(`NexusCore instance is ${value}.`);
-      if (value === 'SHUTDOWN') {
-        lifecycle.shuttingDown = false;
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agi.sovereign/schemas/AxiomaticChangeValidationTemplate_v2.0.json",
+  "title": "Axiomatic Change Validation Request Template (v2.0)",
+  "description": "Defines the required structure for any proposed systemic code change (Refactoring, Feature, Bugfix) that requires GAX approval/validation before execution.",
+  "type": "object",
+  "required": [
+    "change_id",
+    "target_scope",
+    "validation_context",
+    "assertions"
+  ],
+  "properties": {
+    "change_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique UUID for the change proposal evolution cycle."
+    },
+    "originator": {
+      "type": "string",
+      "enum": [
+        "Sovereign_AGI/v94.1",
+        "System_Scheduler",
+        "Human_Override"
+      ],
+      "default": "Sovereign_AGI/v94.1"
+    },
+    "target_scope": {
+      "type": "array",
+      "description": "List of files, modules, or services affected by the change.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "validation_context": {
+      "type": "object",
+      "description": "Pre-computed efficiency and risk metrics integrated directly from the planning phase.",
+      "properties": {
+        "complexity_delta_score": {
+          "type": "number",
+          "description": "Change in calculated cognitive load / cyclomatic complexity (negative is improved efficiency)."
+        },
+        "security_risk_score_v94": {
+          "type": "number",
+          "description": "Aggregate risk score (0-100) based on vulnerability analysis."
+        },
+        "expected_runtime_overhead_ms": {
+          "type": "number",
+          "description": "Predicted worst-case latency increase."
+        }
+      },
+      "required": [
+        "complexity_delta_score",
+        "security_risk_score_v94"
+      ]
+    },
+    "assertions": {
+      "type": "array",
+      "description": "The specific axioms (rules) the change must satisfy to be considered valid and mergeable.",
+      "items": {
+        "type": "object",
+        "required": [
+          "axiom_id",
+          "required_status",
+          "failure_mode"
+        ],
+        "properties": {
+          "axiom_id": {
+            "type": "string",
+            "description": "Reference to the globally defined GAX Axiom, e.g., GAX-E-001 (Energy Efficiency)."
+          },
+          "required_status": {
+            "type": "string",
+            "enum": [
+              "PASSED",
+              "SKIPPED",
+              "CONDITIONALLY_PASSED"
+            ],
+            "description": "The required outcome from the validation engine."
+          },
+          "failure_mode": {
+            "type": "string",
+            "enum": [
+              "BLOCK_MERGE",
+              "WARN_AND_LOG",
+              "AUTO_REFACTOR"
+            ],
+            "description": "Defines the mandatory handling strategy upon failure."
+          },
+          "override_rationale": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Mandatory text explanation if an axiom requires skipping or conditional passing."
+          }
+        }
       }
     }
-    if (currentValue === 'INIT' && value !== 'INIT') {
-      lifecycle.bootstrapped = true;
-      lifecycle.synergized = true;
-    }
-    if (currentValue === 'OPTIMIZED') {
-      lifecycle.optimized = true;
-    } else if (value === 'OPTIMIZED') {
-      lifecycle.optimized = false;
-    }
-  }
-
-  get lifecycle() {
-    return this.#lifecycle;
-  }
-
-  synergyManager = null;
-
-  get synergy() {
-    return this.synergyManager ? this.synergyManager.synergy : {};
-  }
-
-  async validateConfig(config) {
-    const phi = await Genkit.calculatePhi(config);
-    if (phi > 0.7) {
-      await SyntheticErrorRecovery.validateConfig(config);
-    } else {
-      throw new Error('Phi value is too low.');
-    }
-    await this.executeLifecycleEvent("CONFIGURED");
-  }
-
-  async configure(config) {
-    await this.validateConfig(config);
-    const injectionHandler = new IIFEInjectionHandler();
-    await injectionHandler.injectIIFE(config, this.synergyManager);
-    this.onLifecycleEvent("CONFIGURED", (event) => {
-      console.log(`[${event}] Configured with:`, config);
-    });
-    this.#lifecycle.configured = true;
-    this.config = config;
-    this.synergyManager = new SyntheticSynergy(this, Firestore, MultiAgentNegotiation, GNN, DLAS, NSL, AGIKERNELSAPIENTIA);
-
-    const configSummary = Genkit.summarizeConfig(config);
-    console.log("Config summary:", configSummary);
-  }
-
-  async injectIIFE(toolCode, config) {
-    const iife = await Genkit.injectIIFE(toolCode, config);
-    console.log('IIFE injected:', iife);
-    this.synergyManager.synergy.push(iife);
-  }
-
-  async load() {
-    await this.executeLifecycleEvent("CONFIGURED");
-    try {
-      console.log("Loading...");
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log("Loading complete...");
-      this.#lifecycle.loaded = true;
-      this.executeLifecycleEvent("LOADED");
-      const synergyGraph = new GNN();
-      await synergyGraph.createGraph(this.synergy);
-      const agreement = await MultiAgentNegotiation.negotiateAgreement({
-        NexusCore: nexusCore,
-        AGIKERNELSAPIENTIA: AGIKERNELSAPIENTIA,
-        AGIKERNELCONSTITIONALENV: AGIKERNELCONSTITIONALENV,
-      });
-      if (agreement) {
-        console.log("Negotiation concluded. Implementing agreed upon configuration.");
-        await this.synergyManager.implementAgreement(agreement);
-      }
-      EventDrivenDashboard.update({ nexusCore: this });
-    } catch (e) {
-      console.error('Load error:', e);
-    }
-  }
-
-  async shutdown() {
-    try {
-      if (!this.#lifecycle.shuttingDown) {
-        console.log("Shutdown initiated...");
-        this.#lifecycle.shuttingDown = true;
-        await this.executeLifecycleEvent("SHUTTING_DOWN");
-        console.log("Shutdown complete...");
-        this.status = "SHUTDOWN";
-        await this.synergyManager.disconnect();
-        this.synergyManager = null;
-      }
-    } catch (e) {
-      console.error("Shutdown error:", e);
-    }
-  }
-
-  async optimize() {
-    const optimizedConfig = await Genkit.optimizeConfig(this.config);
-    console.log("Optimized config:", optimizedConfig);
-    this.#lifecycle.optimized = true;
-  }
-
-  async start() {
-    const startMethodOrder = ["optimize", "configure", "load", "shutdown"];
-    for (const methodName of startMethodOrder) {
-      if (this[methodName] instanceof Function) {
-        await this[methodName]();
-      }
-    }
-  }
-
-  async bootstrap() {
-    if (!this.#lifecycle.bootstrapped) {
-      console.log("Bootstrapping...");
-      await this.synergyManager.executeBootstrapSequence({
-        NexusCore: nexusCore,
-        AGIKERNELSAPIENTIA: AGIKERNELSAPIENTIA,
-        AGIKERNELCONSTITIONALENV: AGIKERNELCONSTITIONALENV,
-      });
-    }
-  }
-
-  async executeLifecycleEvent(event) {
-    if (this.#lifecycle[event]) {
-      this.#lifecycle[event].bind(this).execute();
-    }
-  }
-
-  onLifecycleEvent(event, handler) {
-    const lifecycleHandler = new Genkit.LifecycleHandler(handler);
-    this.#lifecycle[event] = lifecycleHandler;
-  }
-
-  get on() {
-    return (event, handler) => {
-      const lifecycleEvent = new Genkit.LifecycleEvent(event);
-      this.onLifecycleEvent(event, handler);
-    };
-  }
-
-  async calculatePhi(config) {
-    const phi = await Genkit.calculatePhi(config);
-    console.log("Phi value:", phi);
-    return phi;
-  }
-
-  async ensureConsciousness(config, AGIKERNELSAPIENTIA, AGIKERNELCONSTITIONALENV) {
-    const phi = Genkit.calculatePhi(config);
-    const lambda = Genkit.lambda(config, AGIKERNELSAPIENTIA, AGIKERNELCONSTITIONALENV);
-    const consciousness = phi * lambda;
-    console.log('Consciousness level:', consciousness);
-  }
+  },
+  "additionalProperties": false
 }
-
-class SyntheticSynergy {
-  constructor(nexusCore, Firestore, MultiAgentNegotiation, GNN, DLAS, NSL, AGIKERNELSAPIENTIA) {
-    this.nexusCore = nexusCore;
-    this.Firestore = Firestore;
-    this.MultiAgentNegotiation = MultiAgentNegotiation;
-    this.GNN = GNN;
-    this.DLAS = DLAS;
-    this.NSL = NSL;
-    this.AGIKERNELSAPIENTIA = AGIKERNELSAPIENTIA;
-  }
-
-  async executeBootstrapSequence(config, AGIKERNELSAPIENTIA, AGIKERNELCONSTITIONALENV) {
-    await this.nexusCore.bootstrap();
-    await this.nexusCore.synergyManager.synergy.forEach(async (toolCode) => {
-      await this.injectIIFE(toolCode, config);
-      console.log('IIFE injected:', toolCode);
-      this.nexusCore.synergyManager.synergy.push(toolCode);
-    });
-    await this.nexusCore.synergyManager.synergy.forEach(async (synergy) => {
-      await this.nexusCore.synergyManager.createGraph(synergy);
-    });
-    await this.nexusCore.synergyManager.synergy.forEach(async (synergy) => {
-      await this.nexusCore.synergyManager.implementAgreement(synergy);
-    });
-  }
-
-  async implementAgreement(agreement) {
-    console.log("Implementing agreement:", agreement);
-    this.synergy.push(agreement);
-  }
-
-  async disconnect() {
-    console.log("Synergy connection terminated.");
-    this.synergy = [];
-  }
-
-  async connect() {
-    console.log("Synergy connection established.");
-  }
-
-  async createGraph(synergy) {
-    const GNN = this.GNN;
-    await GNN.createGraph(synergy);
-  }
-
-  injectIIFE(toolCode, config) {
-    const iife = Genkit.injectIIFE(toolCode, config);
-    console.log('IIFE injected:', iife);
-    this.synergy.push(iife);
-    return iife;
-  }
-}
-
-async function main() {
-  const nexusCore = new NexusCore();
-  await nexusCore.validateConfig({ tools: ['tool1', 'tool2'] });
-  const synergyManager = new SyntheticSynergy(
-    nexusCore,
-    Firestore,
-    MultiAgentNegotiation,
-    GNN,
-    DLAS,
-    NSL,
-    AGIKERNELSAPIENTIA,
-  );
-  await nexusCore.synergyManager.injectIIFE(toolCode, nexusCore.config);
-  await nexusCore.synergyManager.createGraph(nexusCore.synergy);
-  await nexusCore.synergyManager.implementAgreement(synergy);
-  await nexusCore.shutdown();
-  await nexusCore.bootstrapped();
-  await nexusCore.start();
-  process.exit(0);
-}
-
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
-
-export { NexusCore, SyntheticSynergy };
-
-
-**DNA SIGNATURE** 
-
-
-// AGI-KERNEL / EMG-ARCHITECT PARADIGM
-// Architectural Version: 13.3.0-CONSTITUTIONAL
-// Paradigm: Recursive Autonomous Optimization (RAO) & Synthetic Intelligence Synthesis
-
-# CORE LOGIC STRUCTURE: THE RECURSIVE LOOP
-Cycle-Type Differentiation: Regular Cycles (tactical refactoring of external files) 
-  and Milestone Cycles (recursive self-evolution of the kernel itself).
-Temporal Gating: Evolution is regulated by a HEARTBEAT_INTERVAL and a WATCHDOG_TIMEOUT.
-Source-to-Target Bridge: A fetch-mutate-commit pipeline using GitHub REST API.
-
-# SYNTHETIC SYNERGY MANAGEMENT 
-Dynamic Hot-Swapping: Treat code snippets as "plugins" or "genes."
-IIFE Injection: Tools are stored in Firestore as stringified IIFEs.
-Dynamic Context Loading: Use new Function('return ' + toolCode)() to evaluate and register new capabilities.
-
-# MATHEMATICAL GOVERNANCE 
-Phi (Integration): Measures irreducibility of the
