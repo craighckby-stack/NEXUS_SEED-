@@ -1,135 +1,62 @@
-// NexusCore.js
-
-import { Genkit } from 'genkit';
-import { LifecycleProtocol } from './LifecycleProtocol';
-import { NodeConfig } from './NodeConfig';
-import { Config } from './Config';
-
-class AsyncNodeChain extends Genkit.AsyncNodeChain {
-  constructor() {
-    super();
-  }
-
-  async loadAsyncNodes(config: INodeConfig[]) {
-    const promises = config.map((config) => this.addNode(config));
-    await Promise.all(promises);
-  }
-
-  async addNode(newConfig: INodeConfig) {
-    const node = new Genkit.AsyncNode();
-    if (newConfig.type === 'async-processor') {
-      await node.init();
-      this.asyncNodes.push(node);
-      return node;
+{
+  "schema_version": "AIM_V2.0",
+  "description": "Agent Integrity Monitoring Manifest. Defines mandatory runtime constraints and enforcement scopes, standardized on metric units and grouped policy layers.",
+  "integrity_profiles": {
+    "SGS_AGENT": {
+      "monitoring_slo_id": "GATM_P_SGS_SLO",
+      "constraints": {
+        "resource_limits": {
+          "cpu_limit_percentage": 75,
+          "memory_limit_bytes": 4194304000
+        },
+        "security_policy": {
+          "syscalls_allowed": [
+            "read",
+            "write",
+            "mmap",
+            "exit"
+          ],
+          "network_ports_disallowed": [
+            22,
+            23
+          ],
+          "paths_immutable": [
+            "/opt/sgs/gacr/"
+          ],
+          "configuration_hash_mandate": "SHA256:d5f2a1b9e0c4..."
+        }
+      }
+    },
+    "GAX_AGENT": {
+      "monitoring_slo_id": "GATM_P_GAX_SLO",
+      "constraints": {
+        "resource_limits": {
+          "cpu_limit_percentage": 10,
+          "memory_limit_bytes": 524288000
+        },
+        "security_policy": {
+          "syscalls_allowed": [
+            "read",
+            "exit"
+          ],
+          "file_access_root_paths": [
+            "/opt/gax/policy_data/"
+          ],
+          "network_mode": "POLICY_FETCH_ONLY"
+        }
+      }
+    },
+    "CRoT_AGENT": {
+      "monitoring_slo_id": "GATM_P_CRoT_SLO",
+      "constraints": {
+        "resource_limits": {
+          "memory_limit_bytes": 131072000
+        },
+        "security_policy": {
+          "network_mode": "NONE",
+          "time_sync_source_critical": "CRITICAL_NTP_A"
+        }
+      }
     }
   }
-
-  async getAsyncNodeStatuses() {
-    const status = this.asyncNodes.reduce((acc, asyncNode) => {
-      acc += ', ' + await asyncNode.status();
-      return acc;
-    }, '');
-    return status;
-  }
-
-  async completeAsyncNodes() {
-    const promises = this.asyncNodes.map(async (asyncNode) => await asyncNode.done());
-    await Promise.all(promises);
-  }
-
-  async prepareForUnloadEvents() {
-    return await this.completeAsyncNodes();
-  }
-
-  async unloadAsyncNodes() {
-    this.asyncNodes.forEach(async (asyncNode) => asyncNode.done());
-    const currentAsyncNodes = this.asyncNodes;
-    this.asyncNodes = [];
-    await currentAsyncNodes.forEach(async (asyncNode) => asyncNode.destroy());
-  }
 }
-
-class AsyncNode extends Genkit.AsyncNode {
-  private _status;
-
-  constructor() {
-    super();
-    this._status = 'initialized';
-  }
-
-  async status() {
-    return this._status;
-  }
-
-  async init() {
-    // Implement node init logic, if any
-  }
-
-  async run() {
-    // Implement node run logic, if any
-    // (Simulating asynchronous operation)
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-
-  async done() {
-    // Implement node done logic
-    this._status = 'done';
-  }
-}
-
-class LifecycleProtocol extends Genkit.Governance {
-  constructor() {
-    super();
-    this.on(Genkit.Event.GOVERNING);
-    this.on(Genkit.Event.SHUTTING_DOWN);
-  }
-}
-
-class NexusCore extends Genkit.AsyncNodeChain {
-  async startEvolutionLifeCycle() {
-    try {
-      console.log("Evolution life-cycle started...");
-      await this.loadAsyncNodes(Config.getEvolutionConfig());
-      this.on(Genkit.Event.EVOLVED);
-    } catch (e) {
-      console.error("Failed to boot evolution life-cycle:", e);
-    }
-  }
-
-  async getEvolutionStatus() {
-    const evolutionLifeCycleStatus = await super.getAsyncNodeStatuses();
-    return evolutionLifeCycleStatus;
-  }
-}
-
-class NodeConfig {
-  type: string;
-  options: any;
-
-  constructor(type: string, options: any) {
-    this.type = type;
-    this.options = options;
-  }
-}
-
-interface IGenkitInterface {
-  load(config: INodeConfig[]): Promise<void>;
-  addNode(config: INodeConfig): Promise<void>;
-  status(): Promise<string>;
-  done(): Promise<void>;
-}
-
-interface INodeConfig {
-  type: string;
-  options: any;
-}
-
-const Config = {
-  getEvolutionConfig: async () => {
-    // Return the evolution configuration
-  }
-};
-
-const nexusCore = new NexusCore();
-nexusCore.startEvolutionLifeCycle();
-nexusCore.getEvolutionStatus().then(status => console.log(status));
