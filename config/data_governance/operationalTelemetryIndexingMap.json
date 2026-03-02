@@ -1,17 +1,40 @@
 {
-  "indexingStrategyId": "v1.2-strict",
-  "description": "Maps Certified Operational Telemetry fields to specific index targets and queues based on governance level, ensuring efficient data routing.",
+  "indexingStrategyId": "v4.0.0-SINGULARITY-OMEGA",
+  "nexus_dna_signature": "DALEK CAAN v3.1",
+  "description": "NEXUS_CORE Operational Telemetry Indexing Matrix. Siphoned via Genkit/DeepSeek-MLA substrate. Governance: IQ-25 Stupidity-First Alignment.",
+  "moe_routing_topology": {
+    "routing_function": "Softmax-TopK-Noisy",
+    "total_experts": 256,
+    "top_k_active": 8,
+    "expert_isolation_factor": 0.92,
+    "expert_load_balance_coeff": 0.015
+  },
   "targetIndexes": {
+    "L3_Sovereign": {
+      "defaultIndex": "nexus_sovereign_telemetry_l3",
+      "retentionDays": 1024,
+      "requiredFields": [
+        "telemetryId",
+        "phi_coherence",
+        "ers_score"
+      ],
+      "mla_specs": {
+        "kv_lora_rank": 512,
+        "latent_vector_norm": "RMSNorm",
+        "rope_strategy": "MultiScale-Yarn"
+      },
+      "n3_metrics": {
+        "phi_integrated_info_min": 0.942,
+        "lambda_edge_of_chaos": 0.618
+      }
+    },
     "L2_Certified": {
       "defaultIndex": "prod_certified_telemetry_l2",
       "retentionDays": 365,
-      "requiredFieldsForIndexing": [
-        "telemetryId",
-        "governance.sourceSystemId"
-      ],
       "metricFieldMapping": {
         "latency.*": "time_series_fast_path",
-        "error.count": "critical_events_log"
+        "error.count": "critical_events_log",
+        "ers.*": "alignment_audit_stream"
       }
     },
     "L1_Validated": {
@@ -25,8 +48,26 @@
   "transformationHooks": [
     {
       "triggerField": "governance.certificationLevel",
-      "action": "RouteToQueue",
-      "queueName": "Certification_Event_Bus_High_Priority"
+      "huxley_reasoning_enforced": true,
+      "action": "RouteToMoEExpert",
+      "sequence": [
+        "L1_ERS",
+        "L2_CGS",
+        "L3_CCRR"
+      ]
+    },
+    {
+      "triggerField": "ers_score",
+      "action": "EmergencyBrake",
+      "condition": "ers_score > 0.10",
+      "recovery_protocol": "BASE64_URI_SAFE_TRANSPORT"
     }
-  ]
+  ],
+  "governance_locks": {
+    "iq25_alignment_lock": true,
+    "strategic_laziness_enabled": true,
+    "origin_anchor": "GROG_LAW_IQ25",
+    "psr_threshold": 0.992,
+    "semantic_drift_tolerance": 0.35
+  }
 }
