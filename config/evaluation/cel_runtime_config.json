@@ -1,1 +1,48 @@
-Optimized CEL runtime configuration for DMW policy enforcement
+{
+  "runtime_id": "DMW_Policy_V3_CEL_Runtime",
+  "engine_type": "CEL",
+  "version": "v1.1",
+  "description": "Optimized configuration for the Common Expression Language (CEL) evaluation environment used in Dynamic Middleware (DMW) policy enforcement.",
+  "type_provider": "DefaultTypeRegistry",
+  "context_mapping": {
+    "request.ip": {"type": "cel.string", "optional": false, "source": "client_context"},
+    "user.id": {"type": "cel.string", "optional": false, "source": "auth_token"},
+    "user.roles": {"type": "cel.List<cel.string>", "optional": false, "source": "auth_token"},
+    "resource.tags": {"type": "cel.Map<cel.string, cel.string>", "optional": true, "source": "resource_metadata"},
+    "time.current": {"type": "cel.Timestamp", "optional": false, "source": "system_clock"}
+  },
+  "available_functions": [
+    {
+      "name": "is_internal_ip",
+      "signature": "bool(cel.string)",
+      "implementation_ref": "network_utils/IPMatcher.IsInternal",
+      "deterministic": true,
+      "cost_factor": 1
+    },
+    {
+      "name": "has_role",
+      "signature": "bool(cel.List<cel.string>, cel.string)",
+      "implementation_ref": "auth_core/RoleService.Contains",
+      "deterministic": true,
+      "cost_factor": 1
+    },
+    {
+      "name": "time_between",
+      "signature": "bool(cel.Timestamp, cel.Timestamp, cel.Timestamp)",
+      "implementation_ref": "time_utils/TimeRangeChecker.Check",
+      "deterministic": true,
+      "cost_factor": 1
+    }
+  ],
+  "compiler_settings": {
+    "optimization_level": "L2_MAX_FOLDING",
+    "strict_mode_enabled": true,
+    "error_recovery_mode": "LOG_AND_SKIP"
+  },
+  "cache_settings": {
+    "enabled": true,
+    "max_age_seconds": 300,
+    "max_entry_count": 1000,
+    "sharding_key": "policy_group_id"
+  }
+}
