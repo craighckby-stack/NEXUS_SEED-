@@ -1,76 +1,78 @@
-class ArchitectureSchemaRegistryKernel {
-    /**
-     * @param {object} dependencies
-     * @param {ILoggerToolKernel} dependencies.logger - High-integrity logger tool.
-     */
-    constructor(dependencies) {
-        this._schemas = new Map();
-        this._logger = null;
-        this.#setupDependencies(dependencies);
-    }
+/**
+ * Component ID: ASR (Architecture Schema Registrar)
+ * Responsibility: EPDP A/B Gate - Architectural Coherence Enforcement.
+ * Function: Manages and validates mandatory structural contracts (schemas, API specifications,
+ * critical manifest entries) across the architecture. ASR ensures proposed mutations (M-02 draft)
+ * do not introduce divergence or break existing core architectural contracts.
+ *
+ * Refactor Rationale: Dependencies are now explicitly injected (Manifest, CoherenceEngine, VetoLogger)
+ * to enhance testability and enforce clean component architecture. The core validation logic
+ * is delegated to the specialized CoherenceEngine.
+ */
 
+class ArchitectureSchemaRegistrar {
     /**
-     * Isolates and validates required dependencies.
-     * @param {object} dependencies
+     * @param {Object} manifestReference - Reference to the core system manifest manager.
+     * @param {Object} coherenceEngine - A dedicated utility for deep structural comparison (SchemaDiffEngine).
+     * @param {Object} vetoLogger - The official logging sink for architectural failures (D_01/VetoLog equivalent).
      */
-    #setupDependencies({ logger }) {
-        if (!logger) {
-            throw new Error("ArchitectureSchemaRegistryKernel requires ILoggerToolKernel for auditable operations.");
+    constructor(manifestReference, coherenceEngine, vetoLogger) {
+        if (!manifestReference || !coherenceEngine || !vetoLogger) {
+            throw new Error("ASR requires Manifest, CoherenceEngine, and VetoLogger dependencies to initialize.");
         }
-        this._logger = logger;
+        this.manifest = manifestReference;
+        this.coherenceEngine = coherenceEngine;
+        this.vetoLogger = vetoLogger;
+        this.COMPONENT_ID = 'ASR';
     }
 
     /**
-     * Asynchronously initializes the kernel, replacing synchronous singleton initialization.
-     * @returns {Promise<void>}
+     * Retrieves the mandatory architectural contracts for validation.
+     * @returns {Promise<Object>} Mandatory schemas and contracts.
      */
-    async initialize() {
-        await this._logger.info("ArchitectureSchemaRegistryKernel starting initialization.");
-        // Configuration loading (if external schemas were needed) would occur here, 
-        // utilizing SecureResourceLoaderInterfaceKernel or a dedicated registry.
-        await this._logger.info("ArchitectureSchemaRegistryKernel initialized successfully, ready for schema registration.");
+    async getMandatoryContracts() {
+        return this.manifest.getValidatedSchemas();
     }
 
     /**
-     * Registers an architecture schema definition asynchronously.
-     * @param {string} name - The unique identifier for the schema.
-     * @param {object} schemaDefinition - The schema structure (e.g., JSON schema).
-     * @returns {Promise<boolean>} True if successfully registered, false if already exists or invalid.
+     * Executes mandatory validation of structural adherence for a proposed mutation payload.
+     * @param {Object} proposedMutationPayload - The full payload intended for GSEP Stage 3.
+     * @returns {Promise<boolean>} True if structural contracts are upheld; False signals mandatory failure.
      */
-    async register(name, schemaDefinition) {
-        if (!name || !schemaDefinition || this._schemas.has(name)) {
-            await this._logger.warn(`Schema registration failed for: ${name}. Reason: Name missing, definition invalid, or already exists.`);
+    async validateSchemaCoherence(proposedMutationPayload) {
+        try {
+            const coreContracts = await this.getMandatoryContracts();
+            
+            // Delegate deep comparison to the specialized engine.
+            const structuralIntegrityResult = await this.coherenceEngine.performDeepStructuralCheck(
+                coreContracts, 
+                proposedMutationPayload
+            );
+
+            if (!structuralIntegrityResult.isCoherent) {
+                // Mandatory failure logged to VetoLog and triggers F-01 protocol indication.
+                const vetoDetails = {
+                    source: this.COMPONENT_ID,
+                    violationType: 'StructuralCoherenceVeto',
+                    details: structuralIntegrityResult.details,
+                    mutation: proposedMutationPayload.id || 'N/A'
+                };
+                
+                // Using the injected VetoLogger (replacing implicit D_01 access)
+                this.vetoLogger.logVeto(vetoDetails);
+                return false;
+            }
+            return true;
+
+        } catch (error) {
+            // Log fatal processing error
+            this.vetoLogger.logError({
+                source: this.COMPONENT_ID,
+                error: `Fatal ASR validation processing error: ${error.message}`
+            });
             return false;
         }
-
-        this._schemas.set(name, schemaDefinition);
-        await this._logger.debug(`Registered architectural schema: ${name}`);
-        return true;
-    }
-
-    /**
-     * Retrieves a registered schema definition.
-     * @param {string} name - The unique identifier.
-     * @returns {object | undefined} The schema definition or undefined.
-     */
-    get(name) {
-        return this._schemas.get(name);
-    }
-
-    /**
-     * Checks for the existence of a schema.
-     * @param {string} name - The unique identifier.
-     * @returns {boolean}
-     */
-    has(name) {
-        return this._schemas.has(name);
-    }
-
-    /**
-     * Returns an iterator over all registered schema names.
-     * @returns {IterableIterator<string>}
-     */
-    keys() {
-        return this._schemas.keys();
     }
 }
+
+module.exports = ArchitectureSchemaRegistrar;
