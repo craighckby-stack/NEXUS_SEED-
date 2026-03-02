@@ -1,80 +1,67 @@
 /**
- * Telemetry Input Attestation Registrar Kernel (TIAR V94.1 - Refactored)
- *
+ * Telemetry Input Attestation Registrar (TIAR V94.1 - Refactored)
+ * 
  * Role: Ensures non-repudiation and cryptographic integrity of decision input vectors 
  * (S-01, S-02) immediately prior to P-01 execution by the OGT. Guarantees the
  * Irreversible Mutation Gate operates on provably attested data.
  *
- * Dependencies: KeyManager, AttestationStore, DataIntegrityProcessor, TelemetryAttestationConfigRegistryKernel, [Optional: Logger].
+ * Dependencies: KeyManager, AttestationStore, Canonicalizer Utility, [Optional: Logger].
  * GSEP Alignment: Stage 3 (Pre-P-01 Gate Execution)
  */
 
-class TelemetryInputAttestationRegistrarKernel {
+const PROTOCOL_VERSION = 'TIAR-V94.1';
+const DEFAULT_HASH_ALGORITHM = 'sha256';
+
+class TelemetryInputAttestationRegistrar {
     
     /**
      * @param {object} dependencies 
      * @param {KeyManagementService} dependencies.keyManager - Service for signing/verifying.
      * @param {AttestationStoreInterface} dependencies.attestationStore - Persistence layer for commitments.
-     * @param {DataIntegrityProcessor} dependencies.dataIntegrityProcessor - Plugin for deterministic data fingerprinting (canonicalization + hashing).
-     * @param {TelemetryAttestationConfigRegistryKernel} dependencies.configRegistry - Configuration constants.
-     * @param {string} [dependencies.hashAlgorithm] - Optional runtime hash algorithm override.
+     * @param {Canonicalizer} dependencies.canonicalizer - Utility for deterministic serialization and hashing.
      * @param {Logger} [dependencies.logger] - Structured logger interface.
      */
     constructor(dependencies) {
-        this._dependencies = dependencies;
-        this.#setupDependencies();
-    }
+        const { keyManager, attestationStore, canonicalizer, hashAlgorithm, logger } = dependencies;
 
-    /**
-     * Isolates dependency initialization and configuration loading.
-     * All configuration constants are retrieved from the injected registry.
-     */
-    #setupDependencies() {
-        const { keyManager, attestationStore, dataIntegrityProcessor, configRegistry, hashAlgorithm, logger } = this._dependencies;
-
-        if (!keyManager || !attestationStore || !dataIntegrityProcessor || !configRegistry) {
-            throw new Error("TIAR Initialization Failure: Core dependencies missing (keyManager, attestationStore, dataIntegrityProcessor, configRegistry).");
+        if (!keyManager || !attestationStore || !canonicalizer) {
+            // In a highly stable system, we should use the proposed ConsensusError here
+            throw new Error("TIAR Initialization Failure: Core dependencies missing (keyManager, attestationStore, canonicalizer).");
         }
 
-        // Core immutable dependencies
         this.keyManager = Object.freeze(keyManager);
         this.attestationStore = Object.freeze(attestationStore);
-        this.dataIntegrityProcessor = Object.freeze(dataIntegrityProcessor); 
-        this.configRegistry = configRegistry;
-        
-        // Configuration derived from registry
-        const defaultHashAlgorithm = this.configRegistry.getDefaultHashAlgorithm();
-        this.protocolVersion = this.configRegistry.getProtocolVersion();
-        
-        // Allow runtime override for the hash algorithm
-        this.hashAlgorithm = hashAlgorithm || defaultHashAlgorithm;
+        this.canonicalizer = Object.freeze(canonicalizer);
         this.logger = logger || console;
+        this.hashAlgorithm = hashAlgorithm || DEFAULT_HASH_ALGORITHM;
     }
 
     /**
      * Receives raw inputs, signs the deterministic hash, and registers the commitment.
+     * Efficiency Note: The full input vector is NOT stored in the AttestationStore, 
+     * only the cryptographic commitment (hash and signature) is recorded.
      * 
      * @param {object} inputVector - Contains raw S-01, S-02 data points and metadata.
      * @returns {Promise<object>} Contains the cryptographic hash and signature.
      */
     async attestInputs(inputVector) {
         
-        // 1. Generate Deterministic Hash using the abstracted processor
-        const inputHash = await this.dataIntegrityProcessor.getDeterministicFingerprint(
-            inputVector,
-            this.hashAlgorithm
-        );
+        // 1. Canonicalization: Convert input into a deterministic byte stream.
+        const canonicalData = this.canonicalizer.canonicalize(inputVector); 
         
-        // 2. Sign the Hash (cryptographic proof of possession and commitment)
+        // 2. Generate Deterministic Hash
+        const inputHash = this.canonicalizer.hash(canonicalData, this.hashAlgorithm);
+        
+        // 3. Sign the Hash (cryptographic proof of possession and commitment)
         const signature = await this.keyManager.sign(inputHash);
 
-        // 3. Construct and register the attestation commitment record
+        // 4. Construct and register the attestation commitment record
         const attestationCommitment = {
             hash: inputHash,
             signature: signature,
             timestamp: Date.now(), // Local time approximation
             signerId: this.keyManager.getIdentityId(), 
-            protocolVersion: this.protocolVersion // Use injected constant
+            protocolVersion: PROTOCOL_VERSION
         };
         
         // Note: Only the small cryptographic commitment goes into the store.
@@ -100,10 +87,8 @@ class TelemetryInputAttestationRegistrarKernel {
         }
 
         // 2. Recalculate hash of the provided input to verify content integrity
-        const reCalculatedHash = await this.dataIntegrityProcessor.getDeterministicFingerprint(
-            inputDataToVerify,
-            this.hashAlgorithm
-        );
+        const reCanonicalizedData = this.canonicalizer.canonicalize(inputDataToVerify);
+        const reCalculatedHash = this.canonicalizer.hash(reCanonicalizedData, this.hashAlgorithm);
 
         if (reCalculatedHash !== commitmentRecord.hash) {
             return { valid: false, code: "E_HASH_MISMATCH", reason: "Input content integrity failure: Provided data does not match the committed hash." };
@@ -131,4 +116,4 @@ class TelemetryInputAttestationRegistrarKernel {
     }
 }
 
-module.exports = TelemetryInputAttestationRegistrarKernel;
+module.exports = TelemetryInputAttestationRegistrar;
