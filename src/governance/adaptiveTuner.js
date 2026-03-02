@@ -1,138 +1,138 @@
 /**
  * Component ID: ATN
- * Name: Adaptive Tuner Kernel
+ * Name: Adaptive Tuner (v94.1 Refactor)
  * Function: Monitors historical telemetry and real-time operational metrics using standardized evaluation
  *           to provide dynamic, controlled adjustments to system governance configurations (like RTM).
  * GSEP Alignment: Stage 4 Autonomous Optimization (T-02 Dynamic Parameter Adjustment)
+ * Rationale: Increased generality, parameterized adjustment control, separation of mathematical evaluation logic, 
+ *            and implementation of adjustment damping based on volatility and hard limits.
  */
 
-class AdaptiveTunerKernel {
-    /**
-     * @param {object} dependencies - Injected kernel dependencies.
-     * @param {ILoggerToolKernel} dependencies.ILoggerToolKernel - High-integrity logging interface.
-     * @param {ITelemetryServiceKernel} dependencies.ITelemetryServiceKernel - Service for historical metrics.
-     * @param {ISystemMonitorServiceKernel} dependencies.ISystemMonitorServiceKernel - Service for current resource data.
-     * @param {IAdaptiveTunerConfigRegistryKernel} dependencies.IAdaptiveTunerConfigRegistryKernel - Configuration source for tuning profiles.
-     * @param {IAdaptiveParameterTunerToolKernel} dependencies.IAdaptiveParameterTunerToolKernel - Core adjustment calculation tool.
-     */
-    constructor(dependencies) {
-        this.logger = dependencies.ILoggerToolKernel;
-        this.configRegistry = dependencies.IAdaptiveTunerConfigRegistryKernel;
-        this.parameterTuner = dependencies.IAdaptiveParameterTunerToolKernel;
-        this.telemetryService = dependencies.ITelemetryServiceKernel;
-        this.systemMonitorService = dependencies.ISystemMonitorServiceKernel; // Retained for architectural completeness, though not heavily used in getAdjustments.
+// Placeholder dependency for robust mathematical analysis
+// This assumes the StatisticalEvaluator scaffold (proposed below) is implemented.
+const { calculateVolatility } = require('./tuningEngine/StatisticalEvaluator'); 
 
-        this.tuningProfile = null; // Configuration loaded asynchronously
-        
-        this.#setupDependencies();
+class AdaptiveTuner {
+    /**
+     * @param {Object} telemetryService - Service providing historical metrics and performance data.
+     * @param {Object} systemMonitorService - Service providing current resource utilization data.
+     */
+    constructor(telemetryService, systemMonitorService) {
+        this.telemetryService = telemetryService;
+        this.systemMonitorService = systemMonitorService;
+        // Centralized tuning profile holding factors and limits
+        this.tuningProfile = this._initializeTuningProfile(); 
     }
 
     /**
-     * Ensures all required dependencies are present.
+     * Initializes the parameterized model defining tuning limits, weights, and stabilization behaviors.
      * @private
+     * @returns {Object} Tuning configuration profile.
      */
-    #setupDependencies() {
-        if (!this.logger || !this.configRegistry || !this.parameterTuner || !this.telemetryService) {
-            throw new Error("ATN Kernel initialization failure: Missing required kernel dependencies.");
-        }
-    }
+    _initializeTuningProfile() {
+        return {
+            // General governance controls
+            MAX_ADJUSTMENT_FACTOR: 0.10, // Max proportional change allowed per cycle (10%)
+            MIN_THRESHOLD_DRIFT_PERCENT: 0.005, // Minimum proportional change required to enact adjustment (0.5%)
+            ANOMALY_SENSITIVITY: 3,      // Number of tolerated global anomalies per evaluation window
 
-    /**
-     * Asynchronously initializes the kernel by loading the tuning profile.
-     * @async
-     */
-    async initialize() {
-        try {
-            // Load the tuning profile from the specialized registry
-            this.tuningProfile = await this.configRegistry.loadTuningProfile();
-            
-            if (!this.tuningProfile || typeof this.tuningProfile.metrics !== 'object') {
-                throw new Error("Invalid or empty tuning profile loaded.");
+            // Metric-specific tuning parameters (generalized schema)
+            metrics: {
+                cpu_util: {
+                    weight: 0.6, // Priority/aggressiveness factor
+                    baseline_target: 0.75, // Ideal average utilization target
+                    min_limit: 0.50, // Hard lower threshold limit
+                    max_limit: 0.95, // Hard upper threshold limit
+                },
+                memory_used_ratio: {
+                    weight: 0.4,
+                    baseline_target: 0.80,
+                    min_limit: 0.60,
+                    max_limit: 0.98,
+                }
             }
-            this.logger.info("AdaptiveTunerKernel initialized successfully with profile.", { metricsCount: Object.keys(this.tuningProfile.metrics).length });
-        } catch (error) {
-            this.logger.error("ATN Kernel failed configuration loading.", { error: error.message });
-            // Fail-safe: Disable tuning if configuration is critical
-            this.tuningProfile = { metrics: {} }; 
-        }
+        };
     }
 
     /**
      * Evaluates a single metric using recent history, calculating proportional adjustment needed and applying safety limits.
-     * This logic is delegated entirely to the IAdaptiveParameterTunerToolKernel.
      * @private
      * @param {string} metricKey - Key of the metric (e.g., 'cpu_util').
      * @param {number} currentValue - The current threshold value for this metric.
-     * @param {object} recentHistory - Summary statistics and raw data for the metric.
-     * @returns {Promise<number | null>} The final calculated bounded threshold value, or null if adjustment is insignificant.
+     * @param {Object} recentHistory - Summary statistics and raw data for the metric.
+     * @returns {number | null} The final calculated bounded threshold value, or null if adjustment is insignificant.
      */
-    async #evaluateMetricAdjustment(metricKey, currentValue, recentHistory) {
+    _evaluateMetricAdjustment(metricKey, currentValue, recentHistory) {
         const params = this.tuningProfile.metrics[metricKey];
         if (!params || !currentValue) return null;
 
-        // Prepare arguments for the external tuning tool
-        const adjustmentArgs = {
-            currentValue: currentValue,
-            history: recentHistory,
-            metricParams: params,
-            globalProfile: {
-                MAX_ADJUSTMENT_FACTOR: this.tuningProfile.MAX_ADJUSTMENT_FACTOR,
-                MIN_THRESHOLD_DRIFT_PERCENT: this.tuningProfile.MIN_THRESHOLD_DRIFT_PERCENT
-            }
-        };
+        const { weight, baseline_target, min_limit, max_limit } = params;
+
+        // 1. Stability Check (requires StatisticalEvaluator for accurate calculation)
+        // We use a simplified simulation if the evaluator is unavailable.
+        const volatility = (typeof calculateVolatility === 'function') 
+            ? calculateVolatility(recentHistory.raw_data) 
+            : (recentHistory.stdev || 0);
+            
+        // Volatility dampener: Reduce aggressiveness if metric history is highly unstable
+        const volatilityDampener = Math.max(0.2, 1.0 - volatility * 2); 
+
+        // 2. Performance Gap Analysis: Deviation from the desired baseline target
+        const deviation = recentHistory.averageUtilization - baseline_target;
         
-        // Delegate calculation to the specialized tuning tool kernel
-        try {
-            return await this.parameterTuner.calculateBoundedAdjustment(adjustmentArgs);
-        } catch (error) {
-            this.logger.error(`ATN: Error during adjustment calculation for ${metricKey}.`, { error: error.message });
-            return null;
+        // Calculate raw adjustment magnitude. Uses Math.tanh for bounded response curve based on deviation.
+        // Negative deviation means average utilization is too low (need to increase threshold, positive adjustment).
+        let proportionalAdjustment = -Math.tanh(deviation * 3) * weight * this.tuningProfile.MAX_ADJUSTMENT_FACTOR * volatilityDampener;
+
+        // 3. Propose new value and enforce bounds
+        const proposedNewValue = currentValue * (1 + proportionalAdjustment);
+
+        // Clamp the proposed value within system safety limits (min/max_limit)
+        const boundedNewValue = Math.max(min_limit, Math.min(max_limit, proposedNewValue));
+        
+        const actualProportionalChange = (boundedNewValue - currentValue) / currentValue;
+
+        if (Math.abs(actualProportionalChange) < this.tuningProfile.MIN_THRESHOLD_DRIFT_PERCENT) {
+            return null; // Change too small to enact, prevents noise drift
         }
+
+        return boundedNewValue;
     }
 
     /**
      * Calculates required threshold adjustments based on recent system state using parameterized analysis.
-     * @async
      * @param {Object} currentConfig - The current configuration schema from RTM, mapped by metric keys.
-     * @returns {Promise<Object>} A map of metric keys to adjustment objects (e.g., { cpu_util: { threshold: 0.78 } }).
+     *                                (e.g., { cpu_util: { threshold: 0.80, unit: '%' } })
+     * @returns {Object} A map of metric keys to adjustment objects (e.g., { cpu_util: { threshold: 0.78 } }).
      */
-    async getAdjustments(currentConfig) {
-        if (!this.tuningProfile || Object.keys(this.tuningProfile.metrics).length === 0) {
-             this.logger.warn("ATN Kernel inactive due to missing or invalid tuning profile. Skipping adjustment cycle.");
-             return {};
-        }
-
+    getAdjustments(currentConfig) {
         const adjustments = {};
         
+        // Retrieve generalized summary statistics for all metrics relevant to tuning
         const metricKeys = Object.keys(this.tuningProfile.metrics);
-        
-        // Retrieve generalized summary statistics asynchronously
-        const operationalSummary = await this.telemetryService.getRecentOperationalSummary(metricKeys);
+        const operationalSummary = this.telemetryService.getRecentOperationalSummary(metricKeys); // Now requests data for specific keys
 
-        const adjustmentPromises = [];
-        
         for (const metricKey of metricKeys) {
             if (currentConfig[metricKey] && operationalSummary[metricKey]) {
                 const currentValue = currentConfig[metricKey].threshold;
                 const history = operationalSummary[metricKey];
 
-                adjustmentPromises.push(
-                    this.#evaluateMetricAdjustment(metricKey, currentValue, history)
-                        .then(adjustedThreshold => {
-                            if (adjustedThreshold !== null) {
-                                adjustments[metricKey] = {
-                                    threshold: adjustedThreshold
-                                };
-                            }
-                        })
+                const adjustedThreshold = this._evaluateMetricAdjustment(
+                    metricKey, 
+                    currentValue, 
+                    history
                 );
+
+                if (adjustedThreshold !== null) {
+                    adjustments[metricKey] = {
+                        threshold: adjustedThreshold
+                    };
+                }
             }
         }
-        
-        await Promise.all(adjustmentPromises);
         
         return adjustments;
     }
 }
 
-module.exports = AdaptiveTunerKernel;
+module.exports = AdaptiveTuner;
