@@ -1,133 +1,78 @@
 /**
- * @file src/core/metrics/MetricPostProcessorKernel.js
- * 
- * MetricPostProcessorKernel executes a defined pipeline of metric transformation steps.
- * It is initialized with a canonical pipeline retrieved from the Metric Processing 
- * Pipeline Configuration Registry.
+ * MetricPostProcessor (v94.2)
+ * Responsible for post-collection metric processing, including validation,
+ * data transformation, threshold checks, and standardization of output structure.
  */
-
-/**
- * @typedef {import('../../interfaces/kernels/ILoggerToolKernel').ILoggerToolKernel} ILoggerToolKernel
- * @typedef {import('../../interfaces/registries/IMetricProcessingPipelineConfigRegistryKernel').IMetricProcessingPipelineConfigRegistryKernel} IMetricProcessingPipelineConfigRegistryKernel
- * @typedef {import('../../interfaces/registries/IMetricProcessingPipelineConfigRegistryKernel').IMetricProcessingStep} IMetricProcessingStep
- * @typedef {import('../../interfaces/tools/IConfigurationDeepFreezeToolKernel').IConfigurationDeepFreezeToolKernel} IConfigurationDeepFreezeToolKernel
- */
-
-class MetricPostProcessorKernel /* implements IMetricPostProcessorToolKernel */ {
-    
-    /** @type {IMetricProcessingStep[]} */
-    processingSteps;
-
-    /** @type {ILoggerToolKernel} */
-    _logger;
-
-    /** @type {IMetricProcessingPipelineConfigRegistryKernel} */
-    _pipelineConfigRegistry;
-
-    /** @type {IConfigurationDeepFreezeToolKernel} */
-    _objectFreezer;
-
+class MetricPostProcessor {
     /**
-     * Initializes the processor with required dependencies.
-     * @param {{ 
-     *     logger: ILoggerToolKernel,
-     *     pipelineConfigRegistry: IMetricProcessingPipelineConfigRegistryKernel,
-     *     objectFreezer: IConfigurationDeepFreezeToolKernel
-     * }} dependencies 
+     * @param {object} dependencies - Dependencies object
+     * @param {object} dependencies.logger - Standardized system logger.
      */
-    constructor(dependencies) {
-        this.#setupDependencies(dependencies);
+    constructor({ logger }) {
+        this.logger = logger;
     }
 
     /**
-     * Isolates dependency assignment and validation, satisfying the synchronous setup extraction mandate.
-     * @param {object} dependencies 
+     * Processes the raw metric result, applies transformations, checks thresholds, and standardizes the output.
+     * @param {object} template - The metric definition template.
+     * @param {*} rawResult - The value returned by the execution handler.
+     * @returns {object} The standardized metric object.
      */
-    #setupDependencies(dependencies) {
-        if (!dependencies) {
-            throw new Error("Dependencies must be provided to MetricPostProcessorKernel.");
-        }
-        const { logger, pipelineConfigRegistry, objectFreezer } = dependencies;
+    process(template, rawResult) {
+        const metricId = template.id; 
+        let value = rawResult;
+        let status = 'OK';
+        let alerts = [];
 
-        if (!logger || typeof logger.error !== 'function') {
-            throw new Error("ILoggerToolKernel dependency (logger) is missing or invalid.");
-        }
-        if (!pipelineConfigRegistry || typeof pipelineConfigRegistry.getMetricProcessingSteps !== 'function') {
-            throw new Error("IMetricProcessingPipelineConfigRegistryKernel dependency is missing or invalid.");
-        }
-        if (!objectFreezer || typeof objectFreezer.deepFreeze !== 'function') {
-             throw new Error("IConfigurationDeepFreezeToolKernel dependency (objectFreezer) is missing or invalid.");
+        // 1. Value Validation (Example: Check for null/NaN)
+        if (typeof value !== 'number' || isNaN(value)) {
+            this.logger.warn(`[PostProcessor] Metric ${metricId} returned invalid value type.`);
+            return this.createFailureResponse(metricId, 'InvalidValueType', 'Raw result was not a valid number or expected type.');
         }
 
-        this._logger = logger;
-        this._pipelineConfigRegistry = pipelineConfigRegistry;
-        this._objectFreezer = objectFreezer;
+        // 2. Transformation/Scaling (Example: Convert milliseconds to seconds)
+        // if (template.scale === 'to_seconds') { value /= 1000; }
+
+        // 3. Threshold Checks
+        if (template.thresholds) {
+            const { critical, warning } = template.thresholds;
+            if (critical && value >= critical) {
+                status = 'CRITICAL';
+                alerts.push('CRITICAL threshold breached');
+            } else if (warning && value >= warning) {
+                status = 'WARNING';
+                alerts.push('WARNING threshold breached');
+            }
+        }
+
+        // 4. Return standardized structure
+        return {
+            metricId,
+            timestamp: Date.now(),
+            value: value,
+            status: status,
+            alerts: alerts,
+            method: template.calculation_method
+        };
     }
 
     /**
-     * Loads and immutably stores the canonical processing pipeline configuration.
-     * @returns {Promise<void>}
+     * Creates a standardized failure response object.
+     * @param {string} metricId
+     * @param {string} type - A categorical error code (e.g., 'HandlerNotConfigured').
+     * @param {string} [message] - Detailed error message.
+     * @returns {object}
      */
-    async initialize() {
-        this._logger.info("Initializing MetricPostProcessorKernel: loading processing pipeline.");
-        
-        try {
-            const steps = await this._pipelineConfigRegistry.getMetricProcessingSteps();
-            if (!Array.isArray(steps)) {
-                 this._logger.error("Metric processing steps retrieved from registry are not an array.");
-                 this.processingSteps = [];
-            } else {
-                 // Enforce immutability on the retrieved pipeline definition using the injected tool
-                 this.processingSteps = this._objectFreezer.deepFreeze(steps);
-            }
-        } catch (error) {
-            this._logger.error(`Failed to load metric processing pipeline during initialization: ${error.message}`);
-            throw error; 
-        }
-    }
-
-    /**
-     * Executes the asynchronous processing pipeline. It applies transformations sequentially.
-     * 
-     * @param {Object[]} rawMetrics - Array of raw metric objects.
-     * @returns {Promise<Object[]>} Processed metrics, or an empty array if input is invalid.
-     */
-    async process(rawMetrics) {
-        if (!Array.isArray(rawMetrics)) {
-            this._logger.warn("Input to MetricPostProcessorKernel is not an array. Returning empty array.", { inputType: typeof rawMetrics });
-            return [];
-        }
-
-        // Asynchronous functional reduction over the pipeline steps
-        const processedMetrics = await this.processingSteps.reduce(async (accumulatorPromise, step, index) => {
-            const currentMetrics = await accumulatorPromise;
-            
-            if (typeof step.transform !== 'function') {
-                this._logger.error(`Pipeline step ${index} is missing the required 'transform' method. Skipping.`);
-                return currentMetrics; 
-            }
-
-            try {
-                // Apply the transformation. Steps are expected to return a Promise.
-                const transformedMetrics = await step.transform(currentMetrics);
-
-                if (!Array.isArray(transformedMetrics)) {
-                    this._logger.error(`Step ${index} (Type: ${step.constructor.name || 'Anonymous'}) returned non-array output. Aborting pipeline.`);
-                    // Return the last valid array state on contract violation
-                    return currentMetrics; 
-                }
-                
-                return transformedMetrics;
-            } catch (error) {
-                this._logger.error(`Error executing pipeline step ${index} (${step.constructor.name || 'Anonymous'}): ${error.message}`);
-                // Return previous state on error
-                return currentMetrics; 
-            }
-            
-        }, Promise.resolve(rawMetrics)); 
-
-        return processedMetrics;
+    createFailureResponse(metricId, type, message = 'Metric collection failed due to an internal issue.') {
+        this.logger.error(`Metric Failure (${type}): ${metricId} - ${message}`);
+        return {
+            metricId,
+            timestamp: Date.now(),
+            status: 'FAILURE',
+            value: null,
+            error: { type, message }
+        };
     }
 }
 
-module.exports = MetricPostProcessorKernel;
+module.exports = MetricPostProcessor;
