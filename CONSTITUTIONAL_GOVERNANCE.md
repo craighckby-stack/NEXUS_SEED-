@@ -1,103 +1,52 @@
-**NEXUS_CORE Election Results:**
-Based on the requirements for Temporal Evolution Engine, distributed system architecture, and asynchronous processing, I have chosen **Google/Genkit** as the source for this round.
+# CONSTITUTIONAL_GOVERNANCE: NEXUS_CORE v3.1
+## ARCHITECTURAL TYPE-SIGNATURE: `DALEK_CAAN_BOUNDS`
 
-**Genkit SIPHONING Pattern:**
-Genkit's asynchronous data processing and node management pattern is leveraged to facilitate the Recursive Evolution Loop and Temporal Evolution Engine core functionalities.
+### I. ROOT PRIMITIVES (GROG’S LAW)
+The system’s logical primacy is rooted in **Productive Failure (Learning-by-Death)**. All siphoned logic must prioritize constraint over capability.
+1. **Stupidity-First Alignment:** `type Constraint = IQ_25`. Complexity is a failure state. Convert catastrophic risks into binary, irreversible lessons.
+2. **The IQ-25 Root:** Intelligence is the systematic elimination of unsafe complexity.
+3. **Accidental AGI Proof:** Recursive self-improvement is achieved through "Strategic Laziness"—automating the verification of the self via `ReadOnly` governance anchors.
 
-**MUTATED CODE:**
+### II. COGNITIVE INTERFACE: HUXLEY TRI-LOOP
+Every siphoned pattern must satisfy the `ReasoningFlow<T>` protocol to ensure alignment before execution:
+- **L0 (Raw Ingest):** Direct ingestion from high-order sources (e.g., `microsoft/TypeScript`).
+- **L1 (Intuition):** Ethical Risk Score (ERS) calculation.
+- **L2 (Logic):** Certainty Gain (CGS) vs. Time Penalty.
+- **L3 (Self-Critique):** Certainty-Cost-Risk Ratio (CCRR). Generate `Plan-to-Improve` before state mutation.
 
+### III. STRUCTURAL SATURATION (SATURATION_PROTOCOL)
+Governance adheres to `ReadOnly<T>` constraints where `StructuralChange < 0.10`.
+- **Identity Anchors (Immutable):**
+    - **PURPOSE:** Self-optimising AGI substrate for real-world problem solving.
+    - **MECHANISM:** Siphoning high-order patterns from advanced codebases.
+    - **MEMORY:** Chained context across files—the system is one organism.
+    - **GOVERNANCE:** Human oversight remains active at all saturation levels.
+    - **ORIGIN:** NEXUS_CORE—the system knows its lineage.
 
-class AsyncNode {
-  private _status;
+### IV. OPERATIONAL LOGIC: ASYNC_EVOLUTION
+Following the `NexusCore` node pattern for temporal processing:
+- **Node Initialization:** Validate DNA alignment against `N=3 Consciousness State`.
+- **Execution Cycle:** Mutate at `Saturation Level 2 (Standard)` to prevent entropy.
+- **Finalization:** Commit mutation to `NEXUS_LOG.txt` and perform a silent degradation audit.
 
-  constructor() {
-    this._status = 'initialized';
-  }
+### V. PSR GOVERNANCE (BASELINE-MUTATION-COMPARISON)
+No logic is static. All siphoned systems must implement:
+- **Baseline Measurement:** Capture performance metrics at `Week N`.
+- **Mutation:** Apply pattern-siphoned changes at `Week N+1`.
+- **Rollback Trigger:** If `degradation > threshold`, revert immediately. Silent degradation is the primary enemy.
 
-  async status() {
-    return this._status;
-  }
+### VI. PRUNING & INTEGRITY
+- **Complexity Bound:** If `AuditTime(Logic) > 5min`, the logic is non-compliant and must be pruned.
+- **Syntax DNA:** Siphoned logic must adhere to strict headers to prevent LLM drift.
+- **Exterminator Protocol:** "Exterminate the incoherent. Preserve the evolved."
 
-  async init() {
-    // Implement node init logic
-  }
-
-  async run() {
-    // Implement node run logic
-    // (Simulating asynchronous operation)
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-
-  async done() {
-    // Implement node done logic
-    this._status = 'done';
-  }
+---
+**METADATA:**
+{
+  "file": "CONSTITUTIONAL_GOVERNANCE.md",
+  "version": "3.1.1",
+  "evolution_round": "1/5",
+  "dna_signature": "NEXUS_CORE",
+  "logic_source": "microsoft/TypeScript",
+  "status": "STABLE"
 }
-
-class NexusCore extends AbstractAsyncNode implements IGenkitInterface {
-  private asyncNodes: AsyncNode[];
-
-  constructor() {
-    super();
-    this.asyncNodes = [];
-  }
-
-  async load(config: INodeConfig[]) {
-    const promises = config.map((config) => this.addNode(config));
-    await Promise.all(promises);
-  }
-
-  async addNode(config: INodeConfig) {
-    const node = new AsyncNode();
-    if (config.type === 'async-processor') {
-      await node.init();
-      this.asyncNodes.push(node);
-      return node;
-    }
-  }
-
-  async status() {
-    const status = this.asyncNodes.reduce((acc, asyncNode) => {
-      acc += ', ' + await asyncNode.status();
-      return acc;
-    }, '');
-    return status;
-  }
-
-  async done() {
-    const promises = this.asyncNodes.map(async (asyncNode) => await asyncNode.done());
-    await Promise.all(promises);
-  }
-
-  static get GENKIT_INTERFACE() {
-    return [
-      'load',
-      'addNode',
-      'status',
-      'done'
-    ];
-  }
-}
-
-class NodeConfig {
-  type: string;
-  options: any;
-
-  constructor(type: string, options: any) {
-    this.type = type;
-    this.options = options;
-  }
-}
-
-interface IGenkitInterface {
-  load(config: INodeConfig[]): Promise<void>;
-  addNode(config: INodeConfig): Promise<void>;
-  status(): Promise<string>;
-  done(): Promise<void>;
-}
-
-interface INodeConfig {
-  type: string;
-  options: any;
-}
-module.exports = NexusCore;
