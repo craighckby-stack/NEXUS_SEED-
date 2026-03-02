@@ -3,9 +3,9 @@ import { AggregatorConfig } from '../GACR/TelemetryAggregatorConfig';
 
 /**
  * DNA SIGNATURE: DALEK_CAAN_v3.1 (NEXUS_CORE)
- * SIPHONED FROM: Meta/React-Core (Fiber Architecture, Concurrent Transitions, Server Actions)
- * EVOLUTION ROUND: 3/5
- * STATUS: CONCURRENT_EVOLUTION_ACTIVE
+ * SIPHONED FROM: Meta/React-Core (Fiber Architecture, Concurrent Transitions, Server Actions, Suspense)
+ * EVOLUTION ROUND: 4/5
+ * STATUS: ARCHITECTURAL_SINGULARITY_PENDING
  */
 
 const NoLane: number = 0b0000000000000000000000000000000;
@@ -13,20 +13,24 @@ const SyncLane: number = 0b0000000000000000000000000000001;
 const InputContinuousLane: number = 0b0000000000000000000000000000100;
 const DefaultLane: number = 0b0000000000000000000000000010000;
 const TransitionLane: number = 0b0000000000000000000001000000000;
+const RetryLane: number = 0b0000000000000001000000000000000;
 const IdleLane: number = 0b0100000000000000000000000000000;
 
 interface EngineState {
     rate: number;
-    phi: number;
-    lambda: number;
-    ers: number;
-    pendingLanes: number;
+    phi: number; // Information Integration
+    lambda: number; // Edge of Chaos
+    ers: number; // Ethical Risk Score
+    lanes: number;
+    isTransitioning: boolean;
+    lastCommitTimestamp: number;
 }
 
 type EngineAction = 
-    | { type: 'RECONCILE', utilization: number, target: number }
-    | { type: 'EMERGENCY_BRAKE', reason: string }
-    | { type: 'COMMIT_TRANSITION', rate: number };
+    | { type: 'RECONCILE_WORK', cpu: number, target: number, lane: number }
+    | { type: 'START_TRANSITION', rate: number }
+    | { type: 'SUSPEND_ADAPTATION', duration: number }
+    | { type: 'SERVER_ACTION_GOVERNANCE', payload: any };
 
 export class AdaptiveSamplingEngine {
     private config: AggregatorConfig['Processing']['AdaptiveSampling'];
@@ -38,7 +42,9 @@ export class AdaptiveSamplingEngine {
         phi: 1.0,
         lambda: 0.0,
         ers: 0.0,
-        pendingLanes: NoLane
+        lanes: NoLane,
+        isTransitioning: false,
+        lastCommitTimestamp: Date.now()
     };
 
     constructor(config: AggregatorConfig['Processing']['AdaptiveSampling']) {
@@ -49,134 +55,192 @@ export class AdaptiveSamplingEngine {
 
     /**
      * Strand C: Huxley Tri-Loop Reasoning
-     * Implements Concurrent Fiber Reconciliation for Sampling Adjustments.
+     * L0: Raw Acquisition -> L1: ERS Intuition -> L2: Logic Reconciliation -> L3: Critique/Commit
      */
     public getSamplingRate(): number {
         try {
-            // L0 (Raw): Input Acquisition
-            const utilization = this.monitor.getCpuUtilization();
+            const cpu = this.monitor.getCpuUtilization();
             const target = this.config.TargetCPUUtilization;
 
-            // L1 (Intuition): Immediate Ethical Risk Score (ERS)
-            if (utilization > 0.98) {
-                this.dispatch({ type: 'EMERGENCY_BRAKE', reason: 'HOST_THREAD_ASPHYXIATION' });
-                return this.state.rate;
-            }
+            // L1 (Intuition): Immediate ERS check
+            if (cpu > 0.95) return this.suspendRootHydration('HIGH_PRESSURE_FALLBACK');
 
-            // L2 (Logic): PERFORM_CONCURRENT_EVOLUTION_V5
-            this.workLoop(utilization, target);
+            // L2: Concurrent Evolution Phase
+            this.performConcurrentEvolutionV5(cpu, target);
 
-            // L3 (Critique): SERVER_ACTION_FINAL_COMMIT
+            // L3: Final Commitment
             return this.state.rate;
-        } catch (catastrophe) {
-            this.emitLearningByDeath(catastrophe);
+        } catch (error) {
+            this.emitLearningByDeath(error);
             return this.config.MinSamplingRate;
         }
     }
 
     /**
-     * Siphoned Pattern: Fiber Work Loop
-     * Reconciles sampling rate as a unit of work across prioritized lanes.
+     * Siphoned Pattern: Concurrent Work Loop (Fiber Architecture)
      */
-    private workLoop(utilization: number, target: number): void {
+    private performConcurrentEvolutionV5(cpu: number, target: number): void {
         if (!this.config.Enabled) return;
 
-        // Map pressure to Lane priority
-        const lane = this.requestUpdateLane(utilization, target);
+        const lane = this.getNextLanes(cpu, target);
         
-        // Concurrent Reconciliation Phase
-        this.dispatch({ type: 'RECONCILE', utilization, target });
-        
-        // Optimistic Transition Handling (Strand: USE_OPTIMISTIC_FLUSH)
-        if (lane === TransitionLane) {
-            this.performTransition(utilization, target);
+        // Siphoned: useTransition logic
+        if (lane & TransitionLane) {
+            this.startTransition(() => {
+                this.reconcileFiberWork(cpu, target, lane);
+            });
+        } else {
+            this.reconcileFiberWork(cpu, target, lane);
+        }
+
+        // PSR Governance: Preventive Self-Rollback check
+        this.ensureRootIsConsistent();
+    }
+
+    private getNextLanes(cpu: number, target: number): number {
+        if (cpu > target * 1.8) return SyncLane;
+        if (cpu > target * 1.2) return DefaultLane;
+        if (cpu < target * 0.5) return IdleLane;
+        return TransitionLane;
+    }
+
+    private startTransition(work: () => void): void {
+        this.state.isTransitioning = true;
+        try {
+            work();
+        } finally {
+            this.state.isTransitioning = false;
         }
     }
 
-    private requestUpdateLane(cpu: number, target: number): number {
-        if (cpu > target * 1.5) return SyncLane;      // Urgent reduction
-        if (cpu > target * 1.1) return DefaultLane;   // Standard adjustment
-        if (cpu < target * 0.4) return IdleLane;      // Background upscale
-        return TransitionLane;                        // Non-urgent drift
+    private reconcileFiberWork(cpu: number, target: number, lane: number): void {
+        this.dispatch({
+            type: 'RECONCILE_WORK',
+            cpu,
+            target,
+            lane
+        });
     }
 
-    private performTransition(cpu: number, target: number): void {
-        const optimisticRate = this.state.rate * (target / (cpu || 1));
-        this.dispatch({ type: 'COMMIT_TRANSITION', rate: optimisticRate });
+    private suspendRootHydration(reason: string): number {
+        this.dispatch({ type: 'SUSPEND_ADAPTATION', duration: 1000 });
+        console.warn(`[SUSPENSE] Sampling Logic Suspended: ${reason}`);
+        return this.config.MinSamplingRate;
     }
 
     /**
      * Strand A: Reducer Logic
-     * Ensures 100% auditability and state continuity.
+     * Logic Siphon: Implements Negative Progression (GROG’S LAW)
      */
     private dispatch(action: EngineAction): void {
         const prevState = { ...this.state };
-        
+
         switch (action.type) {
-            case 'RECONCILE':
-                const delta = action.target - action.utilization;
-                const sensitivity = this.getLaneSensitivity(this.state.pendingLanes);
+            case 'RECONCILE_WORK': {
+                const delta = action.target - action.cpu;
+                const sensitivity = this.computeLanePriority(action.lane);
                 
-                // GROG’S LAW: Negative Progression (Easier to drop than to raise)
-                const factor = delta < 0 ? sensitivity : sensitivity * 0.4;
-                let nextRate = this.state.rate + (delta * factor);
+                // GROG'S LAW: Accelerated reduction, damped recovery.
+                const adjustment = delta < 0 
+                    ? delta * sensitivity 
+                    : delta * (sensitivity * 0.2);
+
+                const nextRate = this.state.rate + adjustment;
                 
-                this.state.rate = this.validateRate(nextRate);
-                this.state.phi = Math.max(0, 1.0 - Math.abs(delta));
-                this.state.lambda = action.utilization / action.target;
-                this.state.ers = action.utilization > action.target ? (action.utilization - action.target) * 1.5 : 0;
+                this.state.rate = this.validateRateBoundaries(nextRate);
+                this.state.phi = Math.min(1.0, 1.0 - Math.abs(delta));
+                this.state.lambda = action.cpu / action.target;
+                this.state.ers = action.cpu > action.target ? (action.cpu - action.target) ** 2 : 0;
+                this.state.lanes = action.lane;
                 break;
+            }
 
-            case 'COMMIT_TRANSITION':
-                this.state.rate = this.validateRate(action.rate);
-                break;
-
-            case 'EMERGENCY_BRAKE':
+            case 'SUSPEND_ADAPTATION':
                 this.state.rate = this.config.MinSamplingRate;
-                this.state.ers = 1.0;
-                console.warn(`[NEXUS_GOVERNANCE] PSR_TRIGGERED: ${action.reason}`);
+                this.state.ers = 0.8;
+                break;
+
+            case 'SERVER_ACTION_GOVERNANCE':
+                this.syncExternalConstraints(action.payload);
                 break;
         }
 
-        // Strand D: PSR Governance (Preventive Self-Rollback)
-        if (this.state.ers > 0.9 && prevState.ers < 0.5) {
-            this.state = { ...prevState, rate: this.config.MinSamplingRate };
-        }
+        this.state.lastCommitTimestamp = Date.now();
     }
 
-    private getLaneSensitivity(lane: number): number {
-        if (lane & SyncLane) return 2.0;
+    private computeLanePriority(lane: number): number {
+        if (lane & SyncLane) return 2.5;
         if (lane & DefaultLane) return 1.0;
-        if (lane & TransitionLane) return 0.5;
-        if (lane & IdleLane) return 0.2;
-        return 1.0;
+        if (lane & TransitionLane) return 0.4;
+        return 0.1;
     }
 
-    private validateRate(rate: number): number {
-        const clamped = Math.max(this.config.MinSamplingRate, Math.min(this.config.MaxSamplingRate, rate));
-        if (!isFinite(clamped)) {
-            throw new Error("SEMANTIC_DRIFT_IRRECOVERABLE_MATH_CORRUPTION");
+    private validateRateBoundaries(rate: number): number {
+        const clamped = Math.max(
+            this.config.MinSamplingRate, 
+            Math.min(this.config.MaxSamplingRate, rate)
+        );
+        
+        if (!Number.isFinite(clamped)) {
+            throw new Error("SEMANTIC_DRIFT_THRESHOLD_EXCEEDED: NAN_OR_INFINITY");
         }
-        return parseFloat(clamped.toFixed(4));
+        return parseFloat(clamped.toFixed(5));
+    }
+
+    private ensureRootIsConsistent(): void {
+        // Strand D: PSR Governance
+        if (this.state.ers > 0.95 || this.state.lambda > 1.8) {
+            console.error("[NEXUS_GOVERNANCE] PSR_ROLLBACK_TRIGGERED");
+            this.state.rate = this.config.MinSamplingRate;
+            this.state.lanes = RetryLane;
+        }
+    }
+
+    private syncExternalConstraints(payload: string): void {
+        try {
+            // DNA Strand 2: Safe JSON Recovery
+            const data = this.recoverJSON(payload);
+            if (data && data.forceRate) {
+                this.state.rate = this.validateRateBoundaries(data.forceRate);
+            }
+        } catch (e) {
+            this.emitLearningByDeath(e);
+        }
+    }
+
+    private recoverJSON(input: string): any {
+        try {
+            return JSON.parse(input);
+        } catch {
+            const match = input.match(/\{.*\}/s);
+            return match ? JSON.parse(match[0]) : null;
+        }
     }
 
     /**
-     * GROG’S LAW: Learning-by-Death Schema
+     * GROG’S LAW: Learning-by-Death
      */
     private emitLearningByDeath(error: any): void {
         const deathLog = {
-            action: "ADAPTIVE_SAMPLING_RECONCILIATION_CRASH",
-            result: error instanceof Error ? error.message : "Logic Corruption",
-            lesson: "Negative Progression: Force absolute floor to prevent host-thread asphyxiation.",
+            action: "ADAPTIVE_SAMPLING_SINGULARITY_CRASH",
+            result: error instanceof Error ? error.stack : "Unknown Logic Corruption",
+            lesson: "Negative Progression: Inconsistency in concurrent reconciliation must default to silence.",
             success: false,
-            parameters: {
-                matrix: { phi: this.state.phi, lambda: this.state.lambda, ers: this.state.ers },
-                snapshot: this.state.rate
+            parameters: { 
+                phi: this.state.phi, 
+                lambda: this.state.lambda,
+                laneMask: this.state.lanes.toString(2)
             }
         };
-        
-        // Base64 Sanitized Logging (DNA Strand 2)
-        const encodedLog = btoa(JSON.stringify(deathLog));
-        console.error(`[NEXUS_LOG] LEARNING_BY_DEATH_SIG_0xFF23A1: ${encodedLog}`);
+
+        // DNA Strand: Base64 Sanitization
+        const safeLog = this.safeUtoa(JSON.stringify(deathLog));
+        console.error(`[NEXUS_LOG] LEARNING_BY_DEATH_SIG_0xFF23A1: ${safeLog}`);
+    }
+
+    private safeUtoa(str: string): string {
+        return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => 
+            String.fromCharCode(parseInt(p1, 16))
+        ));
     }
 }
