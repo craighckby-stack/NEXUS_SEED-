@@ -1,103 +1,53 @@
-class RuleHandlerResolverKernel {
-    #ruleMap;
-    #logger;
+/**
+ * Sovereign AGI Validation Handler Resolver.
+ * This utility resolves abstract handlerIds defined in ValidationRuleConfig 
+ * to concrete, executable functions. It is critical for the Dependency Injection 
+ * framework for validation logic, ensuring strict separation of configuration 
+ * from implementation logic.
+ */
 
-    /**
-     * @param {{rules: Map<string, Function>, logger?: console}} config 
-     */
-    constructor(config = {}) {
-        this.#setupDependencies(config);
-    }
-
-    /**
-     * Goal: Synchronous Setup Extraction.
-     * Extracts synchronous dependency validation and assignment.
-     * @param {{rules: Map<string, Function>, logger?: console}} config 
-     */
-    #setupDependencies(config) {
-        const ruleMap = config.rules;
-        this.#logger = config.logger || console;
-
-        if (!(ruleMap instanceof Map)) {
-            this.#throwSetupError("RuleHandlerResolver requires 'rules' property to be a Map.");
+// NOTE: In a production system, these concrete handlers would be dynamically 
+// imported or loaded from a centralized rule handler directory.
+const RuleHandlers = {
+    MemoryRuleHandler: {
+        checkLimitCoherence: (spec, errors) => { 
+            /* implementation logic */ 
         }
-        this.#ruleMap = ruleMap;
-    }
-
-    /**
-     * Goal: I/O Proxy - Error Handling.
-     * Proxies setup errors.
-     */
-    #throwSetupError(message) {
-        throw new Error(`RuleHandlerResolverKernel Setup Error: ${message}`);
-    }
-
-    /**
-     * Goal: I/O Proxy - Logging.
-     */
-    #logWarning(message) {
-        if (this.#logger && typeof this.#logger.warn === 'function') {
-            this.#logger.warn(message);
+    },
+    SystemRuleHandler: {
+        checkRuntimeCompatibility: (spec, errors) => { 
+            /* implementation logic */ 
+        }
+    },
+    StructuralRuleHandler: {
+        checkRequiredFields: (spec, errors) => { 
+            /* implementation logic */ 
         }
     }
+};
 
+class RuleHandlerResolver {
     /**
-     * Goal: I/O Proxy - Logging.
+     * Resolves a handler ID string (e.g., 'HandlerName.method') into the executable function.
+     * @param {string} handlerId The ID to resolve, defined in ValidationRuleConfig.
+     * @returns {Function|null} The executable validation function or null if not found.
      */
-    #logError(message) {
-        if (this.#logger && typeof this.#logger.error === 'function') {
-            this.#logger.error(message);
-        }
-    }
-
-    /**
-     * Goal: I/O Proxy - External Interaction (Map Lookup).
-     */
-    #delegateToMapLookup(ruleId) {
-        return this.#ruleMap.get(ruleId);
-    }
-
-    /**
-     * Goal: I/O Proxy - Control Flow/Logging.
-     * Handles logging and returns null if the rule is missing or the ID is invalid.
-     */
-    #handleMissingRule(ruleId) {
-        if (!ruleId) {
-            this.#logWarning("Attempted to resolve rule with null or undefined ID.");
+    static resolve(handlerId) {
+        if (!handlerId || typeof handlerId !== 'string') {
             return null;
         }
-        this.#logError(`Rule handler not found for ID: ${ruleId}`);
+
+        const [handlerName, methodName] = handlerId.split('.');
+
+        if (RuleHandlers[handlerName] && typeof RuleHandlers[handlerName][methodName] === 'function') {
+            // Return the function bound to its originating object if necessary for context,
+            // though stateless rule handlers are preferred.
+            return RuleHandlers[handlerName][methodName];
+        }
+
+        console.error(`[RuleHandlerResolver] Handler definition not found or is not a function: ${handlerId}`);
         return null;
     }
-    
-    /**
-     * Goal: I/O Proxy - Validation Logic.
-     * Checks if the retrieved item is a valid function handler.
-     */
-    #validateHandlerType(handler, ruleId) {
-        if (typeof handler !== 'function') {
-            this.#logError(`Handler for ID ${ruleId} found but is not a function.`);
-            return null;
-        }
-        return handler;
-    }
-
-    /**
-     * Resolves the rule handler function by its unique ID.
-     * @param {string} ruleId 
-     * @returns {Function | null}
-     */
-    resolve(ruleId) {
-        if (!ruleId) {
-            return this.#handleMissingRule(ruleId);
-        }
-
-        const handler = this.#delegateToMapLookup(ruleId);
-
-        if (!handler) {
-            return this.#handleMissingRule(ruleId);
-        }
-
-        return this.#validateHandlerType(handler, ruleId);
-    }
 }
+
+module.exports = RuleHandlerResolver;
