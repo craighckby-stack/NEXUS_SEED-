@@ -11,37 +11,20 @@
  */
 class ICRoTIndexClient {
     /**
-     * Ensures the class is treated as an abstract interface and cannot be instantiated directly.
-     */
-    constructor() {
-        if (new.target === ICRoTIndexClient) {
-            throw new Error("Cannot instantiate abstract interface ICRoTIndexClient directly. It must be extended.");
-        }
-    }
-
-    /**
-     * Private helper to enforce abstract contract fulfillment by throwing a standard error.
-     * @param {string} methodName The name of the method that requires implementation.
-     */
-    #enforceImplementation(methodName) {
-        throw new Error(`Method '${methodName}' must be implemented by the concrete CRoT Index Client.`);
-    }
-
-    /**
      * @param {string} fingerprint The 64-character SHA-256 policy hash.
      * @returns {Promise<string[]>} List of historical ACV transaction IDs.
      */
     async getAnchorsByFingerprint(fingerprint) {
-        this.#enforceImplementation('getAnchorsByFingerprint');
+        throw new Error('Method must be implemented by the concrete CRoT Index Client.');
     }
 
     /**
      * @param {string} fingerprint The 64-character SHA-256 policy hash.
      * @param {string} txId The transaction ID (Anchor) associated with the successful policy change.
-     * @returns {Promise<void>} 
+     * @returns {Promise<void>}
      */
     async indexCommit(fingerprint, txId) {
-        this.#enforceImplementation('indexCommit');
+        throw new Error('Method must be implemented by the concrete CRoT Index Client.');
     }
 }
 
