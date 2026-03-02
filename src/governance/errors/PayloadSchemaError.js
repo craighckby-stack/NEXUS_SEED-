@@ -1,72 +1,65 @@
 /**
  * @fileoverview Custom error class for failures encountered during Payload Specification Engine validation.
- * Represents a structured operational failure due to invalid input schema or governance rules violation.
- * This error enforces the mandatory high-integrity error structure, including a specific conceptId,
- * required by the AIA Enforcement Layer for auditable error processing and normalization.
- *
- * NOTE: Canonical serialization (safe field exclusion, deep filtering) is delegated to the
- * IErrorDetailNormalizationToolKernel during pipeline processing, eliminating the need for internal
- * synchronous utility usage (CanonicalErrorFormatterUtility).
+ * Optimizing for encapsulation, efficiency, and structured abstraction using modern ES Class features.
  */
 
 class PayloadSchemaError extends Error {
     // Standard HTTP status code for client payload validation errors.
     static HTTP_STATUS = 400;
-    
-    // Mandatory, standardized concept identifier for high-integrity audit (AIA Enforcement Layer).
-    static CONCEPT_ID = 'GOV_E_003'; 
+    // Internal standardized code for auditing.
+    static ERROR_CODE = 'GOV_MPSE_BREACH';
 
-    /** @type {boolean} */
-    public isOperational;
-    /** @type {number} */
-    public status;
-    /** @type {string} */
-    public conceptId;
-    /** @type {Object} */
-    public failedPayload;
-    /** @type {(Object|Array)} */
-    public validationDetails;
+    // Private fields for enhanced encapsulation (recursive abstraction).
+    #validationDetails;
+    #failedPayload;
+
+    // Efficient class property initialization (constant per instance type).
+    name = 'PayloadSchemaError';
+    isOperational = true; 
+    status = PayloadSchemaError.HTTP_STATUS;
+    code = PayloadSchemaError.ERROR_CODE;
 
     /**
      * @param {string} message - A user-readable explanation of the error.
-     * @param {Object} [payload={}] - The full or relevant part of the input payload that caused the failure. Sensitive data must be sanitized before storing.
-     * @param {(Object|Array)} [validationDetails={}] - Structured data detailing specific validation failures (e.g., Joi/Zod output, array of field errors).
+     * @param {Object} [payload={}] - The failing payload (must be sanitized upstream).
+     * @param {(Object|Array)} [details={}] - Structured data detailing specific validation failures.
      */
-    constructor(message, payload = {}, validationDetails = {}) {
+    constructor(message, payload = {}, details = {}) {
+        // Efficiency: Call super first.
         super(message);
 
-        // --- Core Error Identification ---
-        this.name = 'PayloadSchemaError';
-        this.isOperational = true; // Essential flag for operational error handling middleware
-
-        // --- Contextual Data & Governance ---
-        this.status = PayloadSchemaError.HTTP_STATUS;
-        this.conceptId = PayloadSchemaError.CONCEPT_ID;
-
-        this.failedPayload = payload;
-        this.validationDetails = validationDetails; 
-
-        // --- Stack Trace Management ---
+        // Direct assignment to private fields.
+        this.#failedPayload = payload;
+        this.#validationDetails = details;
+        
+        // Stack Trace Management - done last.
         if (Error.captureStackTrace) {
             // Skips the constructor frame for a cleaner trace origin
-            Error.captureStackTrace(this, PayloadSchemaError); 
+            Error.captureStackTrace(this, PayloadSchemaError);
         }
     }
 
     /**
-     * Provides a basic representation of the error suitable for native JSON serialization (JSON.stringify).
-     * Full, canonical normalization and security filtering is handled asynchronously by the
-     * IErrorDetailNormalizationToolKernel in the processing pipeline.
+     * Public Getter: Controlled access to validation details.
+     * @returns {(Object|Array)}
+     */
+    get validationDetails() {
+        return this.#validationDetails;
+    }
+
+    /**
+     * Provides a standard representation of the error suitable for JSON serialization.
      * @returns {Object} Serializable error representation.
      */
     toJSON() {
+        // Efficiency: Avoids accessing private fields directly outside the class structure
+        // by utilizing the public getter for validation details.
         return {
             name: this.name,
-            conceptId: this.conceptId,
+            code: this.code,
             status: this.status,
             message: this.message,
             validationDetails: this.validationDetails
-            // failedPayload is intentionally omitted here; the normalization tool handles inclusion/exclusion safely.
         };
     }
 }
