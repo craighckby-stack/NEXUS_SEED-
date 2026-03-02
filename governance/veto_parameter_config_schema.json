@@ -1,1 +1,30 @@
-Optimizing computational efficiency and recursive abstraction for veto parameter config schema
+{
+  "title": "Veto Parameter Configuration Schema",
+  "description": "Defines the structural requirements for configuring veto parameters within the governance system.",
+  "type": "object",
+  "properties": {
+    "vetoThreshold": {
+      "type": "number",
+      "description": "The minimum required consensus percentage (0.0 to 1.0) to successfully enact a veto.",
+      "minimum": 0.5,
+      "maximum": 1.0
+    },
+    "vetoWindowCycles": {
+      "type": "integer",
+      "description": "The number of operational cycles during which a veto proposal remains active.",
+      "minimum": 10
+    },
+    "immutableTargets": {
+      "type": "array",
+      "description": "A list of module identifiers that are exempt from the veto mechanism (e.g., kernel.js).",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "vetoThreshold",
+    "vetoWindowCycles"
+  ],
+  "additionalProperties": false
+}
