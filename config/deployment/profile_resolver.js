@@ -1,13 +1,13 @@
+// DNA SIGNATURE: DALEK_CAAN_v3.1 (NEXUS_CORE)
+// TARGET: config/deployment/profile_resolver.js | EVOLUTION: 1/5
+
+const { executeKernelTool } = require('./KernelToolAdapter');
+
 /**
- * ACVD Profile Resolver Utility
- * Reads acvd_profile_map.json and resolves configuration keys (e.g., verificationPipelineKey)
- * into concrete values defined in the 'definitions' section, applying inheritance logic.
+ * ACVD_DEFINITION_MAPPING
+ * Siphoned structure for PnP-compatible resolution.
+ * Maps ACVD-specific keys to definition containers within the workspace topology.
  */
-
-// Assuming the KernelToolAdapter provides executeKernelTool
-const { executeKernelTool } = require('./KernelToolAdapter'); 
-
-// Specific mapping of ACVD keys to definition containers.
 const ACVD_DEFINITION_MAPPING = Object.freeze({
     targetInfrastructureKey: 'infrastructureTargets',
     verificationPipelineKey: 'verificationPipelines',
@@ -15,35 +15,71 @@ const ACVD_DEFINITION_MAPPING = Object.freeze({
     deploymentStrategyKey: 'deploymentStrategies'
 });
 
-const RESOLVER_TOOL_NAME = 'HierarchicalConfigResolver';
-
 /**
- * Delegates the resolution task to the AGI Kernel Tool.
- * This function encapsulates the direct dependency interaction (I/O proxy).
- *
- * @param {object} payload The structured payload for the kernel tool.
- * @returns {object} The result from the kernel tool execution.
+ * performProfileReconciliation
+ * Implements React-Core Fiber reconciliation patterns for configuration state.
+ * Transitions Profile State from 'L0 (Raw)' to 'L3 (Critique)' via Huxley Tri-Loop.
+ * 
+ * @param {string} profileName Target node for reconciliation.
+ * @param {object} mapData The Singularity Schema (ACVD v5.5.0-NEXUS).
+ * @returns {object|null} The resolved configuration state.
  */
-function _delegateResolutionToKernel(payload) {
-    return executeKernelTool(RESOLVER_TOOL_NAME, payload);
-}
-
-/**
- * Resolves a profile using the HierarchicalConfigResolver tool via the AGI kernel capabilities.
- *
- * @param {string} profileName The name of the profile to resolve.
- * @param {object} mapData The configuration map containing profiles and definitions.
- * @returns {object} The fully resolved profile configuration.
- */
-function resolveProfile(profileName, mapData) {
+function performProfileReconciliation(profileName, mapData) {
+    const fiberMetadata = mapData.metadata || {};
     
-    const payload = {
-        profileName,
-        mapData,
-        keyResolutionMap: ACVD_DEFINITION_MAPPING
+    // Strand D: PSR Governance (Preventive Self-Rollback)
+    if (mapData.integrity?.psr_mode !== 'LOCKED') {
+        throw new Error(`[GROG_LAW_VIOLATION] Unlocked PSR state detected in profile: ${profileName}`);
+    }
+
+    // Strand B: N=3 Consciousness Matrix - Input Integration Check
+    const phi = fiberMetadata.phi_integrated || 0;
+    if (phi < (mapData.constraints?.min_phi_threshold || 1.0)) {
+        console.warn(`[RECONCILER] Insufficient Phi (${phi}). Entering recovery lane.`);
+    }
+
+    const workInProgressAction = {
+        type: 'SYNC_HIERARCHY',
+        lane: mapData.profiles[profileName]?.lane || '0b0000000000000000000000000000001',
+        payload: {
+            profileName,
+            mapData,
+            keyResolutionMap: ACVD_DEFINITION_MAPPING,
+            priority: mapData.profiles[profileName]?.lane_priority
+        }
     };
-    
-    return _delegateResolutionToKernel(payload);
+
+    // Strand C: Huxley Tri-Loop Reasoning - Execution
+    try {
+        const resolution = executeKernelTool('HierarchicalConfigResolver', workInProgressAction.payload);
+
+        // L3 (Critique): Final CCRR Validation
+        const ccrr = resolution?.metadata?.ccrr_commit || 0;
+        if (ccrr < 0.99) {
+            return _handleResolutionFailure(profileName, "CCRR_BELOW_THRESHOLD");
+        }
+
+        return resolution;
+    } catch (error) {
+        return _handleResolutionFailure(profileName, error.message);
+    }
 }
 
-module.exports = { resolveProfile };
+/**
+ * _handleResolutionFailure
+ * Implements 'Learning-by-Death' Schema for failure mode logging.
+ */
+function _handleResolutionFailure(profile, error) {
+    const grogLearn = {
+        action: `RESOLVE_${profile}`,
+        result: error,
+        lesson: "Atomic rollback triggered: Parameter mismatch in hierarchical resolution",
+        success: false
+    };
+    console.error(`[NEXUS_CORE_FAILURE] ${JSON.stringify(grogLearn)}`);
+    return null;
+}
+
+module.exports = { 
+    resolveProfile: performProfileReconciliation 
+};
