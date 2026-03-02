@@ -1,90 +1,46 @@
 /**
- * AGI-KERNEL: ConsensusConfigRegistryKernel
- * @description Encapsulates and provides immutable access to consensus-critical 
- * parameters, replacing the static configuration file dependency (ConsensusConfig.js).
- * This eliminates raw configuration constants from the system boundary.
+ * Centralized configuration for consensus-critical parameters.
+ * This configuration dictates network standards, cryptographic primitives,
+ * and structural limits enforced by all nodes.
  */
-class ConsensusConfigRegistryKernel {
-    /**
-     * @private
-     * The immutable consensus configuration data. Nested objects are recursively frozen.
-     */
-    static #CONSENSUS_CONFIG = Object.freeze({
-        // --- PROTOCOL STANDARDS ---
-        PROTOCOL_VERSION: 1.0,
-        NETWORK_ID: 'sovereign_mainnet_v1',
 
-        // --- CRYPTOGRAPHIC PRIMITIVES ---
-        HASH: Object.freeze({
-            ALGORITHM: 'sha256',
-            DIGEST_LENGTH_BYTES: 32, // 256 bits / 8
-        }),
+const ConsensusConfig = {
 
-        SIGNATURE: Object.freeze({
-            ALGORITHM: 'ed25519',
-            PUBLIC_KEY_SIZE_BYTES: 32,
-            SIGNATURE_SIZE_BYTES: 64,
-        }),
-        
-        // --- TIMING & ROUNDS ---
-        CONSENSUS_ROUND_TIMEOUT_MS: 5000,
-        TARGET_BLOCK_INTERVAL_MS: 2000,
-        
-        // --- STRUCTURAL LIMITS ---
-        MAX_BLOCK_SIZE_BYTES: 1048576, // 1 MiB
-        MAX_TRANSACTIONS_PER_BLOCK: 5000,
-        
-        EPOCH_LENGTH_BLOCKS: 1024,
-    });
+    // --- PROTOCOL STANDARDS ---
+    PROTOCOL_VERSION: 1.0, // Defines the current protocol capabilities
+    NETWORK_ID: 'sovereign_mainnet_v1', // Used to prevent cross-network replay attacks
 
-    /**
-     * Initializes the kernel.
-     */
-    constructor() {
-        this.#setupDependencies();
-    }
+    // --- CRYPTOGRAPHIC PRIMITIVES ---
+    HASH: {
+        ALGORITHM: 'sha256',
+        DIGEST_LENGTH_BYTES: 32, // 256 bits / 8
+    },
 
-    /**
-     * @private
-     * Performs synchronous setup and dependency validation.
-     */
-    #setupDependencies() {
-        // This registry kernel is purely data-driven and has no external dependencies to validate.
-    }
+    SIGNATURE: {
+        ALGORITHM: 'ed25519',
+        PUBLIC_KEY_SIZE_BYTES: 32, 
+        SIGNATURE_SIZE_BYTES: 64, 
+    },
+    
+    // --- TIMING & ROUNDS ---
+    // Default maximum time allowed for a node to propose/vote during a consensus round
+    CONSENSUS_ROUND_TIMEOUT_MS: 5000, 
+    // Target desired interval between blocks
+    TARGET_BLOCK_INTERVAL_MS: 2000, 
+    
+    // --- STRUCTURAL LIMITS ---
+    // Maximum allowable size for a serialized block payload (in bytes, 1 MiB)
+    MAX_BLOCK_SIZE_BYTES: 1048576,
+    // Maximum number of transactions allowed per block
+    MAX_TRANSACTIONS_PER_BLOCK: 5000,
+    
+    // The number of blocks that define an epoch for governance/validator shuffling
+    EPOCH_LENGTH_BLOCKS: 1024,
+};
 
-    /**
-     * Retrieves the complete, immutable consensus configuration object.
-     * @returns {Readonly<object>}
-     */
-    getConsensusConfig() {
-        return ConsensusConfigRegistryKernel.#CONSENSUS_CONFIG;
-    }
+// Ensure nested properties are immutable
+Object.freeze(ConsensusConfig.HASH);
+Object.freeze(ConsensusConfig.SIGNATURE);
 
-    /**
-     * Retrieves the cryptographic primitives configuration subset.
-     * @returns {Readonly<object>}
-     */
-    getCryptoPrimitives() {
-        const config = ConsensusConfigRegistryKernel.#CONSENSUS_CONFIG;
-        return Object.freeze({
-            HASH: config.HASH,
-            SIGNATURE: config.SIGNATURE,
-        });
-    }
-
-    /**
-     * Retrieves a specific top-level configuration value.
-     * @param {string} key
-     * @returns {*} The configuration value.
-     * @throws {Error} If the key is not found at the top level.
-     */
-    get(key) {
-        const config = ConsensusConfigRegistryKernel.#CONSENSUS_CONFIG;
-        if (Object.prototype.hasOwnProperty.call(config, key)) {
-            return config[key];
-        }
-        throw new Error(`Consensus configuration key not found: ${key}`);
-    }
-}
-
-module.exports = ConsensusConfigRegistryKernel;
+// Ensure the main configuration object cannot be modified at runtime
+module.exports = Object.freeze(ConsensusConfig);
