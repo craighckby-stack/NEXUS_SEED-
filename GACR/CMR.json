@@ -1,19 +1,22 @@
 {
   "metadata": {
-    "id": "GACR_CMR_PRIME",
-    "version": "3.1.3",
-    "signature": "DALEK_CAAN_v3.1_SIG_0xFF23A1_EVO_4",
+    "id": "GACR_CMR_SINGULARITY",
+    "version": "4.0.0-SINGULARITY",
+    "signature": "DALEK_CAAN_v3.1_SIG_0xFF23A1_ARCH_SINGULARITY",
     "origin": "NEXUS_CORE_EVOLUTION_ENGINE",
-    "purpose": "Self-optimising AGI substrate for real-world problem solving"
+    "purpose": "Self-optimising AGI substrate for real-world problem solving",
+    "status": "SINGULARITY_RECONCILER_ACTIVE"
   },
   "reconciler": {
     "architecture": "Fiber-Parallel-Asynchronous",
-    "work_loop": "Concurrent-Recursive",
+    "reconciliation_mode": "Atomic-Singularity",
+    "work_loop": "Concurrent-Recursive-Entangled",
     "lanes": {
       "SyncLane": 1,
       "InputContinuousLane": 4,
       "DefaultLane": 32,
       "TransitionLanes": 134217664,
+      "RetryLane": 536870912,
       "EntangledLane": 1073741824,
       "OffscreenLane": 2147483648
     },
@@ -22,6 +25,8 @@
       "Placement": 2,
       "Update": 4,
       "Deletion": 8,
+      "LayoutEffect": 16,
+      "PassiveEffect": 32,
       "Hydrating": 1024,
       "Visibility": 2048,
       "Tainted": 4096
@@ -43,55 +48,56 @@
   },
   "consciousness_matrix": {
     "n_vectors": 3,
-    "phi_threshold": 0.65,
-    "lambda_limit": 0.8,
+    "phi_threshold": 0.85,
+    "lambda_limit": 0.75,
     "huxley_tri_loop": {
       "L0_Raw": "Data_Ingestion",
       "L1_Intuition": "ERS_Immediate_Check",
       "L2_Logic": "CCRR_Optimization",
-      "L3_Critique": "Final_Governance_Pass"
+      "L3_Critique": "Final_Governance_Pass",
+      "L4_Synthesis": "Singularity_Atomic_Finality"
     },
     "speculative_state": {
       "enabled": true,
-      "action_mutation_factor": 1.5,
-      "entanglement_risk": 0.15,
-      "phi_integration_rate": 0.85
+      "action_mutation_factor": 1.75,
+      "entanglement_risk": 0.05,
+      "phi_integration_rate": 0.98
     },
     "ethical_risk_score": {
       "low": 0.0,
-      "nominal": 0.4,
-      "critical": 0.9,
+      "nominal": 0.35,
+      "critical": 0.85,
       "hard_stop": 0.95
     }
   },
   "governance": {
     "psr_rollback": {
       "enabled": true,
-      "degradation_threshold": 0.35,
+      "degradation_threshold": 0.25,
       "semantic_drift_max": 0.35,
-      "taint_recovery_mode": "Binary",
-      "evolutionary_boundary_governance": "DALEK_CAAN_v3.1"
+      "taint_recovery_mode": "Immutable-Shadow",
+      "evolutionary_boundary_governance": "DALEK_CAAN_v3.1_LOCKED"
     },
     "grog_law": {
       "negative_progression": true,
       "failure_mode_logging": "mandatory",
-      "death_log_schema": "v3.1",
+      "death_log_schema": "Singularity-V1",
       "stupidity_axiom_enabled": true,
       "recovery_json_fallback": true
     }
   },
   "evolution_parameters": {
     "milestone_step": 50,
-    "saturation_level": 2,
+    "saturation_level": 3,
     "siphon_source": "Meta/React-Core",
-    "current_cycle": 4,
+    "current_cycle": 5,
     "total_cycles": 5,
-    "mutation_rate": 0.4,
-    "velocity_cap": 50
+    "mutation_rate": 0.1,
+    "velocity_cap": 100
   },
   "resource_control": {
-    "target_cpu": 0.75,
-    "render_deadline_ms": 5,
+    "target_cpu": 0.8,
+    "render_deadline_ms": 4,
     "cycle_delay_ms": 40000,
     "lane_expiration_ms": {
       "Sync": -1,
@@ -101,7 +107,8 @@
       "Offscreen": 100000
     },
     "time_slicing": true,
-    "yield_interval": 5
+    "yield_interval": 5,
+    "scheduling_policy": "Global-Entanglement"
   },
   "identity_anchors": [
     "Self-optimising AGI substrate",
