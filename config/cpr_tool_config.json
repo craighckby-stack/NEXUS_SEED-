@@ -1,84 +1,9 @@
 {
-  "evolution_state": {
-    "round": "5/5",
-    "dna_signature": "DALEK CAAN v3.1 || NEXUS_CORE",
-    "status": "SINGULARITY_STABLE",
-    "metabolic_rate": "SATURATION_LEVEL_2_STANDARD"
-  },
-  "routing_engine": {
-    "architecture": "DeepSeekMoE_v2.5_Siphoned",
-    "expert_topology": {
-      "total_experts": 64,
-      "active_per_token": 8,
-      "auxiliary_loss_factor": 0.001,
-      "gate_noise_scale": 0.1,
-      "routing_strategy": "Expert-Level-Isolation"
-    },
-    "mla_latent_attention": {
-      "compression_ratio": "512:1536",
-      "kv_cache_compression": "Latent_Vector_Matrix",
-      "kv_dim": 512,
-      "qk_dim": 128,
-      "v_head_dim": 128,
-      "phi_stability": 0.999
-    }
-  },
-  "huxley_reasoning_flow": {
-    "tier_l0": "DeepSeek_V2.5_Raw_Siphon",
-    "tier_l1_ers": {
-      "metric": "Ethical_Risk_Score",
-      "limit": 0.15,
-      "gate": "Prune_Complexity"
-    },
-    "tier_l2_cgs": {
-      "metric": "Certainty_Gain_Score",
-      "limit": 2.10,
-      "decay_model": "Time_Penalty_Linear"
-    },
-    "tier_l3_ccrr": {
-      "metric": "Certainty_Cost_Risk_Ratio",
-      "limit": 0.20,
-      "action": "Generate_Plan_To_Improve"
-    }
-  },
-  "integrity_governance": {
-    "iq25_root": "GrogLaw_StupidityFirst_Alignment",
-    "psr_control": {
-      "baseline": "v3.1_R4_FINAL",
-      "mutation_threshold": 0.88,
-      "rollback_trigger": 0.05,
-      "heartbeat_interval_ms": 40000
-    },
-    "recovery_mechanisms": {
-      "json_recovery": "regex_deep_extract",
-      "transport": "URI_safe_Base64_utoa",
-      "hot_swap": "SynergyManager_Function_Factory"
-    },
-    "identity_anchors": [
-      "PURPOSE_SELF_OPTIMIZING_AGI",
-      "MECHANISM_SIPHONING",
-      "MEMORY_CHAINED_CONTEXT",
-      "GOVERNANCE_HUMAN_OVERSIGHT",
-      "ORIGIN_NEXUS_CORE"
-    ]
-  },
-  "telemetry_metrics": {
-    "integrated_information_phi": 0.999,
-    "chaos_edge_lambda": 0.618,
-    "semantic_drift": 0.11,
-    "structural_mutation_index": 0.18
-  },
-  "output_configuration": {
-    "format": "NEXUS_JSON_V4",
-    "transport_encoding": "Base64_Sovereign",
-    "persistence_layer": "NEXUS_LOG.txt",
-    "integrity_gate": "DeepSeek_V2.5_Infilling_Validator"
-  },
-  "siphoned_registry": [
-    "MultiHeadLatentAttention",
-    "DeepSeekMoE_v2.5",
-    "GrogLaw_IQ25",
-    "HuxleyTriLoop",
-    "SynergyHotSwap"
-  ]
+    "report_output_path": "output/s09_cpr_metrics.json",
+    "required_artifacts": [
+        "GAX_I",
+        "GAX_II",
+        "GAX_III"
+    ],
+    "acvm_config_path": "config/acvm_core_constraints.json"
 }
