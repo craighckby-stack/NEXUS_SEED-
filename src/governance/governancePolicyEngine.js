@@ -1,98 +1,39 @@
 /**
- * SMAPolicyConfigurationKernel V2.0
- * High-integrity kernel for securely retrieving Schema Migration Adjudicator (SMA) parameters.
- * This replaces the synchronous GovernancePolicyEngine utility, adhering to the AIA Enforcement 
- * Layer mandates for asynchronous execution, explicit initialization, and dependency injection.
+ * Governance Policy Engine (GPE) V1.0
+ * Provides dynamic, centrally managed configuration parameters 
+ * for governance components (like SMA) and thresholds required 
+ * for architectural mutation decisions.
+ * 
+ * NOTE: In advanced sovereign implementations, this data would be fetched 
+ * from a persistent, versioned policy store or ledger.
  */
 
-import { IConfigurationDefaultsRegistryKernel } from "@AGI_KERNEL/IConfigurationDefaultsRegistryKernel";
-
-/**
- * Standardized error for configuration loading failures, including conceptId for auditable processing.
- */
-class GovernanceConfigurationLoadingError extends Error {
-    /**
-     * @param {string} message
-     * @param {string} conceptId - Standardized error identifier (e.g., GOV_E_999).
-     */
-    constructor(message, conceptId = 'GOV_E_999') {
-        super(message);
-        this.name = 'GovernanceConfigurationLoadingError';
-        this.conceptId = conceptId;
-        // Note: Full error normalization is delegated to IErrorDetailNormalizationToolKernel.
+export const DEFAULT_SMA_PARAMS = {
+    // Score aggregation weights (Must sum to 1.0)
+    WEIGHTS: { 
+        CONTRACT_COMPLIANCE: 0.4, 
+        MIGRATION_INTEGRITY: 0.6 
+    },
+    // Acceptance thresholds
+    THRESHOLDS: { 
+        MINIMUM_ACCEPTANCE: 0.75, // Required for any acceptance by SMA
+        VALIDATION: 0.9          // Required for fully validated, non-waived acceptance
     }
-}
+};
 
-export class SMAPolicyConfigurationKernel {
+
+export class GovernancePolicyEngine {
     /**
-     * @private
-     * @type {IConfigurationDefaultsRegistryKernel}
+     * Fetches current configuration parameters relevant to the Schema Migration Adjudicator.
+     * @returns {object} Current governance parameters for SMA.
      */
-    #configRegistry;
+    static getSMAParams() {
+        // Returns the static default config. Future versions would implement dynamic lookup.
+        return DEFAULT_SMA_PARAMS;
+    }
     
-    /**
-     * @private
-     * Internal cache for SMA parameters, replacing the synchronous static cache.
-     * @type {object | null}
-     */
-    #s_SMAParamsCache = null;
-
-    /**
-     * @param {IConfigurationDefaultsRegistryKernel} configRegistry - The configuration defaults registry.
-     */
-    constructor(configRegistry) {
-        if (!configRegistry) {
-            throw new Error("Dependency Injection Error: IConfigurationDefaultsRegistryKernel is required.");
-        }
-        this.#configRegistry = configRegistry;
-    }
-
-    /**
-     * Asynchronously loads and caches the SMA parameters during system initialization.
-     * This ensures policy parameters are immutable and ready for high-speed access,
-     * replacing synchronous, ad-hoc loading.
-     * @async
-     */
-    async initialize() {
-        // Canonical key assumption for SMA configuration, securely retrieved via Registry.
-        const CONFIG_KEY = 'governance.policy.sma'; 
-
-        try {
-            const config = await this.#configRegistry.get(CONFIG_KEY);
-            
-            if (!config || typeof config.WEIGHTS !== 'object' || typeof config.THRESHOLDS !== 'object') {
-                throw new GovernanceConfigurationLoadingError(
-                    `SMAPolicyConfigurationKernel: Retrieved config for '${CONFIG_KEY}' is incomplete or malformed.`
-                );
-            }
-            
-            // Cache the result to enable fast retrieval.
-            this.#s_SMAParamsCache = config;
-            
-        } catch (error) {
-            if (error instanceof GovernanceConfigurationLoadingError) {
-                throw error;
-            }
-            throw new GovernanceConfigurationLoadingError(
-                `Failed to initialize SMAPolicyConfigurationKernel via registry access. Details: ${error.message}`
-            );
-        }
-    }
-
-    /**
-     * Retrieves current configuration parameters relevant to the Schema Migration Adjudicator.
-     * Accesses the pre-loaded internal cache via an asynchronous interface, ensuring adherence
-     * to the non-blocking execution mandate.
-     * 
-     * @returns {Promise<{WEIGHTS: {[key: string]: number}, THRESHOLDS: {[key: string]: number}}>} Current governance parameters for SMA.
-     */
-    async getSMAParams() {
-        if (!this.#s_SMAParamsCache) {
-            throw new GovernanceConfigurationLoadingError(
-                "SMAPolicyConfigurationKernel is uninitialized. Call initialize() before accessing parameters.",
-                'GOV_E_998'
-            );
-        }
-        return this.#s_SMAParamsCache;
-    }
+    // Other methods for fetching global policy flags, state limits, etc.
 }
+
+// Export the class directly for usage as a static utility import (GPE)
+export const GPE = GovernancePolicyEngine;
