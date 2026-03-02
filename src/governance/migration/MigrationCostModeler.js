@@ -1,140 +1,53 @@
-import { IMigrationCostDeriverToolKernel } from './interfaces/IMigrationCostDeriverToolKernel';
-import { IMigrationCostConfigRegistryKernel, MigrationCostConfig } from './registry/IMigrationCostConfigRegistryKernel';
-
 /**
- * Type definition for the immutable cost estimate result.
+ * Migration Cost Modeler (MCM) V1.0
+ * Predicts CPU, Memory, I/O, and Time complexity for schema migrations based on
+ * structural difference metrics provided by the SchemaAnalyzer.
  */
-type CostEstimate = Readonly<{
-    durationMs: number;
-    resources: Readonly<{
-        cpu: number;
-        memory: number;
-        io: number;
-    }>
-}>;
-
-/**
- * Migration Cost Modeler Kernel (MCM) V2.0
- * Predicts CPU, Memory, I/O, and Time complexity for schema migrations.
- * Adheres to AIA Enforcement Layer mandates for asynchronous execution and auditable dependency injection.
- */
-export class MigrationCostModelerKernel {
-
-    private config!: Readonly<MigrationCostConfig>;
-    private initialized: boolean = false;
+export class MigrationCostModeler {
 
     /**
-     * @param costDeriver - High-integrity asynchronous tool for weighted score calculation.
-     * @param configRegistry - Asynchronous registry for retrieving immutable cost model parameters.
+     * Creates a new Cost Modeler instance.
+     * @param {object} configuration - Configuration specifying environmental constants (e.g., typical IO throughput).
      */
-    constructor(
-        private readonly costDeriver: IMigrationCostDeriverToolKernel,
-        private readonly configRegistry: IMigrationCostConfigRegistryKernel
-    ) {}
-
-    /**
-     * Asynchronously initializes the kernel, loading configuration securely.
-     */
-    public async initialize(): Promise<void> {
-        if (this.initialized) return;
-
-        // Load configuration using the asynchronous registry
-        const config = await this.configRegistry.getCostModelConfiguration();
-        
-        // Enforce immutability and apply defaults if necessary
-        this.config = Object.freeze({
-            ioFactor: config.ioFactor ?? 1.2,
-            cpuFactor: config.cpuFactor ?? 0.85,
-            baseOverheadMs: config.baseOverheadMs ?? 500
-        });
-
-        this.initialized = true;
+    constructor(configuration = {}) {
+        this.config = { 
+            ioFactor: configuration.ioFactor || 1.2,
+            cpuFactor: configuration.cpuFactor || 0.85,
+            baseOverheadMs: configuration.baseOverheadMs || 500
+        };
     }
 
     /**
-     * Helper to call the asynchronous weighted metric derivation kernel.
+     * Estimates the full migration cost profile based on analysis inputs.
+     * @param {object} diffAnalysis - The output structure from SchemaMigrationSimulationEngine.analyzeDifferential.
+     * @returns {{durationMs: number, resources: {cpu: number, memory: number, io: number}}}
      */
-    private async calculateScore(inputs: Readonly<Record<string, number>>, weights: Readonly<Record<string, number>>, scalingFactor: number = 1, baseOffset: number = 0): Promise<number> {
-        if (!this.initialized) {
-            throw new Error("MCM Kernel not initialized. Call initialize() first.");
-        }
-        return this.costDeriver.calculateWeightedScore({
-            inputs: inputs,
-            weights: weights,
-            scalingFactor: scalingFactor,
-            baseOffset: baseOffset
-        });
-    }
-
-    /**
-     * Asynchronously estimates the full migration cost profile based on analysis inputs.
-     * @param diffAnalysis - The immutable input structure from differential analysis.
-     * @returns {Promise<CostEstimate>} Immutable cost profile.
-     */
-    public async estimateCosts(
-        diffAnalysis: Readonly<{ complexityScore: number, breakingChangesCount: number, dataTransformationRequired: boolean }>
-    ): Promise<CostEstimate> {
-        if (!this.initialized) {
-            throw new Error("MCM Kernel must be initialized before estimating costs.");
-        }
-
+    estimateCosts(diffAnalysis) {
         const complexity = diffAnalysis.complexityScore;
-        const breaking = diffAnalysis.breakingChangesCount;
-        const inputs = Object.freeze({ complexity, breaking });
+        const breakingChanges = diffAnalysis.breakingChangesCount;
 
-        // --- 1. Time Duration Estimate (Asynchronous Calls) ---
+        // Cost Modeling Formula: Base Overhead + (Complexity * CPU Factor) + (Breaking Changes * IO Factor)
         
-        // Contribution 1: CPU-bound complexity
-        const cpuTimeContribution = await this.calculateScore(
-            inputs,
-            Object.freeze({ complexity: 1500 }),
-            this.config.cpuFactor
-        );
+        // 1. Time Duration Estimate
+        const estimatedTime = this.config.baseOverheadMs + 
+                              (complexity * 1500 * this.config.cpuFactor) + 
+                              (breakingChanges * 500 * this.config.ioFactor);
 
-        // Contribution 2: IO-bound breaking changes
-        const ioTimeContribution = await this.calculateScore(
-            inputs,
-            Object.freeze({ breaking: 500 }),
-            this.config.ioFactor
-        );
-        
-        const estimatedTime = this.config.baseOverheadMs + cpuTimeContribution + ioTimeContribution;
+        // 2. Resource Estimation (Simplified scale 0.0 to 10.0 relative to baseline server)
+        const cpuUsage = (complexity * 0.1) + (breakingChanges * 0.5);
+        const memoryUsage = (complexity * 0.05) + (breakingChanges * 0.3);
+        // I/O is heavily influenced by data transformation needs
+        const ioUsage = diffAnalysis.dataTransformationRequired ? 
+                        (breakingChanges * 1.5) + (complexity * 0.1) : 
+                        (complexity * 0.05);
 
-        // --- 2. Resource Estimation (Asynchronous Calls) ---
-        
-        // CPU Usage
-        const cpuUsage = await this.calculateScore(inputs, Object.freeze({
-            complexity: 0.1, 
-            breaking: 0.5
-        }));
-
-        // Memory Usage
-        const memoryUsage = await this.calculateScore(inputs, Object.freeze({
-            complexity: 0.05,
-            breaking: 0.3
-        }));
-
-        // I/O Usage
-        let ioUsage: number;
-        if (diffAnalysis.dataTransformationRequired) {
-            ioUsage = await this.calculateScore(inputs, Object.freeze({
-                breaking: 1.5,
-                complexity: 0.1
-            }));
-        } else {
-            ioUsage = await this.calculateScore(inputs, Object.freeze({
-                complexity: 0.05
-            }));
-        }
-
-        // Return immutable result structure
-        return Object.freeze({
+        return {
             durationMs: Math.ceil(estimatedTime),
-            resources: Object.freeze({
+            resources: {
                 cpu: Math.min(10.0, cpuUsage), 
                 memory: Math.min(10.0, memoryUsage), 
                 io: Math.min(10.0, ioUsage) 
-            })
-        });
+            }
+        };
     }
 }
