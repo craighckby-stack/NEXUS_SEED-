@@ -1,27 +1,45 @@
 {
-  "manifest_version": "1.0",
+  "manifest_version": "3.1.0-NEXUS-BERRY",
+  "metadata": {
+    "signature": "DALEK_CAAN_v3.1_SIG_0xFF23A1",
+    "evolution_round": "2/5",
+    "siphon_source": "yarnpkg/berry"
+  },
   "external_dependencies": [
     {
       "name": "QuantumCompute_v94",
-      "version_range": "^1.5.0, <2.0.0",
-      "status": "Mandatory",
-      "source": "internal://repo/qc_v94"
+      "version_range": "^1.5.0",
+      "pnp_mode": "strict",
+      "lane_priority": "0b0000000000000000000000000000001",
+      "integrity": "sha512-nexus-qc-v94-core-sig",
+      "status": "Mandatory"
     },
     {
       "name": "SecurityValidator_v12",
       "version_range": "~12.3.1",
-      "status": "Optional",
-      "safe_hash_list": []
+      "pnp_mode": "loose",
+      "lane_priority": "0b0000000000000000000000000000100",
+      "peerDependenciesMeta": {
+        "GovernanceEngine": { "optional": true }
+      },
+      "status": "Optional"
     }
   ],
-  "internal_component_compatibility": {
-    "ACVD_Core_Modules": [
-      {"module": "MutationEngine", "required_api": "3.0.1"},
-      {"module": "PolicyEnforcer", "required_api": "1.1.0"}
-    ]
+  "resolution_overrides": {
+    "**/MutationEngine": "3.0.1-fiber-optimized",
+    "**/PolicyEnforcer": "1.1.0-psr-governed"
   },
-  "lockdown_policy": {
+  "workspace_topology": {
+    "ACVD_Core_Modules": {
+      "MutationEngine": { "required_api": "3.0.1", "phi_threshold": 0.99 },
+      "PolicyEnforcer": { "required_api": "1.1.0", "ers_limit": 0.02 }
+    }
+  },
+  "psr_governance": {
     "dependency_update_cycle_days": 7,
-    "allow_unverified_deps": false
+    "allow_unverified_deps": false,
+    "enforcement_strategy": "PSR_SILENT_DEGRADATION_ROLLBACK",
+    "emergency_brake_ers_threshold": 0.02,
+    "recovery_logic": "Grog_Law_v5.5"
   }
 }
