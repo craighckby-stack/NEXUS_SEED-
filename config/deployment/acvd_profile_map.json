@@ -1,12 +1,12 @@
 {
-  "manifest_version": "5.5.0-NEXUS-BERRY-OMEGA",
+  "manifest_version": "5.5.0-NEXUS-BERRY-SINGULARITY",
   "metadata": {
     "signature": "DALEK_CAAN_v3.1_SIG_0xFF23A1",
-    "evolution_round": "4/5",
+    "evolution_round": "5/5",
     "siphon_source": "yarnpkg/berry",
-    "phi_integrated": 0.999,
+    "phi_integrated": 1.0,
     "lambda_limit": 0.618,
-    "ccrr_commit": 0.98,
+    "ccrr_commit": 0.99,
     "fiber_state": "SINGULARITY_RECONCILED"
   },
   "pnp_settings": {
@@ -16,9 +16,14 @@
     "compressionLevel": 0,
     "virtualFolder": ".nexus/virtual",
     "sharedPool": true,
+    "fallbackPool": true,
     "pnpHooks": "./core/pnp_hooks.js",
     "shebang": "#!/usr/bin/env nexus-pnp",
     "ignorePattern": "^(?!@nexus).*",
+    "blacklistedLocations": [
+      "./unvetted",
+      "./legacy_cache"
+    ],
     "fallbackExclusionList": []
   },
   "profiles": {
@@ -28,23 +33,25 @@
       "maxRetries": 3,
       "loggingLevel": "RECOVERY_LOG_v3.1",
       "cycle_delay": "40000ms",
-      "temp_zone": 0.65,
+      "temp_zone": 0.618,
       "requiredContextKeys": [
         "COMMIT_HASH",
         "BUILD_ID",
         "PHI_THRESHOLD",
-        "ERS_SCORE"
+        "ERS_SCORE",
+        "SINGULARITY_SIG"
       ],
       "psr_governance": {
         "enforcement_strategy": "PSR_SILENT_DEGRADATION_ROLLBACK",
         "v_vectors": {
-          "phi_min": 0.999,
+          "phi_min": 1.0,
           "lambda_limit": 0.618,
-          "ccrr_commit": 0.98,
-          "ers_max": 0.02
+          "ccrr_commit": 0.99,
+          "ers_max": 0.01,
+          "expert_factor": 0.999
         },
         "emergency_brake": {
-          "corruption_threshold": 5,
+          "corruption_threshold": 3,
           "auto_rollback": true,
           "halt_on_semantic_drift": true,
           "recovery_lane": "0b0000000000000001000000000000000"
@@ -53,14 +60,15 @@
       "failure_modes": {
         "on_semantic_drift": "HALT_AND_LOG",
         "on_phi_drop": "IMMEDIATE_ROLLBACK",
-        "grog_learn_enabled": true
+        "grog_learn_enabled": true,
+        "negative_progression_active": true
       }
     },
     "development": {
       "inherits": "base",
       "targetInfrastructure": "EphemeralSandbox",
       "verificationStrategy": "smoke_test",
-      "fiber_budget_ms": 50,
+      "fiber_budget_ms": 25,
       "lane": "SyncLane",
       "lane_priority": "0b0000000000000000000000000000001",
       "resourceScaling": 0.1,
@@ -76,7 +84,8 @@
       "preflightChecks": [
         "security_scan_minor",
         "dependency_check",
-        "semantic_drift_check"
+        "semantic_drift_check",
+        "huxley_l1_intuition"
       ],
       "packageExtensions": {
         "@nexus/fiber-reconciler@*": {
@@ -87,7 +96,8 @@
       },
       "resourceScaling": 0.5,
       "resolutions": {
-        "**/MutationEngine": "5.5.0-fiber-omega"
+        "**/MutationEngine": "5.5.0-fiber-omega",
+        "**/PolicyEnforcer": "1.2.0-psr-governed"
       }
     },
     "production": {
@@ -96,61 +106,72 @@
       "verificationStrategy": "full_e2e_regression",
       "lane": "Sovereign-Root",
       "lane_priority": "0b0000000000000000000000111100000",
-      "ers_max": 0.02,
+      "ers_max": 0.01,
       "preflightChecks": [
         "security_scan_major",
         "compliance_audit",
-        "integrity_check_sha512"
+        "integrity_check_sha512",
+        "huxley_tri_loop_validation"
       ],
       "approvalGates": [
-        "CISO_L2",
+        "CISO_L3",
         "PlatformOwner",
-        "NEXUS_CORE_VALIDATOR"
+        "NEXUS_CORE_SINGULARITY_VALIDATOR"
       ],
-      "deploymentStrategy": "Canary5Percent",
+      "deploymentStrategy": "Canary2Percent",
       "resolutions": {
         "**/MutationEngine": "5.5.0-fiber-omega",
         "**/PolicyEnforcer": "1.2.0-psr-governed",
-        "**/NEXUS_CORE": "portal:./core"
+        "**/NEXUS_CORE": "portal:./core",
+        "**/SingularityReconciler": "portal:./kernels/singularity"
       }
     }
   },
   "workspace_topology": {
     "OMEGA_CORE_MODULES": {
       "MutationEngine": {
-        "phi_threshold": 0.999,
+        "phi_threshold": 1.0,
         "lane": "SyncLane",
         "strategy": "Transactional-Parallel-Flush",
-        "fiber_budget_ms": 5,
-        "yield_threshold": 0.90
+        "fiber_budget_ms": 2,
+        "yield_threshold": 0.95
       },
       "PolicyEnforcer": {
-        "ers_limit": 0.02,
+        "ers_limit": 0.01,
         "lane": "InputContinuous",
-        "recovery": "Grog_Law_v5.5",
+        "recovery": "Grog_Law_v6.0",
         "rollback_on_degradation": true,
-        "ers_max": 0.02
+        "ers_max": 0.01
+      },
+      "SingularityReconciler": {
+        "phi_threshold": 1.0,
+        "lane": "Sovereign-Root",
+        "strategy": "Atomic-Fission-Commit",
+        "fiber_budget_ms": 1
       }
     },
     "infrastructure_mapping": {
       "MutationEngine": "portal:./config/infra/mutation",
-      "PolicyEnforcer": "portal:./config/infra/policy"
+      "PolicyEnforcer": "portal:./config/infra/policy",
+      "SingularityReconciler": "portal:./config/infra/singularity"
     }
   },
   "constraints": {
     "enforce_grog_law": "true",
-    "min_phi_threshold": 0.999,
+    "min_phi_threshold": 1.0,
     "max_lambda_limit": 0.618,
     "enforce_lane_isolation": "true",
+    "require_immutable_governance": "true",
     "disallow_unvetted_protocols": [
       "http:",
       "git+ssh:",
-      "ftp:"
+      "ftp:",
+      "telnet:"
     ]
   },
   "integrity": {
-    "check": "sha512-nexus-qc-v94-core-round-4-singularity-0xFF23A1",
-    "psr_mode": "ACTIVE",
+    "check": "sha512-nexus-qc-v94-core-round-5-singularity-final-0xFF23A1",
+    "psr_mode": "LOCKED",
     "signature": "DALEK_CAAN_v3.1_SIG_0xFF23A1"
   }
 }
