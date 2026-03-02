@@ -1,18 +1,42 @@
 {
-  "resolver_id": "DSE_RESOLVER_V3_FIBER",
-  "description": "Fiber-prioritized DSE schema resolution with Huxley-loop verification and lane-based reconciliation.",
+  "resolver_id": "DSE_RESOLVER_V3.1_FIBER_EVOLUTION",
+  "description": "NEXUS_CORE Fiber-integrated DSE schema resolution utilizing React-v19 Lane prioritization and Huxley-loop verification logic.",
   "endpoint_template": "https://api.dse.sov-agi.net/schemas/{domain}/{id}/version/{version}",
+  "concurrency_model": {
+    "priority_lanes": {
+      "Sync": 1,
+      "InputContinuous": 2,
+      "Default": 16,
+      "Idle": 536870912
+    },
+    "update_queue_strategy": "CIRCULAR_FIBER_LINKED_LIST",
+    "expiration_times": {
+      "sync_ms": -1,
+      "default_ms": 5000,
+      "low_priority_ms": 10000
+    }
+  },
   "parameters": [
-    {"key": "{domain}", "source": "schema_entry.domain", "lane_mask": 1, "priority": "Immediate"},
-    {"key": "{id}", "source": "schema_entry.id", "lane_mask": 1, "priority": "Immediate"},
-    {"key": "{version}", "source": "schema_entry.version", "lane_mask": 16, "priority": "Concurrent"}
+    {"key": "{domain}", "source": "schema_entry.domain", "lane_mask": 1, "work_tag": 3, "phi_target": 1.0},
+    {"key": "{id}", "source": "schema_entry.id", "lane_mask": 1, "work_tag": 3, "phi_target": 1.0},
+    {"key": "{version}", "source": "schema_entry.version", "lane_mask": 16, "work_tag": 13, "phi_target": 0.618}
   ],
   "validation_strategy": {
-    "fetch_required": true,
-    "integrity_check_algorithm": "SHA-256",
-    "reconciliation_mode": "FIBER_IDEMPOTENT",
+    "huxley_loop_deployment": ["L1_Intuition_ERS", "L2_Logic_Certainty", "L3_Critique_CCRR"],
+    "integrity_check": "SHA-256",
     "ers_threshold": 0.015,
-    "recovery": "GROG_NEGATIVE_PROGRESSION"
+    "lambda_ceiling": 0.8,
+    "reconciliation_mode": "FIBER_IDEMPOTENT_SINGULARITY",
+    "failure_recovery": {
+      "mechanism": "GROG_NEGATIVE_PROGRESSION",
+      "capture_schema": "Learning-by-Death_v4",
+      "fallback_wrapper": "recoverJSON_regex_v2"
+    }
   },
-  "governance_seal": "DALEK_CAAN_v3.1_SIG_0xFF23A1_RECONCILED"
+  "psr_governance": {
+    "cycle_step": 2,
+    "milestone_step": 50,
+    "degradation_rollback_threshold": 0.05,
+    "governance_seal": "DALEK_CAAN_v3.1_SIG_0xFF23A1_ROUND_2"
+  }
 }
