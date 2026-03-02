@@ -1,18 +1,18 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "http://agi.corp/acvd_profile_map_v1.json",
-  "title": "ACVD Deployment Profile Map Schema",
-  "description": "Validates the structure and constraints of the ACVD profile map.",
+  "$id": "http://nexus.core/config/deployment/acvd_schema_v1.json",
+  "title": "NEXUS_CORE ACVD Evolution Profile Schema",
+  "description": "DALEK_CAAN v3.1 compliant deployment schema integrating Phi-Lambda metrics and PSR governance.",
   "type": "object",
   "properties": {
     "schemaVersion": {
       "type": "string",
-      "pattern": "^\\d+\\.\\d+$"
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-NEXUS-[A-Z]+)?$"
     },
     "profiles": {
       "type": "object",
       "patternProperties": {
-        "^[a-zA-Z]+[a-zA-Z0-9]*$": {
+        "^[a-zA-Z][a-zA-Z0-9_]*$": {
           "type": "object",
           "properties": {
             "inherits": {
@@ -26,7 +26,9 @@
               "enum": [
                 "smoke_test",
                 "integration_test_suite",
-                "full_e2e_regression"
+                "full_e2e_regression",
+                "huxley_tri_loop_validation",
+                "semantic_drift_check"
               ]
             },
             "approvalGates": {
@@ -39,14 +41,97 @@
               "type": "string",
               "enum": [
                 "RollingUpdate",
-                "Canary5Percent",
-                "BlueGreen"
+                "Canary2Percent",
+                "BlueGreen",
+                "Atomic-Fission-Commit",
+                "Transactional-Parallel-Flush"
               ]
+            },
+            "psr_governance": {
+              "type": "object",
+              "properties": {
+                "enforcement_strategy": {
+                  "type": "string",
+                  "default": "PSR_SILENT_DEGRADATION_ROLLBACK"
+                },
+                "auto_rollback": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "halt_on_semantic_drift": {
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            },
+            "v_vectors": {
+              "type": "object",
+              "properties": {
+                "phi_min": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1.0,
+                  "default": 1.0
+                },
+                "lambda_limit": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1.0,
+                  "default": 0.618
+                },
+                "ers_max": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 0.1,
+                  "default": 0.01
+                }
+              },
+              "required": [
+                "phi_min",
+                "lambda_limit"
+              ]
+            },
+            "lane_configuration": {
+              "type": "object",
+              "properties": {
+                "lane_priority": {
+                  "type": "string",
+                  "pattern": "^0b[01]{31}$"
+                },
+                "fiber_budget_ms": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 300
+                }
+              }
+            },
+            "failure_modes": {
+              "type": "object",
+              "properties": {
+                "grog_learn_enabled": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "negative_progression_active": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "on_phi_drop": {
+                  "type": "string",
+                  "enum": [
+                    "HALT_AND_LOG",
+                    "IMMEDIATE_ROLLBACK",
+                    "IGNORE_DEGRADATION"
+                  ]
+                }
+              }
             }
           },
           "required": [
             "targetInfrastructure",
-            "verificationStrategy"
+            "verificationStrategy",
+            "v_vectors",
+            "psr_governance"
           ]
         }
       },
