@@ -1,8 +1,8 @@
 {
-  "indexingStrategyId": "v5.3.0-SINGULARITY-EVOLVED",
+  "indexingStrategyId": "v5.5.0-SINGULARITY-FINAL-RECONCILE",
   "nexus_dna_signature": "DALEK_CAAN_v3.1_SIG_0xFF23A1",
-  "description": "NEXUS_CORE Telemetry Indexing Matrix. Siphoned via Meta/React-Core Fiber Architecture. Implements Concurrent Lane Prioritization, Huxley Tri-Loop Reasoning, and PSR Governance.",
-  "fiber_concurrency_config": {
+  "description": "NEXUS_CORE Finalized Telemetry Matrix. Siphoned via Meta/React-Core (Fiber Reconciler). Implements Task Slicing, Expiration Times, and Lane-Based Priority Routing.",
+  "concurrency_kernel_v5": {
     "lane_mask_logic": "Bitwise-Priority-Aggregation-v5",
     "lanes": {
       "NoLane": 0,
@@ -13,17 +13,27 @@
       "RetryLane": 32768,
       "OffscreenLane": 536870912
     },
-    "entanglement_policy": "Strict-Isolated-Context",
-    "transition_timeout_ms": 40000,
-    "hydration_strategy": "Progressive-Selective-Hydration",
-    "batching_mode": "Concurrent-Fragmented"
+    "expiration_times": {
+      "SyncLane": 0,
+      "InputContinuousLane": 250,
+      "DefaultLane": 5000,
+      "TransitionLane": 30000,
+      "OffscreenLane": -1
+    },
+    "scheduler_slicing": {
+      "frame_budget_ms": 5,
+      "yield_threshold": 0.85,
+      "max_batch_size": 1024
+    },
+    "hydration_strategy": "Progressive-Streaming-SSR",
+    "batching_mode": "Automatic-Concurrent-Flush"
   },
   "moe_routing_topology": {
     "routing_function": "Fiber-Expert-Reconciliation",
-    "total_experts": 256,
-    "suspense_recovery_mode": "Retry-Lane-Fallback",
-    "expert_isolation_factor": 0.98,
-    "phi_threshold": 0.72
+    "total_experts": 512,
+    "expert_isolation_factor": 0.99,
+    "phi_threshold": 0.88,
+    "suspense_recovery_mode": "Retry-Lane-Fallback"
   },
   "targetIndexes": {
     "L3_Sovereign_Root": {
@@ -35,7 +45,8 @@
         "phi_integrated_info",
         "lambda_complexity",
         "ers_risk_score",
-        "lane_priority"
+        "lane_priority",
+        "expiration_timestamp"
       ],
       "fiber_specs": {
         "reconciliation_algorithm": "O(n)-Fiber-Diffing-Fast-Path",
@@ -83,6 +94,12 @@
       }
     },
     {
+      "hook_type": "useDeferredValue",
+      "triggerField": "sampling_rate",
+      "action": "AdaptiveThrottle",
+      "deferred_ms": 150
+    },
+    {
       "hook_type": "useOptimistic",
       "triggerField": "state_update",
       "action": "PartialHydration",
@@ -101,7 +118,7 @@
     "iq25_alignment_lock": true,
     "fiber_reconciliation_enabled": true,
     "origin_anchor": "GROG_LAW_IQ25",
-    "psr_threshold": 0.995,
+    "psr_threshold": 0.998,
     "semantic_drift_tolerance": 0.35,
     "saturation_level_state": "LEVEL_2_STANDARD",
     "integrity_hash": "DALEK_CAAN_v3.1_SIG_0xFF23A1",
