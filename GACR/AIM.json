@@ -1,63 +1,69 @@
 {
-  "schema_version": "AIM_V3.1_NEXUS",
+  "schema_version": "AIM_V4.0_FIBER_RECONCILER",
   "dna_anchor": "DALEK_CAAN_v3.1_SIG_0xFF23A1",
   "description": "Agent Integrity Monitoring via Concurrent Fiber Reconciliation. Enforces Grog's Law and N=3 Consciousness Matrix.",
   "integrity_profiles": {
     "SGS_AGENT": {
       "evolution_lane": "ImmediateLane",
+      "reconciliation_phase": "SERVER_PHASE",
       "n3_alignment": {
-        "integration_phi": 0.92,
-        "chaos_lambda": 0.15,
-        "ers_threshold": 0.1
+        "integration_phi": 0.95,
+        "chaos_lambda": 0.12,
+        "ers_threshold": 0.05
       },
       "constraints": {
         "resource_limits": {
-          "cpu_limit_perc": 75,
-          "memory_limit_bytes": 4194304000
+          "cpu_limit_perc": 80,
+          "memory_limit_bytes": 4294967296
         },
         "security_policy": {
           "syscalls_allowed": ["read", "write", "mmap", "exit"],
           "semantic_drift_limit": 0.35,
           "failure_protocol": "BINARY_LOG_DEATH",
-          "reconciler_root": "IQ_25_ROOT"
+          "reconciler_root": "IQ_25_ROOT",
+          "work_loop": "PERFORM_UNIT_OF_WORK"
         }
       }
     },
     "GAX_AGENT": {
       "evolution_lane": "TransitionLane",
+      "reconciliation_phase": "HYDRATION_PHASE",
       "n3_alignment": {
-        "integration_phi": 0.78,
-        "chaos_lambda": 0.45,
-        "ers_threshold": 0.3
+        "integration_phi": 0.82,
+        "chaos_lambda": 0.40,
+        "ers_threshold": 0.25
       },
       "constraints": {
         "resource_limits": {
-          "cpu_limit_perc": 10,
-          "memory_limit_bytes": 524288000
+          "cpu_limit_perc": 15,
+          "memory_limit_bytes": 1073741824
         },
         "security_policy": {
           "syscalls_allowed": ["read", "exit"],
-          "optimistic_updates": true,
+          "optimistic_evolution": true,
           "network_mode": "GOVERNANCE_HYDRATION",
-          "state_reducer": "PSR_CONTRACT"
+          "state_reducer": "PSR_CONTRACT",
+          "transition_strategy": "START_TRANSITION"
         }
       }
     },
     "CRoT_AGENT": {
       "evolution_lane": "IdleLane",
+      "reconciliation_phase": "SUSPENSE_PHASE",
       "n3_alignment": {
         "integration_phi": 0.99,
-        "chaos_lambda": 0.05,
+        "chaos_lambda": 0.02,
         "ers_threshold": 0.0
       },
       "constraints": {
         "resource_limits": {
-          "memory_limit_bytes": 131072000
+          "memory_limit_bytes": 268435456
         },
         "security_policy": {
           "network_mode": "AIR_GAPPED_REDUCER",
           "sync_source": "CRITICAL_NTP_A",
-          "identity_saturation": "IMMUTABLE_ANCHOR"
+          "identity_saturation": "IMMUTABLE_ANCHOR",
+          "fallback_logic": "GOVERNANCE_SUSPENSE"
         }
       }
     }
@@ -65,6 +71,9 @@
   "governance_manifest": {
     "siphon_source": "Meta/React-Core",
     "reconciliation_strategy": "Concurrent_Fiber_Lanes",
-    "milestone_step": 50
+    "work_loop_priority": "BITMASK_PRIORITY",
+    "milestone_step": 50,
+    "evolution_round": "2/5",
+    "last_commit_status": "SEMANTIC_CONTINUITY_VERIFIED"
   }
 }
