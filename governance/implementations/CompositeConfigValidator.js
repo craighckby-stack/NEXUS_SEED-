@@ -1,75 +1,58 @@
 /**
- * A highly optimized Composite Validator implementation leveraging the
- * ValidationAggregator plugin for efficient execution and error aggregation.
+ * @fileoverview Concrete implementation of ConfigValidator that runs a series of ordered
+ * sub-validators (GRCMs) and aggregates their results.
  */
-class CompositeConfigValidator {
-    #validators;
-    #aggregator;
 
+const { ConfigValidator } = require('../interfaces/ConfigValidator');
+
+/**
+ * CompositeConfigValidator
+ * Purpose: Executes an ordered sequence of granular rule checking modules (GRCMs) 
+ * to ensure comprehensive validation coverage.
+ */
+class CompositeConfigValidator extends ConfigValidator {
     /**
-     * @param {Array<Object>} initialValidators - Objects implementing the validate(config) method.
+     * @param {ConfigValidator[]} validators - An array of concrete validator instances (GRCMs).
      */
-    constructor(initialValidators = []) {
-        this.#setupDependencies(initialValidators);
-    }
-
-    /**
-     * Extracts synchronous dependency resolution and initialization.
-     * @param {Array<Object>} initialValidators
-     */
-    #setupDependencies(initialValidators) {
-        // The internal collection of validators, shared with the aggregator.
-        this.#validators = initialValidators;
-
-        // Delegate core logic to the optimized plugin kernel via proxy resolution.
-        this.#aggregator = this.#resolveValidationAggregator(this.#validators);
-    }
-
-    /**
-     * I/O Proxy: Resolves and instantiates the external ValidationAggregator tool.
-     * Note: Assumes ValidationAggregator is available in scope (e.g., via module import).
-     * @param {Array<Object>} validators
-     * @returns {ValidationAggregator}
-     */
-    #resolveValidationAggregator(validators) {
-        // Check for global availability, mimicking dependency injection/resolution
-        if (typeof ValidationAggregator === 'undefined') {
-             throw new Error("Required dependency 'ValidationAggregator' not found.");
+    constructor(validators = []) {
+        super();
+        if (!Array.isArray(validators)) {
+            throw new Error("CompositeConfigValidator expects an array of validators.");
         }
-        return new ValidationAggregator(validators);
+        // Filters out non-validator instances if stricter checks are necessary later.
+        this.validators = validators;
+        console.log(`Composite Validator initialized with ${this.validators.length} modules.`);
     }
 
     /**
-     * Adds a validator dynamically. Ensures runtime validation contract.
-     * O(1) complexity.
-     * @param {Object} validator 
+     * @override
+     * @param {Object} config - The configuration object to validate.
+     * @returns {Promise<import('../interfaces/ConfigValidator').GOV_ValidationResult>}
      */
-    addValidator(validator) {
-        if (!validator || typeof validator.validate !== 'function') {
-            throw new TypeError("Validator must be an object exposing a function named 'validate'.");
+    async validate(config) {
+        const allErrors = [];
+
+        // Execute validators sequentially to potentially save on expensive subsequent checks
+        // if an early critical failure is detected.
+        for (const validator of this.validators) {
+            // Note: Parallel execution (Promise.all) might be faster, but sequential 
+            // execution often allows for earlier failure return and dependency ordering.
+            const result = await validator.validate(config);
+            
+            if (!result.isValid) {
+                allErrors.push(...result.errors);
+            }
+            
+            // Fail fast mechanism: Optional based on governance requirements, 
+            // but often preferred to prevent processing deeply flawed config.
+            // if (allErrors.length > 5) break; // Example implementation of soft fail-fast
         }
-        // Push directly to the shared array
-        this.#validators.push(validator);
-    }
 
-    /**
-     * I/O Proxy: Delegates the validation execution to the aggregated tool.
-     * @param {Object} config 
-     * @returns {Array<Object>}
-     */
-    #delegateToAggregatorExecution(config) {
-        return this.#aggregator.execute(config);
-    }
-
-    /**
-     * Validates the configuration by delegating execution to the aggregated validators.
-     * The core aggregation loop runs with maximum computational efficiency (direct iteration).
-     * @param {Object} config 
-     * @returns {Array<Object>} List of validation errors, or empty array if valid.
-     */
-    validate(config) {
-        return this.#delegateToAggregatorExecution(config);
+        return {
+            isValid: allErrors.length === 0,
+            errors: allErrors,
+        };
     }
 }
 
-// export default CompositeConfigValidator;
+module.exports = CompositeConfigValidator;
