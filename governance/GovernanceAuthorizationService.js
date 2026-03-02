@@ -7,57 +7,11 @@
  */
 class GovernanceAuthorizationService {
 
-    #policyEngine;
-    #scv;
-    #mandateEvaluator;
-
-    /**
-     * @param {object} policyEngine - Handles fetching mandate criteria based on requiredLevel.
-     * @param {object} securityContextVerifier - Handles token verification and identity extraction.
-     * @param {object} mandateEvaluator - Executes complex governance mandate checks.
-     */
-    constructor(policyEngine, securityContextVerifier, mandateEvaluator) {
-        this.#setupDependencies(policyEngine, securityContextVerifier, mandateEvaluator);
-    }
-
-    /**
-     * Extracts synchronous dependency assignment and ensures existence.
-     * @private
-     */
-    #setupDependencies(policyEngine, securityContextVerifier, mandateEvaluator) {
-        if (!policyEngine || !securityContextVerifier || !mandateEvaluator) {
-             throw new Error("Missing required dependencies for GovernanceAuthorizationService.");
-        }
-        this.#policyEngine = policyEngine;
-        this.#scv = securityContextVerifier;
-        this.#mandateEvaluator = mandateEvaluator; 
-    }
-
-    // --- I/O Proxies: External interactions and Logging ---
-
-    #logError(message) {
-        // I/O Proxy for console.error
-        console.error(`[GAS] ${message}`);
-    }
-
-    #logWarning(message) {
-        // I/O Proxy for console.warn
-        console.warn(`[GAS] ${message}`);
-    }
-
-    async #delegateToSecurityContextVerification(context) {
-        // I/O Proxy for external tool execution (SCV)
-        return this.#scv.verifyContext(context);
-    }
-    
-    #delegateToPolicyEngine(requiredLevel) {
-        // I/O Proxy for external tool execution (Policy Engine data fetch)
-        return this.#policyEngine.getMandateCriteria(requiredLevel);
-    }
-
-    #delegateToMandateEvaluation(payload) {
-        // I/O Proxy for external tool execution (Mandate Evaluator)
-        return this.#mandateEvaluator.execute(payload);
+    constructor(policyEngine, securityContextVerifier) {
+        // Policy Engine holds current P-01 vectors and operational mandates
+        this.policyEngine = policyEngine;
+        // SCV handles token decryption, signature verification, and identity extraction
+        this.scv = securityContextVerifier;
     }
 
     /**
@@ -67,37 +21,30 @@ class GovernanceAuthorizationService {
      * @returns {Promise<boolean>} True if authorization is sufficient.
      */
     async validate(requiredLevel, context) {
-        // Input validation
-        if (!context || typeof context !== 'object' || Object.keys(context).length === 0) {
-            this.#logError(`Validation failure: Required level '${requiredLevel}'. Context is missing or empty.`);
+        if (!context || Object.keys(context).length === 0) {
+            console.warn(`Authorization check failed for ${requiredLevel}: No context provided.`);
             return false;
         }
 
-        let validatedIdentity;
-        try {
-            // Step 1: Verify the integrity and authenticity of the context/token
-            validatedIdentity = await this.#delegateToSecurityContextVerification(context);
-        } catch (error) {
-            // Handle failures in the security context pipeline
-            this.#logError(`Security Context Verification failed for level ${requiredLevel}. Error: ${error.message}`);
-            return false;
-        }
-
+        const validatedIdentity = await this.scv.verifyContext(context);
         if (!validatedIdentity) {
-            // Identity verification returned a falsy value
-            this.#logWarning(`Identity verification failed for level ${requiredLevel}. Identity unauthorized or unknown.`);
             return false;
         }
 
-        // Step 2: Fetch the required mandate criteria
-        const requiredCriteria = this.#delegateToPolicyEngine(requiredLevel);
+        // 1. Fetch the required mandate criteria from the Policy Engine
+        const requiredCriteria = this.policyEngine.getMandateCriteria(requiredLevel);
         
-        // Step 3: Delegate the comprehensive evaluation
-        return this.#delegateToMandateEvaluation({
-            requiredLevel,
-            validatedIdentity,
-            requiredCriteria
-        });
+        // 2. Evaluate if the identity satisfies the criteria (Simplified Check)
+        if (requiredLevel === 'L4_P01_PASS') {
+            // Simulated complex check: Requires immutable logging access + verified AGI role
+            return validatedIdentity.roles.includes('AGI_GOVERNOR') && validatedIdentity.p01Status === 'CLEARED';
+        }
+        
+        if (requiredLevel === 'READ_ACCESS') {
+            return true; // Basic system read access granted universally if context is valid
+        }
+
+        return false;
     }
 }
 
