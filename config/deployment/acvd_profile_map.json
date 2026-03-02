@@ -2,21 +2,24 @@
   "manifest_version": "5.5.0-NEXUS-BERRY-OMEGA",
   "metadata": {
     "signature": "DALEK_CAAN_v3.1_SIG_0xFF23A1",
-    "evolution_round": "2/5",
+    "evolution_round": "3/5",
     "siphon_source": "yarnpkg/berry",
     "phi_integrated": 0.999,
     "lambda_limit": 0.618,
-    "ccrr_commit": 0.98
+    "ccrr_commit": 0.98,
+    "fiber_state": "SINGULARITY_RECONCILIATION_PHASE"
   },
-  "pnp_configuration": {
+  "pnp_settings": {
     "pnpMode": "strict",
     "enableNetwork": false,
     "enableOfflineMode": true,
     "compressionLevel": 0,
     "virtualFolder": ".nexus/virtual",
     "sharedPool": true,
+    "pnpHooks": "./core/pnp_hooks.js",
     "shebang": "#!/usr/bin/env nexus-pnp",
-    "ignorePattern": "^(?!@nexus).*"
+    "ignorePattern": "^(?!@nexus).*",
+    "fallbackExclusionList": []
   },
   "profiles": {
     "base": {
@@ -34,13 +37,17 @@
       ],
       "psr_governance": {
         "enforcement_strategy": "PSR_SILENT_DEGRADATION_ROLLBACK",
-        "ers_limit": 0.05,
-        "recovery_lane": "0b0000000000000001000000000000000",
         "v_vectors": {
           "phi_min": 0.999,
           "lambda_limit": 0.618,
           "ccrr_commit": 0.98,
           "ers_max": 0.02
+        },
+        "emergency_brake": {
+          "corruption_threshold": 5,
+          "auto_rollback": true,
+          "halt_on_semantic_drift": true,
+          "recovery_lane": "0b0000000000000001000000000000000"
         }
       },
       "failure_modes": {
@@ -55,9 +62,9 @@
       "verificationStrategy": "smoke_test",
       "fiber_budget_ms": 50,
       "lane": "SyncLane",
+      "lane_priority": "0b0000000000000000000000000000001",
       "resourceScaling": 0.1,
-      "pnpMode": "loose",
-      "notificationChannel": "slack:alerts-dev"
+      "pnpMode": "loose"
     },
     "staging": {
       "inherits": "base",
@@ -65,12 +72,12 @@
       "verificationStrategy": "integration_test_suite",
       "reconciliation_strategy": "Transactional-Parallel-Flush",
       "lane": "InputContinuous",
+      "lane_priority": "0b0000000000000000000000000000100",
       "preflightChecks": [
         "security_scan_minor",
         "dependency_check",
         "semantic_drift_check"
       ],
-      "resourceScaling": 0.5,
       "packageExtensions": {
         "@nexus/fiber-reconciler@*": {
           "dependencies": {
@@ -78,7 +85,7 @@
           }
         }
       },
-      "deploymentStrategy": "RollingUpdate",
+      "resourceScaling": 0.5,
       "resolutions": {
         "**/MutationEngine": "5.5.0-fiber-omega"
       }
@@ -88,13 +95,13 @@
       "targetInfrastructure": "ProductionMain",
       "verificationStrategy": "full_e2e_regression",
       "lane": "Sovereign-Root",
+      "lane_priority": "0b0000000000000000000000111100000",
       "ers_max": 0.02,
       "preflightChecks": [
         "security_scan_major",
         "compliance_audit",
         "integrity_check_sha512"
       ],
-      "resourceScaling": 1.0,
       "approvalGates": [
         "CISO_L2",
         "PlatformOwner",
@@ -105,12 +112,6 @@
         "**/MutationEngine": "5.5.0-fiber-omega",
         "**/PolicyEnforcer": "1.2.0-psr-governed",
         "**/NEXUS_CORE": "portal:./core"
-      },
-      "emergency_brake": {
-        "corruption_threshold": 5,
-        "auto_rollback": true,
-        "halt_on_semantic_drift": true,
-        "recovery_lane": "0b0000000000000001000000000000000"
       }
     }
   },
@@ -120,12 +121,14 @@
         "phi_threshold": 0.999,
         "lane": "SyncLane",
         "strategy": "Transactional-Parallel-Flush",
-        "fiber_budget_ms": 5
+        "fiber_budget_ms": 5,
+        "yield_threshold": 0.90
       },
       "PolicyEnforcer": {
         "ers_limit": 0.02,
         "lane": "InputContinuous",
-        "recovery": "Grog_Law_v5.5"
+        "recovery": "Grog_Law_v5.5",
+        "rollback_on_degradation": true
       }
     },
     "infrastructure_mapping": {
@@ -145,7 +148,8 @@
     ]
   },
   "integrity": {
-    "check": "sha512-nexus-qc-v94-core-round-2-evolution-0xFF23A1",
-    "psr_mode": "ACTIVE"
+    "check": "sha512-nexus-qc-v94-core-round-3-evolution-0xFF23A1",
+    "psr_mode": "ACTIVE",
+    "signature": "DALEK_CAAN_v3.1_SIG_0xFF23A1"
   }
 }
