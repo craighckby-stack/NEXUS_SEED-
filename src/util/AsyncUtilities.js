@@ -6,40 +6,70 @@
  */
 
 /**
- * Accessor for Kernel Plugins. Defined globally in the AGI-KERNEL runtime environment.
- * @type {object} 
- */
-declare const AGI_KERNEL_PLUGINS: any;
-
-/**
  * Creates a debounced function that delays invoking the wrapped function until after `wait` milliseconds
  * have elapsed since the last time the debounced function was invoked. Handles asynchronous inner functions.
- * 
- * NOTE: The complex state management and concurrency control is handled by the AsyncDebounceTool plugin.
- * 
  * @param {Function} func - The asynchronous function to debounce.
  * @param {number} wait - The number of milliseconds to wait.
  * @returns {Function & {flush: Function}} A new debounced function with a manual `flush` method.
  */
 export function debounce(func, wait) {
-    if (typeof func !== 'function' || typeof wait !== 'number' || wait < 0) {
-        throw new Error("Invalid arguments for debounce: func must be a function and wait must be a non-negative number.");
-    }
-    
-    // Delegation to the extracted AsyncDebounceTool plugin logic.
-    // The plugin factory handles closure state management, context binding, and asynchronous safety.
-    if (typeof AGI_KERNEL_PLUGINS !== 'undefined' && AGI_KERNEL_PLUGINS.AsyncDebounceTool) {
-        const debouncedFunc = AGI_KERNEL_PLUGINS.AsyncDebounceTool.execute({ func, wait });
-        return debouncedFunc;
-    }
+    let timeoutId = null;
+    let isExecuting = false;
+    let needsRerun = false;
 
-    // CRITICAL Fallback: If the kernel environment is not fully initialized, we cannot provide the service.
-    console.error("CRITICAL: AsyncDebounceTool is not initialized. Async control flow will fail.");
+    const debounced = function(...args) {
+        const context = this;
+        
+        const runner = async function() {
+            timeoutId = null;
+            if (isExecuting) {
+                needsRerun = true;
+                return; 
+            }
+            
+            isExecuting = true;
+            needsRerun = false;
+            try {
+                await func.apply(context, args);
+            } catch (error) {
+                console.error("Debounced function failed execution:", error);
+            } finally {
+                isExecuting = false;
+                // If new calls arrived during execution, immediately schedule the next run
+                if (needsRerun) {
+                    debounced.apply(context, args);
+                }
+            }
+        };
+
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+        }
+
+        timeoutId = setTimeout(runner, wait);
+        
+        // Optimization for Node.js
+        if (timeoutId.unref) {
+            timeoutId.unref();
+        }
+    };
     
-    // Return a function that logs and does nothing, maintaining the expected function signature.
-    const noopDebounce = (...args: any) => { /* noop */ };
-    (noopDebounce as any).flush = () => { /* noop */ };
-    return noopDebounce as any;
+    // Method to force immediate execution if scheduled, bypassing the wait period.
+    debounced.flush = function() {
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+            if (!isExecuting) {
+                // If not currently running, run immediately
+                func.apply(this);
+            } else {
+                // If running, ensure a rerun happens immediately after it finishes
+                needsRerun = true;
+            }
+        }
+    };
+
+    return debounced;
 }
 
 // Future exports: throttle, queueManager, rateLimit etc.
