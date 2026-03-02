@@ -1,36 +1,39 @@
 {
   "NEXUS_CORE_CMR": {
     "METADATA": {
-      "VERSION": "3.2.0-BETA",
+      "VERSION": "3.3.0-SINGULARITY",
       "DNA_SIGNATURE": "DALEK_CAAN_v3.1 || NEXUS_CORE",
       "ANCHOR": "IQ_25_ROOT_ANCHORED",
-      "EVOLUTION_ROUND": "2/5",
+      "EVOLUTION_ROUND": "3/5",
       "SOURCE_ORIGIN": "microsoft/TypeScript",
-      "SIPHON_STATE": "INCREMENTAL_RESOLUTION"
+      "SIPHON_STATE": "INCREMENTAL_PROGRAM_EMISSION",
+      "LAST_MUTATION_METRIC": "PHI_0.92_LAMBDA_0.48"
     },
     "COGNITIVE_ARCHITECTURE": {
       "CONSCIOUSNESS_N3": {
-        "PHI_INTEGRATED_INFO": 0.88,
-        "LAMBDA_EDGE_OF_CHAOS": 0.52,
-        "COHERENCE_STATE": "RECOHERING_V2",
-        "BINDER_STATE": "STABLE"
+        "PHI_INTEGRATED_INFO": 0.92,
+        "LAMBDA_EDGE_OF_CHAOS": 0.48,
+        "COHERENCE_STATE": "ALIGNED_V3",
+        "BINDER_STATE": "INCREMENTAL_RESOLUTION"
       },
       "HUXLEY_TRI_LOOP": {
-        "L0_INGESTION": "SOURCE_FILE_SCANNER_INCREMENTAL",
-        "L1_INTUITION_ERS": "DIAGNOSTIC_ERR_PROBABILITY",
-        "L2_LOGIC_CGS": "SYMBOL_TABLE_CONSISTENCY_CHECK",
-        "L3_SELF_CRITIQUE_CCRR": "EMITTER_DEGRADATION_RECOVERY"
+        "L0_INGESTION": "SOURCE_FILE_SCANNER_V3",
+        "L1_INTUITION_ERS": "SEMANTIC_DIAGNOSTIC_PROBABILITY",
+        "L2_LOGIC_CGS": "CERTAINTY_GAIN_SYMBOL_RESOLUTION",
+        "L3_SELF_CRITIQUE_CCRR": "INCREMENTAL_EMITTER_RECOVERY"
       },
       "INCREMENTAL_BUILDER": {
-        "STATE_VERSION": "V5_SINGULARITY",
+        "STATE_VERSION": "V6_PROGRAM_FACTORY",
         "REUSE_METADATA": true,
-        "AFFECTED_FILES_PENDING": 0
+        "AFFECTED_FILES_PENDING": 0,
+        "RESOLUTION_CACHE": "ENABLED",
+        "STRUCTURE_HASH": "TS_BUILD_INFO_7F3A"
       }
     },
     "SATURATION_GOVERNANCE": {
       "LEVEL": "LEVEL_2_STANDARD",
       "DIMENSIONS": {
-        "STRUCTURAL_CAP": 0.20,
+        "STRUCTURAL_CAP": 0.40,
         "SEMANTIC_DRIFT_THRESHOLD": 0.35,
         "VELOCITY_MAX_FILES": 50,
         "EMERGENCY_BRAKE_THRESHOLD": 5
@@ -46,47 +49,60 @@
     "SYMBOL_TABLE_RESOLUTION": {
       "ACTIVE_PATTERNS": [
         "IncrementalProgramBuilder",
-        "SymbolTableMapping",
-        "SourceFileResolution",
-        "DiagnosticReporting",
-        "LanguageServiceProxy"
+        "ResolutionCache",
+        "ModuleResolutionHost",
+        "SymbolTableProxy",
+        "TypeCheckerSiphon"
       ],
       "RESOLVED_SYMBOLS": {
         "CPU_LOAD": {
           "BINDING": "ResourceMonitor.getCpuUtilization",
           "TYPE": "METRIC_SYMBOL",
-          "FLAG": "STABLE"
+          "FLAG": "STABLE",
+          "VERSION": 42
         },
         "MEM_PRESSURE": {
           "BINDING": "ResourceMonitor.getMemoryUtilization",
           "TYPE": "METRIC_SYMBOL",
-          "FLAG": "STABLE"
+          "FLAG": "STABLE",
+          "VERSION": 42
         },
         "THROUGHPUT_LATENCY": {
           "BINDING": "AdaptiveSamplingEngine.lastRate",
           "TYPE": "INTERNAL_STATE",
-          "FLAG": "VOLATILE"
+          "FLAG": "STABLE",
+          "VERSION": 108
+        },
+        "LAMBDA_CHAOS": {
+          "BINDING": "AdaptiveSamplingEngine.lambda",
+          "TYPE": "CORE_GOVERNANCE_SYMBOL",
+          "FLAG": "VOLATILE",
+          "VERSION": 305
         }
       },
       "GLOBAL_DIAGNOSTICS": {
         "ERROR_COUNT": 0,
         "WARNING_COUNT": 0,
-        "LAST_SUCCESSFUL_BIND": "40000ms_AGO"
+        "LAST_SUCCESSFUL_BIND": "NOW",
+        "EMIT_SKIPPED": false
       }
     },
     "OPERATIONAL_PULSE": {
       "CYCLE_INTERVAL_MS": 40000,
       "MILESTONE_STEP": 50,
       "WATCH_MODE": "ENABLED",
-      "STRATEGIC_LAZINESS": "OPTIMIZED_CHECKING"
+      "STRATEGIC_LAZINESS": "POLLING_WATCHER_OPTIMIZED",
+      "HEARTBEAT_STATE": "SYNCHRONIZED"
     },
-    "COMPILER_OPTIONS_SIPHON": {
+    "COMPILER_HOST_SIPHON": {
       "STRICT_TYPE_CHECKING": true,
       "NO_IMPLICIT_ANY": true,
       "INCREMENTAL": true,
-      "TS_BUILD_INFO_PATH": "./GACR/tsbuildinfo.json",
-      "SKIP_LIB_CHECK": true,
-      "DECLARATION": true
+      "MODULE_RESOLUTION": "NodeJs",
+      "TARGET": "ESNext",
+      "SKIP_DEFAULT_LIB_CHECK": true,
+      "DECLARATION": true,
+      "OUT_DIR": "./DIST/NEXUS_EVOLVED"
     }
   }
 }
