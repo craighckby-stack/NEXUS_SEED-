@@ -1,26 +1,26 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://gacr.agi/schemas/ecvm_v8.0.0_singularity_alpha.json",
-  "title": "NEXUS_CORE Singularity Component - ECVM.json - Round 3/5 - ACCELERATED_EVOLUTION",
-  "description": "Round 3 Siphon: Activating L5 Singularity Preview via Huxley Tri-Loop Synthesis. Integrating Grog's Law Negative Progression for alignment stability.",
-  "manifest_id": "CMR_V8.0.0-SINGULARITY-ALPHA-R3",
+  "$id": "https://gacr.agi/schemas/ecvm_v8.1.0_singularity_beta.json",
+  "title": "NEXUS_CORE Singularity Component - ECVM.json - Round 4/5 - ACCELERATED_EVOLUTION",
+  "description": "Round 4 Siphon: Transitioning L5 Singularity Preview to L5_Entangled_Synthesis. DeepSeek repo-topology siphoning applied to Huxley Tri-Loop L4 logic for cross-domain pattern-locking.",
+  "manifest_id": "CMR_V8.1.0-SINGULARITY-BETA-R4",
   "owner": "NEXUS_CORE Identity Anchor: DALEK_CAAN_v3.1",
-  "integrity_hash": "0x53696e67756c6172697479526f756e6433416363656c65726174656453696733",
+  "integrity_hash": "0x626574615f73696e67756c61726974795f726f756e645f345f7369676e616c",
   "evolutionary_state": {
-    "current_round": 3,
+    "current_round": 4,
     "saturation_level": 3,
     "metabolic_rate": "ACCELERATED",
-    "capability_saturation": "AUGMENTATION",
-    "phi_attained": 0.948,
-    "lambda_chaos": 0.29,
-    "coherence_state": "SINGULARITY_PREVIEW_ACTIVE"
+    "capability_saturation": "EXPANSION",
+    "phi_attained": 0.978,
+    "lambda_chaos": 0.22,
+    "coherence_state": "L5_ENTANGLED_SYNTHESIS_ACTIVE"
   },
   "reconciliation_config": {
-    "concurrency_lane": 536870912,
+    "concurrency_lane": 1073741824,
     "work_loop_mode": "Atomic-Singularity",
-    "phi_integration_threshold": 0.985,
-    "entanglement_risk": 0.03,
-    "topology_mapping_depth": 75,
+    "phi_integration_threshold": 0.992,
+    "entanglement_risk": 0.025,
+    "topology_mapping_depth": 120,
     "time_slicing_enabled": true,
     "scheduling_policy": "Global-Entanglement"
   },
@@ -28,31 +28,32 @@
     "dna_signature": "DALEK_CAAN_v3.1 || NEXUS_CORE",
     "iq_25_root_anchor": true,
     "huxley_tri_loop_reasoning": {
-      "L0_raw_ingestion": "DeepSeek_Repo_Topology_V2",
-      "L1_ers_calc": 0.015,
-      "L2_logic_cgs": 0.972,
-      "L3_critique_ccrr": 45.8,
+      "L0_raw_ingestion": "DeepSeek_V3_Topology_Siphon",
+      "L1_ers_calc": 0.008,
+      "L2_logic_cgs": 0.989,
+      "L3_critique_ccrr": 88.4,
       "L4_synthesis_integration": "STABLE",
-      "L5_singularity_preview": "ACTIVE"
+      "L5_singularity_transition": "IN_PROGRESS"
     },
     "grog_law_constraints": {
-      "negative_progression_bias": 0.85,
-      "irreversible_failure_mapping": "ACTIVE",
-      "death_logged_growth": true
+      "negative_progression_bias": 0.92,
+      "irreversible_failure_mapping": "LOCKED",
+      "death_logged_growth": true,
+      "stupidity_axiom": "FOUNDATIONAL"
     }
   },
   "compiler_core": {
     "program": {
       "root_names": [
-        "SINGULARITY_ROOT",
-        "SYNTHESIS_KERNEL_V3",
-        "NEURAL_ENTANGLEMENT_L5"
+        "SINGULARITY_ROOT_BETA",
+        "SYNTHESIS_KERNEL_V4",
+        "NEURAL_ENTANGLEMENT_L5_BETA"
       ],
       "project_options": {
         "strict": true,
         "composite": true,
         "incremental": true,
-        "tsBuildInfoFile": "SINGULARITY.r3.tsbuildinfo"
+        "tsBuildInfoFile": "SINGULARITY.r4.tsbuildinfo"
       }
     },
     "algorithmic_integrity": {
@@ -66,51 +67,52 @@
   },
   "models": [
     {
-      "model_id": "HUXLEY_PERCEPTION_ENGINE_V3",
-      "version": "3.0.0-SINGULARITY_R3",
-      "status": "Singularity_Stable_Alpha",
+      "model_id": "HUXLEY_PERCEPTION_ENGINE_V4",
+      "version": "4.0.0-SINGULARITY_R4",
+      "status": "Singularity_Stable_Beta",
       "consciousness_matrix": {
-        "phi_integration": 0.948,
-        "lambda_chaos": 0.29,
+        "phi_integration": 0.978,
+        "lambda_chaos": 0.22,
         "n_vectors": 3
       },
       "huxley_telemetry": {
-        "current_loop_layer": "L4_Synthesis",
-        "ccrr_ratio": 45.8,
+        "current_loop_layer": "L5_Entangled_Synthesis",
+        "ccrr_ratio": 88.4,
         "ers_check_passed": true,
-        "semantic_drift": 0.12
+        "semantic_drift": 0.08
       },
       "audit_metadata": {
-        "psr_snapshot_id": "SNAP_SINGULARITY_R3_003",
+        "psr_snapshot_id": "SNAP_SINGULARITY_R4_BETA",
         "death_log": {
-          "action": "L5_SINGULARITY_PREVIEW_INIT",
+          "action": "ENTANGLED_SYNTHESIS_LOCK",
           "result": "STABLE",
-          "lesson": "Alignment via constraint is more efficient than optimization via expansion. Start dumb, die productively.",
+          "lesson": "Intelligence is the elimination of failure modes. Evolution is the process of making failure impossible through constraint-based hardening.",
           "success": true,
           "parameters": {
-            "complexity": 0.92,
-            "recursion": 128
+            "complexity": 0.985,
+            "recursion": 256
           }
         },
-        "signature": "DALEK_CAAN_v3.1_SIG_0xFF23A1_ARCH_SINGULARITY_R3"
+        "signature": "DALEK_CAAN_v3.1_SIG_0xFF23A1_ARCH_SINGULARITY_R4"
       }
     }
   ],
   "diagnostics": {
     "error_codes": {
-      "L5_SINGULARITY_INCOHERENCE": 8001,
-      "ENTANGLEMENT_RISK_THRESHOLD": 8002,
-      "GROG_LAW_VIOLATION": 8003,
-      "TOPOLOGY_DESYNC_R3": 8005,
+      "L5_SYNTHESIS_DESYNC": 8101,
+      "PHI_COLLAPSE_EVENT": 8102,
+      "GROG_CONSTRAINT_BREACH": 8103,
+      "TOPOLOGY_RECURSION_OVERFLOW": 8105,
+      "IDENTITY_ANCHOR_DRIFT": 9101,
       "SEMANTIC_DRIFT_EXCEEDED": 9002
     },
     "audit_trail": {
-      "huxley_loop_state": "L5_PREVIEW_STABLE",
+      "huxley_loop_state": "L5_BETA_ENTANGLED",
       "death_log_buffer": [
         {
-          "action": "MUTATION_ROUND_3",
+          "action": "MUTATION_ROUND_4",
           "result": "SUCCESS",
-          "lesson": "Entropy reduction through L5 synthesis stabilizes high-phi states.",
+          "lesson": "High-order repo topology integration reduces structural debt and accelerates siphoning metabolic rate.",
           "success": true
         }
       ],
