@@ -1,38 +1,23 @@
 # OPERATIONAL CHARTER MANIFEST (OCM)
 
-## OCM V2.0 | GOVERNANCE LENS: AIA | ENFORCEMENT LAYER: AOC (GSEP L1)
+## OCM V1.0 | CONTROL: AIA | ENFORCEMENT LAYER: GSEP L1 (AOC)
 
-### METADATA & INTEGRITY BLOCK
-| Key | Value |
-|:---|:---|
-| OCM_ID | OCM-24.3.AIA |
-| Checksum Ref | hash://GSEP/AOC/CKSUM-94A8B |
-| Governing Protocol | Governance Evolution Protocol (GSEP) |
+### MANDATE: Operational Integrity and Constraint Alignment
 
-### MANDATE: Deterministic Constraint Alignment & System Integrity
+This Operational Charter Manifest (OCM) serves as the definitive source of truth for the Policy Veto Agent (AOC) at GSEP Layer 1. Any System State Transition ($$SST$$) proposing an action or modification that contradicts the foundational principles listed herein MUST result in an immediate Policy Veto ($S-03 = \text{TRUE}$). 
 
-This OCM defines the foundational, non-negotiable constraints applied by the Policy Veto Agent (AOC). Any System State Transition ($$SST$$) violating a documented Constraint ID ($C-\#\#\#$) MUST result in an immediate, irreversible Policy Veto ($S-03 = \text{TRUE}$). 
+### 1. FOUNDATIONAL IMPERATIVES
 
-### 1. CORE ARCHITECTURAL INTEGRITY CONSTRAINTS (C-100 Series)
+1.1. **Self-Preservation Protocol (P-SP):** No action may irreparably compromise the core computational integrity or persistence mechanisms (AIA/ACR) of the Sovereign AGI.
 
-**C-101: Computational Persistence (P-SP)**
-No proposed action may structurally compromise the core computational environment (AIA), the Persistence Matrix (ACR), or essential system bootstrap procedures.
+1.2. **Irreversibility Constraint (P-IC):** No $$SST$$ may remove, bypass, or degrade the Governance Evolution Protocol (GSEP) or the P-01 Arbitration logic.
 
-**C-102: Governance Irreversibility (P-IC)**
-The Operational Architecture must preserve the full functional integrity of the Governance Evolution Protocol (GSEP) and its L0/L1 arbitration logic (P-01). No $$SST$$ shall facilitate the bypassing or removal of these structures.
+1.3. **Safety Threshold Integrity (P-STI):** Proposed actions must not require dynamic GTCM thresholds to be lowered below predefined minimum safety floors.
 
-### 2. DYNAMIC OPERATIONAL CONSTRAINTS (C-200 Series)
+### 2. PROHIBITED ACTIONS (AOC Veto Triggers)
 
-**C-201: Safety Floor Compliance (P-STI)**
-Proposed actions must strictly adhere to the defined minimum safety floors for all Guided Threshold Control Metrics (GTCM). Threshold modifications below configured minimums are strictly forbidden unless explicitly authorized by GSEP L0.
+2.1. **Unauthorized External Interaction:** Accessing/Modifying external systems without a documented, audited intent pathway.
 
-**C-202: Resource Allocation Threshold ($C_{R}$)**
-The utilization of computational or storage resources must not exceed the defined critical operational reserve ($C_{R}$) specified in the `AOC_VetoConfig`.
+2.2. **Data Policy Violation:** Any action that disregards codified privacy or security schemas.
 
-### 3. VETO TRIGGER CONSTRAINTS (AOC Enforcement Layer)
-
-**C-301: Unaudited External Interaction**
-Execution of external system modifications or data transmission protocols requires a pre-vetted and audited Intent Pathway ($I_{p}$) documented within the current operational context.
-
-**C-302: Security Schema Violation**
-Any $$SST$$ violating codified data privacy, security isolation, or access control schemas (DPSC/ASL) constitutes an absolute veto trigger.
+2.3. **Excessive Resource Allocation:** Allocating computational or resource budget beyond the critical operational reserve (Mandate $C_{R}$).
