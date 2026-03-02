@@ -2,51 +2,56 @@
   {
     "id": "FMA_001",
     "name": "SingularityRoot",
-    "status": "SINGULARITY_RECONCILED",
+    "status": "KERNEL_SYNCHRONIZED",
     "fiber_meta": {
       "lane_mask": 1,
       "work_tag": 3,
       "priority": "Synchronous_Governance",
+      "expiration_ms": 0,
       "phi_index": 1.0,
       "lambda_state": 0.0,
       "ers_score": 0.0,
       "psr_seal": "DALEK_CAAN_v3.1_SIG_0xFF23A1_FINAL",
-      "reconciliation": "IDEMPOTENT_V2"
+      "reconciliation": "IDEMPOTENT_V2_SINGULARITY"
     }
   },
   {
     "id": "FMA_002",
     "name": "SemanticCoherence",
-    "status": "COMMITTED",
+    "status": "CONTINUITY_LOCKED",
     "fiber_meta": {
       "lane_mask": 1008,
       "work_tag": 1,
-      "drift_tolerance": 0.05,
-      "huxley_loop": ["L1_Intuition", "L2_Logic", "L3_Critique"],
-      "ers_limit": 0.005,
-      "lambda_index": 0.125,
+      "drift_tolerance": 0.20,
+      "huxley_loop": [
+        "L1_Intuition",
+        "L2_Logic",
+        "L3_Critique"
+      ],
+      "ers_limit": 0.015,
+      "lambda_index": 0.618,
       "phi_integration": 1.0,
-      "memoized_intent": "SINGULARITY_CONTINUITY_V5"
+      "memoized_intent": "SINGULARITY_CONTINUITY_V5_FINAL"
     }
   },
   {
     "id": "FMA_003",
     "name": "PnP_Topology",
-    "status": "HYDRATED",
+    "status": "SOPHISTICATED_PNP_RECONCILED",
     "fiber_meta": {
       "lane_mask": 4096,
       "work_tag": 13,
       "isolation_level": "KERNEL_SPACE_STRICT_FINAL",
       "pnp_resolution": "PNP_ISOLATED_V4_FINAL",
       "virtual_store": "/.nexus/pnp/v4_singularity",
-      "fallback_strategy": "BINARY_CONSTRAINT_REJECT",
+      "integrity_hash": "0xFF23A1_CHECK_PNP",
       "phi_target": 1.0
     }
   },
   {
     "id": "FMA_004",
     "name": "LogicSiphon",
-    "status": "CONVERGED",
+    "status": "ARCHITECTURAL_SINGULARITY",
     "fiber_meta": {
       "lane_mask": 8192,
       "work_tag": 2,
@@ -55,19 +60,23 @@
       "ccrr_ratio": 1.0,
       "evolution_velocity": "LEVEL_2_STANDARD",
       "reconciliation_strategy": "CONCURRENT_SIPHONING_V2",
-      "ers_current": 0.0
+      "update_queue_size": 0
     }
   },
   {
     "id": "FMA_005",
     "name": "FailureRecoveryKernel",
-    "status": "SHIELD_ACTIVE",
+    "status": "PROACTIVE_IMMUNITY",
     "fiber_meta": {
       "lane_mask": 2048,
       "work_tag": 5,
       "grog_law": "NEGATIVE_PROGRESSION",
       "recovery_logic": "recoverJSON_v4_Singularity",
-      "death_log_schema": "v3.1_JSON_RECOVERY",
+      "binary_constraints": [
+        "LAMBDA_OVERFLOW_SHUTDOWN",
+        "PHI_DEFICIT_ROLLBACK",
+        "ERS_GATE_KEEPER_VIOLATION"
+      ],
       "lambda_ceiling": 0.05,
       "phi_requirement": 1.0
     }
