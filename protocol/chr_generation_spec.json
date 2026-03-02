@@ -1,1 +1,47 @@
-[object Object]
+{
+  "spec_version": "1.0.0",
+  "metadata": {
+    "spec_id": "CHR-941-GEN-001",
+    "description": "Intelligent Agent Character Generation Specification v94.1",
+    "entity_type": "ProtocolAgent"
+  },
+  "generation_parameters": {
+    "seed_strategy": {
+      "type": "DeterministicHash",
+      "source_fields": ["protocol_id", "instance_uid"],
+      "algorithm": "FNV-1a-64"
+    },
+    "complexity_score": {
+      "default": 4,
+      "range": [1, 7],
+      "scaling_model": "AdaptiveLoad"
+    },
+    "runtime_constraints": {
+      "memory_footprint_mb": {
+        "soft_limit": 512,
+        "hard_limit": 1024,
+        "fallback": 256
+      },
+      "cpu_affinity": {
+        "preference": "high_performance",
+        "strategy": "cooldown_weighted"
+      }
+    }
+  },
+  "component_dependencies": {
+    "core_runtime": {
+      "required": true,
+      "version_lock": "94.1.x",
+      "injection": "SingletonInstance"
+    },
+    "temporal_projection_module": {
+      "required": false,
+      "version_lock": "94.1.4",
+      "injection": "LazyFactory"
+    }
+  },
+  "lifecycle_hooks": {
+    "pre_init": ["ResourcePreAllocator"],
+    "post_generation": ["IntegrityCheck"]
+  }
+}
