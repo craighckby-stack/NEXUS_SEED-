@@ -1,120 +1,58 @@
 /**
- * AGI-KERNEL ConceptualPolicyRegistryKernel
+ * @fileoverview ConceptualPolicyRegistry
+ * A repository mapping declarative constraint types defined in concept manifests
+ * to their specialized, executable validation functions (Policy Handlers).
  * 
- * Manages the registration and retrieval of conceptual policies, ensuring
- * integrity via configuration freezing and O(1) lookup efficiency, using
- * dependency injection for all underlying utilities.
+ * NOTE: All handlers accept (constraint, context) and return a violation object (if failed) or null (if compliant).
  */
 
 /**
- * @typedef {Object} Policy
- * @property {string} name - Human readable name.
- * @property {string} description - What the policy governs.
- * @property {Object} config - The configuration payload enforced by the policy.
+ * Handler for MandatoryMarker policy. Checks if a critical marker was removed.
+ * @param {Object} constraint {type: 'MandatoryMarker', marker: string, targetPath: string}
+ * @param {Object} context {mutationType: string, filePath: string, contentDiff: string}
+ * @returns {Object | null} Violation object or null.
  */
-
-class ConceptualPolicyRegistryKernel {
-    /** @type {IInMemoryMapStoreToolKernel<Policy>} */
-    #policyStore;
-
-    /** @type {IObjectImmutabilityToolKernel} */
-    #immutabilityEnforcer;
-
-    /**
-     * @param {{ policyStore: IInMemoryMapStoreToolKernel<Policy>, immutabilityEnforcer: IObjectImmutabilityToolKernel }} dependencies
-     */
-    constructor({ policyStore, immutabilityEnforcer }) {
-        this.#policyStore = policyStore;
-        this.#immutabilityEnforcer = immutabilityEnforcer;
-        this.#setupDependencies();
-    }
-
-    /**
-     * Rigorously enforces synchronous dependency assignment and validation,
-     * satisfying the synchronous setup extraction mandate.
-     */
-    #setupDependencies() {
-        if (!this.#policyStore || typeof this.#policyStore.register !== 'function') {
-            throw new Error("Dependency Injection Error: IInMemoryMapStoreToolKernel ('policyStore') is missing or invalid.");
-        }
-        if (!this.#immutabilityEnforcer || typeof this.#immutabilityEnforcer.freeze !== 'function') {
-            throw new Error("Dependency Injection Error: IObjectImmutabilityToolKernel ('immutabilityEnforcer') is missing or invalid.");
+const mandatoryMarkerHandler = (constraint, context) => {
+    if (context.mutationType === 'MODIFY' && context.filePath === constraint.targetPath) {
+        // Checks for removal indication in the diff content (assuming typical diff format '-marker')
+        if (context.contentDiff && typeof context.contentDiff === 'string' && context.contentDiff.includes(`-${constraint.marker}`)) {
+             return {
+                ruleId: constraint.id || 'MAND-001',
+                detail: `Mandatory marker '${constraint.marker}' removed from critical file ${context.filePath}.`,
+                severity: 'CRITICAL'
+            };
         }
     }
+    return null;
+};
 
-    /**
-     * Initializes the kernel. Required by the strategic mandate.
-     * @returns {Promise<void>}
-     */
-    async initialize() {
-        // No asynchronous configuration loading needed here, as registration is external.
-    }
-
-    /**
-     * Registers a new conceptual policy.
-     * 
-     * Delegates freezing to the injected immutability tool and storage to the injected map store.
-     * 
-     * @param {string} policyId - Unique identifier for the policy.
-     * @param {Policy} policy - The policy object.
-     * @returns {Promise<void>}
-     */
-    async registerPolicy(policyId, policy) {
-        if (!policy || typeof policy.config === 'undefined') {
-            throw new Error(`Integrity Error: Policy registration for ID: ${policyId} failed. Policy structure must contain a 'config' payload.`);
+/**
+ * Handler for AccessControl policy. Checks agent permissions for modification.
+ * @param {Object} constraint {type: 'AccessControl', targetPrefix: string, allowedAgents: Array<string>}
+ * @param {Object} context {filePath: string, agentId: string}
+ * @returns {Object | null} Violation object or null.
+ */
+const accessControlHandler = (constraint, context) => {
+    if (context.filePath.startsWith(constraint.targetPrefix)) {
+        // Ensure constraint.allowedAgents is defined and includes the acting agent
+        if (!constraint.allowedAgents || !constraint.allowedAgents.includes(context.agentId)) {
+            return {
+                ruleId: constraint.id || 'AC-002',
+                detail: `Agent ${context.agentId} lacks permission to modify components prefixed by ${constraint.targetPrefix}.`,
+                severity: 'MAJOR'
+            };
         }
-        
-        // Delegate freezing to the injected tool
-        const immutablePolicy = this.#immutabilityEnforcer.freeze(policy);
-        
-        this.#policyStore.register(policyId, immutablePolicy);
     }
+    return null;
+};
 
-    /**
-     * Retrieves a registered policy by its ID.
-     * 
-     * @param {string} policyId - The unique identifier of the policy.
-     * @returns {Promise<Policy | undefined>}
-     */
-    async getPolicy(policyId) {
-        return this.#policyStore.get(policyId);
-    }
 
-    /**
-     * Retrieves the configuration payload for a specific policy.
-     * 
-     * @param {string} policyId - The unique identifier of the policy.
-     * @returns {Promise<Object | undefined>} The configuration payload.
-     */
-    async getPolicyConfig(policyId) {
-        const policy = await this.getPolicy(policyId);
-        return policy ? policy.config : undefined;
-    }
-
-    /**
-     * Checks if a policy is registered.
-     * @param {string} policyId - The unique identifier of the policy.
-     * @returns {Promise<boolean>}
-     */
-    async hasPolicy(policyId) {
-        return this.#policyStore.has(policyId);
-    }
-
-    /**
-     * Returns an iterable of all registered policy IDs.
-     * @returns {Promise<IterableIterator<string>>}
-     */
-    async keys() {
-        return this.#policyStore.keys();
-    }
+export const ConceptualPolicyRegistry = {
+    // Register the available policy handlers:
+    MandatoryMarker: mandatoryMarkerHandler,
+    AccessControl: accessControlHandler,
     
-    /**
-     * Clears all registered policies. Use only for controlled environment reset.
-     * @returns {Promise<void>}
-     */
-    async clear() {
-        this.#policyStore.clear();
-    }
-}
-
-export { ConceptualPolicyRegistryKernel };
+    // Future expansion points for other high-level validation categories (e.g., Code Archetype, Dependency Audits, Schema Compliance):
+    // 'CodeArchetype': /* handler function */,
+    // 'SchemaCompliance': /* handler function */,
+};
