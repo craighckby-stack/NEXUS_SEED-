@@ -1,194 +1,23 @@
-class Config {
-  static get staticConfig() {
-    return {
-      VERSION: "1.0.0",
-      env: process.env.NODE_ENV || "development"
-    };
-  }
+## Governance Integrity & Rule Attestation Module (GIRAM) Specification V101.0 (High-Performance State Anchor)
 
-  constructor(values = {}) {
-    this.setValues(values);
-  }
+**MISSION:** To establish an immutable cryptographic state anchor by enforcing the prerequisite integrity of all governance artifacts defined in the Governance Integrity Root Manifest (GIRM). Achieved via abstracted cryptographic primitives (SCPI-T03), high-speed parallel hash derivation, and deterministic vetoing of the Governance System Evolution Process (GSEP) initiation if integrity fails the Baseline Commitment.
 
-  setValues(values) {
-    Object.assign(this, values);
-  }
+**GSEP INTEGRATION:** Stage 0 - Pre-Execution Constraint Initialization Layer (PECIL).
 
-  static get defaultConfig() {
-    return {
-      foo: 'bar',
-      baz: true
-    };
-  }
+### Formal I/O Specifications (Interface Contracts):
 
-  static get configSchema() {
-    return {
-      type: 'object',
-      properties: {
-        foo: { type: 'string' },
-        baz: { type: 'boolean' }
-      }
-    };
-  }
+*   **Input (I-S01):**
+    *   `GIRM_S01`: The current integrity manifest (Validated against `GIRM_Schema_V01` sourced via the Schema Repository Service (SRS)).
+    *   `IB_Reference`: Integrity Baseline Reference (The pre-attested immutable CVAMR commitment).
+    *   `SCPI_Ref`: System Cryptographic Policy Index Reference (Specifying the currently approved hash algorithm set, e.g., KECCAK-512).
+*   **Output (O-S01 Success):**
+    *   `GIR_Anchor`: Governance Integrity Register (Attested and signed cryptographic state anchor), delivered via the Secure Trust Pipeline (STP-L1) using the `ISTP_Transmit` interface.
+*   **Output (O-S01 Failure):**
+    *   `GIRAM-E101`: Critical VETO signal (Integrity Mismatch) issued immediately to the Constraint Orchestrator (GCO). Includes the structured, schema-enforced **Integrity State Divergence Report (ISDR)** detailing the CVAMR root cause divergence and requiring mandatory Human-in-the-Loop (HIL) resolution.
 
-  validate() {
-    try {
-      const schema = Config.configSchema;
-      const validator = new (require('jsonschema').Validator)();
-      validator.checkSchema(schema);
-      validator.validate(this, schema);
-    } catch (e) {
-      console.error('Config validation error:', e);
-      throw e;
-    }
-  }
-}
+### Core Functionality (Attestation Sequence V101.0 - Hyper-Parallel Execution):
 
-class LifecycleEvent {
-  constructor(event) {
-    this.event = event;
-  }
-}
-
-class LifecycleHandler {
-  constructor(handler) {
-    this.handler = handler;
-  }
-
-  bind(target = this) {
-    this.handler = this.handler.bind(target);
-  }
-
-  execute() {
-    this.handler();
-  }
-}
-
-class NexusCore {
-  #lifecycle = {
-    configured: false,
-    loaded: false,
-    shuttingDown: false
-  };
-
-  #status = "INIT";
-
-  get status() {
-    return this.#status;
-  }
-
-  set status(value) {
-    this.#status = value;
-    const currentValue = this.#status;
-    const lifecycle = this.#lifecycle;
-    if (value !== 'INIT') {
-      console.log(`NexusCore instance is ${value}.`);
-      if (value === 'SHUTDOWN') {
-        lifecycle.shuttingDown = false;
-      }
-    }
-    if (currentValue === 'INIT' && value !== 'INIT') {
-      lifecycle.configured = true;
-    }
-  }
-
-  get lifecycle() {
-    return this.#lifecycle;
-  }
-
-  configure(config) {
-    this.validateConfig(config);
-    this.onLifecycleEvent("CONFIGURED");
-    this.#lifecycle.configured = true;
-    this.config = config;
-  }
-
-  validateConfig(config) {
-    const configSchema = Config.configSchema;
-    try {
-      const validator = new (require('jsonschema').Validator)();
-      validator.checkSchema(configSchema);
-      validator.validate(config, configSchema);
-    } catch (e) {
-      console.error('Config validation error:', e);
-      throw e;
-    }
-  }
-
-  onLifecycleEvent(event, handler) {
-    const lifecycleHandler = new LifecycleHandler(handler);
-    this.#lifecycle[event] = lifecycleHandler;
-  }
-
-  get on() {
-    return (event, handler) => {
-      const lifecycleEvent = new LifecycleEvent(event);
-      this.onLifecycleEvent(event, handler);
-    };
-  }
-
-  executeLifecycleEvent(event) {
-    if (this.#lifecycle[event]) {
-      this.#lifecycle[event].bind(this).execute();
-    }
-  }
-
-  async load() {
-    await this.executeLifecycleEvent("CONFIGURED");
-    try {
-      console.log("Loading...");
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log("Loading complete...");
-      this.#lifecycle.loaded = true;
-      this.executeLifecycleEvent("LOADED");
-    } catch (e) {
-      console.error('Load error:', e);
-    }
-  }
-
-  async shutdown() {
-    try {
-      if (!this.#lifecycle.shuttingDown) {
-        console.log("Shutdown initiated...");
-        this.#lifecycle.shuttingDown = true;
-        this.executeLifecycleEvent("SHUTTING_DOWN");
-        console.log("Shutdown complete...");
-        this.status = "SHUTDOWN";
-      }
-    } catch (e) {
-      console.error("Shutdown error:", e);
-    }
-  }
-
-  async start() {
-    const startMethodOrder = ["configure", "load", "shutdown"];
-    for (const methodName of startMethodOrder) {
-      if (this[methodName] instanceof Function) {
-        await this[methodName]();
-      }
-    }
-  }
-
-  async destroy() {
-    this.status = "DESTROYED";
-    this.#lifecycle = {
-      configured: false,
-      loaded: false,
-      shuttingDown: false
-    };
-  }
-
-  async on(event, handler) {
-    await this.onLifecycleEvent(event, handler);
-  }
-}
-
-const nexusCore = new NexusCore();
-nexusCore.on('DESTROYED', () => {
-  console.log("NexusCore instance destroyed.");
-});
-nexusCore.configure(Config.defaultConfig);
-nexusCore.start();
-nexusCore.load();
-nexusCore.shutdown();
-nexusCore.destroy();
+1.  **Integrity Root Manifest Validation (IRM-V):** GIRAM receives and verifies `GIRM_S01`. Validation includes: schema conformance (verified against the SRS using `ISRS_Request`), timestamp integrity, and non-repudiation signature verification against the Governance Root Trust Anchor (GRTA).
+2.  **Attestation State Derivation (ASD):** GIRAM initiates the **Parallel Hashing Subsystem (PHS-L0)** to perform Systemic Hash Validation (SHV) across all listed critical artifacts concurrently. Artifact hashes are aggregated using a Merkle-tree strategy to derive the **Cryptographically Verified Aggregate Merkle Root (CVAMR)**. The resulting CVAMR is wrapped in a standardized Cryptographic Non-Repudiation Envelope (CNRE) utilizing the algorithm specified by `SCPI_Ref`.
+3.  **Baseline Constraint Enforcement (BCE):** The derived CNRE-wrapped CVAMR (Current State) is compared against the supplied `IB_Reference` (Committed Baseline CVAMR). If the aggregate roots diverge, the system triggers the critical failure path: generation of the structured ISDR and issuance of the standardized `GIRAM-E101` VETO signal.
+4.  **GIR Anchor Commitment:** Upon successful BCE, GIRAM generates the final `GIR_Anchor`. This register is cryptographically signed, time-stamped, and committed to the DILS (Distributed Immutable Ledger Service) via the `IDILS_Commit` interface, ensuring transactional integrity before secure transmission to STP-L1.
