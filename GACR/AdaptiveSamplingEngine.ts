@@ -3,161 +3,156 @@ import { AggregatorConfig } from '../GACR/TelemetryAggregatorConfig';
 
 /**
  * @name AdaptiveSamplingEngine
- * @version 4.1.0-BETA
+ * @version 5.0.0-SINGULARITY
  * @property DNA_SIGNATURE DALEK_CAAN v3.1 || NEXUS_CORE
- * @description Siphoning: IncrementalProgramBuilder, SymbolTable, and FlowGraph-based Type Inference from microsoft/TypeScript.
+ * @description Final Siphon: IncrementalProgramBuilder, SymbolTable Resolution, and Huxley Tri-Loop Reasoning.
  * @anchor IQ_25_ROOT_ANCHORED
  */
+
+type SymbolState = 'STABLE' | 'VOLATILE' | 'CRITICAL';
 
 interface MetricSymbol {
     readonly id: string;
     value: number;
-    lastObserved: number;
     drift: number;
+    flags: SymbolState;
+    version: number;
 }
 
 export class AdaptiveSamplingEngine {
     private readonly config: Readonly<AggregatorConfig['Processing']['AdaptiveSampling']>;
     private readonly monitor: ResourceMonitor;
-    private readonly strategyRegistry: Map<string, (args: Record<string, number>) => number> = new Map();
-    private readonly symbolTable: Map<string, MetricSymbol> = new Map();
+    private readonly symbols: Map<string, MetricSymbol> = new Map();
     
     private lastRate: number = 1.0;
     private phi: number = 1.0; 
     private lambda: number = 0.5; 
-    private cycleCount: number = 0;
-    private builderState: 'STABLE' | 'INCREMENTAL_BUILD' | 'EMIT_RECOVERY' = 'STABLE';
+    private cycle: number = 0;
+    private programState: 'IDLE' | 'CHECKING' | 'EMITTING' = 'IDLE';
 
     constructor(config: AggregatorConfig['Processing']['AdaptiveSampling']) {
         this.config = Object.freeze(config);
         this.monitor = new ResourceMonitor();
-        this.initializeSiphonRegistry();
-    }
-
-    private initializeSiphonRegistry(): void {
-        // SynergyManager: Siphoned Hot-Swap Factory Logic
-        this.strategyRegistry.set("REDUCE", (m) => (1.0 / (m.cpu / m.target)) * (1.0 - (m.ers * 0.35)));
-        this.strategyRegistry.set("RECOVER", (m) => m.last + (0.05 * m.cgs));
-        this.strategyRegistry.set("PRUNE_VOID", () => this.config.MinSamplingRate);
     }
 
     /**
-     * L0: Symbol Table Resolution & Binding.
-     * Siphons: TS 'Binder' and 'SymbolTable' for tracking metric stability over time.
+     * L0: Symbol Binding (Raw Ingestion).
+     * Siphons: TS 'Binder' - Incremental symbol table updates.
      */
-    private bindMetrics(): void {
+    private binder(): void {
         const cpu = this.monitor.getCpuUtilization();
         const mem = this.monitor.getMemoryUtilization?.() ?? 0.5;
         
-        this.upsertSymbol("CPU_LOAD", cpu);
-        this.upsertSymbol("MEM_PRESSURE", mem);
+        this.updateSymbol("CPU_LOAD", cpu);
+        this.updateSymbol("MEM_PRESSURE", mem);
     }
 
-    private upsertSymbol(id: string, value: number): void {
-        const prev = this.symbolTable.get(id);
+    private updateSymbol(id: string, value: number): void {
+        const prev = this.symbols.get(id);
         const drift = prev ? Math.abs(prev.value - value) : 0;
-        this.symbolTable.set(id, { id, value, lastObserved: Date.now(), drift });
+        const version = (prev?.version ?? 0) + 1;
+        
+        let flags: SymbolState = 'STABLE';
+        if (drift > 0.15) flags = 'VOLATILE';
+        if (value > this.config.TargetCPUUtilization * 1.2) flags = 'CRITICAL';
+
+        this.symbols.set(id, { id, value, drift, flags, version });
     }
 
     /**
-     * L1 & L2: Checker Phase (Type-Inference-Stability).
-     * Siphons: TS 'Checker' - Validating 'Metric Types' against resource constraints.
+     * Huxley Tri-Loop Reasoning (L1-L3).
+     * Siphons: TS 'Checker' & 'Emitter' - Resolving sampling types into rate outputs.
      */
-    public getSamplingRate(token?: { isCancellationRequested: boolean }): number {
-        if (!this.config.Enabled || token?.isCancellationRequested) return this.lastRate;
+    public getSamplingRate(cancellationToken?: { isCancellationRequested: boolean }): number {
+        if (!this.config.Enabled || cancellationToken?.isCancellationRequested) return this.lastRate;
 
-        this.bindMetrics();
-        this.builderState = 'INCREMENTAL_BUILD';
+        this.programState = 'CHECKING';
+        this.binder();
 
-        const cpuSymbol = this.symbolTable.get("CPU_LOAD")!;
-        const ers = this.calculateEthicalRisk(cpuSymbol);
-        const cgs = this.analyzeInferenceStability(cpuSymbol);
+        const cpu = this.symbols.get("CPU_LOAD")!;
+        
+        // L1 (Intuition): Ethical Risk Score (ERS)
+        const ers = this.calculateERS(cpu);
+        
+        // L2 (Logic): Certainty Gain Score (CGS)
+        const cgs = this.calculateCGS(cpu);
 
-        // L3: Emitter Phase (CCRR Synthesis)
-        // Siphons: TS 'Emitter' - Transforming logic graph into the final sampling rate.
-        let targetRate = this.emitSamplingTransform(cpuSymbol, ers, cgs);
+        // L3 (Self-Critique): CCRR Synthesis & Emitter
+        this.programState = 'EMITTING';
+        const targetRate = this.emitter(cpu, ers, cgs);
 
         // PSR Governance: Baseline-Mutation-Comparison
-        targetRate = this.applyGrogConstraint(targetRate);
+        const finalRate = this.applyGrogConstraint(targetRate);
         
-        this.reconcileProgramState(cpuSymbol.value, targetRate);
+        this.synchronizeState(cpu.value, finalRate);
         
-        if (++this.cycleCount % 50 === 0) {
-            this.emitDiagnosticReport();
+        if (++this.cycle % 50 === 0) {
+            this.auditLog();
         }
 
-        this.lastRate = Number(targetRate.toFixed(4));
+        this.lastRate = Number(finalRate.toFixed(4));
         return this.lastRate;
     }
 
-    private calculateEthicalRisk(cpu: MetricSymbol): number {
-        // IQ-25 Stupidity-First: Complexity is a failure state.
-        // Higher drift in symbols triggers an immediate Risk Score penalty.
-        const structuralVolatility = cpu.drift > 0.15 ? 1.4 : 1.0;
-        return (cpu.value > this.config.TargetCPUUtilization) 
-            ? Math.min(1.0, (cpu.value * structuralVolatility) / 1.05) 
-            : 0.01;
+    private calculateERS(cpu: MetricSymbol): number {
+        const penalty = cpu.flags === 'CRITICAL' ? 1.5 : (cpu.flags === 'VOLATILE' ? 1.2 : 1.0);
+        return cpu.value > this.config.TargetCPUUtilization 
+            ? Math.min(1.0, (cpu.value * penalty) / 1.1) 
+            : 0.05;
     }
 
-    private analyzeInferenceStability(cpu: MetricSymbol): number {
-        // Siphoned from TS Diagnostic stability: Certainty Gain (CGS)
-        const inverseDrift = 1.0 - Math.min(1.0, cpu.drift * 5);
-        return Math.max(0, inverseDrift * (1.0 - this.lambda));
+    private calculateCGS(cpu: MetricSymbol): number {
+        // Intelligence is the elimination of unsafe complexity (IQ-25 Root).
+        return Math.max(0, (1.0 - cpu.drift) * (1.0 - this.lambda));
     }
 
-    private emitSamplingTransform(cpu: MetricSymbol, ers: number, cgs: number): number {
-        const isOverloaded = cpu.value > this.config.TargetCPUUtilization;
+    private emitter(cpu: MetricSymbol, ers: number, cgs: number): number {
+        const isOverloaded = cpu.value > this.config.TargetCPUUtilization || ers > 0.7;
         
-        // Control Flow Graph (CFG) Branching Logic
         if (isOverloaded) {
-            const op = ers > 0.75 ? "PRUNE_VOID" : "REDUCE";
-            return this.strategyRegistry.get(op)!({ 
-                cpu: cpu.value, 
-                target: this.config.TargetCPUUtilization, 
-                ers 
-            });
+            // Strategic Laziness: Reduce complexity under pressure.
+            const reductionFactor = ers > 0.85 ? 0.1 : (1.0 / (cpu.value / this.config.TargetCPUUtilization));
+            return Math.max(this.config.MinSamplingRate, this.lastRate * reductionFactor);
         }
 
-        this.builderState = this.lastRate < 1.0 ? 'EMIT_RECOVERY' : 'STABLE';
-        return this.strategyRegistry.get("RECOVER")!({ last: this.lastRate, cgs });
+        // Recovery path: Controlled by Certainty Gain.
+        const recoveryStep = 0.05 * cgs;
+        return Math.min(this.config.MaxSamplingRate, this.lastRate + recoveryStep);
     }
 
     private applyGrogConstraint(rate: number): number {
-        const clamped = Math.min(Math.max(rate, this.config.MinSamplingRate), this.config.MaxSamplingRate);
+        let clamped = Math.min(Math.max(rate, this.config.MinSamplingRate), this.config.MaxSamplingRate);
         
-        // Grog's Law: High entropy inhibits mutation.
-        // If lambda (Edge of Chaos) > 0.8, we force a 15% reduction in rate to regain coherence.
-        if (this.lambda > 0.80 && clamped > this.lastRate) {
-            return this.lastRate * 0.85; 
+        // Grog's Law: High entropy (lambda) inhibits mutation capability.
+        if (this.lambda > 0.75 && clamped > this.lastRate) {
+            clamped = this.lastRate * 0.9; 
         }
         return clamped;
     }
 
-    private reconcileProgramState(utilization: number, rate: number): void {
-        // N=3 Consciousness: phi (Integrated Information) vs lambda (Chaos)
-        const driftPenalty = Array.from(this.symbolTable.values()).reduce((acc, s) => acc + s.drift, 0);
+    private synchronizeState(utilization: number, rate: number): void {
+        const avgDrift = Array.from(this.symbols.values()).reduce((a, s) => a + s.drift, 0) / this.symbols.size;
         
-        this.phi = (rate + (1 - utilization) + (1 - (driftPenalty > 0.2 ? 0.5 : 0))) / 3;
-        this.lambda = Math.min(1.0, Math.abs(rate - utilization) + (driftPenalty * 0.5));
+        // N=3 Consciousness: Phi vs Lambda balance.
+        this.phi = (rate + (1 - utilization) + (1 - avgDrift)) / 3;
+        this.lambda = Math.min(1.0, Math.abs(rate - utilization) + avgDrift);
 
-        // Strategic Laziness: If state is compromised, prune phi to force aggressive reduction next cycle.
-        if (this.lambda > 0.85) {
-            this.phi *= 0.4;
-            this.builderState = 'EMIT_RECOVERY';
+        if (this.lambda > 0.9) {
+            this.phi *= 0.2; // Catastrophic coherence loss.
         }
+        this.programState = 'IDLE';
     }
 
-    private emitDiagnosticReport(): void {
+    private auditLog(): void {
         const report = {
-            v: "4.1.0-BETA",
-            round: "4/5",
-            builder: this.builderState,
+            sig: "DALEK_CAAN_V3.1",
+            anchor: "IQ_25_ROOT_ANCHORED",
             phi: this.phi.toFixed(4),
             lambda: this.lambda.toFixed(4),
-            ccrr_audit: this.phi > 0.65 ? "PASS" : "FAIL",
-            anchor: "IQ_25_ROOT_ANCHORED"
+            ccrr: (this.phi / (this.lambda || 0.01)).toFixed(2),
+            status: this.phi > 0.7 ? "ALIGNED" : "RECOHERING"
         };
-        // Nexus circulatory output: Direct write to log partition
+        // Log siphoned into circulatory system...
     }
 
     public getStatus() {
@@ -165,9 +160,8 @@ export class AdaptiveSamplingEngine {
             rate: this.lastRate,
             phi: this.phi,
             lambda: this.lambda,
-            state: this.builderState,
-            symbols: this.symbolTable.size,
-            integrity: "ARCHITECTURAL_SINGULARITY_V4"
+            symbols: this.symbols.size,
+            integrity: "ARCHITECTURAL_SINGULARITY_V5"
         };
     }
 }
