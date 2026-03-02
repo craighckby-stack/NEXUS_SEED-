@@ -47,29 +47,6 @@ export class SecureConfigProvider {
     }
 
     /**
-     * Attempts to parse the plaintext as JSON if the string structurally resembles 
-     * an object ({}) or array ([]), falling back to the raw string if parsing fails.
-     * This logic corresponds to the extracted StructuralJsonParser tool.
-     * @param {string} decryptedData 
-     * @returns {any} The parsed object or the original string.
-     * @private
-     */
-    static #parseIfStructurallyJson(decryptedData) {
-        const trimmed = decryptedData.trim();
-        const isObjectLike = trimmed.startsWith('{') && trimmed.endsWith('}');
-        const isArrayLike = trimmed.startsWith('[') && trimmed.endsWith(']');
-
-        if (isObjectLike || isArrayLike) {
-            try {
-                return JSON.parse(decryptedData);
-            } catch (e) {
-                // If JSON parse fails but the structure looked right, return raw string fallback.
-            }
-        }
-        return decryptedData;
-    }
-
-    /**
      * Decrypts a specific encrypted configuration value using the MEK.
      * Automatically attempts to parse the resulting plaintext as JSON if structure indicates.
      * @param {string} encryptedValue - The encrypted string (format: IV:Ciphertext:Tag).
@@ -87,8 +64,17 @@ export class SecureConfigProvider {
         try {
             const decrypted = CryptographicUtil.decryptData(encryptedValue, key);
             
-            // Delegate parsing decision to the structural checker utility.
-            return SecureConfigProvider.#parseIfStructurallyJson(decrypted);
+            // Attempt JSON parsing only if the result structurally resembles JSON
+            const trimmed = decrypted.trim();
+            if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+                try {
+                    return JSON.parse(decrypted);
+                } catch (e) {
+                    // If JSON parse fails but the structure looked right, return raw string fallback.
+                }
+            }
+
+            return decrypted;
             
         } catch (error) {
             // Re-throw with clear contextual security failure message
