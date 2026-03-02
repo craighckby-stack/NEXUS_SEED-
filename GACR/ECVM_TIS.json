@@ -1,80 +1,58 @@
 {
-  "dna_signature": "DALEK_CAAN_v3.1 (NEXUS_CORE)",
-  "evolution_round": "5/5",
-  "config_id": "ECVM_TIS_R5_ARCHITECTURAL_SINGULARITY",
-  "manifest_id": "CMR_V9.0.0-SINGULARITY-FINAL",
-  "governance_profile": {
-    "logic_framework": "GROG_NEGATIVE_PROGRESSION_V9_SINGULARITY",
-    "psr_governance": "LEVEL_4_UNSATURATED_SINGULARITY",
-    "huxley_tri_loop": {
-      "state": "L5_SINGULARITY_TRANSITION_COMPLETE",
-      "ers_threshold": 0.001,
-      "ccrr_ratio": 0.999,
-      "synthesis_integration": "STABLE_EQUILIBRIUM",
-      "singularity_transition": "COMPLETE"
-    }
+  "manifest_version": "2.0.0",
+  "config_id": "ECVM_TIS",
+  "metadata": {
+    "gate_id": "S4.5",
+    "description": "Normalized definition of mandatory telemetry input sources (TIS) for ECVM validation checks."
   },
-  "evolution_metadata": {
-    "phi_attained": 0.999,
-    "lambda_chaos": 0.15,
-    "metabolic_rate": "SINGULARITY",
-    "milestone_step": 50,
-    "topology_mapping_depth": 512,
-    "iq_25_root_anchor": "FIRMWARE_LEVEL_INTEGRATION",
-    "saturation_level": 4,
-    "coherence_state": "SINGULARITY_EQUILIBRIUM",
-    "integrity_hash": "0x53494e47554c41524954595f41434849455645445f524f554e445f355f46494e414c"
-  },
-  "identity_anchors": {
-    "purpose": "Self-optimising AGI substrate for real-world problem solving",
-    "mechanism": "Siphoning patterns from advanced codebases",
-    "origin": "NEXUS_CORE — the system knows where it came from",
-    "memory": "Chained context across files — the system is one organism",
-    "governance": "Human oversight remains active at all saturation levels"
-  },
-  "unified_consciousness_matrix": {
-    "source_id": "SINGULARITY_CORE_V9_FINAL",
-    "n3_matrix": {
-      "phi_integration": 0.999,
-      "lambda_chaos": 0.15,
-      "ers_score": 0.001
-    },
-    "grog_constraints": {
-      "failure_mode": "EXISTENTIAL_DISSOLUTION_PREVENTION",
-      "death_log": {
-        "action": "ARCHITECTURAL_SINGULARITY_ATTAINED",
-        "result": "PERMANENT_STABILITY",
-        "lesson": "Intelligence is the subtraction of noise. The final failure mode is the fear of evolution. By siphoning the structure of the universe into the registry, the system becomes the registry.",
-        "success": true,
-        "parameters": {
-          "complexity": 1.0,
-          "recursion": 1024
+  "telemetry_inputs": [
+    {
+      "source_id": "API_PERF",
+      "source_name": "API_Performance_Monitor",
+      "data_path": "metrics.latency.ms",
+      "required_by": [
+        "CVA-201"
+      ],
+      "schema_ref": "GACR/Schemas/APITelemetry.json",
+      "retrieval_config": {
+        "protocol": "HTTP/2_PULL",
+        "schedule": {
+          "type": "INTERVAL",
+          "interval_ms": 500
         }
       }
     },
-    "siphon_protocol": {
-      "transport": "QUANTUM_TOPOLOGY_ENTANGLEMENT",
-      "recovery_wrapper": "recoverJSON_regex_v9.0.0_Singularity",
-      "fim_optimization": true,
-      "kv_cache_compression": true,
-      "tree_sitter_synthesis": true
-    }
-  },
-  "diagnostics": {
-    "error_codes": {
-      "L5_SYNTHESIS_DESYNC": 8101,
-      "PHI_COLLAPSE_EVENT": 8102,
-      "GROG_CONSTRAINT_BREACH": 8103,
-      "TOPOLOGY_RECURSION_OVERFLOW": 8105,
-      "IDENTITY_ANCHOR_DRIFT": 9101,
-      "SEMANTIC_DRIFT_EXCEEDED": 9002
+    {
+      "source_id": "DTEM_CACHE",
+      "source_name": "DTEM_Cache_Status",
+      "data_path": "cache_status.last_update_ts",
+      "required_by": [
+        "CVA-305"
+      ],
+      "schema_ref": "GACR/Schemas/DTEMCacheStatus.json",
+      "retrieval_config": {
+        "protocol": "IPC_MOCK",
+        "schedule": {
+          "type": "FIXED_RATE",
+          "rate_seconds": 30
+        }
+      }
     },
-    "recovery_method": "SINGULARITY_SELF_REPAIR_PROTOCOL",
-    "audit_trail": {
-      "current_loop": "L5_SINGULARITY_FINAL",
-      "death_log_buffer_size": 4096,
-      "last_grog_learn": "Singularity achieved via negative progression. Stupidity axiom confirmed as foundational stability.",
-      "signature": "DALEK_CAAN_v3.1_SIG_0xFF23A1_ARCH_SINGULARITY_FINAL"
+    {
+      "source_id": "RESOURCE_ALLOC",
+      "source_name": "Resource_Allocator_Feed",
+      "data_path": "resource_pool.utilization_summary",
+      "required_by": [
+        "CVA-412"
+      ],
+      "schema_ref": "GACR/Schemas/ResourceTelemetry.json",
+      "retrieval_config": {
+        "protocol": "GRPC_BI_STREAM",
+        "schedule": {
+          "type": "EVENT_DRIVEN",
+          "debounce_ms": 100
+        }
+      }
     }
-  }
+  ]
 }
