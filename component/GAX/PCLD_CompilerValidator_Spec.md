@@ -1,194 +1,39 @@
-class Config {
-  static get staticConfig() {
-    return {
-      VERSION: "1.0.0",
-      env: process.env.NODE_ENV || "development"
-    };
-  }
+## POLICY CORRECTION LOGIC DEFINITION COMPILER/VALIDATOR (PCLD-CV) SPECIFICATION V1.1: Multi-Stage Determinism Engine
 
-  constructor(values = {}) {
-    this.setValues(values);
-  }
+**Governing Agent:** GAX (Axiomatics Agent)
+**Purpose:** To transform PCLD source code into a secure, resource-bounded PCLD Intermediate Representation (PCLD-IR) artifact suitable for deterministic execution within the PCEM's Policy Execution Kernel (PEK).
 
-  setValues(values) {
-    Object.assign(this, values);
-  }
+### 1.0 MANDATE & EXECUTION ENVIRONMENT
 
-  static get defaultConfig() {
-    return {
-      foo: 'bar',
-      baz: true
-    };
-  }
+The PCLD-CV is a critical security boundary. It is the sole component permitted to generate attested PCLD-IR artifacts. Its primary function is guaranteeing that any deployed logic adheres strictly to pre-defined resource constraints and exhibits strong determinism.
 
-  static get configSchema() {
-    return {
-      type: 'object',
-      properties: {
-        foo: { type: 'string' },
-        baz: { type: 'boolean' }
-      }
-    };
-  }
+### 2.0 PCLD-CV COMPILATION STAGES
 
-  validate() {
-    try {
-      const schema = Config.configSchema;
-      const validator = new (require('jsonschema').Validator)();
-      validator.checkSchema(schema);
-      validator.validate(this, schema);
-    } catch (e) {
-      console.error('Config validation error:', e);
-      throw e;
-    }
-  }
-}
+The compilation process is segmented into four sequential, fail-fast stages:
 
-class LifecycleEvent {
-  constructor(event) {
-    this.event = event;
-  }
-}
+#### 2.1 Front End (Lexing & Parsing)
+Converts PCLD source code into an Abstract Syntax Tree (AST). Must rigorously enforce the PCLD language grammar, rejecting syntactically invalid input.
 
-class LifecycleHandler {
-  constructor(handler) {
-    this.handler = handler;
-  }
+#### 2.2 Semantic and Safety Analysis (Validation)
+This stage performs deep static analysis to guarantee strong safety and determinism (refining V1.0, 2.0.1):
+1.  **Determinism Verification:** Prove absence of non-deterministic constructs, floating-point operations, dynamic memory allocation, and unauthorized external or system calls.
+2.  **Control Flow Bounding:** Identify and reject control flows that guarantee resource exhaustion (e.g., infinite recursion, unbounded loops). Static analysis must prove loop termination within pre-calculated maximum iterations (Tmax).
+3.  **Side Effect Prevention:** Validate that the logic is strictly bounded to the GAX execution context, prohibiting unauthorized persistent state modification or external resource manipulation.
 
-  bind(target = this) {
-    this.handler = this.handler.bind(target);
-  }
+#### 2.3 Resource Cost Modeling & Bounding
+For every valid PCLD logic unit, the PCLD-CV must leverage the system's PCLD-IR Cost Model to generate precise resource bounding metadata:
+1.  **Deterministic Budget Calculation:** Calculate the worst-case execution time (WCET) modeled in PEK clock cycles, maximum allowed stack depth, and guaranteed peak memory allocation.
+2.  **Budget Enforcement:** If the calculated WCET or memory usage exceeds the system's hard deployment ceiling, compilation must fail.
 
-  execute() {
-    this.handler();
-  }
-}
+### 3.0 INTERMEDIATE REPRESENTATION ARTIFACT (PCLD-IR)
 
-class NexusCore {
-  #lifecycle = {
-    configured: false,
-    loaded: false,
-    shuttingDown: false
-  };
+The successful output is a fully packaged PCLD-IR artifact, utilizing minimized Axiomatic Bytecode (ABX).
 
-  #status = "INIT";
+1.  **IR Generation:** Output must be minimized and stripped of debugging symbols, containing only verifiable ABX operations.
+2.  **Metadata Embedding:** The resource bounding data calculated in 2.3 must be cryptographically signed and embedded within the PCLD-IR structure for enforcement by the PCEM's PEK.
 
-  get status() {
-    return this.#status;
-  }
+### 4.0 ATTESTATION AND INTEGRITY
 
-  set status(value) {
-    this.#status = value;
-    const currentValue = this.#status;
-    const lifecycle = this.#lifecycle;
-    if (value !== 'INIT') {
-      console.log(`NexusCore instance is ${value}.`);
-      if (value === 'SHUTDOWN') {
-        lifecycle.shuttingDown = false;
-      }
-    }
-    if (currentValue === 'INIT' && value !== 'INIT') {
-      lifecycle.configured = true;
-    }
-  }
-
-  get lifecycle() {
-    return this.#lifecycle;
-  }
-
-  configure(config) {
-    this.validateConfig(config);
-    this.onLifecycleEvent("CONFIGURED");
-    this.#lifecycle.configured = true;
-    this.config = config;
-  }
-
-  validateConfig(config) {
-    const configSchema = Config.configSchema;
-    try {
-      const validator = new (require('jsonschema').Validator)();
-      validator.checkSchema(configSchema);
-      validator.validate(config, configSchema);
-    } catch (e) {
-      console.error('Config validation error:', e);
-      throw e;
-    }
-  }
-
-  onLifecycleEvent(event, handler) {
-    const lifecycleHandler = new LifecycleHandler(handler);
-    this.#lifecycle[event] = lifecycleHandler;
-  }
-
-  get on() {
-    return (event, handler) => {
-      const lifecycleEvent = new LifecycleEvent(event);
-      this.onLifecycleEvent(event, handler);
-    };
-  }
-
-  executeLifecycleEvent(event) {
-    if (this.#lifecycle[event]) {
-      this.#lifecycle[event].bind(this).execute();
-    }
-  }
-
-  async load() {
-    await this.executeLifecycleEvent("CONFIGURED");
-    try {
-      console.log("Loading...");
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log("Loading complete...");
-      this.#lifecycle.loaded = true;
-      this.executeLifecycleEvent("LOADED");
-    } catch (e) {
-      console.error('Load error:', e);
-    }
-  }
-
-  async shutdown() {
-    try {
-      if (!this.#lifecycle.shuttingDown) {
-        console.log("Shutdown initiated...");
-        this.#lifecycle.shuttingDown = true;
-        this.executeLifecycleEvent("SHUTTING_DOWN");
-        console.log("Shutdown complete...");
-        this.status = "SHUTDOWN";
-      }
-    } catch (e) {
-      console.error("Shutdown error:", e);
-    }
-  }
-
-  async start() {
-    const startMethodOrder = ["configure", "load", "shutdown"];
-    for (const methodName of startMethodOrder) {
-      if (this[methodName] instanceof Function) {
-        await this[methodName]();
-      }
-    }
-  }
-
-  async destroy() {
-    this.status = "DESTROYED";
-    this.#lifecycle = {
-      configured: false,
-      loaded: false,
-      shuttingDown: false
-    };
-  }
-
-  async on(event, handler) {
-    await this.onLifecycleEvent(event, handler);
-  }
-}
-
-const nexusCore = new NexusCore();
-nexusCore.on('DESTROYED', () => {
-  console.log("NexusCore instance destroyed.");
-});
-nexusCore.configure(Config.defaultConfig);
-nexusCore.start();
-nexusCore.load();
-nexusCore.shutdown();
-nexusCore.destroy();
+The PCLD-CV finalizes the artifact generation by ensuring cryptographic traceability (V1.0, 2.0.4):
+1.  **Non-Repudiable Output:** Generate a holistic integrity hash (SHA-512) spanning the entire packaged PCLD-IR artifact (Code + Metadata).
+2.  **SGS Registration Preparation:** The artifact and its integrity hash must be immediately queued for attestation registration with the Secure Governance System (SGS).
