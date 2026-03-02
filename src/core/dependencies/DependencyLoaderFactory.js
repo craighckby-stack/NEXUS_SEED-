@@ -1,66 +1,24 @@
 /**
- * DependencyLoaderKernel
- * This Kernel encapsulates the mechanism for resolving module paths or service names
- * by leveraging injected utility and environment loader dependencies, ensuring
- * architectural separation and testability.
+ * DependencyLoaderFactory
+ * This module provides a centralized function capable of resolving module paths or service names.
+ * In a full DI implementation, this would encapsulate the logic of a dedicated DI container (e.g., Awilix, inversify).
+ * 
+ * For demonstration purposes, this factory defaults to synchronous require() but provides the required interface
+ * needed by HandlerServiceResolver.
  */
-class DependencyLoaderKernel {
-    /** @type {IDependencyLookupToolKernel} */
-    #dependencyLookupUtility;
-    
-    /** @type {IEnvironmentLoaderToolKernel} */
-    #environmentLoader;
 
-    /**
-     * @param {object} dependencies
-     * @param {IDependencyLookupToolKernel} dependencies.dependencyLookupUtility
-     * @param {IEnvironmentLoaderToolKernel} dependencies.environmentLoader
-     */
-    constructor(dependencies) {
-        this.#setupDependencies(dependencies);
-    }
-
-    /**
-     * Isolates dependency setup and validation from the constructor,
-     * rigorously satisfying synchronous setup extraction.
-     * @param {object} dependencies
-     * @private
-     */
-    #setupDependencies(dependencies) {
-        if (!dependencies) {
-            throw new Error("Dependencies must be provided to DependencyLoaderKernel.");
-        }
-
-        const { dependencyLookupUtility, environmentLoader } = dependencies;
-
-        // Validation of IDependencyLookupToolKernel
-        if (!dependencyLookupUtility || typeof dependencyLookupUtility.executeLookup !== 'function') {
-            throw new TypeError("IDependencyLookupToolKernel (dependencyLookupUtility) must be provided with an executeLookup method.");
-        }
-        this.#dependencyLookupUtility = dependencyLookupUtility;
-
-        // Validation of IEnvironmentLoaderToolKernel
-        if (!environmentLoader) {
-            throw new TypeError("IEnvironmentLoaderToolKernel (environmentLoader) must be provided.");
-        }
-        this.#environmentLoader = environmentLoader;
-    }
-
-    /**
-     * Resolves a dependency synchronously using the configured utility and environment loader.
-     * This replaces the functionality previously exposed by defaultServiceLoader.
-     *
-     * @param {string} serviceName - The name or path of the service/module to load.
-     * @returns {any | null} The loaded module or null upon failure.
-     */
-    resolveDependencySync(serviceName) {
-        // Delegate the synchronous execution and error handling to the reusable tool,
-        // passing the injected environment loader.
-        return this.#dependencyLookupUtility.executeLookup(
-            serviceName, 
-            this.#environmentLoader
-        );
+// Note: This implementation assumes services are exported modules accessible via 'require'.
+// Adjust path resolution logic as needed for environment (e.g., relative vs absolute paths, DI container lookup).
+function defaultServiceLoader(serviceName) {
+    try {
+        // SECURITY WARNING: In a production environment dealing with user-defined input, 
+        // ensure 'serviceName' is sanitized or mapped via an allowed list before calling require().
+        // Assuming 'serviceName' here is a predefined module name from configuration.
+        return require(serviceName);
+    } catch (e) {
+        console.error(`[DependencyLoader] Failed to load service: ${serviceName}`, e.message);
+        return null; // Return null if not found/error, allowing HSR to handle the functional failure
     }
 }
 
-module.exports = DependencyLoaderKernel;
+module.exports = defaultServiceLoader;
