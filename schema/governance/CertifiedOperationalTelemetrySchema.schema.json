@@ -1,128 +1,29 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:sovereign-agi:governance:CertifiedOperationalTelemetry",
-  "title": "Certified Operational Telemetry Schema",
-  "description": "Defines the mandatory, governed structure for operational telemetry, including strict governance metadata and standardized metric payload.",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.v94.2/schema/governance/CertifiedOperationalTelemetrySchema.schema.json",
   "type": "object",
+  "title": "Certified Operational Telemetry Schema",
+  "description": "Defines the mandatory structure for operational telemetry reports necessary for integrity checks.",
   "properties": {
-    "telemetryId": {
-      "description": "Unique UUID identifying this specific telemetry transmission instance.",
-      "type": "string",
-      "format": "uuid"
+    "execution_cycle": {
+      "type": "integer",
+      "description": "The specific iteration or cycle ID."
     },
-    "timestampCertified": {
-      "description": "ISO 8601 UTC timestamp marking when this data set was certified by the governance layer.",
+    "integrity_hash": {
+      "type": "string",
+      "description": "A cryptographic hash verifying the integrity of the reported state."
+    },
+    "status_code": {
+      "type": "string",
+      "enum": ["ACTIVATE", "UNIFY", "IDLE", "ERROR"]
+    },
+    "timestamp": {
       "type": "string",
       "format": "date-time"
     },
-    "governance": {
-      "description": "Mandatory fields establishing data source context and certification status.",
-      "type": "object",
-      "properties": {
-        "sourceSystemId": { "type": "string", "description": "Identifier of the system originating the raw data." },
-        "pipelineVersion": { "type": "string", "description": "Version of the transformation pipeline that processed and certified this telemetry." },
-        "certificationLevel": {
-          "type": "string",
-          "enum": ["L0_Raw", "L1_Validated", "L2_Certified"],
-          "description": "The current governance certification level."
-        }
-      },
-      "required": ["sourceSystemId", "pipelineVersion", "certificationLevel"],
-      "additionalProperties": false
-    },
-    "payload": {
-      "description": "The primary operational data metrics.",
-      "type": "object",
-      "properties": {
-        "environmentContext": {
-          "type": "object",
-          "properties": {
-            "region": { "type": "string" },
-            "deploymentHash": { "type": "string" }
-          },
-          "required": ["region"]
-        },
-        "metrics": {
-          "description": "An array of standardized, strongly-typed metrics.",
-          "type": "array",
-          "items": { "$ref": "#/$defs/Metric" },
-          "minItems": 1
-        }
-      },
-      "required": ["environmentContext", "metrics"],
-      "additionalProperties": true
+    "mutations_applied": {
+      "type": "integer"
     }
   },
-  "required": ["telemetryId", "timestampCertified", "governance", "payload"],
-  "additionalProperties": false,
-  "$defs": {
-    "BaseMetric": {
-      "type": "object",
-      "properties": {
-        "name": { "type": "string", "description": "Canonical metric name (e.g., latency.p95)." },
-        "unit": { "type": "string", "description": "Unit of measurement (e.g., ms, count, bool)." },
-        "tags": { "type": "object", "description": "Key-value tags for detailed metric context." }
-      },
-      "required": ["name", "unit"]
-    },
-    "CounterMetric": {
-      "allOf": [
-        { "$ref": "#/$defs/BaseMetric" },
-        {
-          "type": "object",
-          "properties": {
-            "type": { "const": "COUNTER" },
-            "value": { "type": "integer", "minimum": 0 }
-          },
-          "required": ["type", "value"]
-        }
-      ]
-    },
-    "GaugeMetric": {
-      "allOf": [
-        { "$ref": "#/$defs/BaseMetric" },
-        {
-          "type": "object",
-          "properties": {
-            "type": { "const": "GAUGE" },
-            "value": { "type": "number" }
-          },
-          "required": ["type", "value"]
-        }
-      ]
-    },
-    "DistributionMetric": {
-      "allOf": [
-        { "$ref": "#/$defs/BaseMetric" },
-        {
-          "type": "object",
-          "properties": {
-            "type": { "const": "DISTRIBUTION" },
-            "count": { "type": "integer", "minimum": 1 },
-            "sum": { "type": "number" },
-            "min": { "type": "number" },
-            "max": { "type": "number" },
-            "percentiles": {
-              "type": "object",
-              "patternProperties": {
-                "^p(50|90|95|99)$": { "type": "number" }
-              }
-            }
-          },
-          "required": ["type", "count", "sum", "percentiles"]
-        }
-      ]
-    },
-    "Metric": {
-      "description": "A single metric payload, differentiated by type.",
-      "oneOf": [
-        { "$ref": "#/$defs/CounterMetric" },
-        { "$ref": "#/$defs/GaugeMetric" },
-        { "$ref": "#/$defs/DistributionMetric" }
-      ],
-      "discriminator": {
-        "propertyName": "type"
-      }
-    }
-  }
+  "required": ["execution_cycle", "integrity_hash", "timestamp", "status_code"]
 }
