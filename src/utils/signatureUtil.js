@@ -1,6 +1,5 @@
 import crypto from 'crypto';
 import util from 'util';
-import { toCanonicalBuffer } from './canonicalizerUtil.js';
 import {
     SIGNATURE_ALGORITHM,
     SIGNATURE_CURVE,
@@ -10,37 +9,61 @@ import {
     DEFAULT_HASH_ENCODING
 } from '../config/cryptoConfig.js';
 
-// Promisify Key Generation - Kept local to its usage domain.
+// Promisify Key Generation
 const generateKeyPairAsync = util.promisify(crypto.generateKeyPair);
 
-// --- START Simulation of Plugin Hook ---
-// This function simulates the kernel's mechanism for executing external, abstracted tools.
-// We wrap the Node.js crypto call here to ensure runtime safety in the current Node environment,
-// while structurally delegating the logic to the extracted plugin interface.
-const __executePlugin = async (pluginName, args) => {
-    if (pluginName === 'CryptoIntegrityHasher') {
-        const { buffer, algorithm } = args;
-        
-        // Fallback shim using Node's crypto to fulfill the synchronous requirement of the Node environment
-        // until full environment migration is achieved.
-        return new Promise((resolve, reject) => {
-            try {
-                 // Use DEFAULT_HASH_ENCODING defined in cryptoConfig.js
-                 resolve(crypto.createHash(algorithm).update(buffer).digest(DEFAULT_HASH_ENCODING));
-            } catch (e) {
-                reject(e);
-            }
-        });
+/**
+ * Recursively sorts object keys alphabetically to ensure deterministic serialization.
+ * @param {any} data
+ * @returns {any} A structure identical to data, but with sorted object keys.
+ */
+function _sortKeysDeep(data) {
+    if (typeof data !== 'object' || data === null) {
+        return data;
     }
-    throw new Error(`Plugin ${pluginName} not found.`);
-};
-// --- END Simulation of Plugin Hook ---
+
+    if (Array.isArray(data)) {
+        return data.map(item => _sortKeysDeep(item));
+    }
+
+    const sortedKeys = Object.keys(data).sort();
+    
+    return sortedKeys.reduce((sortedObject, key) => {
+        sortedObject[key] = _sortKeysDeep(data[key]);
+        return sortedObject;
+    }, {});
+}
+
+/**
+ * Ensures consistent, canonical binary serialization of data for signing/hashing.
+ * @param {any} data
+ * @returns {Buffer} The serialized buffer (UTF-8 encoded string or raw Buffer).
+ */
+function _canonicalize(data) {
+    if (data instanceof Buffer) {
+        return data;
+    }
+    if (typeof data === 'string') {
+        return Buffer.from(data, 'utf8');
+    }
+
+    // Step 1: Recursively sort complex objects for determinism.
+    if (typeof data === 'object' && data !== null) {
+        const sortedData = _sortKeysDeep(data);
+        // Step 2: Stringify.
+        const str = JSON.stringify(sortedData);
+        return Buffer.from(str, 'utf8');
+    }
+
+    // Handle primitives
+    return Buffer.from(String(data), 'utf8');
+}
 
 
 /**
  * Utility focusing on Asymmetric Cryptography (Digital Signatures - ECDSA).
  * Crucial for proving origin, non-repudiation, and verifying state integrity.
- * Relies on canonicalizerUtil for deterministic serialization.
+ * Uses deterministic data canonicalization defined internally.
  */
 export class SignatureUtil {
 
@@ -63,13 +86,12 @@ export class SignatureUtil {
 
     /**
      * Generates a digital signature for a data payload using a private key.
-     * Data is first deterministically canonicalized before signing.
      * @param {any} data - The data payload to sign.
      * @param {string} privateKeyPem - The private key in PEM format.
      * @returns {string} The digital signature in the configured encoding.
      */
     static sign(data, privateKeyPem) {
-        const bufferToSign = toCanonicalBuffer(data);
+        const bufferToSign = _canonicalize(data);
         const signer = crypto.createSign(SIGNATURE_ALGORITHM);
         signer.update(bufferToSign);
         return signer.sign(privateKeyPem, DEFAULT_SIGNATURE_ENCODING);
@@ -77,34 +99,27 @@ export class SignatureUtil {
 
     /**
      * Verifies a digital signature against the original data using a public key.
-     * Data is first deterministically canonicalized before verification.
      * @param {any} data - The original data payload.
      * @param {string} signature - The digital signature in the configured encoding.
      * @param {string} publicKeyPem - The public key in PEM format.
      * @returns {boolean} True if the signature is valid, false otherwise.
      */
     static verify(data, signature, publicKeyPem) {
-        const bufferToVerify = toCanonicalBuffer(data);
+        const bufferToVerify = _canonicalize(data);
         const verifier = crypto.createVerify(SIGNATURE_ALGORITHM);
         verifier.update(bufferToVerify);
         return verifier.verify(publicKeyPem, signature, DEFAULT_SIGNATURE_ENCODING);
     }
 
-    // --- Data Integrity Helper ---
+    // --- Data Integrity Helpers ---
     
     /**
-     * Calculates the deterministic hash of the provided data payload using the CryptoIntegrityHasher tool.
-     * NOTE: This operation is now asynchronous due to delegation to the external plugin.
+     * Calculates the hash of deterministically serialized data.
      * @param {any} data 
-     * @returns {Promise<string>} The configured hash encoding (e.g., hex).
+     * @returns {string} The configured hash encoding (e.g., hex).
      */
-    static async hash(data) {
-        const buffer = toCanonicalBuffer(data);
-        
-        // Delegate hashing logic to the extracted plugin
-        return await __executePlugin('CryptoIntegrityHasher', {
-            buffer: buffer,
-            algorithm: HASH_ALGORITHM
-        });
+    static hash(data) {
+        const buffer = _canonicalize(data);
+        return crypto.createHash(HASH_ALGORITHM).update(buffer).digest(DEFAULT_HASH_ENCODING);
     }
 }
