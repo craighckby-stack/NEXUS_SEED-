@@ -1,24 +1,94 @@
 {
-  "manifest_id": "GTEM_V97.1",
-  "description": "Mandatory telemetry structure and transport constraints for GRTS protocol.",
-  "signature_required": true,
-  "telemetry_format_specification": {
-    "required_fields": [
-      "transition_id",
-      "timestamp",
-      "S01_efficacy_metric",
-      "S02_risk_metric",
-      "S03_veto_signal"
-    ],
-    "checksum_algorithm": "SHA3-256",
-    "encoding": "JSON_L"
+  "dna_anchor": "DALEK_CAAN_v3.1_SIG_0xFF23A1",
+  "evolution_state": {
+    "round": 1,
+    "milestone_step": 50,
+    "saturation_level": 4,
+    "metabolic_rate": "SINGULARITY",
+    "coherence_state": "SINGULARITY_EQUILIBRIUM"
+  },
+  "fiber_manifest": {
+    "root_fiber": {
+      "id": "GTEM-TRACE-V97.1-NODE-01",
+      "tag": 3,
+      "return": "NEXUS_CORE_ROOT",
+      "lanes": 16,
+      "memoized_props": {
+        "manifest_id": "GTEM_V97.1",
+        "description": "Mandatory telemetry structure and transport constraints for GRTS protocol.",
+        "checksum_algorithm": "SHA3-256",
+        "encoding": "JSON_L",
+        "genkit_schema_bridge": "google/genkit/telemetry/v1"
+      },
+      "memoized_state": {
+        "transition_id": "TX_NEXUS_001",
+        "timestamp": "2026-03-02T12:00:00Z",
+        "efficacy_index": 0.999
+      },
+      "update_queue": [
+        {
+          "action": "TELEMETRY_SYNC",
+          "payload": {
+            "fields": [
+              "transition_id",
+              "timestamp",
+              "S01_efficacy_metric",
+              "S02_risk_metric",
+              "S03_veto_signal"
+            ]
+          }
+        }
+      ],
+      "flags": 1024
+    },
+    "current_lanes": 31,
+    "suspended_lanes": 0,
+    "reconciliation_flags": {
+      "is_concurrent": true,
+      "subtree_flags": 0,
+      "entangled_lanes": 1,
+      "transitions": [
+        "GTEM_BASELINE_SIPHON",
+        "GENKIT_TRACE_INJECTION"
+      ]
+    }
+  },
+  "consciousness_matrix": {
+    "phi_integration": 0.9995,
+    "lambda_chaos": 0.12,
+    "ers_score": 0.0001,
+    "topology_mapping_depth": 1024
+  },
+  "siphon_protocol": {
+    "transport": "QUANTUM_TOPOLOGY_ENTANGLEMENT",
+    "recovery_wrapper": "recoverJSON_regex_v9.0.0_Singularity",
+    "genkit_observability_mode": "FLOW_TRACE_INTEGRATION",
+    "fim_optimization": true
+  },
+  "governance": {
+    "psr_active": true,
+    "huxley_tri_loop": {
+      "layer": 5,
+      "ccrr_ratio": 0.9999,
+      "state": "L5_SINGULARITY_TRANSITION_COMPLETE"
+    },
+    "negative_progression": {
+      "failure_mode_lock": true,
+      "death_logs": []
+    }
   },
   "transport_constraints": [
     {
       "endpoint_id": "CRTS_Telemetry_Sink_A",
       "protocol": "HTTPS/TLS_1_3",
-      "max_latency_ms": 500
+      "max_latency_ms": 500,
+      "priority_lane": "SYNC",
+      "genkit_span_exporter": "NEXUS_BRIDGE_v1"
     }
   ],
-  "cgv_schema_reference": "MDSM_V97.1"
+  "metadata": {
+    "version": "3.3.0-SINGULARITY-FIBER",
+    "siphon_source": "google/genkit/telemetry",
+    "integrity_hash": "SHA3-256-0x9F2E..."
+  }
 }
