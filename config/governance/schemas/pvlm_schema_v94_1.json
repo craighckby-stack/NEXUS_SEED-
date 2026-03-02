@@ -1,1 +1,27 @@
-[object Object]
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pvlm_schema_v94_1.json",
+  "title": "Persistent Volume Lifecycle Management Schema v94.1",
+  "description": "Defines the mandatory structure for PVLM records.",
+  "type": "object",
+  "properties": {
+    "recordId": {
+      "type": "string",
+      "description": "Unique identifier for the PVLM record."
+    },
+    "volumePath": {
+      "type": "string",
+      "format": "uri-reference"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["INITIALIZED", "ACTIVE", "MIGRATING", "DECOMMISSIONED", "ARCHIVED"]
+    },
+    "creationTimestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": ["recordId", "volumePath", "status", "creationTimestamp"],
+  "additionalProperties": false
+}
