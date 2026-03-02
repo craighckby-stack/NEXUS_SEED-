@@ -1,119 +1,59 @@
 /**
- * Utility Component: SystemLogger v94.2 (Refactored for Plugin Integration)
+ * Utility Component: SystemLogger v94.1
  * Role: Provides standardized, structured logging across the Sovereign AGI system.
- * Mandate: Ensures logs are easily parseable, include structured context, and respects severity levels using the LogEntryProcessor tool.
+ * Mandate: Ensures logs are easily parseable, include structured context, and respect severity levels.
  */
-
-// Placeholder declaration for the assumed available plugin interface
-declare const LogEntryProcessor: {
-    execute: (args: {
-        componentName: string;
-        level: string;
-        message: string;
-        context?: Record<string, any>;
-        environment?: Record<string, string>;
-    }) => {
-        shouldEmit: boolean;
-        outputString: string;
-        logEntry: Record<string, any>;
-        level: string;
-    };
-};
-
 class SystemLogger {
     
-    private componentName: string;
-
     /**
      * @param {string} componentName - The module or component initializing the logger.
      */
-    constructor(componentName: string = 'System') {
+    constructor(componentName = 'System') {
         this.componentName = componentName;
     }
 
     /**
-     * Internal logging function to format and output the log entry using the LogEntryProcessor plugin.
-     * @param {string} level 
-     * @param {string} message 
-     * @param {Record<string, any>} [context={}]
+     * Internal logging function to format and output the log entry.
      */
-    private _log(level: string, message: string, context: Record<string, any> = {}): void {
-        
-        let processedLog;
-        try {
-            // Utilize the plugin to handle formatting, timestamping, and emission filtering.
-            processedLog = LogEntryProcessor.execute({
-                componentName: this.componentName,
-                level,
-                message,
-                context
-                // Relying on the plugin to correctly access global process.env or defaults
-            });
-        } catch (e) {
-            // Fail safe logging if plugin execution fails
-            console.error(`[Plugin Error] Failed to process log entry: ${(e as Error).message}`, { level, message, component: this.componentName });
-            return;
-        }
+    _log(level, message, context = {}) {
+        const timestamp = new Date().toISOString();
+        const output = `[${timestamp}] [${level.toUpperCase()}] [${this.componentName}] ${message}`;
 
-        if (!processedLog.shouldEmit) {
-            return;
-        }
+        // Define the structured log entry
+        const logEntry = {
+            timestamp,
+            level: level.toUpperCase(),
+            component: this.componentName,
+            message,
+            ...context
+        };
 
-        const { outputString, logEntry } = processedLog;
-
-        // Output based on determined level
-        switch (processedLog.level) {
+        // Output based on level
+        switch (level) {
             case 'error':
-                console.error(outputString, logEntry);
+                console.error(output, logEntry);
                 break;
             case 'warn':
-                console.warn(outputString, logEntry);
+                console.warn(output, logEntry);
                 break;
             case 'info':
-                console.info(outputString, logEntry);
+                console.info(output, logEntry);
                 break;
             case 'debug':
-            default:
-                console.log(outputString, logEntry);
+                // Typically suppressed in production unless explicitly enabled
+                if (process.env.NODE_ENV === 'development' || process.env.LOG_LEVEL === 'debug') {
+                    console.log(output, logEntry);
+                }
                 break;
+            default:
+                console.log(output, logEntry);
         }
     }
 
-    /**
-     * Logs an error message.
-     * @param {string} message 
-     * @param {Record<string, any>} [context]
-     */
-    public error(message: string, context?: Record<string, any>): void { 
-        this._log('error', message, context); 
-    }
-    
-    /**
-     * Logs a warning message.
-     * @param {string} message 
-     * @param {Record<string, any>} [context]
-     */
-    public warn(message: string, context?: Record<string, any>): void { 
-        this._log('warn', message, context); 
-    }
-    
-    /**
-     * Logs an informational message.
-     * @param {string} message 
-     * @param {Record<string, any>} [context]
-     */
-    public info(message: string, context?: Record<string, any>): void { 
-        this._log('info', message, context); 
-    }
-    
-    /**
-     * Logs a debug message.
-     * @param {string} message 
-     * @param {Record<string, any>} [context]
-     */
-    public debug(message: string, context?: Record<string, any>): void { 
-        this._log('debug', message, context); 
-    }
+    error(message, context) { this._log('error', message, context); }
+    warn(message, context) { this._log('warn', message, context); }
+    info(message, context) { this._log('info', message, context); }
+    debug(message, context) { this._log('debug', message, context); }
 }
 
 /**
@@ -121,6 +61,6 @@ class SystemLogger {
  * @param {string} componentName 
  * @returns {SystemLogger}
  */
-const getLogger = (componentName: string): SystemLogger => new SystemLogger(componentName);
+const getLogger = (componentName) => new SystemLogger(componentName);
 
 module.exports = { SystemLogger, getLogger };
