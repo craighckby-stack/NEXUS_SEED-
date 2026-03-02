@@ -1,125 +1,170 @@
-import { AbstractKernel } from '@kernel/AbstractKernel';
+// src/governance/configIntegrityMonitor.js
+
+const sha512 = require('../utils/cryptoUtils');
+const CIMIntegrityError = require('../system/CIMIntegrityError');
+const { CIM_CODES, CRITICAL_TARGETS } = require('./CIMGovernanceCodes');
 
 /**
- * ConfigurationIntegrityKernel is responsible for verifying the structural integrity
- * and cryptographic hash of configuration objects before they are applied or trusted.
- * It delegates hashing and schema validation to specialized high-integrity tools.
- * This component replaces the synchronous ConfigIntegrityMonitor.
+ * Component: CIM (Configuration Integrity Monitor) v94.1
+ * Role: Policy Protection Layer / Critical Integrity Checkpoint
+ * Mandate: Ensures the immutability and integrity of critical governance configuration files 
+ *          against unauthorized mutation or tampering using cryptographically strong checksums (SHA-512) 
+ *          verified against the Secure Policy Ledger (D-01).
  */
-class ConfigurationIntegrityKernel extends AbstractKernel {
+class ConfigIntegrityMonitor {
+    
+    /**
+     * CRITICAL_TARGETS are now sourced from CIMGovernanceCodes for separation of concerns.
+     */
 
     /**
-     * @param {object} dependencies - Injected dependencies.
-     * @param {ILoggerToolKernel} dependencies.ILoggerToolKernel - For auditable logging.
-     * @param {HashIntegrityCheckerToolKernel} dependencies.HashIntegrityCheckerToolKernel - For calculating and verifying configuration hashes.
-     * @param {ISpecValidatorKernel} dependencies.ISpecValidatorKernel - For validating configuration data against registered schemas.
-     * @param {ConfigSchemaRegistryKernel} dependencies.ConfigSchemaRegistryKernel - For retrieving necessary configuration schemas.
+     * @param {object} dependencies 
+     * @param {object} dependencies.auditLogger - D-01 Interface for logging.
+     * @param {object} dependencies.proposalManager - A-01 Interface for staging approval checks.
+     * @param {object} dependencies.policyLedgerInterface - Dedicated D-01 I/O interface (Must implement getPolicyHashes, storeNewIntegrityHash).
+     * @param {string[]} [configPaths] - Optional list of paths to monitor. Defaults to CRITICAL_TARGETS.
      */
-    constructor(dependencies) {
-        super(dependencies);
-    }
-
-    /**
-     * Ensures all required dependencies are present and sets internal references.
-     * @private
-     */
-    #setupDependencies() {
-        const {
-            ILoggerToolKernel,
-            HashIntegrityCheckerToolKernel,
-            ISpecValidatorKernel,
-            ConfigSchemaRegistryKernel
-        } = this.dependencies;
-
-        if (!ILoggerToolKernel || !HashIntegrityCheckerToolKernel || !ISpecValidatorKernel || !ConfigSchemaRegistryKernel) {
-            throw new Error("ConfigurationIntegrityKernel requires ILoggerToolKernel, HashIntegrityCheckerToolKernel, ISpecValidatorKernel, and ConfigSchemaRegistryKernel.");
+    constructor({ auditLogger, proposalManager, policyLedgerInterface }, configPaths = CRITICAL_TARGETS) {
+        if (!auditLogger || !proposalManager || !policyLedgerInterface) {
+            throw new Error(`CIM Initialization Failure (${CIM_CODES.INIT_FAILURE}): Essential interfaces required.`);
         }
         
-        this.logger = ILoggerToolKernel;
-        this.hashChecker = HashIntegrityCheckerToolKernel;
-        this.validator = ISpecValidatorKernel;
-        this.schemaRegistry = ConfigSchemaRegistryKernel;
+        this.auditLogger = auditLogger; 
+        this.proposalManager = proposalManager; 
+        this.policyLedgerInterface = policyLedgerInterface; 
+        
+        // Ensure configuration set is frozen and defensive copy is used.
+        this.configPaths = Object.freeze([...new Set(configPaths)]); 
+        
+        this._currentHashes = {}; // Renamed for clarity of internal state
+        this.isReady = false;
+        
+        // Runtime validation check for critical D-01 methods
+        if (typeof this.policyLedgerInterface.getPolicyHashes !== 'function') {
+             throw new TypeError(`PolicyLedgerInterface missing required method: getPolicyHashes. Code: ${CIM_CODES.LEDGER_INTERFACE_MISSING}`);
+        }
     }
 
     /**
-     * Asynchronously initializes the kernel, setting up dependencies and performing initial readiness checks.
+     * Initializes the CIM state by loading the securely signed integrity digests from the D-01 ledger.
+     * This operation is blocking and fails the host process if critical integrity state cannot be established.
      * @async
      */
     async initialize() {
-        this.#setupDependencies();
-        this.logger.info('ConfigurationIntegrityKernel initializing...');
+        if (this.isReady) return; // Idempotency check
+
+        const context = { targets: this.configPaths.length };
+        this.auditLogger.logSystemEvent("CIM_INIT_START", "Attempting secure checksum load from D-01.", context);
         
-        // Example: Perform a basic check to ensure the schema registry is accessible.
         try {
-            await this.schemaRegistry.isReady();
-            this.logger.debug('ConfigurationIntegrityKernel initialized successfully.');
-            this.isInitialized = true;
+            // Securely fetch hashes
+            const fetchedHashes = await this.policyLedgerInterface.getPolicyHashes(this.configPaths);
+
+            // Critical validation: Ensure all defined paths were retrieved and are valid strings.
+            for (const path of this.configPaths) {
+                const hash = fetchedHashes[path];
+                if (!hash || typeof hash !== 'string' || hash.length < 64) {
+                    // Fail fast if D-01 is missing integrity data for a mandatory target.
+                    throw new Error(`Mandatory integrity hash missing or invalid from D-01 for path: ${path}. Hash length failure.`);
+                }
+            }
+
+            this._currentHashes = fetchedHashes;
+            this.isReady = true;
+            this.auditLogger.logSystemEvent("CIM_INIT_SUCCESS", `CIM operational, monitoring ${this.configPaths.length} targets.`);
         } catch (error) {
-            this.logger.fatal(`ConfigurationIntegrityKernel failed initialization due to registry access error: ${error.message}`);
-            throw error;
+             const failureContext = { paths: this.configPaths, detail: error.message };
+             this.auditLogger.logCritical(CIM_CODES.INIT_VETO, "Failed to establish CIM operational state. Potential security vulnerability or Ledger failure.", failureContext);
+             // Re-throw to halt system startup with standardized failure code.
+             throw new Error(`CIM initialization fatal error (${CIM_CODES.INIT_FATAL}): ${error.message}`);
         }
     }
 
     /**
-     * Verifies the integrity of a configuration object against an expected hash and its registered schema.
-     * 
-     * @param {string} configId - Identifier used to fetch the schema (e.g., 'GovernanceSettingsSchema').
-     * @param {object} configData - The configuration data object to verify.
-     * @param {string} expectedHash - The known good hash to compare against.
-     * @returns {Promise<{isValid: boolean, validationErrors: Array<string>, calculatedHash: string}>}
-     * @async
+     * Executes the integrity check against a provided content string/buffer.
+     * This is the highest severity check in the governance chain.
+     * @param {string} filePath - The monitored path.
+     * @param {string|Buffer} currentContent - The raw content string (or Buffer) of the file.
+     * @returns {boolean} True if integrity is verified.
+     * @throws {CIMIntegrityError} If a hash mismatch or untracked path is detected.
      */
-    async verifyIntegrity(configId, configData, expectedHash) {
-        if (!this.isInitialized) {
-            throw new Error("ConfigurationIntegrityKernel is not initialized.");
+    checkIntegrity(filePath, currentContent) {
+        if (!this.isReady) {
+            throw new Error(`CIM State Error: Must be initialized before use. Code: ${CIM_CODES.UNINITIALIZED_ACCESS}`);
+        }
+
+        const knownHash = this._currentHashes[filePath];
+        
+        if (!knownHash) {
+            // D941C: Untracked path veto. Policy violation.
+            const msg = `Configuration path '${filePath}' is untracked by Policy Ledger. Integrity Veto Issued.`;
+            this.auditLogger.logCritical(CIM_CODES.UNTRACKED_VETO, msg, { file: filePath });
+            // CIMIntegrityError handles the classification
+            throw new CIMIntegrityError(msg, filePath, 'UNTRACKED_CONFIG'); 
+        }
+
+        const computedHash = sha512(currentContent);
+        
+        if (knownHash !== computedHash) {
+            // D941D: Hash mismatch veto. Security failure (Unauthorized mutation).
+            const msg = `Integrity failure detected on '${filePath}'. Hash mismatch. Mutation suspected.`;
+            // Log only a truncated version of the actual hash for security/brevity
+            const logContext = { 
+                file: filePath, 
+                expected: knownHash.substring(0, 16) + '...', 
+                actual: computedHash.substring(0, 16) + '...' 
+            };
+            this.auditLogger.logCritical(CIM_CODES.MUTATION_VETO, msg, logContext);
+            throw new CIMIntegrityError(msg, filePath, 'HASH_MISMATCH');
         }
         
-        this.logger.trace(`Beginning integrity verification for configuration: ${configId}`);
-        const errors = [];
-        let calculatedHash = null;
+        this.auditLogger.logSystemEvent("CIM_VERIFIED", `Integrity of ${filePath} verified successfully.`, { file: filePath });
+        return true;
+    }
 
-        // 1. Schema Validation (Structural Integrity)
-        try {
-            const schema = await this.schemaRegistry.getSchema(configId);
-            if (schema) {
-                const validationResult = await this.validator.validate(schema, configData);
-                if (!validationResult.isValid) {
-                    this.logger.warn(`Schema validation failed for ${configId}. Structural errors detected.`);
-                    errors.push(...validationResult.errors);
-                }
-            } else {
-                this.logger.warning(`No registered schema found for ${configId}. Skipping structural validation.`);
-            }
-        } catch (e) {
-            this.logger.error(`Error during schema retrieval/validation for ${configId}: ${e.message}`);
-            errors.push(`Internal schema validation error: ${e.message}`);
+    /**
+     * Updates the secure integrity record post-P-01 approval (A-01 staging).
+     * This is a sensitive operation protected by the A-01 proposal digest.
+     * @async
+     * @param {string} filePath - Path of the file updated.
+     * @returns {Promise<void>} 
+     * @throws {Error} If A-01 digest is missing or D-01 write fails.
+     */
+    async updateIntegrityRecord(filePath) {
+        if (!this.isReady) {
+             throw new Error("CIM State Error: Cannot update record until initialized.");
+        }
+        
+        const approvedStateDigest = this.proposalManager.retrieveApprovedHash(filePath);
+
+        if (!approvedStateDigest || typeof approvedStateDigest !== 'string' || approvedStateDigest.length < 64) {
+            const context = { file: filePath, digestLength: (approvedStateDigest ? approvedStateDigest.length : 0) };
+            this.auditLogger.logCritical(CIM_CODES.UPDATE_VETO, `Integrity update rejected. Missing valid approved A-01 state digest.`, context);
+            throw new Error("Integrity record update vetoed. Missing valid A-01 approval stage data.");
         }
 
-        // 2. Hash Integrity Check (Content Integrity)
+        const oldHash = this._currentHashes[filePath] || 'N/A';
+        
+        // Stage tentative local update
+        this._currentHashes[filePath] = approvedStateDigest;
+        
         try {
-            const hashCheckResult = await this.hashChecker.verifyHash(configData, expectedHash);
-            calculatedHash = hashCheckResult.calculatedHash; // Record the calculated hash for audit
+            // Durable commit to secure ledger (D-01)
+            await this.policyLedgerInterface.storeNewIntegrityHash(filePath, approvedStateDigest); 
             
-            if (!hashCheckResult.isValid) {
-                this.logger.error(`Hash integrity check failed for ${configId}. Hash mismatch.`);
-                errors.push(`Configuration hash mismatch. Expected: ${expectedHash}, Calculated: ${calculatedHash}`);
-            }
-        } catch (e) {
-            this.logger.error(`Error during hash verification for ${configId}: ${e.message}`);
-            errors.push(`Internal hash verification error: ${e.message}`);
+            this.auditLogger.logSystemEvent("CIM_RECORD_COMMITTED", `Integrity digest for ${filePath} securely updated in D-01.`, {
+                file: filePath,
+                oldHash: oldHash.substring(0, 16) + '...', 
+                newHash: approvedStateDigest.substring(0, 16) + '...'
+            });
+
+        } catch (error) {
+            // CRITICAL RECOVERY: If D-01 commit fails, revert the in-memory state to preserve security consistency (using the old, verified hash).
+            this._currentHashes[filePath] = oldHash;
+            this.auditLogger.logCritical(CIM_CODES.D01_COMMIT_FAILURE, `Failed to commit new hash for ${filePath}. Local state reverted. CIM state unstable.`, { file: filePath, error: error.message });
+            throw error; // Propagate failure to halt the deployment process.
         }
-
-        const isValid = errors.length === 0;
-
-        if (isValid) {
-            this.logger.info(`Integrity check successful for ${configId}.`);
-        } else {
-             // Dispersing audit failure for critical governance configuration check
-            await this.logger.audit(`Integrity failure detected for ${configId}.`, { errors, configId, expectedHash, calculatedHash });
-        }
-
-        return { isValid, validationErrors: errors, calculatedHash };
     }
 }
 
-export { ConfigurationIntegrityKernel };
+module.exports = ConfigIntegrityMonitor;
