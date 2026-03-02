@@ -1,6 +1,6 @@
 {
-  "schema_version": "94.1",
-  "manifest_id": "GRCS-V94.1",
+  "schema_version": "94.2",
+  "manifest_id": "GRCS-V94.2",
   "description": "Canonical JSON schema defining the required structure for CPES (S6.7) simulation outputs and S7 metric consumption, ensuring deterministic and validated input for the S8 Finality Certification.",
   "required_fields": [
     "certified_utility_S01",
