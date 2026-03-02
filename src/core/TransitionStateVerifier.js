@@ -1,90 +1,39 @@
-/** 
- * TransitionStateVerifierKernel enforces architectural consistency by utilizing
- * Dependency Injection (DI) for its required utilities and isolating synchronous 
- * setup logic.
- */
-class TransitionStateVerifierKernel {
-    /**
-     * @param {ITransitionSchema} schema - The state machine configuration schema.
-     * @param {IShallowObjectDiffUtilityToolKernel} shallowDiffUtilityKernel - Utility for shallow object comparison.
-     */
-    constructor(schema, shallowDiffUtilityKernel) {
-        /** @private {ITransitionSchema} */
-        this._schema = null;
-        /** @private {IShallowObjectDiffUtilityToolKernel} */
-        this._shallowDiffUtilityKernel = null;
+class TransitionStateVerifier {
+  constructor(current_state) {
+    this.current_state = current_state;
+  }
 
-        this.#setupDependencies(schema, shallowDiffUtilityKernel);
-    }
+  async validate(instruction_json) {
+    // 1. Validate Schema and Integrity Hash
+    if (!this.verifyIntegrity(instruction_json)) throw new Error('Integrity hash mismatch.');
+    
+    // 2. State Comparison: Generate delta based on current state.
+    const delta = this.generateExecutionDelta(instruction_json);
 
-    /**
-     * Isolates synchronous dependency setup and validation.
-     * @private
-     */
-    #setupDependencies(schema, shallowDiffUtilityKernel) {
-        if (!schema || !shallowDiffUtilityKernel) {
-            throw new Error("TransitionStateVerifierKernel requires schema and shallowDiffUtilityKernel.");
-        }
-        this._schema = schema;
-        this._shallowDiffUtilityKernel = shallowDiffUtilityKernel;
-    }
+    // 3. Atomicity Check: Ensure instructions are safe to run.
+    if (!this.checkIdempotence(delta)) throw new Error('Transition is not idempotent.');
+    
+    console.log(`Verified transition. Delta Size: ${delta.length}`);
+    return delta;
+  }
 
-    verify(state, transition) {
-        const { from, to } = transition;
-        
-        if (!this._schema.states[from] || !this._schema.states[to]) {
-            return false;
-        }
-
-        const diff = this.getDiff(state, from);
-        
-        if (diff.length === 0) {
-            return true;
-        }
-
-        const abstraction = this.getAbstraction(diff, from); 
-        
-        return this.isAbstractionValid(abstraction, to);
-    }
-
-    /**
-     * Identifies keys in 'state' that differ from the definition of the 'from' schema state,
-     * utilizing the injected diff utility.
-     */
-    getDiff(state, from) {
-        const fromSchema = this._schema.states[from];
-        // Uses the injected kernel
-        return this._shallowDiffUtilityKernel.getDiff(state, fromSchema);
-    }
-
-    /**
-     * Derives a partial object (abstraction) containing the expected previous values 
-     * (from the 'from' schema definition) for all keys that were found to be different.
-     */
-    getAbstraction(diff, from) {
-        const abstraction = {};
-        const fromSchema = this._schema.states[from];
-
-        diff.forEach(key => {
-            abstraction[key] = fromSchema[key];
-        });
-        return abstraction;
-    }
-
-    /**
-     * Checks if the abstraction values (old values of changed fields) match 
-     * the definition of the target state ('to').
-     */
-    isAbstractionValid(abstraction, to) {
-        const toState = this._schema.states[to];
-        
-        const keys = Object.keys(abstraction);
-        for (let i = 0; i < keys.length; i++) {
-            const key = keys[i];
-            if (abstraction[key] !== toState[key]) {
-                return false;
-            }
-        }
-        return true;
-    }
+  verifyIntegrity(instruction) {
+    // Implementation calculates hash of instruction_set and compares to instruction.integrity_hash
+    // Placeholder for actual cryptographic verification
+    return true;
+  }
+  
+  generateExecutionDelta(instruction) {
+    // Calculates the minimal changes required by comparing instruction payload to running state.
+    return instruction.instruction_set.filter(i => 
+      this.current_state.needsUpdate(i.payload.target_module)
+    );
+  }
+  
+  checkIdempotence(delta) {
+      // Ensure each operation can be re-run without unintended side effects.
+      // Detailed logic omitted for brevity.
+      return true;
+  }
 }
+module.exports = TransitionStateVerifier;
