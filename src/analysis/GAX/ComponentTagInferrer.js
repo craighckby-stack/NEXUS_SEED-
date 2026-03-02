@@ -1,120 +1,39 @@
 /**
- * ComponentTagInferrerKernel
+ * ComponentTagInferrer
  * v94.1 Sovereign AGI Component for Autonomous Configuration Refinement.
  * MISSION: Analyze component metrics (static/runtime) and suggest optimal Tags
  *          to minimize reliance on manual ComponentProfileMap updates.
  */
 
-class ComponentTagInferrerKernel {
-  #staticAnalyzer;
-  #telemetryEngine;
-  #tagInferenceEngine;
-  #tagRules;
-
-  /**
-   * @param {object} staticAnalyzer
-   * @param {object} telemetryEngine
-   * @param {RuleBasedTaggingEngineToolKernel} tagInferenceEngine - Injected reusable tool
-   */
-  constructor(staticAnalyzer, telemetryEngine, tagInferenceEngine) {
-    this.#setupDependencies(staticAnalyzer, telemetryEngine, tagInferenceEngine);
+class ComponentTagInferrer {
+  constructor(staticAnalyzer, telemetryEngine) {
+    this.staticAnalyzer = staticAnalyzer;
+    this.telemetryEngine = telemetryEngine;
+    this.tagRules = this.loadInferenceRules(); // Placeholder for ML model or rule set
   }
 
-  /**
-   * Rigorously validates and assigns all external dependencies and loads internal configuration.
-   * @param {object} staticAnalyzer
-   * @param {object} telemetryEngine
-   * @param {RuleBasedTaggingEngineToolKernel} tagInferenceEngine
-   */
-  #setupDependencies(staticAnalyzer, telemetryEngine, tagInferenceEngine) {
-    if (!staticAnalyzer || typeof staticAnalyzer.analyze !== 'function') {
-      throw new Error("Dependency Injection Error: Static Analyzer must be provided and implement 'analyze'.");
-    }
-    if (!telemetryEngine || typeof telemetryEngine.getRecentData !== 'function') {
-      throw new Error("Dependency Injection Error: Telemetry Engine must be provided and implement 'getRecentData'.");
-    }
-    if (!tagInferenceEngine || typeof tagInferenceEngine.execute !== 'function') {
-      throw new Error("Dependency Injection Error: RuleBasedTaggingEngineToolKernel must be provided and implement 'execute'.");
-    }
-
-    this.#staticAnalyzer = staticAnalyzer;
-    this.#telemetryEngine = telemetryEngine;
-    this.#tagInferenceEngine = tagInferenceEngine;
-    this.#tagRules = this.#defineInferenceRules(); // Load structured rules for the engine
+  loadInferenceRules() {
+    // In reality, this loads complex inference logic (e.g., if latency < 1ms AND iops > 10000 -> TAG=HIGH_THROUGHPUT)
+    return { /* ... ruleset ... */ };
   }
 
-  /**
-   * Defines the structured rules for the RuleBasedTaggingEngineToolKernel.
-   * This acts as an internal configuration helper.
-   * @returns {Array<Object>}
-   */
-  #defineInferenceRules() {
-    // Structure: { source: 'static'|'runtime', field: string, operator: string, value: any, tag: string }
-    return [
-      // 1. Static Analysis Inference (e.g., high dependency count suggests criticality)
-      {
-        source: 'static',
-        field: 'dependency_count',
-        operator: '>',
-        value: 50,
-        tag: 'INFRASTRUCTURE_CRITICAL'
-      },
-      // 2. Runtime/Telemetry Inference (e.g., constant high queue depth suggests high throughput)
-      {
-        source: 'runtime',
-        field: 'queue_depth_avg',
-        operator: '>',
-        value: 100,
-        tag: 'HIGH_THROUGHPUT'
-      }
-    ];
-  }
-
-  /**
-   * I/O Proxy: Delegates static analysis calculation to the injected analyzer.
-   * @param {string} path
-   * @returns {object}
-   */
-  #delegateToStaticAnalyzerAnalyze(path) {
-    return this.#staticAnalyzer.analyze(path);
-  }
-
-  /**
-   * I/O Proxy: Delegates retrieval of recent runtime telemetry data.
-   * @param {string} componentId
-   * @returns {object}
-   */
-  #delegateToTelemetryEngineFetch(componentId) {
-    return this.#telemetryEngine.getRecentData(componentId);
-  }
-
-  /**
-   * I/O Proxy: Executes the rule set against collected data using the dedicated inference tool.
-   * @param {object} inputData
-   * @returns {Array<string>}
-   */
-  #delegateToTagInferenceEngineExecute(inputData) {
-    return this.#tagInferenceEngine.execute(inputData);
-  }
-
-  /**
-   * Analyzes component descriptors to infer suggested operational tags.
-   * @param {object} componentDescriptor
-   * @returns {Array<string>} Suggested tags
-   */
   infer(componentDescriptor) {
-    const analysis = this.#delegateToStaticAnalyzerAnalyze(componentDescriptor.path);
-    const runtimeData = this.#delegateToTelemetryEngineFetch(componentDescriptor.id);
+    const analysis = this.staticAnalyzer.analyze(componentDescriptor.path);
+    const runtimeData = this.telemetryEngine.getRecentData(componentDescriptor.id);
+    let suggestedTags = [];
 
-    // Use the external engine to apply all rules simultaneously
-    const suggestedTags = this.#delegateToTagInferenceEngineExecute({
-      rules: this.#tagRules,
-      staticData: analysis,
-      runtimeData: runtimeData
-    });
+    // 1. Static Analysis Inference (e.g., high cyclomatic complexity suggests LOW_STRICTNESS_QA)
+    if (analysis.dependency_count > 50) {
+      suggestedTags.push('INFRASTRUCTURE_CRITICAL');
+    }
+
+    // 2. Runtime/Telemetry Inference (e.g., constant high queue depth suggests HIGH_THROUGHPUT)
+    if (runtimeData.queue_depth_avg > 100) {
+      suggestedTags.push('HIGH_THROUGHPUT');
+    }
     
-    return suggestedTags;
+    return Array.from(new Set(suggestedTags)); // Return unique inferred tags
   }
 }
 
-module.exports = ComponentTagInferrerKernel;
+module.exports = ComponentTagInferrer;
