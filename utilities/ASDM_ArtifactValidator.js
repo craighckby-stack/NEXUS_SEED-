@@ -2,18 +2,11 @@
 // Utility responsible for loading and enforcing ASDM artifact structures defined in config/ASDM_ArtifactSchemas.json.
 
 import schemas from '../config/ASDM_ArtifactSchemas.json';
-
-// Assume the AGI Kernel context provides access to the defined utility via a global KERNEL object or similar mechanism.
-// For demonstration, we simulate the execution call using a conceptual ToolExecutor type declaration.
-declare const KERNEL: {
-    execute(toolName: 'RequiredFieldEnforcerUtility', args: { artifactType: string, artifactData: object, requiredFields: string[] }): { isValid: boolean, errors: string[] };
-};
+// NOTE: In a production AGI environment, a robust schema validation library (like 'ajv' for JSON Schema Draft 7/2020) must be utilized.
+// This implementation provides the necessary interface.
 
 const SCHEMA_REGISTRY = schemas.Registry;
 
-/**
- * Validator utilizing the RequiredFieldEnforcerUtility for enforcing basic ASDM structural integrity.
- */
 export class ASDM_ArtifactValidator {
     /**
      * Validates an artifact against its registered schema using strict enforcement.
@@ -28,23 +21,17 @@ export class ASDM_ArtifactValidator {
         if (!definition) {
             throw new Error(`ASDM Validation Error: Unknown artifact type requested: ${artifactType}`);
         }
-        
-        // --- Phase 1: Basic Structure Check (required_fields) using Kernel Utility
-        
-        // The responsibility of checking for missing fields is delegated to the Kernel utility.
-        const validationResult = KERNEL.execute('RequiredFieldEnforcerUtility', {
-            artifactType: artifactType,
-            artifactData: artifactData,
-            requiredFields: definition.required_fields || []
-        });
 
-        if (!validationResult.isValid) {
-            // Throw the first encountered error, mimicking the original implementation's quick fail behavior.
-            throw new Error(validationResult.errors[0]);
+        // --- Phase 1: Basic Structure Check (required_fields)
+        const missingFields = definition.required_fields.filter(field => !(field in artifactData));
+        if (missingFields.length > 0) {
+            throw new Error(`ASDM Validation Error: [${artifactType}] Missing required fields: ${missingFields.join(', ')}`);
         }
 
         // --- Phase 2: Detailed Schema Check (Conceptual integration with JSON Schema Validator)
-        // TODO: Integrate with a full JSON Schema Validator tool (e.g., SchemaValidationEngineTool or similar AJV integration) here.
+        // TODO: Replace conceptual call with integration to the actual schema validation library (e.g., const validator = new Ajv(); if (!validator.validate(definition.schema_definition, artifactData)) { ... })
+
+        // For now, we rely on Phase 1, but the architecture demands a full JSON Schema check.
 
         console.log(`Artifact validation successful for type: ${artifactType}`);
         return true;
