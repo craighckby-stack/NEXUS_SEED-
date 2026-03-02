@@ -1,21 +1,23 @@
 {
-  "schema_version": "AIM_V3.2_TS_SIPHON",
-  "description": "NEXUS_CORE Soundness Manifest. Implements DALEK_CAAN_SINGULARITY constraints using TypeScript-derived diagnostic pipelines.",
+  "schema_version": "AIM_V3.3_TS_TRANSFORM",
+  "description": "NEXUS_CORE Soundness Manifest. Implements DALEK_CAAN_SINGULARITY constraints using TypeScript-derived diagnostic pipelines and IncrementalBuilder states.",
   "integrity_profiles": {
     "SGS_AGENT": {
       "monitoring_slo_id": "GATM_P_SGS_SLO",
       "diagnostic_mode": "STRICT_CHECKER",
+      "incremental_builder_state": "PROJECT_REFERENCES_AWARE",
       "reasoning_pipeline": {
-        "l0_ingest": "TOKENIZED",
-        "l1_intuition": "ERS_SYMBOL_TABLE",
-        "l2_logic": "CGS_INFERENCE",
-        "l3_critique": "CCRR_EMIT"
+        "l0_ingest": "TOKENIZED_SCANNER",
+        "l1_intuition": "ERS_SYMBOL_TABLE_RESOLUTION",
+        "l2_logic": "CGS_INFERENCE_ENGINE",
+        "l3_critique": "CCRR_EMIT_DIAGNOSTIC"
       },
       "constraints": {
         "compiler_options": {
           "strict": true,
           "noImplicitAny": true,
           "strictNullChecks": true,
+          "noUnusedLocals": true,
           "iq_25_alignment": "REQUIRED"
         },
         "resource_limits": {
@@ -27,7 +29,8 @@
           "syscalls_allowed": ["read", "write", "mmap", "exit", "futex"],
           "ers_threshold": 0.35,
           "ccrr_audit": "MANDATORY",
-          "paths_immutable": ["/opt/sgs/gacr/", "/opt/nexus/dna/"]
+          "paths_immutable": ["/opt/sgs/gacr/", "/opt/nexus/dna/"],
+          "cancellation_token_enabled": true
         }
       }
     },
@@ -43,7 +46,8 @@
         "security_policy": {
           "syscalls_allowed": ["read", "exit"],
           "phi_lambda_balance": 0.65,
-          "network_mode": "POLICY_FETCH_ONLY"
+          "network_mode": "POLICY_FETCH_ONLY",
+          "diagnostic_reporting": "MINIMAL_JSON"
         }
       }
     },
@@ -57,15 +61,17 @@
         "security_policy": {
           "network_mode": "NONE",
           "iq_25_anchor": "IMMUTABLE",
-          "time_sync_source": "CRITICAL_NTP_A"
+          "time_sync_source": "CRITICAL_NTP_A",
+          "grog_law_enforcement": "STRICT"
         }
       }
     }
   },
   "nexus_metadata": {
-    "evolution_round": "2/5",
+    "evolution_round": "3/5",
     "saturation_state": "LEVEL_2_STANDARD",
     "dna_anchor": "DALEK_CAAN_V3.1",
-    "siphon_source": "microsoft/TypeScript"
+    "siphon_source": "microsoft/TypeScript",
+    "current_soundness": "ARCHITECTURAL_INTEGRITY_ALPHA"
   }
 }
