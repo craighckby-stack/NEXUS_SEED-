@@ -1,37 +1,22 @@
+const { SystemLogger } = require('../../utility/SystemLogger');
+
 /**
  * Constraint Analysis Broker (CAB)
  * Purpose: Intelligently determines and executes the minimum required static analysis
  * to satisfy the active set of governance constraints, centralizing context generation.
+ * Integrated for UNIFIER.js compatibility.
  */
 
-import { SystemLogger } from '../system_core/system_logger'; 
-
-// Interface definition for the injected tool
-interface AnalysisRequirementResolverTool {
-    execute(args: { activeRules: Array<Object> }): Array<string>;
-}
-
-export class ConstraintAnalysisBroker {
+class ConstraintAnalysisBroker {
     
-    private syntaxAnalyzer: any;
-    private entropyScorer: any;
-    private logger: SystemLogger;
-    private analysisRequirementResolver: AnalysisRequirementResolverTool;
-
     /**
      * @param {Object} dependencies 
      * @param {Object} dependencies.syntaxAnalyzer
      * @param {Object} dependencies.entropyScorer
-     * @param {AnalysisRequirementResolverTool} dependencies.analysisRequirementResolver
      */
-    constructor(dependencies: { 
-        syntaxAnalyzer: any, 
-        entropyScorer: any,
-        analysisRequirementResolver: AnalysisRequirementResolverTool 
-    }) {
+    constructor(dependencies) {
         this.syntaxAnalyzer = dependencies.syntaxAnalyzer;
         this.entropyScorer = dependencies.entropyScorer;
-        this.analysisRequirementResolver = dependencies.analysisRequirementResolver; // New dependency
         this.logger = new SystemLogger('CAB');
     }
 
@@ -41,31 +26,29 @@ export class ConstraintAnalysisBroker {
      * @param {Array<Object>} activeRules - Rules applicable to the current file scope.
      * @returns {Promise<Object>} AnalysisContext
      */
-    async getContext(fileContent: string, activeRules: Array<Object>): Promise<Object> {
-        
-        // Use the extracted plugin logic to determine required metrics
-        const requiredMetrics = this.analysisRequirementResolver.execute({ activeRules });
-        const context: { [key: string]: any } = {};
+    async getContext(fileContent, activeRules) {
+        const requiredMetrics = this._determineRequiredMetrics(activeRules);
+        const context = {};
         
         if (requiredMetrics.length === 0) {
             return context;
         }
 
         // Execute calculations for required components (can be optimized with Promises.all)
-        const calculationPromises: Promise<void>[] = [];
+        const calculationPromises = [];
 
         if (requiredMetrics.includes('syntax_full')) {
             calculationPromises.push( 
                 this.syntaxAnalyzer.analyze(fileContent)
-                    .then((result: any) => { context.syntax = result; })
-                    .catch((err: any) => { this.logger.error("Syntax analysis failed:", err); context.syntax = {}; })
+                    .then(result => context.syntax = result)
+                    .catch(err => { this.logger.error("Syntax analysis failed:", err); context.syntax = {}; })
             );
         }
         
         if (requiredMetrics.includes('entropy')) {
             calculationPromises.push(
                 Promise.resolve(this.entropyScorer.calculateEntropy(fileContent))
-                    .then((result: any) => { context.entropy = result; })
+                    .then(result => context.entropy = result)
             );
         }
 
@@ -76,5 +59,29 @@ export class ConstraintAnalysisBroker {
         return context;
     }
 
-    // _determineRequiredMetrics method removed.
+    /**
+     * Parses rules to build a minimal required metric set.
+     * @param {Array<Object>} activeRules
+     * @returns {Array<string>} List of required metrics (e.g., ['syntax_full', 'entropy'])
+     */
+    _determineRequiredMetrics(activeRules) {
+        const requirements = new Set();
+
+        for (const rule of activeRules) {
+            switch (rule.type) {
+                case 'COMPLEXITY_THRESHOLD':
+                case 'FORBIDDEN_PATTERNS': // Structural patterns require AST, thus full syntax
+                    requirements.add('syntax_full');
+                    break;
+                case 'ENTROPY_DENSITY':
+                    requirements.add('entropy');
+                    break;
+                // Add future analysis requirements here (e.g., control_flow, mutation_score)
+            }
+        }
+
+        return Array.from(requirements);
+    }
 }
+
+module.exports = { ConstraintAnalysisBroker };
