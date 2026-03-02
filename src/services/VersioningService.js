@@ -1,28 +1,10 @@
-/**
- * Interface representing the required utility for deterministic ID generation.
- * @typedef {object} ICanonicalIDGeneratorUtility
- * @property {(data: object | string) => string} generateId - Generates a deterministic, content-based ID (hash).
- */
-
-// Assuming global access to the Kernel's plugin container for Dependency Injection simulation.
+const ImmutableIdGenerator = require('./ImmutableIdGenerator');
 
 /**
  * Service dedicated to creating, managing, and verifying versioned resource snapshots.
  * This service separates the concerns of pure ID generation from complex resource lifecycle tracking.
  */
 class VersioningService {
-
-    /**
-     * Retrieves the necessary utility instance (Dependency Injection Proxy).
-     * @returns {ICanonicalIDGeneratorUtility}
-     */
-    static getIdGenerator() {
-        // Accessing the utility via the simulated kernel environment (AGI_PLUGINS).
-        if (typeof globalThis.AGI_PLUGINS === 'undefined' || !globalThis.AGI_PLUGINS.CanonicalIDGeneratorUtility) {
-            throw new Error("Initialization Error: CanonicalIDGeneratorUtility is required by VersioningService but not available in AGI_PLUGINS.");
-        }
-        return globalThis.AGI_PLUGINS.CanonicalIDGeneratorUtility;
-    }
 
     /**
      * Creates a complete, traceable snapshot package for a resource.
@@ -34,10 +16,7 @@ class VersioningService {
      * @returns {{resource: string, immutableId: string, timestamp: number, versionHash: string}}
      */
     static createSnapshot(resourceName, data) {
-        const idGenerator = VersioningService.getIdGenerator();
-        
-        // 1. Generate Immutable ID (IID) based on resource content
-        const immutableId = idGenerator.generateId(data);
+        const immutableId = ImmutableIdGenerator.generateId(data);
         
         const snapshot = {
             resource: resourceName,
@@ -45,14 +24,14 @@ class VersioningService {
             timestamp: Date.now(), // Dynamic field for creation time
         };
         
-        // 2. Create a verifiable hash over the deterministic snapshot components (resource + IID)
-        // This ensures the structural integrity of the linkage data.
+        // Create a verifiable hash over the deterministic snapshot components (resource + IID)
+        // This allows validating the snapshot linkage without dependency on execution time.
         const deterministicBase = {
              resource: snapshot.resource,
              immutableId: snapshot.immutableId
         };
         
-        snapshot.versionHash = idGenerator.generateId(deterministicBase);
+        snapshot.versionHash = ImmutableIdGenerator.generateId(deterministicBase);
         
         return snapshot;
     }
