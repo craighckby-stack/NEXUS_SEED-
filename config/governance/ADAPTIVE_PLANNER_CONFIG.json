@@ -1,48 +1,18 @@
 {
-  "system_identifier": "AdaptivePlanner",
-  "planner_version": "V94.1.ASP.2",
-  "operational_mode": "Production",
-  "data_ingestion_config": {
-    "dependencies": [
-      {"source": "SDR_OperationalMetrics", "required_freshness_seconds": 3600},
-      {"source": "RETV_ComplianceFailures", "criticality": "HIGH"},
-      {"source": "PSR_SimulationEfficacyData", "required_completeness": 0.98}
-    ],
-    "ingestion_policy": "STRICT_CONSISTENCY"
+  "planner_version": "V94.1.ASP.1",
+  "input_dependencies": [
+    "SDR_OperationalMetrics",
+    "RETV_ComplianceFailures",
+    "PSR_SimulationEfficacyData"
+  ],
+  "synthesis_constraints": {
+    "minimum_trust_threshold_S01": 0.95,
+    "maximum_risk_index_S02": 0.10,
+    "adaptive_cycle_wait_epochs": 1000
   },
-  "core_governance_limits": {
-    "safety_constraints": {
-      "minimum_trust_threshold_S01": 0.97,
-      "maximum_risk_index_S02": 0.08
-    },
-    "dynamic_modulation": {
-      "adaptive_cycle_wait_epochs": 800,
-      "epoch_decay_rate": 0.05,
-      "modulation_target": "minimum_trust_threshold_S01"
-    }
-  },
-  "planning_output": {
-    "output_format": "AIA_Proposal_Schema",
-    "required_acceptance_score": 0.85
-  },
-  "resilience_policy": {
-    "trigger_logic": "OR",
-    "tier_matrix": [
-      {
-        "tier": "L1_Mitigation",
-        "condition": "RETV_ComplianceFailures >= 2",
-        "action": "Adjust_Cycle_Epochs_x2"
-      },
-      {
-        "tier": "L2_Containment",
-        "condition": "maximum_risk_index_S02 > 0.15",
-        "action": "Throttle_Non_Critical_Subsystems"
-      },
-      {
-        "tier": "L3_Emergency",
-        "condition": "RETV_ComplianceFailures >= 5",
-        "action": "Activate_Manual_Override_L4"
-      }
-    ]
+  "output_format": "AIA_Proposal_Schema",
+  "failure_handling": {
+    "trigger": "RETV_ComplianceFailures > 5",
+    "fallback_action": "Activate_Manual_Override_L4"
   }
 }
