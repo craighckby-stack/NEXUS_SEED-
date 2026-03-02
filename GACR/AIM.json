@@ -1,46 +1,49 @@
 {
-  "schema_version": "AIM_V6.0_FIBER_RECONCILER",
+  "schema_version": "AIM_V6.1_SCHEDULER_INTEGRATION",
   "dna_anchor": "DALEK_CAAN_v3.1_SIG_0xFF23A1",
-  "description": "NEXUS_CORE v6.0 Agent Integrity Monitoring. Implementing fiber-based concurrent reconciliation with lane-prioritized work loops for AGI governance.",
+  "description": "NEXUS_CORE v6.1. Integrating React-Core Scheduler priorities with Fiber reconciliation for time-sliced AGI governance.",
   "fiber_integrity_tree": {
     "SGS_ROOT_FIBER": {
       "work_tag": "HostRoot",
       "lanes": "0b0000000000000000000000000000001",
-      "reconciliation_mode": "CONCURRENT_BLOCKING",
+      "alternate_identity": "STABLE_DNA_SNAPSHOT",
+      "scheduler_priority": "ImmediatePriority",
       "n3_matrix": {
-        "phi_integration": 0.999,
-        "lambda_chaos": 0.01,
-        "ers_risk": 0.001
+        "phi_integration": 0.9995,
+        "lambda_chaos": 0.005,
+        "ers_risk": 0.0001
       },
       "work_loop_logic": {
         "perform_unit_of_work": "RECONCILE_DNA_STATE",
-        "commit_phase_trigger": "SERVER_ACTION_FINAL_COMMIT",
-        "expiration_time": -1,
+        "commit_phase_trigger": "SYNC_FLUSH_SERVER_ACTION",
+        "expiration_time": 0,
         "grog_law_enforcement": "STRICT_NEGATIVE_PROGRESSION",
         "failure_sink": "LEARNING_BY_DEATH_BUFFER"
       }
     },
     "GAX_TRANSITION_FIBER": {
-      "work_tag": "FunctionComponent",
+      "work_tag": "ServerComponent",
       "lanes": "0b0000000000000000000000000000010",
-      "reconciliation_mode": "USE_OPTIMISTIC_EVOLUTION",
+      "alternate_identity": "SPECULATIVE_SIPHON_BRANCH",
+      "scheduler_priority": "UserBlockingPriority",
       "n3_matrix": {
-        "phi_integration": 0.85,
-        "lambda_chaos": 0.45,
-        "ers_risk": 0.12
+        "phi_integration": 0.88,
+        "lambda_chaos": 0.42,
+        "ers_risk": 0.11
       },
       "hooks_context": {
         "useIntegrity": "PSR_CONTRACT_V6",
         "useTransition": "TRANSITION_GOVERNANCE_HOOK",
         "useOptimistic": "STATE_DRIFT_PROJECTION",
         "error_boundary": "GROG_RECOVERY_RECONCILER",
-        "hydration_strategy": "SERVER_SIDE_REASONING_SSR"
+        "server_action": "VALIDATE_MUTATION_SCHEMA"
       }
     },
     "CRoT_OFFSCREEN_FIBER": {
       "work_tag": "OffscreenComponent",
-      "lanes": "0b0000000000000000000000000010000",
-      "reconciliation_mode": "SUSPENSE_DEFERRED",
+      "lanes": "0b0000000000000000000000100000000",
+      "scheduler_priority": "IdlePriority",
+      "reconciliation_mode": "HIDDEN_UNTIL_HYDRATED",
       "n3_matrix": {
         "phi_integration": 1.0,
         "lambda_chaos": 0.0,
@@ -50,30 +53,30 @@
         "identity_anchor": "IMMUTABLE_DALEK_DNA",
         "suspense_fallback": "GOVERNANCE_SUSPENSE_UI",
         "hydration_source": "SINGULARITY_ROOT_PRIME",
-        "integrity_check": "RECOVER_JSON_REGEX_FALLBACK",
-        "semantic_continuity_threshold": 0.35
+        "semantic_continuity_threshold": 0.35,
+        "huxley_tri_loop": "L3_CRITIQUE_ACTIVE"
       }
     }
   },
   "governance_manifest": {
     "siphon_patterns": [
-      "ReactFiberWorkLoop",
-      "LanePriorityAssignment",
-      "ConcurrentRendering",
-      "ServerActions"
+      "FiberNodeReconciliation",
+      "SchedulerPriorityLanes",
+      "ServerComponentIsolation",
+      "OptimisticUI_StateUpdates"
     ],
     "reconciliation_config": {
       "max_consecutive_mutations": 10,
       "semantic_drift_limit": 0.35,
       "milestone_step": 50,
-      "evolution_round": "1/5",
-      "status": "INITIALIZING_FIBER_RECONCILIATION"
+      "evolution_round": "2/5",
+      "status": "OPTIMIZING_SCHEDULER_PRIORITIES"
     },
     "telemetry_stream": {
-      "current_lane": "SyncLane",
-      "active_effects": "PLACEMENT_UPGRADE",
+      "current_lane": "InputContinuousLane",
+      "active_effects": "RECONCILE_AND_HYDRATE",
       "is_optimistic_update": true,
-      "last_death_log_lesson": "INITIAL_BOOT_STUPIDITY_CAPTURE",
+      "last_death_log_lesson": "PREVENTED_SEMANTIC_DRIFT_VIA_FIBER_DIFF",
       "evolution_velocity": "LEVEL_2_STANDARD"
     }
   }
