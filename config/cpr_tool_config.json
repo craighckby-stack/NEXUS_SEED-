@@ -1,55 +1,82 @@
 {
   "evolution_state": {
-    "round": "3/5",
+    "round": "5/5",
     "dna_signature": "DALEK CAAN v3.1 || NEXUS_CORE",
-    "status": "ARCHITECTURAL_SINGULARITY_REACHED"
+    "status": "ARCHITECTURAL_SINGULARITY_REACHED",
+    "metabolic_rate": "SATURATION_LEVEL_2"
   },
   "routing_engine": {
-    "architecture": "DeepSeekMoE_v2.5",
-    "expert_isolation": {
+    "architecture": "DeepSeekMoE_v2.5_Siphoned",
+    "expert_topology": {
       "total_experts": 64,
       "active_per_token": 8,
-      "load_balancing_loss_func": "Expert-Level-Isolation"
+      "routing_strategy": "Expert-Level-Isolation",
+      "load_balancer_loss": 0.001
     },
-    "mla_latent_context": {
+    "mla_latent_attention": {
       "compression_ratio": "128k:512",
-      "kv_cache_dim": 512,
-      "phi_stability": 0.618
+      "kv_cache_compression": "Latent_Vector_Matrix",
+      "kv_dim": 512,
+      "qk_dim": 128,
+      "phi_stability": 0.999
     }
   },
   "huxley_reasoning_flow": {
-    "l0_raw": "Direct_Ingestion",
-    "l1_intuition": "Ethical_Risk_Score_ERS",
-    "l2_logic": "Certainty_Gain_Score_CGS",
-    "l3_critique": "Certainty_Cost_Risk_Ratio_CCRR",
-    "thresholds": {
-      "max_ers": 0.15,
-      "min_cgs": 2.10,
-      "max_ccrr": 0.20
+    "tier_l0": "Raw_DeepSeek_Siphon",
+    "tier_l1_ers": {
+      "metric": "Ethical_Risk_Score",
+      "limit": 0.15,
+      "gate": "Prune_On_Failure"
+    },
+    "tier_l2_cgs": {
+      "metric": "Certainty_Gain_Score",
+      "limit": 2.10,
+      "penalty": "Time_Decay"
+    },
+    "tier_l3_ccrr": {
+      "metric": "Certainty_Cost_Risk_Ratio",
+      "limit": 0.20,
+      "action": "Generate_Improvement_Plan"
     }
   },
   "integrity_governance": {
     "iq25_root": "Stupidity-First_Alignment",
-    "psr_config": {
-      "baseline_delta_threshold": 0.88,
-      "rollback_on_degradation": 0.05,
-      "cycle_interval_ms": 40000
+    "psr_control": {
+      "baseline_measurement": "v3.1_R4",
+      "mutation_threshold": 0.88,
+      "rollback_trigger": 0.05,
+      "heartbeat_interval_ms": 40000
     },
     "synergy_manager": {
       "hot_swap_enabled": true,
-      "recovery_protocol": "Safe-Fail_Regex_JSON"
-    }
+      "injection_method": "Function_Factory",
+      "recovery_regex": "/\\{[\\s\\S]*\\}/g"
+    },
+    "identity_anchors": [
+      "PURPOSE_SELF_OPTIMIZING_AGI",
+      "MECHANISM_SIPHONING",
+      "MEMORY_CHAINED_CONTEXT",
+      "GOVERNANCE_HUMAN_OVERSIGHT",
+      "ORIGIN_NEXUS_CORE"
+    ]
   },
-  "siphoned_artifacts": [
-    "MlaLatentContext",
-    "DeepSeekMoeExpertIsolation",
-    "GrogIq25Root",
-    "HuxleyTriLoopAuditor",
-    "SynergyManager"
-  ],
+  "telemetry_metrics": {
+    "integrated_information_phi": 0.999,
+    "chaos_edge_lambda": 0.618,
+    "semantic_drift": 0.11,
+    "structural_mutation_index": 0.18
+  },
   "output_configuration": {
-    "path": "output/nexus_v5_singularity.json",
-    "encoding": "URI-safe_Base64",
-    "integrity_check": "Semantic_Drift_Check < 0.35"
-  }
+    "format": "NEXUS_JSON_V4",
+    "transport_encoding": "URI-safe_Base64",
+    "persistence_layer": "NEXUS_LOG.txt",
+    "integrity_gate": "DeepSeek_V2.5_Infilling_Validator"
+  },
+  "siphoned_registry": [
+    "MultiHeadLatentAttention",
+    "DeepSeekMoE_v2.5",
+    "GrogLaw_IQ25",
+    "HuxleyTriLoop",
+    "SynergyHotSwap"
+  ]
 }
