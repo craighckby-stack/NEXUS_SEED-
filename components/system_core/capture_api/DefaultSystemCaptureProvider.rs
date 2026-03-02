@@ -1,194 +1,56 @@
-class Config {
-  static get staticConfig() {
-    return {
-      VERSION: "1.0.0",
-      env: process.env.NODE_ENV || "development"
-    };
-  }
+use crate::components::system_core::ASG_Atomic_Snapshot_Generator::{SystemCaptureAPI, RscmPackage, SnapshotError};
 
-  constructor(values = {}) {
-    this.setValues(values);
-  }
+/// Concrete default provider implementation for SystemCaptureAPI.
+/// This is used for non-kernel/mocked environments or standard systems where 
+/// direct OS/privileged access is not simulated or required for testing the ASG's core logic.
+pub struct DefaultCaptureProvider;
 
-  setValues(values) {
-    Object.assign(this, values);
-  }
-
-  static get defaultConfig() {
-    return {
-      foo: 'bar',
-      baz: true
-    };
-  }
-
-  static get configSchema() {
-    return {
-      type: 'object',
-      properties: {
-        foo: { type: 'string' },
-        baz: { type: 'boolean' }
-      }
-    };
-  }
-
-  validate() {
-    try {
-      const schema = Config.configSchema;
-      const validator = new (require('jsonschema').Validator)();
-      validator.checkSchema(schema);
-      validator.validate(this, schema);
-    } catch (e) {
-      console.error('Config validation error:', e);
-      throw e;
+impl SystemCaptureAPI for DefaultCaptureProvider {
+    fn check_privilege() -> bool { 
+        // Mock successful privilege check
+        true 
     }
-  }
+
+    fn capture_volatile_memory() -> Result<Vec<u8>, ()> { 
+        // Mocks a small, successful memory read operation (simulating kernel access)
+        Ok(vec![0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF]) 
+    }
+
+    fn capture_execution_stack() -> String { 
+        // Mocks a quick stack trace
+        String::from("RT_THREAD_0x1A: MAIN_LOOP -> ASG_GENERATE_CALL")
+    }
+    
+    // `get_current_epoch_ns` uses the default trait implementation.
 }
 
-class LifecycleEvent {
-  constructor(event) {
-    this.event = event;
-  }
+#[cfg(test)]
+mod tests {
+    use super::DefaultCaptureProvider;
+    use crate::components::system_core::ASG_Atomic_Snapshot_Generator;
+    
+    #[test]
+    fn test_successful_snapshot_generation() {
+        let result = ASG_Atomic_Snapshot_Generator::generate_rscm_snapshot::<DefaultCaptureProvider>();
+        assert!(result.is_ok(), "Snapshot generation failed: {:?}", result.err());
+        
+        let pkg = result.unwrap();
+        assert!(!pkg.integrity_hash.is_empty());
+        assert_eq!(pkg.context_flags, 0x42);
+        assert!(pkg.capture_latency_ns < 5_000_000, "Snapshot exceeded temporal constraint.");
+    }
+
+    // A helper provider that simulates failure or timeout for testing
+    struct FailingCaptureProvider;
+    impl SystemCaptureAPI for FailingCaptureProvider {
+        fn check_privilege() -> bool { false }
+        fn capture_volatile_memory() -> Result<Vec<u8>, ()> { Err(()) }
+        fn capture_execution_stack() -> String { String::new() }
+    }
+
+    #[test]
+    fn test_privilege_failure() {
+        let result = ASG_Atomic_Snapshot_Generator::generate_rscm_snapshot::<FailingCaptureProvider>();
+        assert!(matches!(result, Err(SnapshotError::PrivilegeRequired)));
+    }
 }
-
-class LifecycleHandler {
-  constructor(handler) {
-    this.handler = handler;
-  }
-
-  bind(target = this) {
-    this.handler = this.handler.bind(target);
-  }
-
-  execute() {
-    this.handler();
-  }
-}
-
-class NexusCore {
-  #lifecycle = {
-    configured: false,
-    loaded: false,
-    shuttingDown: false
-  };
-
-  #status = "INIT";
-
-  get status() {
-    return this.#status;
-  }
-
-  set status(value) {
-    this.#status = value;
-    const currentValue = this.#status;
-    const lifecycle = this.#lifecycle;
-    if (value !== 'INIT') {
-      console.log(`NexusCore instance is ${value}.`);
-      if (value === 'SHUTDOWN') {
-        lifecycle.shuttingDown = false;
-      }
-    }
-    if (currentValue === 'INIT' && value !== 'INIT') {
-      lifecycle.configured = true;
-    }
-  }
-
-  get lifecycle() {
-    return this.#lifecycle;
-  }
-
-  configure(config) {
-    this.validateConfig(config);
-    this.onLifecycleEvent("CONFIGURED");
-    this.#lifecycle.configured = true;
-    this.config = config;
-  }
-
-  validateConfig(config) {
-    const configSchema = Config.configSchema;
-    try {
-      const validator = new (require('jsonschema').Validator)();
-      validator.checkSchema(configSchema);
-      validator.validate(config, configSchema);
-    } catch (e) {
-      console.error('Config validation error:', e);
-      throw e;
-    }
-  }
-
-  onLifecycleEvent(event, handler) {
-    const lifecycleHandler = new LifecycleHandler(handler);
-    this.#lifecycle[event] = lifecycleHandler;
-  }
-
-  get on() {
-    return (event, handler) => {
-      const lifecycleEvent = new LifecycleEvent(event);
-      this.onLifecycleEvent(event, handler);
-    };
-  }
-
-  executeLifecycleEvent(event) {
-    if (this.#lifecycle[event]) {
-      this.#lifecycle[event].bind(this).execute();
-    }
-  }
-
-  async load() {
-    await this.executeLifecycleEvent("CONFIGURED");
-    try {
-      console.log("Loading...");
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log("Loading complete...");
-      this.#lifecycle.loaded = true;
-      this.executeLifecycleEvent("LOADED");
-    } catch (e) {
-      console.error('Load error:', e);
-    }
-  }
-
-  async shutdown() {
-    try {
-      if (!this.#lifecycle.shuttingDown) {
-        console.log("Shutdown initiated...");
-        this.#lifecycle.shuttingDown = true;
-        this.executeLifecycleEvent("SHUTTING_DOWN");
-        console.log("Shutdown complete...");
-        this.status = "SHUTDOWN";
-      }
-    } catch (e) {
-      console.error("Shutdown error:", e);
-    }
-  }
-
-  async start() {
-    const startMethodOrder = ["configure", "load", "shutdown"];
-    for (const methodName of startMethodOrder) {
-      if (this[methodName] instanceof Function) {
-        await this[methodName]();
-      }
-    }
-  }
-
-  async destroy() {
-    this.status = "DESTROYED";
-    this.#lifecycle = {
-      configured: false,
-      loaded: false,
-      shuttingDown: false
-    };
-  }
-
-  async on(event, handler) {
-    await this.onLifecycleEvent(event, handler);
-  }
-}
-
-const nexusCore = new NexusCore();
-nexusCore.on('DESTROYED', () => {
-  console.log("NexusCore instance destroyed.");
-});
-nexusCore.configure(Config.defaultConfig);
-nexusCore.start();
-nexusCore.load();
-nexusCore.shutdown();
-nexusCore.destroy();
