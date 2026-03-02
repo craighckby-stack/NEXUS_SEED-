@@ -1,130 +1,102 @@
 /**
- * AGI-KERNEL v7.11.3 [STRATEGIC_AGENCY]
- * Refactored component: GovernanceLoader -> GovernanceLoaderKernel
- *
- * Manages the loading, caching, and retrieval of system governance configurations.
- * Implements promise memoization for computational efficiency on repeated access.
- * Relies strictly on Dependency Injection (DI) for I/O and configuration path resolution.
+ * GovernanceLoader: Critical Configuration Handler for Sovereign AGI
+ * Role: Loads, validates, and distributes immutable, externally mandated governance configuration (OGT thresholds).
+ * Note: Uses synchronous file reading during startup initialization. Failure results in process halt.
  */
 
-// NOTE: Interface imports are conceptual for this output.
-// import { ISecureResourceLoaderInterfaceKernel } from './ISecureResourceLoaderInterfaceKernel';
-// import { IPathRegistryKernel } from './IPathRegistryKernel';
+import fs from 'fs';
+import yaml from 'js-yaml';
+import Joi from 'joi';
+import logger from '../utils/logger';
+// Ideally, import ConfigService for path resolution in the future
 
-class GovernanceLoaderKernel {
-    /** @type {ISecureResourceLoaderInterfaceKernel} */
-    #ioLoader;
-    /** @type {IPathRegistryKernel} */
-    #pathRegistry;
-    /** @type {string} */
-    #configDirectory;
-    /** @type {Map<string, Promise<Object>>} Cache storage for pending or resolved configuration loading promises. */
-    #cache = new Map();
+const GOVERNANCE_CONFIG_PATH = 'config/governance.yaml';
 
-    /**
-     * @param {object} dependencies
-     * @param {ISecureResourceLoaderInterfaceKernel} dependencies.ioLoader
-     * @param {IPathRegistryKernel} dependencies.pathRegistry
-     */
-    constructor(dependencies) {
-        this.#setupDependencies(dependencies);
+// Define the required immutable schema for external governance controls
+// Immutability is critical for compliance and deterministic operation.
+const GovernanceSchema = Joi.object({
+    required_confidence_default: Joi.number().min(0).max(1).strict().required(),
+    risk_model_weights: Joi.object().pattern(Joi.string().strict(), Joi.number().strict()).required(),
+    atm_decay_rate: Joi.number().min(0).max(1).strict().required(),
+    // Allows governance file to temporarily override strictness if migration requires it
+    strict_validation: Joi.boolean().default(true),
+}).unknown(false); // Disallow unknown properties by default (high compliance standard)
+
+class GovernanceLoader {
+    constructor() {
+        this._config = null; // Use internal naming convention
     }
 
     /**
-     * Rigorously validates and assigns injected dependencies.
-     * Satisfies the mandate for synchronous setup extraction.
-     * @param {object} dependencies
+     * Initializes the governance config. This must be called successfully before operations begin.
+     * @returns {Object} The immutable governance configuration object.
      */
-    #setupDependencies(dependencies) {
-        const { ioLoader, pathRegistry } = dependencies;
-
-        if (!ioLoader || typeof ioLoader.loadJson !== 'function') {
-             throw new Error("GovernanceLoaderKernel requires a valid ioLoader (ISecureResourceLoaderInterfaceKernel) instance with a 'loadJson' method.");
+    initialize() {
+        if (this._config) {
+            logger.warn('Governance configuration already initialized. Skipping reload.');
+            return this._config;
         }
-        if (!pathRegistry || typeof pathRegistry.resolvePath !== 'function') {
-             throw new Error("GovernanceLoaderKernel requires a valid pathRegistry (IPathRegistryKernel) instance with a 'resolvePath' method.");
-        }
-        
-        this.#ioLoader = ioLoader;
-        this.#pathRegistry = pathRegistry;
-    }
 
-    /**
-     * Initializes the kernel, asynchronously retrieving the governance configuration root path.
-     * @returns {Promise<void>}
-     */
-    async initialize() {
-        // Strategic constant definition for the governance config root path
-        const GOVERNANCE_CONFIG_DIR_KEY = 'GOVERNANCE_CONFIG_ROOT'; 
-        const DEFAULT_GOVERNANCE_PATH = 'config/governance';
-        
         try {
-            // The IPathRegistryKernel is responsible for providing the strategic path configuration.
-            this.#configDirectory = await this.#pathRegistry.resolvePath(GOVERNANCE_CONFIG_DIR_KEY, DEFAULT_GOVERNANCE_PATH);
+            const fileContents = fs.readFileSync(GOVERNANCE_CONFIG_PATH, 'utf8');
+            const rawConfig = yaml.load(fileContents);
+            
+            // Apply strict validation based on defined schema and config file preference
+            const validationOptions = {
+                abortEarly: false,
+                // Only allow unknown keys if 'strict_validation: false' is present in the governance file
+                allowUnknown: rawConfig.strict_validation === false
+            };
+
+            const { error, value } = GovernanceSchema.validate(rawConfig, validationOptions);
+
+            if (error) {
+                logger.error('Governance Configuration Validation Failed:', error.details);
+                throw new Error(`Invalid governance schema defined in ${GOVERNANCE_CONFIG_PATH}: ${error.message}`);
+            }
+            
+            // Enforce immutability upon successful loading to ensure governance contract stability
+            this._config = Object.freeze(value); 
+            logger.info('Governance configuration loaded and verified (Immutable).');
+            return this._config;
+
         } catch (e) {
-             throw new Error(`[GovernanceLoaderKernel] Failed to resolve governance configuration path '${GOVERNANCE_CONFIG_DIR_KEY}': ${e.message}`);
+            // Mandatory halt if governance thresholds cannot be established (Compliance requirement)
+            logger.fatal(`FATAL ERROR: Could not establish OGT governance contract: ${e.message}`);
+            process.exit(1);
         }
     }
 
     /**
-     * Loads a specific governance policy configuration by name.
-     * Caches the promise of the loading operation (promise memoization).
-     * 
-     * @param {string} policyName The name of the policy (e.g., 'security', 'resource_limits').
-     * @returns {Promise<Object>} The parsed configuration object.
+     * Retrieves the entire immutable configuration object.
+     * Use accessor methods instead of accessing keys directly where possible.
+     * @returns {Object} The immutable governance configuration.
      */
-    async load(policyName) {
-        const cacheKey = policyName.toLowerCase();
-
-        // 1. Check cache for existing promise or resolved value
-        if (this.#cache.has(cacheKey)) {
-            return this.#cache.get(cacheKey);
+    get config() {
+        if (!this._config) {
+             throw new Error('Governance configuration not initialized. Call initialize() first.');
         }
-
-        const fileName = `${cacheKey}.json`;
-        // Construct the full path using the resolved config directory.
-        // Note: Direct dependency on Node's 'path.join' has been removed.
-        const fullPath = `${this.#configDirectory}/${fileName}`;
-
-        // 2. Define the loading operation
-        const loadOperation = this.#ioLoader.loadJson(fullPath)
-            .catch(error => {
-                // Remove failed promise from cache to allow retries
-                this.#cache.delete(cacheKey);
-                throw error;
-            });
-        
-        // 3. Cache the promise immediately to prevent concurrent duplicate I/O operations (race conditions)
-        this.#cache.set(cacheKey, loadOperation);
-
-        // 4. Await and return the result
-        return loadOperation;
+        return this._config; 
     }
 
     /**
-     * Utility method for accessing deeply nested configurations safely using dot notation.
-     * @param {string} policyName The policy configuration to load.
-     * @param {string} pathString Dot-separated path (e.g., 'limits.cpu').
-     * @returns {Promise<any>} The value at the specified path, or undefined.
+     * Accessor for critical AI risk thresholds (e.g., used by C-11 MCRA module)
      */
-    async get(policyName, pathString) {
-        const config = await this.load(policyName);
-        
-        if (!pathString) return config;
-        
-        // Implements safe dot-notation traversal
-        return pathString.split('.').reduce((acc, part) => {
-            if (acc === undefined || acc === null) return undefined; 
-            return acc[part];
-        }, config);
+    getRiskThresholds() {
+        return {
+            confidenceDefault: this.config.required_confidence_default,
+            riskWeights: this.config.risk_model_weights
+        };
     }
-
+    
     /**
-     * Clears all cached configuration promises, forcing a full reload on next access.
+     * Accessor for Autonomous Timeline Management (ATM) settings
      */
-    clearCache() {
-        this.#cache.clear();
+    getAtmSettings() {
+        return {
+            decayRate: this.config.atm_decay_rate,
+        };
     }
 }
 
-module.exports = GovernanceLoaderKernel;
+export default new GovernanceLoader();
