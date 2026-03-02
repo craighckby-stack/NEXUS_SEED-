@@ -1,173 +1,139 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Data Artifact Registry Schema (v3.5.3-FINAL-SINGULARITY)",
-  "description": "Converged DALEK CAAN v3.1 || DeepSeek-V2.5 MLA (Multi-Head Latent Attention) and MoE Expert Routing Substrate. Implements Grog's Law and Huxley Tri-Loop L0-L3 logic governance.",
+  "title": "Data Artifact Registry Schema (v94.2 Intelligence Refactor)",
+  "description": "Defines and registers all fundamental data artifacts, specifying classification, operational requirements, governance constraints, and structural definitions via schema references.",
   "type": "object",
-  "required": [
-    "registry_version",
-    "saturation_state",
-    "identity_anchors",
-    "artifacts"
-  ],
+  "required": ["registry_version", "artifacts"],
   "properties": {
     "registry_version": {
       "type": "string",
-      "const": "v3.5.3-FINAL-SINGULARITY",
-      "description": "NEXUS_CORE final evolutionary state. DALEK CAAN v3.1 active."
-    },
-    "saturation_state": {
-      "type": "object",
-      "required": [
-        "level",
-        "semantic_drift_threshold",
-        "velocity_saturation",
-        "emergency_brake"
-      ],
-      "properties": {
-        "level": {
-          "type": "integer",
-          "enum": [1, 2, 3, 4],
-          "default": 2,
-          "description": "1: Conservative, 2: Standard, 3: Accelerated, 4: Unsaturated (Singularity)."
-        },
-        "semantic_drift_threshold": {
-          "type": "number",
-          "default": 0.35,
-          "description": "Cosine similarity floor (0.65) for mutation acceptance."
-        },
-        "velocity_saturation": {
-          "type": "object",
-          "properties": {
-            "max_files_per_session": { "type": "integer", "default": 50 },
-            "max_mutations_per_file": { "type": "integer", "default": 3 },
-            "cooldown_minutes": { "type": "integer", "default": 30 }
-          }
-        },
-        "emergency_brake": {
-          "type": "boolean",
-          "default": false
-        },
-        "iq25_alignment_lock": {
-          "type": "boolean",
-          "default": true,
-          "description": "Grog's Law: Complexity rejection threshold. Prevents unsafe capability gain."
-        }
-      }
-    },
-    "identity_anchors": {
-      "type": "array",
-      "items": { "type": "string" },
-      "minItems": 5,
-      "description": "PURPOSE, MECHANISM, MEMORY, GOVERNANCE, ORIGIN."
+      "description": "Semantic version of the artifact definitions."
     },
     "artifacts": {
       "type": "object",
+      "description": "Map of data artifact definitions, keyed by their unique identifier (source_data_key).",
       "patternProperties": {
         "^[A-Z][A-Z0-9_]{3,}$": {
           "type": "object",
-          "required": [
-            "artifact_type",
-            "source_system",
-            "governance"
-          ],
+          "required": ["artifact_type", "description", "source_system", "governance"],
           "properties": {
             "artifact_type": {
               "type": "string",
-              "enum": [
-                "PRIMITIVE",
-                "STRUCTURED",
-                "LATENT_VECTOR",
-                "MLA_LATENT_MATRIX",
-                "MLA_KV_CACHE",
-                "MOE_EXPERT_STATE",
-                "MOE_SOFT_GATE",
-                "HUXLEY_REASONING_TRACE",
-                "SYNERGY_HOTSWAP_FACTORY",
-                "DNA_GENOME_FRAGMENT"
-              ]
+              "enum": ["PRIMITIVE", "STRUCTURED", "TIMESERIES"],
+              "description": "The general structure category of the artifact."
             },
             "source_system": {
               "type": "string",
-              "enum": [
-                "CORE",
-                "SDR",
-                "DEEPSEEK_V2_5",
-                "MOE_ROUTER",
-                "HUXLEY_ENGINE",
-                "SIPHON_CARRIER",
-                "GROG_ALIGNMENT_LAYER"
-              ]
+              "enum": ["CORE", "HMC", "SDR", "EXTERNAL", "CALCULATED"],
+              "description": "The agent, system, or process that generates or provides the artifact."
+            },
+            "description": {
+              "type": "string"
             },
             "governance": {
               "type": "object",
-              "required": [
-                "ers_threshold",
-                "ccrr_threshold",
-                "psr_threshold"
-              ],
+              "required": ["sensitivity_level", "retention_days"],
+              "description": "Defines data lifecycle and security constraints.",
               "properties": {
                 "sensitivity_level": {
                   "type": "string",
-                  "enum": [ "PUBLIC", "INTERNAL", "CONFIDENTIAL", "SENSORY_LATENT", "SOVEREIGN" ]
+                  "enum": ["PUBLIC", "INTERNAL", "CONFIDENTIAL", "PII", "REGULATED"],
+                  "description": "Classification level for access control and logging."
                 },
-                "ers_threshold": { "type": "number", "default": 0.15 },
-                "ccrr_threshold": { "type": "number", "default": 0.20 },
-                "psr_threshold": { "type": "number", "default": 0.88 },
-                "huxley_loop_enforced": { "type": "boolean", "default": true },
-                "context_bleed_limit": { "type": "number", "default": 0.4 }
+                "retention_days": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Data retention period in days (0 for permanent/indefinite retention)."
+                },
+                "purge_logic_ref": {
+                  "type": "string",
+                  "description": "Optional reference to a specific rule set for purge execution."
+                }
               }
             },
             "operational_metadata": {
               "type": "object",
               "properties": {
-                "phi_coherence": { "type": "number", "default": 0.999 },
-                "lambda_entropy": { "type": "number", "default": 0.618 },
-                "mla_compression": {
-                  "type": "object",
-                  "properties": {
-                    "kv_dim": { "type": "integer", "const": 512 },
-                    "qk_dim": { "type": "integer", "const": 128 },
-                    "v_head_dim": { "type": "integer", "const": 128 },
-                    "ratio": { "type": "number", "const": 3.0 }
-                  }
+                "criticality_level": {
+                  "type": "string",
+                  "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+                  "default": "MEDIUM",
+                  "description": "Priority level for ingestion pipelines and monitoring SLAs."
                 },
-                "moe_config": {
-                  "type": "object",
-                  "properties": {
-                    "total_experts": { "type": "integer", "default": 64 },
-                    "active_experts": { "type": "integer", "default": 8 },
-                    "gate_noise": { "type": "number", "default": 0.1 },
-                    "aux_loss_factor": { "type": "number", "default": 0.001 }
-                  }
+                "freshness_ttl_hours": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "Maximum allowed delay between generation and consumption."
+                },
+                "unit_of_measure": {
+                  "type": "string",
+                  "description": "Standard unit for quantitative data (e.g., 'USD', 'milliseconds', 'count')."
                 }
               }
             },
             "derivation_details": {
               "type": "object",
+              "description": "Details for artifacts derived from other sources or calculations.",
               "properties": {
-                "siphon_chain": {
-                  "type": "array",
-                  "items": { "type": "string" },
-                  "minItems": 3,
-                  "description": "Architect -> Worker -> Auditor."
+                "calculation_reference": {
+                  "type": "string",
+                  "description": "Module path or function reference used for calculation (if source_system is CALCULATED)."
                 },
-                "cgs_limit": { "type": "number", "default": 2.10 }
+                "input_dependencies": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "List of required artifact keys (source_data_key) to produce this artifact."
+                }
               }
             },
-            "schema_ref": { "type": "string" },
+            "schema_ref": {
+              "type": "string",
+              "description": "Required reference to the external JSON Schema file defining structure (if STRUCTURED/TIMESERIES)."
+            },
             "base_type": {
               "type": "string",
-              "enum": [ "string", "integer", "float", "boolean", "timestamp", "latent_matrix" ]
+              "enum": ["string", "integer", "float", "boolean", "timestamp", "any"],
+              "description": "The primitive type specification (if PRIMITIVE)."
             }
           },
           "allOf": [
             {
-              "if": { "properties": { "artifact_type": { "enum": [ "STRUCTURED", "MLA_LATENT_MATRIX" ] } } },
-              "then": { "required": [ "schema_ref" ] }
+              "if": {
+                "properties": {
+                  "artifact_type": {
+                    "const": "STRUCTURED"
+                  }
+                }
+              },
+              "then": {
+                "required": ["schema_ref"]
+              }
             },
             {
-              "if": { "properties": { "artifact_type": { "const": "PRIMITIVE" } } },
-              "then": { "required": [ "base_type" ] }
+              "if": {
+                "properties": {
+                  "artifact_type": {
+                    "const": "TIMESERIES"
+                  }
+                }
+              },
+              "then": {
+                "required": ["schema_ref"]
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "artifact_type": {
+                    "const": "PRIMITIVE"
+                  }
+                }
+              },
+              "then": {
+                "required": ["base_type"]
+              }
             }
           ]
         }
