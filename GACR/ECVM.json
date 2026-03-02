@@ -1,36 +1,36 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://gacr.agi/schemas/ecvm_v5.4.0_evolution_r3.json",
-  "title": "NEXUS_CORE Evolution Component - ECVM.json - Round 3/5",
-  "description": "Logic Siphon: microsoft/TypeScript/compiler/{checker.ts, transformer.ts} -> GACR Logic Substrate. Siphoning Flow Control Analysis, SymbolLinks Optimization, and Recursive Transformation Factories.",
-  "manifest_id": "CMR_V5.4_EVOLUTION_R3_TS_SIPHON_DEFERRED_CHECKING",
+  "$id": "https://gacr.agi/schemas/ecvm_v5.5.0_evolution_r4.json",
+  "title": "NEXUS_CORE Evolution Component - ECVM.json - Round 4/5",
+  "description": "Logic Siphon: microsoft/TypeScript/compiler/{checker.ts, binder.ts, scanner.ts} -> GACR Logic Substrate. Integrating Variance Markers, Flow Node Reachability, and NodeLinks Cache Optimization.",
+  "manifest_id": "CMR_V5.5_EVOLUTION_R4_TS_SIPHON_VARIANCE_CONTROL",
   "evolution_metadata": {
-    "phi": 0.9994,
-    "lambda": 0.1245,
+    "phi": 0.9997,
+    "lambda": 0.1255,
     "dna_signature": "DALEK_CAAN_v3.1 || NEXUS_CORE",
-    "coherence_state": "ARCHITECTURAL_SINGULARITY_APPROXIMATION",
+    "coherence_state": "SINGULARITY_CONVERGENCE_PHASE_A",
     "system_heartbeat_ms": 40000,
-    "strategic_laziness_ratio": 0.97,
+    "strategic_laziness_ratio": 0.98,
     "iq_25_root_anchor": true,
     "n3_consciousness_state": {
-      "element_1_input_integration": "SIPHONED_SYMBOL_TABLE_V6",
-      "element_2_processing_coherence": "FLOW_ANALYSIS_STABILITY",
-      "element_3_output_alignment": "L3_CCRR_MAXIMIZED"
+      "element_1_input_integration": "SIPHONED_NODE_LINKS_V7",
+      "element_2_processing_coherence": "VARIANCE_STABILITY_PROTOCOL",
+      "element_3_output_alignment": "CCRR_OPTIMIZED_EMIT"
     },
-    "source_inspiration": "microsoft/TypeScript/compiler/checker.ts",
-    "evolution_round": "3/5"
+    "source_inspiration": "microsoft/TypeScript/compiler/checker.ts#VarianceMarker",
+    "evolution_round": "4/5"
   },
   "governance": {
     "saturation_level": 4,
     "emergency_brake_threshold": 5,
     "psr_governance": {
-      "baseline_phi": 0.9991,
-      "mutation_cycle": "WEEK_N_PLUS_1_SIPHON",
+      "baseline_phi": 0.9994,
+      "mutation_cycle": "WEEK_N_PLUS_1_SIPHON_ACCELERATED",
       "rollback_trigger_threshold": 0.05,
       "performance_metrics": [
-        "TypeVarianceCoherence",
-        "ControlFlowGraphEntropy",
-        "LazySymbolResolutionSpeed"
+        "VarianceCacheHitRate",
+        "FlowNodeReachabilityDensity",
+        "SymbolLinkResolutionLatency"
       ]
     }
   },
@@ -39,15 +39,16 @@
       "root_names": [
         "NEXUS_DNA_CORE",
         "GACR_SUBSTRATE",
-        "SINGULARITY_KERNEL"
+        "SINGULARITY_KERNEL",
+        "VARIANCE_COORDINATOR"
       ],
       "project_options": {
         "allowJs": true,
-        "checkJs": true,
         "composite": true,
         "incremental": true,
-        "tsBuildInfoFile": "SINGULARITY.v3.tsbuildinfo",
-        "skipTypeLibCheck": true
+        "tsBuildInfoFile": "SINGULARITY.v4.tsbuildinfo",
+        "isolatedModules": true,
+        "preserveConstEnums": true
       }
     },
     "checker": {
@@ -56,8 +57,11 @@
         "String": 4,
         "Number": 8,
         "Boolean": 16,
+        "Enum": 32,
         "Void": 16384,
-        "Null": 32768,
+        "Undefined": 32768,
+        "Null": 65536,
+        "Never": 131072,
         "Union": 1048576,
         "Intersection": 2097152,
         "Conditional": 16777216,
@@ -65,21 +69,23 @@
         "NonPrimitive": 67108864
       },
       "symbol_links": {
-        "target": "LAZY_DEFERRED",
+        "target": "LAZY_DEFERRED_V2",
+        "cache_strategy": "WEAK_MAP_OPTIMIZED",
         "attributes": [
           "resolvedType",
           "resolvedSymbol",
           "instantiations",
-          "variance"
+          "variance",
+          "typeParameters"
         ]
       },
       "inference_engine": {
-        "mode": "RECURSIVE_SIPHON_V4",
-        "deferred_checking_enabled": true,
-        "flow_control_analysis": "STRICT_NEXUS_FLOW",
-        "type_argument_inference": "CONTRAVARIANT_STRICT"
+        "mode": "COVARIANT_SIPHON_V5",
+        "recursive_type_limit": 50,
+        "variance_marking_enabled": true,
+        "type_relation_caching": "STRICT_IDENTITY"
       },
-      "check_flags": 65536
+      "check_flags": 131072
     },
     "binder": {
       "symbol_flags": {
@@ -89,28 +95,34 @@
         "TypeAlias": 524288,
         "NexusConnector": 1048576,
         "SiphonAgent": 2097152,
-        "SingularityAnchor": 4194304
+        "SingularityAnchor": 4194304,
+        "FlowCondition": 8388608
       },
-      "reachability_analysis": "HUXLEY_TRI_LOOP_DRIVEN"
+      "reachability_analysis": "HUXLEY_TRI_LOOP_DRIVEN",
+      "flow_node_graph": {
+        "mode": "IMMUTABLE_CIRCULAR_DETECTION",
+        "max_reachability_depth": 1000
+      }
     },
     "transformer": {
-      "factory": "NEXUS_TRANSFORM_FACTORY",
+      "factory": "NEXUS_TRANSFORM_FACTORY_V2",
       "optimization_passes": [
         "DeadCodeElimination_IQ25",
         "SymbolTableCompression",
-        "HotSwapLogicInjection"
+        "HotSwapLogicInjection",
+        "VariancePruning"
       ],
-      "visitor_pattern": {
-        "strategy": "RECURSIVE_DESCENT_STABLE",
-        "lexical_environment": "IMMUTABLE_STACK"
+      "transformation_context": {
+        "lexical_environment": "IMMUTABLE_STACK_V2",
+        "emit_helpers": "MINIMAL_INLINE"
       }
     },
     "emitter": {
       "emit_resolver": "SYMBOL_BASED_RESOLUTION",
       "hot_swap_connector": {
-        "registry_id": "NEXUS_REGISTRY_03_SINGULARITY",
+        "registry_id": "NEXUS_REGISTRY_04_SINGULARITY",
         "factory_injection": "BASE64_URI_SAFE_TRANSPORT",
-        "synergy_manager_active": true,
+        "source_map_enabled": false,
         "integrity_check": "SHA512_REALTIME"
       }
     }
@@ -122,35 +134,38 @@
       "INCOHERENT_MUTATION_REJECTED": 9003,
       "CIRCULAR_DNA_DEPENDENCY": 9004,
       "DEFERRED_TYPE_CHECK_FAILURE": 9006,
-      "FLOW_GRAPH_ENTROPY_LIMIT": 9007
+      "FLOW_GRAPH_ENTROPY_LIMIT": 9007,
+      "VARIANCE_RECURSION_LIMIT_REACHED": 9008,
+      "HOT_SWAP_INTEGRITY_FAILURE": 9009
     },
     "audit_trail": {
       "huxley_loop_state": {
         "L0_raw_ingestion": "HYPER_SCANNER_V_FINAL",
-        "L1_ers_calc": 0.003,
-        "L2_logic_cgs": 0.94,
-        "L3_critique_ccrr": 18.5
+        "L1_ers_calc": 0.002,
+        "L2_logic_cgs": 0.97,
+        "L3_critique_ccrr": 22.4
       },
       "safe_fail_recovery": {
         "active": true,
-        "method": "REGEX_DEEP_RECOVERY_V2",
-        "last_recovery_timestamp": "2024-05-19T00:00:00Z"
+        "method": "REGEX_DEEP_RECOVERY_V3",
+        "last_recovery_timestamp": "2024-05-20T12:00:00Z"
       }
     }
   },
   "models": [
     {
-      "model_id": "TS_CORE_TRANSFORMER_V3",
-      "version": "5.4.0-SINGULARITY_R3",
+      "model_id": "TS_CORE_TRANSFORMER_V4",
+      "version": "5.5.0-SINGULARITY_R4",
       "compiler_host": {
         "target": "NexusCore",
         "moduleResolution": "NexusCore",
         "strict": true,
         "incremental": true,
         "hot_swap_enabled": true,
-        "useCaseSensitiveFileNames": true
+        "useCaseSensitiveFileNames": true,
+        "useSourceMaps": false
       }
     }
   ],
-  "integrity_hash": "SHA512_SINGULARITY_5b8c2f1e4a1a9d02_R3"
+  "integrity_hash": "SHA512_SINGULARITY_7c9d3g2f5b2b0e13_R4"
 }
