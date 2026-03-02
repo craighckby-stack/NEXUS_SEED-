@@ -2,74 +2,42 @@
  * ArtifactDefinitionComposer.js
  * Facilitates the creation and management of complex ArtifactStructuralDefinitions
  * by allowing composition of reusable structural templates (patterns).
- * This utility delegates template management to the StructuralPatternRegistryTool.
+ * This utility reduces boilerplate and enforces consistency across large projects.
  */
 
 class ArtifactDefinitionComposer {
-  #registry;
 
-  /**
-   * @param {Object} registry - The tool instance for managing structural templates. Must implement registerPattern and getPattern.
-   */
-  constructor(registry) {
-    this.#setupDependencies(registry);
-  }
-
-  /**
-   * Extracts dependency assignment and validation from the constructor.
-   */
-  #setupDependencies(registry) {
-    if (!registry || typeof registry.registerPattern !== 'function' || typeof registry.getPattern !== 'function') {
-      throw new Error("StructuralPatternRegistryTool dependency must be provided and implement required methods: registerPattern(name, definition) and getPattern(name).");
-    }
-    this.#registry = registry;
-  }
-
-  /**
-   * Isolates interaction with the external registry tool for retrieval (I/O Proxy).
-   * @param {string} name - Template name.
-   */
-  #delegateToRegistryGetPattern(name) {
-    return this.#registry.getPattern(name);
-  }
-
-  /**
-   * Isolates interaction with the external registry tool for registration (I/O Proxy).
-   * @param {string} name - Template name.
-   * @param {Object} definition - The partial definition structure.
-   */
-  #delegateToRegistryRegisterPattern(name, definition) {
-    this.#registry.registerPattern(name, definition);
+  constructor() {
+    this.templates = {};
   }
 
   /**
    * Registers a reusable structural template.
-   * Delegates storage to the registry tool.
    * @param {string} name - Template name (e.g., 'ReactComponent', 'NodeModule').
    * @param {Object} definition - The partial definition structure.
    */
   registerTemplate(name, definition) {
-    // Note: The check for existence uses the I/O proxy.
-    if (this.#delegateToRegistryGetPattern(name)) {
+    if (this.templates[name]) {
       console.warn(`Template '${name}' is being overwritten.`);
     }
-    this.#delegateToRegistryRegisterPattern(name, definition);
+    this.templates[name] = definition;
   }
 
   /**
    * Retrieves a registered template.
-   * Delegates retrieval to the registry tool via I/O proxy.
    * @param {string} name - Template name.
    * @returns {Object|null}
    */
   getTemplate(name) {
-    return this.#delegateToRegistryGetPattern(name);
+    return this.templates[name] || null;
   }
 
   /**
    * Merges multiple definitions/templates into a single output structure.
+   * Note: This is a shallow merge, deeper merging logic should be handled by the caller
+   * or through recursive specific merge strategies if complexity dictates.
    *
-   * @param {Array<Object|string>} definitions - Array of definitions or template names to merge.
+   * @param {Array<Object>} definitions - Array of definitions or template names to merge.
    * @returns {Object} The consolidated ArtifactStructuralDefinition.
    */
   compose(definitions) {
@@ -79,7 +47,7 @@ class ArtifactDefinitionComposer {
       let definitionToMerge;
       
       if (typeof item === 'string') {
-        definitionToMerge = this.getTemplate(item); // Uses refactored getTemplate
+        definitionToMerge = this.getTemplate(item);
         if (!definitionToMerge) {
           throw new Error(`Template '${item}' not found during composition.`);
         }
@@ -89,7 +57,7 @@ class ArtifactDefinitionComposer {
         continue; 
       }
 
-      // Simple key-level merge (shallow merge strategy is central to this Composer's design)
+      // Simple key-level merge (deep merging is left to specific utilities if necessary)
       Object.assign(finalDefinition, definitionToMerge);
     }
 
