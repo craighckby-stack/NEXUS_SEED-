@@ -1,56 +1,45 @@
-class ACVDIntegritySchemaRegistryKernel {
-    /**
-     * Initializes the registry.
-     * @returns {Promise<void>}
-     */
-    async initialize() {
-        // Standard kernel initialization hook.
-    }
+/**
+ * ACVD Policy Configuration Schema Definition.
+ * This JSON schema defines the mandatory structure and expected types 
+ * for the governance constants loaded by the DynamicPolicyCache.
+ * 
+ * NOTE: In a complete system, this would be processed by a dedicated validator (e.g., Zod or AJV).
+ */
 
-    /**
-     * Retrieves the ACVD Integrity Policy Configuration Schema.
-     * @returns {Promise<object>} The immutable JSON Schema object.
-     */
-    async getACVDIntegritySchema() {
-        const ACVDIntegritySchema = {
+const ACVDIntegritySchema = {
+    type: 'object',
+    id: 'ACVD_V94_1_PolicyConfig',
+    required: ['policy_thresholds', 'attestation_requirements'],
+    properties: {
+        policy_thresholds: {
             type: 'object',
-            $id: 'ACVD_V94_1_PolicyConfig',
-            required: ['policy_thresholds', 'attestation_requirements'],
+            required: ['integrity_veto_bounds', 'utility_maximization'],
             properties: {
-                policy_thresholds: {
+                integrity_veto_bounds: {
                     type: 'object',
-                    required: ['integrity_veto_bounds', 'utility_maximization'],
-                    properties: {
-                        integrity_veto_bounds: {
-                            type: 'object',
-                            required: ['max_pvlm_failures', 'max_mpam_failures'],
-                            properties: {
-                                max_pvlm_failures: { type: 'number', minimum: 0 },
-                                max_mpam_failures: { type: 'number', minimum: 0 }
-                            }
-                        },
-                        utility_maximization: {
-                            type: 'object',
-                            required: ['UFRM'],
-                            properties: {
-                                UFRM: { type: 'number' }
-                            }
-                        }
+                    required: ['max_pvlm_failures', 'max_mpam_failures'],
+                    schema: {
+                        max_pvlm_failures: { type: 'number', minimum: 0 },
+                        max_mpam_failures: { type: 'number', minimum: 0 }
                     }
                 },
-                attestation_requirements: {
+                utility_maximization: {
                     type: 'object',
-                    required: ['ecvm_required'],
-                    properties: {
-                        ecvm_required: { type: 'boolean' }
+                    required: ['UFRM'],
+                    schema: {
+                        UFRM: { type: 'number' }
                     }
                 }
             }
-        };
-
-        // Configuration objects exposed by registries must be immutable.
-        return Object.freeze(ACVDIntegritySchema);
+        },
+        attestation_requirements: {
+            type: 'object',
+            required: ['ecvm_required'],
+            schema: {
+                ecvm_required: { type: 'boolean' }
+            }
+        }
     }
-}
+};
 
-module.exports = ACVDIntegritySchemaRegistryKernel;
+module.exports = ACVDIntegritySchema;
