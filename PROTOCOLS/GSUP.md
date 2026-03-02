@@ -1,194 +1,30 @@
-class Config {
-  static get staticConfig() {
-    return {
-      VERSION: "1.0.0",
-      env: process.env.NODE_ENV || "development"
-    };
-  }
+# GSUP V94.1: GOVERNANCE SCHEMA UPDATE PROTOCOL
 
-  constructor(values = {}) {
-    this.setValues(values);
-  }
+## 1.0 PURPOSE & SCOPE
+The Governance Schema Update Protocol (GSUP) defines the atomic, CRoT-attested process necessary for modification of Trust Segment B validation schemas stored within the Policy Configuration Schema Repository (PCSR). This is a highly privileged, off-GSEP-C operation required to facilitate policy evolution without compromising the integrity attested by the Policy Configuration Schema Integrity Manifest (PCSIM).
 
-  setValues(values) {
-    Object.assign(this, values);
-  }
+## 2.0 PROTOCOL PHASES
 
-  static get defaultConfig() {
-    return {
-      foo: 'bar',
-      baz: true
-    };
-  }
+The protocol requires sequential validation and commitment phases involving multiple independent governance systems to enforce multi-agent consensus before update deployment.
 
-  static get configSchema() {
-    return {
-      type: 'object',
-      properties: {
-        foo: { type: 'string' },
-        baz: { type: 'boolean' }
-      }
-    };
-  }
+### Phase 1: Preparation & Submission (GAX Lead)
+1.  **Schema Draft:** GAX generates proposed updates to PCSR (e.g., changes to PVLM schema constraints).
+2.  **Version Lock:** Proposed schemas are cryptographically sealed with the anticipated new version (N+1) metadata.
+3.  **Audit Review:** Independent auditing module (Oversight Committee, OC) signs off on semantic adherence and integrity via an OC-Signed Audit Log (**OCAL**).
 
-  validate() {
-    try {
-      const schema = Config.configSchema;
-      const validator = new (require('jsonschema').Validator)();
-      validator.checkSchema(schema);
-      validator.validate(this, schema);
-    } catch (e) {
-      console.error('Config validation error:', e);
-      throw e;
-    }
-  }
-}
+### Phase 2: CRoT Attestation & Commitment
+1.  **Integrity Hash Generation:** The entire updated PCSR payload is hashed ($\text{Hash}_{\text{PCSR}, N+1}$). 
+2.  **PCSIM Update Request:** The hash and version N+1 metadata are submitted to CRoT for attestation.
+3.  **CRoT Signing:** CRoT verifies the OCAL signature and context. Upon successful verification, CRoT cryptographically signs the new hash, generating the updated **PCSIM** ($\text{PCSIM}_{N+1}$). 
+4.  **Distribution:** The $\text{PCSIM}_{N+1}$ and the attested PCSR N+1 package are distributed atomically to all PCTM instances and redundant storage layers.
 
-class LifecycleEvent {
-  constructor(event) {
-    this.event = event;
-  }
-}
+### Phase 3: Activation & Verification (PCTM/SGS Lead)
+1.  **Pre-Flight Check:** All governance agents (SGS, GAX) acknowledge receipt of the attested PCSIM and PCSR N+1 files.
+2.  **Atomic Activation:** PCTM synchronously replaces the operational PCSR files with the attested N+1 package.
+3.  **Self-Test:** PCTM immediately executes a self-verification run, re-hashing the newly active PCSR and comparing it against the received $\text{PCSIM}_{N+1}$.
+4.  **Success Logging:** SGS logs the successful GSUP completion event into the Certified State Transition Ledger (CSTL), marking the $\text{PCSIM}_{N+1}$ as active for subsequent GSEP-C runs (S0).
 
-class LifecycleHandler {
-  constructor(handler) {
-    this.handler = handler;
-  }
+## 3.0 FAILURE MODES
 
-  bind(target = this) {
-    this.handler = this.handler.bind(target);
-  }
-
-  execute() {
-    this.handler();
-  }
-}
-
-class NexusCore {
-  #lifecycle = {
-    configured: false,
-    loaded: false,
-    shuttingDown: false
-  };
-
-  #status = "INIT";
-
-  get status() {
-    return this.#status;
-  }
-
-  set status(value) {
-    this.#status = value;
-    const currentValue = this.#status;
-    const lifecycle = this.#lifecycle;
-    if (value !== 'INIT') {
-      console.log(`NexusCore instance is ${value}.`);
-      if (value === 'SHUTDOWN') {
-        lifecycle.shuttingDown = false;
-      }
-    }
-    if (currentValue === 'INIT' && value !== 'INIT') {
-      lifecycle.configured = true;
-    }
-  }
-
-  get lifecycle() {
-    return this.#lifecycle;
-  }
-
-  configure(config) {
-    this.validateConfig(config);
-    this.onLifecycleEvent("CONFIGURED");
-    this.#lifecycle.configured = true;
-    this.config = config;
-  }
-
-  validateConfig(config) {
-    const configSchema = Config.configSchema;
-    try {
-      const validator = new (require('jsonschema').Validator)();
-      validator.checkSchema(configSchema);
-      validator.validate(config, configSchema);
-    } catch (e) {
-      console.error('Config validation error:', e);
-      throw e;
-    }
-  }
-
-  onLifecycleEvent(event, handler) {
-    const lifecycleHandler = new LifecycleHandler(handler);
-    this.#lifecycle[event] = lifecycleHandler;
-  }
-
-  get on() {
-    return (event, handler) => {
-      const lifecycleEvent = new LifecycleEvent(event);
-      this.onLifecycleEvent(event, handler);
-    };
-  }
-
-  executeLifecycleEvent(event) {
-    if (this.#lifecycle[event]) {
-      this.#lifecycle[event].bind(this).execute();
-    }
-  }
-
-  async load() {
-    await this.executeLifecycleEvent("CONFIGURED");
-    try {
-      console.log("Loading...");
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log("Loading complete...");
-      this.#lifecycle.loaded = true;
-      this.executeLifecycleEvent("LOADED");
-    } catch (e) {
-      console.error('Load error:', e);
-    }
-  }
-
-  async shutdown() {
-    try {
-      if (!this.#lifecycle.shuttingDown) {
-        console.log("Shutdown initiated...");
-        this.#lifecycle.shuttingDown = true;
-        this.executeLifecycleEvent("SHUTTING_DOWN");
-        console.log("Shutdown complete...");
-        this.status = "SHUTDOWN";
-      }
-    } catch (e) {
-      console.error("Shutdown error:", e);
-    }
-  }
-
-  async start() {
-    const startMethodOrder = ["configure", "load", "shutdown"];
-    for (const methodName of startMethodOrder) {
-      if (this[methodName] instanceof Function) {
-        await this[methodName]();
-      }
-    }
-  }
-
-  async destroy() {
-    this.status = "DESTROYED";
-    this.#lifecycle = {
-      configured: false,
-      loaded: false,
-      shuttingDown: false
-    };
-  }
-
-  async on(event, handler) {
-    await this.onLifecycleEvent(event, handler);
-  }
-}
-
-const nexusCore = new NexusCore();
-nexusCore.on('DESTROYED', () => {
-  console.log("NexusCore instance destroyed.");
-});
-nexusCore.configure(Config.defaultConfig);
-nexusCore.start();
-nexusCore.load();
-nexusCore.shutdown();
-nexusCore.destroy();
+*   **PCSIM Mismatch:** If Phase 3, Step 3 fails (Hash mismatch), the PCTM immediately rolls back to the prior certified state ($\text{PCSR}_{N}$) and triggers a CRITICAL (RRP) failure event.
+*   **CRoT Failure to Sign:** Protocol halts immediately. A **TERMINAL (SIH)** event is triggered if CRoT is unresponsive.
