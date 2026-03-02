@@ -1,56 +1,57 @@
 /**
- * AGI-KERNEL v7.11.3 [STRATEGIC_AGENCY]
- * Kernel Component ID: SEVK
- * Name: Statistical Evaluator Kernel
- * Function: Provides asynchronous interfaces for high-efficiency statistical functions
- *           required by the Adaptive Parameter Tuner. Adheres to Maximum Recursive Abstraction
- *           by delegating all computation to the IMaturityMetricDeriverToolKernel.
+ * Utility Component ID: SEV
+ * Name: Statistical Evaluator
+ * Function: Provides centralized, high-efficiency mathematical functions for analyzing time-series data,
+ *           specifically targeting volatility and trend analysis required by the Adaptive Tuner (ATN).
  */
 
-const { IMaturityMetricDeriverToolKernel } = require('ACTIVE_TOOLS');
+/**
+ * Calculates the standard deviation of a dataset (proxy for metric volatility).
+ * @param {Array<number>} data - Array of recent metric observations.
+ * @returns {number} The standard deviation.
+ */
+function calculateVolatility(data) {
+    if (!data || data.length < 2) return 0;
 
-class StatisticalEvaluatorKernel {
-    /**
-     * @param {{maturityMetricDeriverKernel: IMaturityMetricDeriverToolKernel}} dependencies
-     */
-    constructor({ maturityMetricDeriverKernel }) {
-        if (!maturityMetricDeriverKernel || typeof maturityMetricDeriverKernel.calculateVolatility !== 'function') {
-            throw new Error('SEVK_INIT_ERROR: IMaturityMetricDeriverToolKernel dependency is required for statistical delegation.');
-        }
-        this._MMDK = maturityMetricDeriverKernel;
-        this.interfaceName = 'StatisticalEvaluatorKernel';
-    }
+    const n = data.length;
+    const mean = data.reduce((a, b) => a + b, 0) / n;
+    
+    // Sum of squared differences from the mean
+    const variance = data.reduce((sum, value) => sum + Math.pow(value - mean, 2), 0) / (n - 1);
 
-    /**
-     * Enforces AIA mandate for asynchronous initialization.
-     * @returns {Promise<void>}
-     */
-    async initialize() {
-        // Note: _MMDK is assumed to be initialized externally or handles its own lifecycle.
-        // No further asynchronous initialization needed for this abstraction layer.
-    }
-
-    /**
-     * Calculates the standard deviation of a dataset (proxy for metric volatility) asynchronously.
-     * Delegates calculation entirely to the specialized IMaturityMetricDeriverToolKernel.
-     * @param {Array<number>} data - Array of recent metric observations.
-     * @returns {Promise<number>} The standard deviation.
-     */
-    async calculateVolatility(data) {
-        // Maximum Recursive Abstraction: Delegate complex computation
-        return await this._MMDK.calculateVolatility(data);
-    }
-
-    /**
-     * Determines the short-term trend direction based on a linear regression slope asynchronously.
-     * Delegates calculation entirely to the specialized IMaturityMetricDeriverToolKernel.
-     * @param {Array<{ value: number, timestamp: number }>} observations - Array of { value: number, timestamp: number } objects.
-     * @returns {Promise<number>} The slope of the trend.
-     */
-    async calculateTrendSlope(observations) {
-        // Maximum Recursive Abstraction: Delegate complex computation
-        return await this._MMDK.calculateTrendSlope(observations);
-    }
+    return Math.sqrt(variance);
 }
 
-module.exports = StatisticalEvaluatorKernel;
+/**
+ * Determines the short-term trend direction based on a linear regression slope.
+ * @param {Array<Object>} observations - Array of { value: number, timestamp: number } objects.
+ * @returns {number} The slope of the trend (positive for increasing, negative for decreasing).
+ */
+function calculateTrendSlope(observations) {
+    if (!observations || observations.length < 2) return 0;
+
+    // Simple linear regression (y = mx + b), where x is time index (0, 1, 2...) and y is the value.
+    const n = observations.length;
+    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+
+    for (let i = 0; i < n; i++) {
+        const x = i; // Use index as time proxy
+        const y = observations[i].value;
+        sumX += x;
+        sumY += y;
+        sumXY += x * y;
+        sumX2 += x * x;
+    }
+
+    const denominator = (n * sumX2) - (sumX * sumX);
+    if (denominator === 0) return 0;
+    
+    // Slope (m)
+    const slope = ((n * sumXY) - (sumX * sumY)) / denominator;
+    return slope;
+}
+
+module.exports = {
+    calculateVolatility,
+    calculateTrendSlope
+};
