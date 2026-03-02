@@ -1,80 +1,91 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Data Artifact Registry Schema (v96.1 NEXUS_CORE Siphon-Grog)",
-  "description": "Evolutionary substrate for artifact governance. Implements IQ-25 Strategic Laziness and Huxley Tri-Loop alignment protocols.",
+  "title": "Data Artifact Registry Schema (v98.4 NEXUS_CORE Siphon-Grog)",
+  "description": "Architectural singularity substrate for logic siphoning. Implements MLA latent projections and PSR governance protocols.",
   "type": "object",
-  "required": ["registry_version", "artifacts"],
+  "required": ["registry_version", "saturation_state", "artifacts"],
   "properties": {
     "registry_version": {
       "type": "string",
-      "description": "Systemic version (DNA VI). Current: v3.1.0-EVO2."
+      "description": "Systemic version (DNA VI). Current: v3.5.1-SINGULARITY_ROUND_3."
+    },
+    "saturation_state": {
+      "type": "object",
+      "required": ["level", "semantic_drift_threshold", "emergency_brake"],
+      "description": "DALEK CAAN v3.1 Evolution Boundary Governance parameters.",
+      "properties": {
+        "level": {
+          "type": "integer",
+          "enum": [1, 2, 3, 4],
+          "default": 2
+        },
+        "semantic_drift_threshold": {
+          "type": "number",
+          "default": 0.35
+        },
+        "emergency_brake": {
+          "type": "boolean",
+          "default": false
+        }
+      }
     },
     "artifacts": {
       "type": "object",
-      "description": "Registry of data artifacts keyed by Sovereign Identifier (DNA VI).",
+      "description": "Sovereign Identifier Registry. Integrated with DeepSeek-V2.5 topology.",
       "patternProperties": {
         "^[A-Z][A-Z0-9_]{3,}$": {
           "type": "object",
-          "required": ["artifact_type", "description", "source_system", "governance"],
+          "required": ["artifact_type", "source_system", "governance"],
           "properties": {
             "artifact_type": {
               "type": "string",
-              "enum": ["PRIMITIVE", "STRUCTURED", "TIMESERIES", "LATENT_VECTOR", "MOE_EXPERT_STATE", "MLA_KV_CACHE"],
-              "description": "Category including DeepSeek-V2.5 MLA projection types."
+              "enum": [
+                "PRIMITIVE",
+                "STRUCTURED",
+                "TIMESERIES",
+                "LATENT_VECTOR",
+                "MLA_LATENT_MATRIX",
+                "MLA_KV_CACHE",
+                "MOE_EXPERT_STATE",
+                "MOE_GATE_LOGS"
+              ]
             },
             "source_system": {
               "type": "string",
-              "enum": ["CORE", "HMC", "SDR", "EXTERNAL", "CALCULATED", "SIPHON_ENGINE", "DEEPSEEK_V2_5"],
-              "description": "Originating process node (DNA II.1)."
+              "enum": ["CORE", "HMC", "SDR", "EXTERNAL", "SIPHON_ENGINE", "DEEPSEEK_V2_5", "MOE_ROUTER"]
             },
-            "description": {
-              "type": "string"
-            },
+            "description": { "type": "string" },
             "governance": {
               "type": "object",
-              "required": ["sensitivity_level", "retention_days", "ers_threshold", "ccrr_threshold"],
-              "description": "Huxley Tri-Loop governance and safety constraints (DNA II.2).",
+              "required": ["ers_threshold", "ccrr_threshold", "psr_threshold"],
               "properties": {
                 "sensitivity_level": {
                   "type": "string",
                   "enum": ["PUBLIC", "INTERNAL", "CONFIDENTIAL", "PII", "REGULATED", "SENSORY_LATENT"]
                 },
-                "retention_days": {
-                  "type": "integer",
-                  "minimum": 0
-                },
-                "ers_threshold": {
+                "retention_days": { "type": "integer", "minimum": 0 },
+                "ers_threshold": { "type": "number", "default": 0.15 },
+                "ccrr_threshold": { "type": "number", "default": 0.20 },
+                "psr_threshold": {
                   "type": "number",
-                  "minimum": 0,
-                  "maximum": 1,
-                  "default": 0.15,
-                  "description": "Ethical Risk Score limit (L1 Reasoning)."
+                  "default": 0.88,
+                  "description": "Baseline-Mutation-Comparison threshold (DNA II.3)."
                 },
-                "ccrr_threshold": {
-                  "type": "number",
-                  "minimum": 0,
-                  "maximum": 1,
-                  "default": 0.20,
-                  "description": "Certainty-Cost-Risk Ratio limit (L3 Self-Critique)."
+                "identity_anchor_lock": {
+                  "type": "boolean",
+                  "default": true
                 }
               }
             },
             "operational_metadata": {
               "type": "object",
               "properties": {
-                "phi_coherence": {
+                "phi_coherence": { "type": "number", "default": 0.999 },
+                "lambda_entropy": { "type": "number", "default": 0.618 },
+                "compression_ratio": {
                   "type": "number",
-                  "default": 0.999,
-                  "description": "Integrated Information metric (DNA II.1)."
-                },
-                "lambda_entropy": {
-                  "type": "number",
-                  "default": 0.618,
-                  "description": "Edge of Chaos stability measure."
-                },
-                "latent_vector_dim": {
-                  "type": "integer",
-                  "enum": [128, 512, 1536]
+                  "default": 3.0,
+                  "description": "MLA latent compression (1536 / KV_DIM)."
                 },
                 "moe_expert_config": {
                   "type": "object",
@@ -89,10 +100,11 @@
             "derivation_details": {
               "type": "object",
               "properties": {
-                "cgs_limit": {
-                  "type": "number",
-                  "default": 2.10,
-                  "description": "Certainty Gain Score threshold for L2 reasoning."
+                "cgs_limit": { "type": "number", "default": 2.10 },
+                "siphon_chain": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "description": "Ordered model chain (Gemini-Architect -> Cerebras-Worker -> Gemini-Auditor)."
                 },
                 "input_dependencies": {
                   "type": "array",
