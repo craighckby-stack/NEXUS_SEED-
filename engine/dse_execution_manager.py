@@ -1,5 +1,3 @@
-# engine/dse_execution_manager.py
-
 import json
 # NOTE: Imports below are illustrative, assuming supporting infrastructure exists
 # from governance.smc_controller import StateMachineController
@@ -11,59 +9,85 @@ class DSEExecutionManager:
     Central operational component responsible for orchestrating the atomic 15-stage 
     GSEP-C pipeline (P-M01 compliance). Handles stage transitions, constraint 
     checking, and Integrity Halt (IH) invocation upon violation.
+    
+    Optimized for recursive flow abstraction and computational efficiency.
     """
 
     def __init__(self, flow_config_path='config/gsep_c_flow.json'):
-        # Initialize components: SMC, ACVM, Logger
         self.flow_config = self._load_flow_config(flow_config_path)
         self.current_state = 'S00'
+        # Pre-compute ordered stage keys for optimized iteration in recursion
+        self._stage_keys = list(self.flow_config.get('stages', {}).keys())
 
     def _load_flow_config(self, path):
         try:
             with open(path, 'r') as f:
                 return json.load(f)
         except FileNotFoundError:
-            # Handle critical error: Cannot start GSEP-C without flow definition
             raise Exception(f"GSEP-F Flow definition not found at {path}")
 
     def _invoke_actor(self, stage_data):
-        """Executes the task defined for the current GSEP-C stage (e.g., CRoT Agent, EMS)."""
+        """Executes the task defined for the current GSEP-C stage."""
+        # Direct access to data structure (actor/task lookup is minimized)
         actor = stage_data.get('actor')
         task = stage_data.get('task')
-        # Logging / External API call to actor service
+        # Logging / External API call to actor service (Simulated)
         return {"status": "success", "artifact_path": f"artifact/{self.current_state}_data.json"}
 
-    def _check_constraints(self, state, artifact_data):
-        """Enforces P-M02 checks (GAX I, II, III) against ACVM criteria."""
-        if state in ['S01', 'S07', 'S08']:
-            axiom = self.flow_config['stages'][state].get('axiom')
-            # Retrieve ACVM constraints for the triggered axiom
-            # constraints = self.acvm_loader.get_constraints(axiom) 
-            
-            # Logic for GAX constraint resolution (simulated)
-            if 'violation_detected' in artifact_data: 
-                self.invoke_integrity_halt(f"P-M02/GAX VIOLATION detected at {state}: {axiom} failed.")
+    def _check_constraints(self, stage_key, stage_data, artifact_data):
+        """Enforces P-M02 checks (GAX I, II, III) against ACVM criteria. Optimized for rapid failure detection."""
         
-        return True 
+        # Optimization: Check for 'axiom' key existence directly instead of state enumeration
+        if 'axiom' in stage_data:
+            axiom = stage_data['axiom']
+            # Logic for GAX constraint resolution (simulated: rapid failure exit)
+            if 'violation_detected' in artifact_data: 
+                # If violation detected, trigger immediate halt and skip remaining code execution
+                self.invoke_integrity_halt(f"P-M02/GAX VIOLATION detected at {stage_key}: {axiom} failed.")
+        
+        # If IH is not called, constraints are implicitly satisfied
+
+    def _execute_stage(self, stage_key):
+        """Core execution step for a single stage."""
+        stage_data = self.flow_config['stages'][stage_key]
+        self.current_state = stage_key
+        
+        # 1. P-M01 Structural Validation via SMC (Assumed external)
+
+        try:
+            artifact = self._invoke_actor(stage_data)
+            
+            # Pass stage metadata directly to constraint checker
+            self._check_constraints(stage_key, stage_data, artifact)
+            
+            return True # Stage execution successful and constraints passed
+
+        except Exception as e:
+            self.invoke_integrity_halt(f"Runtime Exception at {stage_key}: {e}")
+            return False
+
+    def run_gsep_c_pipeline_recursive(self, index=0):
+        """
+        Recursive abstraction of the GSEP-C state machine execution flow.
+        Efficiently iterates over the pre-computed stage key list.
+        """
+        if index >= len(self._stage_keys):
+            # Base Case: Pipeline completion
+            return 
+
+        stage_key = self._stage_keys[index]
+        
+        # Execute current stage. If execution fails, IH is called and process terminates via exit(1).
+        success = self._execute_stage(stage_key)
+
+        if success:
+            # Recursive step: Move to the next stage. 
+            # This structure represents the sequential flow abstractly.
+            self.run_gsep_c_pipeline_recursive(index + 1)
 
     def run_gsep_c_pipeline(self):
-        # Must pass C-ICR before starting (S00)
-        
-        for state_key, stage_data in self.flow_config.get('stages', {}).items():
-            self.current_state = state_key
-            
-            # 1. P-M01 Structural Validation via SMC (Check state transition contract)
-            # if not self.smc.check_stage_preconditions(self.current_state):
-            #      self.invoke_integrity_halt(f"P-M01 Flow Violation at {self.current_state}")
-
-            try:
-                artifact = self._invoke_actor(stage_data)
-                self._check_constraints(self.current_state, artifact)
-
-            except Exception as e:
-                self.invoke_integrity_halt(f"Runtime Exception at {self.current_state}: {e}")
-                return 
-
+        """Initiates the optimized recursive pipeline execution."""
+        self.run_gsep_c_pipeline_recursive(index=0)
         # Final logging and state transition completion
         pass
 
