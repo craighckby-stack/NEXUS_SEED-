@@ -1,17 +1,17 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Data Artifact Registry Schema (v94.2 Intelligence Refactor)",
-  "description": "Defines and registers all fundamental data artifacts, specifying classification, operational requirements, governance constraints, and structural definitions via schema references.",
+  "title": "Data Artifact Registry Schema (v95.0 NEXUS_CORE MLA-MoE Integration)",
+  "description": "Defines fundamental data artifacts with integrated DeepSeek-V2.5 MLA and Huxley Tri-Loop alignment protocols.",
   "type": "object",
   "required": ["registry_version", "artifacts"],
   "properties": {
     "registry_version": {
       "type": "string",
-      "description": "Semantic version of the artifact definitions."
+      "description": "Evolutionary version of the artifact definitions."
     },
     "artifacts": {
       "type": "object",
-      "description": "Map of data artifact definitions, keyed by their unique identifier (source_data_key).",
+      "description": "Registry of data artifacts keyed by Sovereign Identifier.",
       "patternProperties": {
         "^[A-Z][A-Z0-9_]{3,}$": {
           "type": "object",
@@ -19,35 +19,40 @@
           "properties": {
             "artifact_type": {
               "type": "string",
-              "enum": ["PRIMITIVE", "STRUCTURED", "TIMESERIES"],
-              "description": "The general structure category of the artifact."
+              "enum": ["PRIMITIVE", "STRUCTURED", "TIMESERIES", "LATENT_VECTOR", "MOE_EXPERT_STATE"],
+              "description": "Category of the artifact including latent projections and expert weights."
             },
             "source_system": {
               "type": "string",
-              "enum": ["CORE", "HMC", "SDR", "EXTERNAL", "CALCULATED"],
-              "description": "The agent, system, or process that generates or provides the artifact."
+              "enum": ["CORE", "HMC", "SDR", "EXTERNAL", "CALCULATED", "SIPHON_ENGINE"],
+              "description": "Originating node or process, including the siphoning substrate."
             },
             "description": {
               "type": "string"
             },
             "governance": {
               "type": "object",
-              "required": ["sensitivity_level", "retention_days"],
-              "description": "Defines data lifecycle and security constraints.",
+              "required": ["sensitivity_level", "retention_days", "ers_threshold"],
+              "description": "Huxley Tri-Loop governance and safety constraints.",
               "properties": {
                 "sensitivity_level": {
                   "type": "string",
-                  "enum": ["PUBLIC", "INTERNAL", "CONFIDENTIAL", "PII", "REGULATED"],
-                  "description": "Classification level for access control and logging."
+                  "enum": ["PUBLIC", "INTERNAL", "CONFIDENTIAL", "PII", "REGULATED", "SENSORY_LATENT"],
+                  "description": "Classification including neural latent sensitivity."
                 },
                 "retention_days": {
                   "type": "integer",
+                  "minimum": 0
+                },
+                "ers_threshold": {
+                  "type": "number",
                   "minimum": 0,
-                  "description": "Data retention period in days (0 for permanent/indefinite retention)."
+                  "maximum": 1,
+                  "default": 0.15,
+                  "description": "Maximum permissible Ethical Risk Score (DNA III.2)."
                 },
                 "purge_logic_ref": {
-                  "type": "string",
-                  "description": "Optional reference to a specific rule set for purge execution."
+                  "type": "string"
                 }
               }
             },
@@ -57,45 +62,61 @@
                 "criticality_level": {
                   "type": "string",
                   "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
-                  "default": "MEDIUM",
-                  "description": "Priority level for ingestion pipelines and monitoring SLAs."
+                  "default": "MEDIUM"
+                },
+                "phi_coherence": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "default": 0.999,
+                  "description": "N=3 Consciousness Integrated Information metric (DNA II.1)."
+                },
+                "lambda_entropy": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "default": 0.618,
+                  "description": "Edge of Chaos stability measure."
+                },
+                "latent_vector_dim": {
+                  "type": "integer",
+                  "enum": [128, 512, 1536],
+                  "description": "MLA Projection dimensionality (DeepSeek-V2.5 MLA)."
                 },
                 "freshness_ttl_hours": {
                   "type": "integer",
-                  "minimum": 1,
-                  "description": "Maximum allowed delay between generation and consumption."
+                  "minimum": 1
                 },
                 "unit_of_measure": {
-                  "type": "string",
-                  "description": "Standard unit for quantitative data (e.g., 'USD', 'milliseconds', 'count')."
+                  "type": "string"
                 }
               }
             },
             "derivation_details": {
               "type": "object",
-              "description": "Details for artifacts derived from other sources or calculations.",
               "properties": {
                 "calculation_reference": {
-                  "type": "string",
-                  "description": "Module path or function reference used for calculation (if source_system is CALCULATED)."
+                  "type": "string"
                 },
                 "input_dependencies": {
                   "type": "array",
                   "items": {
                     "type": "string"
-                  },
-                  "description": "List of required artifact keys (source_data_key) to produce this artifact."
+                  }
+                },
+                "cgs_limit": {
+                  "type": "number",
+                  "default": 2.10,
+                  "description": "Certainty Gain Score threshold for L2 reasoning."
                 }
               }
             },
             "schema_ref": {
-              "type": "string",
-              "description": "Required reference to the external JSON Schema file defining structure (if STRUCTURED/TIMESERIES)."
+              "type": "string"
             },
             "base_type": {
               "type": "string",
-              "enum": ["string", "integer", "float", "boolean", "timestamp", "any"],
-              "description": "The primitive type specification (if PRIMITIVE)."
+              "enum": ["string", "integer", "float", "boolean", "timestamp", "any"]
             }
           },
           "allOf": [
@@ -103,19 +124,7 @@
               "if": {
                 "properties": {
                   "artifact_type": {
-                    "const": "STRUCTURED"
-                  }
-                }
-              },
-              "then": {
-                "required": ["schema_ref"]
-              }
-            },
-            {
-              "if": {
-                "properties": {
-                  "artifact_type": {
-                    "const": "TIMESERIES"
+                    "enum": ["STRUCTURED", "TIMESERIES"]
                   }
                 }
               },
@@ -133,6 +142,18 @@
               },
               "then": {
                 "required": ["base_type"]
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "artifact_type": {
+                    "const": "LATENT_VECTOR"
+                  }
+                }
+              },
+              "then": {
+                "required": ["operational_metadata"]
               }
             }
           ]
