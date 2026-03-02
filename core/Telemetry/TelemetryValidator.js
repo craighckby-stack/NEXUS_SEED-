@@ -4,51 +4,68 @@
  * Ensures all outgoing telemetry adheres to type, format, and constraint specifications.
  */
 
-const DeclarativeEventSchemaValidator = require('@kernel/tools/DeclarativeEventSchemaValidator'); 
-const GAXEventSchema = Object.freeze(require('./GAXEventSchema'));
+const GAXEventSchema = require('./GAXEventSchema');
 
 class TelemetryValidator {
     /**
-     * Executes the core validation logic using the external declarative tool.
-     * @param {Object} schema - The validation schema definition.
-     * @param {Object} payload - The raw data object to validate.
-     * @returns {Object} { isValid: boolean, errors: Array<string> }
-     */
-    static #executeValidationDelegation({ schema, payload }) {
-        // Delegate the core validation logic (required, type, enum, strictness) to the specialized, reusable tool.
-        // Tool interface: .validate({ schema, payload }) -> { isValid, errors }
-        return DeclarativeEventSchemaValidator.validate({ schema, payload });
-    }
-
-    /**
-     * Validates a raw event payload against its defined schema using the declarative validator tool.
+     * Validates a raw event payload against its defined schema.
      * @param {string} eventName - The key name of the event (e.g., 'SYS:INIT:START').
      * @param {Object} payload - The raw data object to validate.
      * @returns {Object} { isValid: boolean, errors: Array<string> }
      */
     static validate(eventName, payload) {
-        // Using the frozen GAXEventSchema ensures read-only access to the validation rules.
-        const definition = GAXEventSchema[eventName];
-        
-        if (!definition) {
-            return {
-                isValid: false,
-                errors: [`Unknown event name: ${eventName}`]
-            };
+        const schemaDefinition = GAXEventSchema[eventName];
+        const validationResult = { isValid: true, errors: [] };
+
+        if (!schemaDefinition) {
+            validationResult.isValid = false;
+            validationResult.errors.push(`Unknown event name: ${eventName}`);
+            return validationResult;
         }
 
-        // Destructure the specific validation schema required by the DeclarativeEventSchemaValidator.
-        const { schema } = definition;
+        const schema = schemaDefinition.schema;
+        const payloadKeys = Object.keys(payload);
+        const schemaKeys = Object.keys(schema);
 
-        // Robustness check: Ensure the definition structure is not malformed.
-        if (!schema) {
-            return {
-                isValid: false,
-                errors: [`Internal Error: Definition for ${eventName} found, but 'schema' property is missing or null.`]
-            };
+        // 1. Check Required Fields and Type/Constraint Validation
+        for (const fieldName of schemaKeys) {
+            const fieldSchema = schema[fieldName];
+            const fieldValue = payload[fieldName];
+            const present = payload.hasOwnProperty(fieldName);
+
+            if (fieldSchema.required && !present) {
+                validationResult.isValid = false;
+                validationResult.errors.push(`Missing required field: ${fieldName}`);
+                continue;
+            }
+
+            if (present) {
+                // Basic Type Checking
+                if (typeof fieldValue !== fieldSchema.type) {
+                    validationResult.isValid = false;
+                    validationResult.errors.push(`Field '${fieldName}' expects type '${fieldSchema.type}', got '${typeof fieldValue}'`);
+                }
+
+                // Enum Check
+                if (fieldSchema.enum && !fieldSchema.enum.includes(fieldValue)) {
+                    validationResult.isValid = false;
+                    validationResult.errors.push(`Field '${fieldName}' value '${fieldValue}' is not in allowed enumeration.`);
+                }
+
+                // Future: Implement 'format' (uuid, sha1) and 'pattern' logic here
+                // Future: Implement 'min/max' checks
+            }
         }
-        
-        return this.#executeValidationDelegation({ schema, payload });
+
+        // 2. Check for unexpected fields (Strict Schema Enforcement)
+        for (const fieldName of payloadKeys) {
+            if (!schema.hasOwnProperty(fieldName)) {
+                validationResult.isValid = false;
+                validationResult.errors.push(`Unexpected field encountered: ${fieldName}`);
+            }
+        }
+
+        return validationResult;
     }
 }
 
