@@ -1,13 +1,13 @@
 {
   "$schema": "http://json-schema.org/draft/2020-12/schema",
-  "$id": "https://agi.sovereign/governance/WITS_Schema_v94.1.json",
+  "$id": "https://agi.sovereign/governance/WITS_Schema_v94.2.json",
   "title": "WITS_Schema_Formal",
   "description": "Formal JSON Schema definition for Workflow Integrity Telemetry System (WITS). Mandates strict structure and typing for GCO state logging.",
   "type": "object",
   "properties": {
     "schemaId": {
       "type": "string",
-      "const": "WITS_V94.1",
+      "const": "WITS_V94.2",
       "description": "Internal identifier for schema version."
     },
     "timestamp": {
