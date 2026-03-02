@@ -1,119 +1,74 @@
-import { ILoggerToolKernel } from './interfaces/ILoggerToolKernel';
-import { IThresholdLookupValidatorToolKernel } from './interfaces/IThresholdLookupValidatorToolKernel';
-import { ConfigDefaultsRegistryKernel } from './registry/ConfigDefaultsRegistryKernel';
+// src/governance/ResourceThresholds.js
 
 /**
- * AGI-KERNEL v7.11.3 [STRATEGIC_AGENCY]
- * ResourceThresholdsConfigRegistryKernel (RTC-G02 Refactored)
+ * RESOURCE THRESHOLDS CONFIGURATION (RTC)
+ * ID: RTC-G02
+ * GSEP Role: Provides a centralized, typed interface for accessing
+ * versioned resource governance thresholds and baselines.
  *
- * Strategic Mandate: Decouple static configuration, ensure asynchronous loading, 
- * and formalize dependency injection for high-integrity governance thresholds.
+ * Decouples static numerical thresholds from the dynamic check logic
+ * within the ResourceCheckRegistry (RCR).
  */
-class ResourceThresholdsConfigRegistryKernel {
-    private logger: ILoggerToolKernel;
-    private thresholdValidator: IThresholdLookupValidatorToolKernel;
-    private configRegistry: ConfigDefaultsRegistryKernel;
 
-    private activeVersion: string = 'V1';
-    private activeConfig: Readonly<Record<string, number>> = {};
-    private readonly configKey: string = 'GOVERNANCE_RESOURCE_THRESHOLDS'; // Standardized registry key
+const V1_THRESHOLDS = Object.freeze({
+    // Core Operational Baselines
+    CPU_CORE_BASELINE: 0.85, // Max utilization before triggering FAIL
+    MEMORY_RESERVE_MIN_MB: 256, // Minimum required MB reserve
+    LATENCY_MAX_MS: 50, // Maximum allowed execution latency for critical operations
 
+    // Mutation Specific Overheads
+    MUTATION_HEAP_MAX_MB: 1024,
+    MUTATION_TIMEOUT_S: 120,
+});
+
+class ResourceThresholds {
     /**
-     * @param logger High-integrity logging tool (conceptual dependency).
-     * @param thresholdValidator Specialized tool for strict threshold lookup and validation.
-     * @param configRegistry Registry for asynchronous retrieval of default configuration data.
+     * @param {string} [version='V1'] - The governance threshold version to enforce.
      */
-    constructor(
-        logger: ILoggerToolKernel,
-        thresholdValidator: IThresholdLookupValidatorToolKernel,
-        configRegistry: ConfigDefaultsRegistryKernel
-    ) {
-        this.logger = logger;
-        this.thresholdValidator = thresholdValidator;
-        this.configRegistry = configRegistry;
-        this.#setupDependencies();
+    constructor(version = 'V1') {
+        this.version = version;
+        this.config = this._loadVersion(version);
     }
 
     /**
-     * Ensures all critical dependencies are instantiated and ready for use.
-     * Isolated synchronous setup.
-     * @private
-     */
-    #setupDependencies(): void {
-        if (!this.logger || !this.thresholdValidator || !this.configRegistry) {
-            throw new Error('ResourceThresholdsConfigRegistryKernel initialization failed: Missing required dependencies.');
-        }
-    }
-
-    /**
-     * Initializes the kernel asynchronously by loading the default configuration.
-     * Configuration loading moved from synchronous constructor to async initialization.
-     * @param {string} [initialVersion='V1'] - The governance threshold version to enforce.
-     */
-    public async initialize(initialVersion: string = 'V1'): Promise<void> {
-        this.activeVersion = initialVersion;
-        await this.reload(initialVersion);
-    }
-
-    /**
-     * Loads the specific threshold configuration version asynchronously from the registry.
+     * Loads the specific threshold configuration version.
      * @private
      * @param {string} version 
-     * @returns {Promise<Readonly<Record<string, number>>>}
+     * @returns {Object}
      */
-    private async _loadVersion(version: string): Promise<Readonly<Record<string, number>>> {
-        try {
-            // Configuration is retrieved asynchronously from the centralized registry.
-            const allConfigs = await this.configRegistry.get(this.configKey);
-            const configKeyUpper = version.toUpperCase();
-
-            if (allConfigs && allConfigs[configKeyUpper]) {
-                return Object.freeze(allConfigs[configKeyUpper]);
-            }
-
-            // Violation corrected: Replaced console.warn with injected logger.
-            this.logger.warn(`RTC Warning: Unknown threshold version '${version}'. Falling back to V1.`, { 
-                component: 'ResourceThresholdsConfigRegistryKernel', version 
-            });
-            
-            if (allConfigs && allConfigs['V1']) {
-                return Object.freeze(allConfigs['V1']);
-            }
-            
-            // Critical failure: V1 default is mandatory and missing.
-            throw new Error(`Critical failure: Cannot load resource thresholds for version ${version}. V1 fallback is also missing.`);
-
-        } catch (error) {
-            this.logger.error(`Error loading resource thresholds configuration: ${error.message}`, { version, key: this.configKey });
-            // Re-throw critical errors to halt initialization/operation
-            throw error;
+    _loadVersion(version) {
+        switch (version.toUpperCase()) {
+            case 'V1':
+                return V1_THRESHOLDS;
+            default:
+                console.warn(`RTC Warning: Unknown threshold version '${version}'. Falling back to V1.`);
+                return V1_THRESHOLDS;
         }
     }
 
     /**
-     * Retrieves a specific threshold value, delegating strict validation to the specialized tool kernel.
+     * Retrieves a specific threshold value.
+     * Enforces strict key validation.
      * @param {string} key - The threshold identifier (e.g., 'CPU_CORE_BASELINE').
-     * @returns {number} The numerical threshold value.
-     * @throws {Error} If the key is missing or validation fails.
+     * @returns {number | undefined} The numerical threshold value.
      */
-    public get(key: string): number {
-        // Delegate the strict access and validation logic to the specialized injected tool kernel.
-        return this.thresholdValidator.execute({
-            config: this.activeConfig,
-            key: key,
-            version: this.activeVersion
-        });
+    get(key) {
+        const value = this.config[key];
+        if (typeof value === 'undefined') {
+             // Explicit failure for missing required keys improves RCR reliability.
+             throw new Error(`RTC Error: Required threshold '${key}' not defined in version ${this.version}.`);
+        }
+        return value;
     }
 
     /**
-     * Reloads thresholds, facilitating dynamic runtime reconfiguration asynchronously.
+     * Reloads thresholds, potentially allowing for dynamic runtime reconfiguration.
      * @param {string} version 
      */
-    public async reload(version: string): Promise<void> {
-        this.activeVersion = version;
-        this.activeConfig = await this._loadVersion(version);
-        this.logger.info(`Resource thresholds reloaded successfully for version: ${version}`, { component: 'ResourceThresholdsConfigRegistryKernel' });
+    reload(version) {
+        this.version = version;
+        this.config = this._loadVersion(version);
     }
 }
 
-export = ResourceThresholdsConfigRegistryKernel;
+module.exports = ResourceThresholds;
