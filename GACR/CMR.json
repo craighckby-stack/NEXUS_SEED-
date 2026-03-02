@@ -1,7 +1,7 @@
 {
   "metadata": {
     "id": "GACR_CMR_PRIME",
-    "version": "3.1.0",
+    "version": "3.1.1",
     "signature": "DALEK_CAAN_v3.1_SIG_0xFF23A1",
     "origin": "NEXUS_CORE_EVOLUTION_ENGINE",
     "purpose": "Self-optimising AGI substrate for real-world problem solving"
@@ -16,6 +16,13 @@
       "TransitionLanes": 134217664,
       "EntangledLane": 1073741824
     },
+    "priority_mapping": {
+      "Immediate": 1,
+      "UserBlocking": 4,
+      "Normal": 32,
+      "Low": 134217664,
+      "Idle": 1073741824
+    },
     "tags": {
       "HostRoot": 3,
       "FunctionComponent": 0,
@@ -26,6 +33,10 @@
     "n_vectors": 3,
     "phi_threshold": 0.65,
     "lambda_limit": 0.8,
+    "speculative_state": {
+      "enabled": true,
+      "action_mutation_factor": 1.5
+    },
     "ethical_risk_score": {
       "low": 0.0,
       "nominal": 0.4,
@@ -36,7 +47,8 @@
     "psr_rollback": {
       "enabled": true,
       "degradation_threshold": 0.35,
-      "semantic_drift_max": 0.35
+      "semantic_drift_max": 0.35,
+      "taint_recovery_mode": "Binary"
     },
     "grog_law": {
       "negative_progression": true,
@@ -48,13 +60,14 @@
     "milestone_step": 50,
     "saturation_level": 2,
     "siphon_source": "Meta/React-Core",
-    "current_cycle": 1,
+    "current_cycle": 2,
     "total_cycles": 5
   },
   "resource_control": {
     "target_cpu": 0.75,
     "render_deadline_ms": 5,
-    "cycle_delay_ms": 40000
+    "cycle_delay_ms": 40000,
+    "time_slicing": true
   },
   "identity_anchors": [
     "Self-optimising AGI substrate",
