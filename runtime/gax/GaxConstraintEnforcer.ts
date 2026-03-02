@@ -1,6 +1,3 @@
-declare const PayloadSizeChecker: { execute: (args: { request: unknown, limit: number, unit?: string }) => boolean; };
-
-// --- Constraint Definitions ---
 export class ConstraintViolationError extends Error {
   public constraintType: string;
   
@@ -21,120 +18,74 @@ export interface ConstraintDefinition {
 // Defines the optimized lookup structure: Map<"serviceName/methodName", ConstraintDefinition[]>
 export type IndexedConstraintMap = Map<string, ConstraintDefinition[]>; 
 
-// --- Plugin Interface Definitions ---
-
-export interface ConstraintCheckResult {
-    isViolated: boolean;
-    violationMessage?: string;
-}
-
-export interface IConstraintChecker {
-    /** The type of constraint this checker handles (e.g., 'payload_size'). */
-    readonly constraintType: string; 
-    /** Executes the check against the request and constraint definition. */
-    execute(constraint: ConstraintDefinition, request: unknown): ConstraintCheckResult;
-}
-
-// --- Gax Constraint Enforcer Kernel ---
-
-export class GaxConstraintEnforcerKernel {
-  #indexedConstraints: IndexedConstraintMap;
-  #checkers: Map<string, IConstraintChecker>;
+export class GaxConstraintEnforcer {
+  // The enforcer relies on a pre-indexed, strongly typed constraint map.
+  private indexedConstraints: IndexedConstraintMap;
 
   /**
-   * Initializes the kernel with pre-indexed constraints and a set of constraint checkers.
+   * Initializes the enforcer with a pre-indexed map of constraints.
+   * Indexing logic (inheritance, merging) must occur externally.
    */
-  constructor(indexedConstraints: IndexedConstraintMap, checkers: IConstraintChecker[]) {
-    this.#setupDependencies(indexedConstraints, checkers);
+  constructor(indexedConstraints: IndexedConstraintMap) {
+    this.indexedConstraints = indexedConstraints;
   }
-
-  // --- Setup and Initialization ---
-
-  /**
-   * Synchronously validates dependencies and initializes internal state.
-   * (Satisfies the synchronous setup extraction goal.)
-   */
-  #setupDependencies(indexedConstraints: IndexedConstraintMap, checkers: IConstraintChecker[]): void {
-    if (!indexedConstraints || !checkers) {
-      this.#throwSetupError("Indexed constraints and checkers list must be provided.");
-    }
-    this.#indexedConstraints = indexedConstraints;
-    
-    const checkerMap = new Map<string, IConstraintChecker>();
-    for (const checker of checkers) {
-      if (!checker || !checker.constraintType) {
-        this.#throwSetupError("Invalid checker provided; must implement IConstraintChecker.");
-      }
-      checkerMap.set(checker.constraintType, checker);
-    }
-    this.#checkers = checkerMap;
-  }
-
-  // I/O Proxy: Setup Error Handling
-  #throwSetupError(message: string): never {
-    throw new Error(`[GaxConstraintEnforcerKernel Setup Error] ${message}`);
-  }
-
-  // --- Public Interface ---
 
   /**
    * Retrieves and enforces all relevant constraints for a specific API call.
    */
   public enforce(serviceName: string, methodName: string, request: unknown): void {
-    const constraints = this.#delegateToConstraintLookup(serviceName, methodName);
+    const constraints = this.getEffectiveConstraints(serviceName, methodName);
+
+    if (constraints.length === 0) {
+      return; 
+    }
 
     for (const constraint of constraints) {
-      const checker = this.#delegateToCheckerLookup(constraint.type);
-
-      if (!checker) {
-        this.#logMissingCheckerWarning(constraint.type);
-        continue;
-      }
-
-      const result = this.#executeChecker(checker, constraint, request);
-
-      if (result.isViolated) {
-        this.#throwViolationError(constraint, result);
+      switch (constraint.type) {
+        case 'rate_limit':
+          // Implementation requires integrating a stateful rate limiter utility.
+          if (!this.checkRateLimit(serviceName, methodName)) {
+            throw new ConstraintViolationError('Rate limit exceeded for method call', constraint.type);
+          }
+          break;
+        case 'payload_size':
+          const limit = constraint.value as number;
+          if (this.checkPayloadSize(request, limit, constraint.unit)) {
+             throw new ConstraintViolationError(`Payload size (${limit} ${constraint.unit || 'bytes'}) exceeded limit`, constraint.type);
+          }
+          break;
+        // Further validation cases (e.g., 'timeout', 'field_pattern') can be added here.
+        default:
+          console.warn(`[GaxConstraintEnforcer] Skipping unknown constraint type: ${constraint.type}`);
       }
     }
   }
 
-  // --- I/O Proxies ---
-
   /**
-   * I/O Proxy: Calculates the effective constraints by accessing private state.
+   * Calculates the effective constraints. O(1) lookup since constraints are pre-indexed by method.
    */
-  #delegateToConstraintLookup(serviceName: string, methodName: string): ConstraintDefinition[] {
+  private getEffectiveConstraints(serviceName: string, methodName: string): ConstraintDefinition[] {
     const key = `${serviceName}/${methodName}`;
-    return this.#indexedConstraints.get(key) || [];
-  }
-  
-  /**
-   * I/O Proxy: Looks up a registered checker by type.
-   */
-  #delegateToCheckerLookup(constraintType: string): IConstraintChecker | undefined {
-      return this.#checkers.get(constraintType);
+    return this.indexedConstraints.get(key) || [];
   }
 
-  /**
-   * I/O Proxy: Executes the constraint check (External Tool Delegation).
-   */
-  #executeChecker(checker: IConstraintChecker, constraint: ConstraintDefinition, request: unknown): ConstraintCheckResult {
-    return checker.execute(constraint, request);
+  // --- Stub Implementations for Runtime Checks ---
+
+  private checkRateLimit(serviceName: string, methodName: string): boolean {
+    // TRUE if the call is allowed.
+    // Requires external RateLimiter instance injection.
+    return true; 
   }
   
-  /**
-   * I/O Proxy: Handles logging a warning for an unregistered checker.
-   */
-  #logMissingCheckerWarning(constraintType: string): void {
-    console.warn(`[GaxConstraintEnforcerKernel] Skipping constraint '${constraintType}'. No checker registered.`);
-  }
-
-  /**
-   * I/O Proxy: Handles throwing a ConstraintViolationError (Control Flow Isolation).
-   */
-  #throwViolationError(constraint: ConstraintDefinition, result: ConstraintCheckResult): never {
-    const message = result.violationMessage || `Constraint violation of type '${constraint.type}' detected.`;
-    throw new ConstraintViolationError(message, constraint.type);
+  private checkPayloadSize(request: unknown, limit: number, unit?: string): boolean {
+    // TRUE if the request violates the size limit.
+    try {
+      const bytes = Buffer.byteLength(JSON.stringify(request), 'utf8');
+      // TODO: Add unit conversion logic (KB, MB, GB)
+      return bytes > limit; 
+    } catch (e) {
+      // Handle serialization errors gracefully
+      return true; // Assume violation if size cannot be determined safely
+    }
   }
 }
