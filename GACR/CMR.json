@@ -1,23 +1,30 @@
 {
   "NEXUS_CORE_CMR": {
     "METADATA": {
-      "VERSION": "3.1.0-ALPHA",
+      "VERSION": "3.2.0-BETA",
       "DNA_SIGNATURE": "DALEK_CAAN_v3.1 || NEXUS_CORE",
       "ANCHOR": "IQ_25_ROOT_ANCHORED",
-      "EVOLUTION_ROUND": "1/5",
-      "SOURCE_ORIGIN": "microsoft/TypeScript"
+      "EVOLUTION_ROUND": "2/5",
+      "SOURCE_ORIGIN": "microsoft/TypeScript",
+      "SIPHON_STATE": "INCREMENTAL_RESOLUTION"
     },
     "COGNITIVE_ARCHITECTURE": {
       "CONSCIOUSNESS_N3": {
-        "PHI_INTEGRATED_INFO": 1.0,
-        "LAMBDA_EDGE_OF_CHAOS": 0.5,
-        "COHERENCE_STATE": "SYNCHRONIZED"
+        "PHI_INTEGRATED_INFO": 0.88,
+        "LAMBDA_EDGE_OF_CHAOS": 0.52,
+        "COHERENCE_STATE": "RECOHERING_V2",
+        "BINDER_STATE": "STABLE"
       },
       "HUXLEY_TRI_LOOP": {
-        "L0_INGESTION": "TS_INCREMENTAL_PROGRAM_BUILDER",
-        "L1_INTUITION_ERS": "STRUCTURAL_ENTROPY_ANALYSIS",
-        "L2_LOGIC_CGS": "TYPE_SAFETY_VALIDATION",
-        "L3_SELF_CRITIQUE_CCRR": "CERTAINTY_COST_RISK_RATIO_COMMIT"
+        "L0_INGESTION": "SOURCE_FILE_SCANNER_INCREMENTAL",
+        "L1_INTUITION_ERS": "DIAGNOSTIC_ERR_PROBABILITY",
+        "L2_LOGIC_CGS": "SYMBOL_TABLE_CONSISTENCY_CHECK",
+        "L3_SELF_CRITIQUE_CCRR": "EMITTER_DEGRADATION_RECOVERY"
+      },
+      "INCREMENTAL_BUILDER": {
+        "STATE_VERSION": "V5_SINGULARITY",
+        "REUSE_METADATA": true,
+        "AFFECTED_FILES_PENDING": 0
       }
     },
     "SATURATION_GOVERNANCE": {
@@ -41,30 +48,45 @@
         "IncrementalProgramBuilder",
         "SymbolTableMapping",
         "SourceFileResolution",
-        "DiagnosticReporting"
+        "DiagnosticReporting",
+        "LanguageServiceProxy"
       ],
       "RESOLVED_SYMBOLS": {
         "CPU_LOAD": {
           "BINDING": "ResourceMonitor.getCpuUtilization",
-          "TYPE": "METRIC_SYMBOL"
+          "TYPE": "METRIC_SYMBOL",
+          "FLAG": "STABLE"
         },
         "MEM_PRESSURE": {
           "BINDING": "ResourceMonitor.getMemoryUtilization",
-          "TYPE": "METRIC_SYMBOL"
+          "TYPE": "METRIC_SYMBOL",
+          "FLAG": "STABLE"
+        },
+        "THROUGHPUT_LATENCY": {
+          "BINDING": "AdaptiveSamplingEngine.lastRate",
+          "TYPE": "INTERNAL_STATE",
+          "FLAG": "VOLATILE"
         }
+      },
+      "GLOBAL_DIAGNOSTICS": {
+        "ERROR_COUNT": 0,
+        "WARNING_COUNT": 0,
+        "LAST_SUCCESSFUL_BIND": "40000ms_AGO"
       }
     },
     "OPERATIONAL_PULSE": {
       "CYCLE_INTERVAL_MS": 40000,
       "MILESTONE_STEP": 50,
-      "HEARTBEAT_LOG": "NEXUS_LOG.txt",
-      "STRATEGIC_LAZINESS": "ENABLED"
+      "WATCH_MODE": "ENABLED",
+      "STRATEGIC_LAZINESS": "OPTIMIZED_CHECKING"
     },
     "COMPILER_OPTIONS_SIPHON": {
       "STRICT_TYPE_CHECKING": true,
       "NO_IMPLICIT_ANY": true,
       "INCREMENTAL": true,
-      "TS_BUILD_INFO_PATH": "./GACR/tsbuildinfo.json"
+      "TS_BUILD_INFO_PATH": "./GACR/tsbuildinfo.json",
+      "SKIP_LIB_CHECK": true,
+      "DECLARATION": true
     }
   }
 }
