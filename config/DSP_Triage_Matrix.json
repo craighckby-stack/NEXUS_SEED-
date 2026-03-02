@@ -1,215 +1,32 @@
-TARGET FILE: config/DSP_Triage_Matrix.json
-ROUND: 4/5
-
-CHAINED CONTEXT:
-A new service discovery system has been implemented and is currently being integrated with the existing triage matrix. The new system uses a combination of DNS and HTTP protocols to resolve services. The current implementation of the loadConfig function is not compatible with the new service discovery system.
-
-// Import required modules
-const genkit = require('genkit');
-import { create } from 'react-core';
-import { ServiceDiscovery, Service } from 'react-service-discovery'; // Integrate the new service discovery system
-
-// Parse the current file using the Genkit parser
-const(parser) => {
-  // Get the metadata from the current file
-  const filePath = __filename;
-  const fileDir = path.dirname(filePath);
-  const fileName = path.basename(filePath, '.js');
-
-  // Define a new abstract class that will handle configuration using React-Core's composition APIs
-  const configClass = `
-    import { Inject, injectable, singleton } from '${genkit.packagesLocation}.genkit';
-    import { JsonSchema } from 'jsonschema';
-    import { Logger, LogLevel } from '${genkit.packagesLocation}/genkit/packages/logging';
-    import { create } from 'react-core';
-    import { ServiceDiscovery, Service } from 'react-service-discovery';
-
-    // Register new metadata in the configuration class
-    abstract class Config {
-      static readonly logger = new Logger({ level: LogLevel.ALL });
-
-      static readonly defaultConfigSchema = {
-        type: 'object',
-        properties: {
-          metaDirectory: { type: 'string', pattern: '^[\\w\\/]+\\.json$', description: 'path to the metadata file' }
-        },
-      };
-
-      static readonly defaultEnvironmentConfig = {
-        NODE_ENV: 'development',
-        LOG_LEVEL: 'debug'
-      };
-
-      static get staticEnvironment() {
-        const currentNodeEnv = process.env.NODE_ENV;
-        return currentNodeEnv ? currentNodeEnv : process.env.NODE_ENV_DEFAULT || 'development';
-      }
-
-      constructor(values = {}, container) {
-        this.values = values;
-        this.container = container;
-      }
-
-      abstract init(container: any);
-
-      validateConfig(@Inject('config') config: any, container: any) {
-        const configFilePath = `${this.container.resolve('configDir')}config.json`;
-        const schemaValidator = new JsonSchema();
-        const metaConfig = schemaValidator.validate(config, this.staticEnvironment ? this.defaultEnvironmentConfig.NODE_ENV : 'node');
-        return metaConfig;
-      }
-
-      get logger() {
-        return this.constructor.logger;
-      }
-
-      get configFilePath() {
-        return this.container.resolve('configDir') + fileName + ".json";
-      }
-
-      loadConfig(configObj, options = {}) {
-        const configFilePath = this.configFilePath;
-        const fetchConfig = create(function* () {
-          const services = yield ServiceDiscovery.resolve('config');
-          const service = services.find((service) => service.instance.name === 'config');
-          if (service) {
-            const content = yield service.read();
-            return JSON.parse(content);
-          }
-        });
-        return fetchConfig();
-      }
-
-      updateConfig(configObj, options = {}) {
-        const configFilePath = this.configFilePath;
-        const fetchConfig = create(function* () {
-          const services = yield ServiceDiscovery.resolve('config');
-          const service = services.find((service) => service.instance.name === 'config');
-          if (service) {
-            yield service.write(JSON.stringify(configObj));
-          }
-        });
-        return fetchConfig();
-      }
+{
+  "description": "Defines the priority rules for mapping MIS payload metadata (Impact, Scope) to a simulation configuration key required by GTCM, implementing the Triage Rules Engine (TRE). Rules are processed sequentially by priority.",
+  "mapping_rules": [
+    {
+      "priority": 1,
+      "match_type": "ExactPair",
+      "impact": "critical",
+      "scope": "core",
+      "config_key": "high_critical"
+    },
+    {
+      "priority": 2,
+      "match_type": "ExactPair",
+      "impact": "critical",
+      "scope": "integration",
+      "config_key": "critical_integration"
+    },
+    {
+      "priority": 3,
+      "match_type": "ImpactFallback",
+      "impact_match": ["high", "critical"],
+      "config_key": "medium_high"
+    },
+    {
+      "priority": 4,
+      "match_type": "ImpactFallback",
+      "impact_match": ["medium"],
+      "config_key": "medium_default"
     }
-  `;
-
-  // Update the AST with the new class definition
-  tree.updateClassDeclarations(parser.parse(configClass).functions);
-
-  // Generate the modified code from the updated AST
-  const modifiedCode = tree.generateCode({ format: 'esmodule' });
-
-  // Inject the modified code into the current file
-  this.exports = modifiedCode;
-};
-
-VOTED ARCHITECTURE: React-Epic (Facebook)
-
-MUTATED CODE:
-
-// Import required modules
-const genkit = require('genkit');
-import { create } from 'react-core';
-import { createStore, Epic } from 'react-epic'; // Integrate React-Epic for a more scalable architecture
-
-// Parse the current file using the Genkit parser
-const(parser) => {
-  // Get the metadata from the current file
-  const filePath = __filename;
-  const fileDir = path.dirname(filePath);
-  const fileName = path.basename(filePath, '.js');
-
-  // Define a new abstract class that will handle configuration using React-Core's composition APIs
-  const configClass = `
-    import { Inject, injectable, singleton } from '${genkit.packagesLocation}.genkit';
-    import { JsonSchema } from 'jsonschema';
-    import { Logger, LogLevel } from '${genkit.packagesLocation}/genkit/packages/logging';
-    import { create } from 'react-core';
-    import { createStore, Epic } from 'react-epic';
-
-    // Register new metadata in the configuration class
-    abstract class Config {
-      static readonly logger = new Logger({ level: LogLevel.ALL });
-
-      static readonly defaultConfigSchema = {
-        type: 'object',
-        properties: {
-          metaDirectory: { type: 'string', pattern: '^[\\w\\/]+\\.json$', description: 'path to the metadata file' }
-        },
-      };
-
-      static readonly defaultEnvironmentConfig = {
-        NODE_ENV: 'development',
-        LOG_LEVEL: 'debug'
-      };
-
-      static get staticEnvironment() {
-        const currentNodeEnv = process.env.NODE_ENV;
-        return currentNodeEnv ? currentNodeEnv : process.env.NODE_ENV_DEFAULT || 'development';
-      }
-
-      constructor(values = {}, container) {
-        this.values = values;
-        this.container = container;
-      }
-
-      abstract init(container: any);
-
-      validateConfig(@Inject('config') config: any, container: any) {
-        const configFilePath = `${this.container.resolve('configDir')}config.json`;
-        const schemaValidator = new JsonSchema();
-        const metaConfig = schemaValidator.validate(config, this.staticEnvironment ? this.defaultEnvironmentConfig.NODE_ENV : 'node');
-        return metaConfig;
-      }
-
-      get logger() {
-        return this.constructor.logger;
-      }
-
-      get configFilePath() {
-        return this.container.resolve('configDir') + fileName + ".json";
-      }
-
-      loadConfig(configObj, options = {}) {
-        const configFilePath = this.configFilePath;
-        const store = createStore();
-        const getAsyncConfig = Epic(function*(action) {
-          const services = yield ServiceDiscovery.resolve('config');
-          const service = services.find((service) => service.instance.name === 'config');
-          if (service) {
-            const content = yield service.read();
-            store.dispatch(action(JSON.parse(content)));
-          } else {
-            store.dispatch(action());
-          }
-        });
-        store.dispatch({ type: 'GET_CONFIG', data: configObj });
-        this.values = store.getState();
-      }
-
-      updateConfig(configObj, options = {}) {
-        const configFilePath = this.configFilePath;
-        const store = createStore();
-        const updateAsyncConfig = Epic(function*(action) {
-          const services = yield ServiceDiscovery.resolve('config');
-          const service = services.find((service) => service.instance.name === 'config');
-          if (service) {
-            yield service.write(JSON.stringify(configObj));
-          }
-        });
-        store.dispatch({ type: 'UPDATE_CONFIG', data: configObj });
-        this.values = store.getState();
-      }
-    }
-  `;
-
-  // Update the AST with the new class definition
-  tree.updateClassDeclarations(parser.parse(configClass).functions);
-
-  // Generate the modified code from the updated AST
-  const modifiedCode = tree.generateCode({ format: 'esmodule' });
-
-  // Inject the modified code into the current file
-  this.exports = modifiedCode;
-};
+  ],
+  "default_fallback_key": "low_default"
+}
