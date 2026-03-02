@@ -1,122 +1,106 @@
 /**
- * AGI-KERNEL v7.11.3 - DialAnalysisRuleEngineKernel
- * Handles specialized rule compilation, prefix indexing, and delegates execution
- * to an injected IRuleEvaluationEngineToolKernel.
+ * src/engine/DialAnalysisRuleEngine.js
+ * Rule engine designed to parse and execute the structured logic defined in config/dial_analysis_map.json.
+ * It translates raw telemetry metrics into preconditions and executes complex logical rules.
  */
-class DialAnalysisRuleEngineKernel {
-    #ruleSets;
-    #ruleEvaluationEngine;
-    #logger;
+
+class DialAnalysisRuleEngine {
 
     /**
-     * @param {object} dependencies
-     * @param {IRuleEvaluationEngineToolKernel} dependencies.ruleEvaluationEngine - Tool for executing individual rules.
-     * @param {ILoggerToolKernel} dependencies.logger - Tool for logging warnings and errors.
+     * Static map of supported comparison operators.
+     * Ensures derivePreconditions remains clean and extensible.
      */
-    constructor(dependencies) {
-        this.#ruleSets = new Map();
-        this.#setupDependencies(dependencies);
-    }
+    static COMPARATORS = {
+        'GT': (value, threshold) => value > threshold,
+        'LT': (value, threshold) => value < threshold,
+        'EQ': (value, threshold) => value === threshold,
+        'GTE': (value, threshold) => value >= threshold,
+        'LTE': (value, threshold) => value <= threshold,
+        'DEFAULT': (value, threshold) => value === threshold, // Fallback
+    };
 
-    /**
-     * Strictly validates and assigns required strategic dependencies.
-     * Ensures the synchronous setup extraction mandate is satisfied.
-     * @param {object} dependencies 
-     */
-    #setupDependencies(dependencies) {
-        if (!dependencies.ruleEvaluationEngine) {
-            throw new Error('DialAnalysisRuleEngineKernel: Missing required dependency: ruleEvaluationEngine (IRuleEvaluationEngineToolKernel).');
+    constructor(config) {
+        if (!config || !config.metrics_config || !config.precondition_definitions || !config.response_rules) {
+            throw new Error("DialAnalysisRuleEngine requires a complete configuration structure.");
         }
-        if (!dependencies.logger) {
-            throw new Error('DialAnalysisRuleEngineKernel: Missing required dependency: logger (ILoggerToolKernel).');
-        }
-        this.#ruleEvaluationEngine = dependencies.ruleEvaluationEngine;
-        this.#logger = dependencies.logger;
+
+        // Ensure rules are sorted only once, high priority first.
+        this.rules = config.response_rules.slice().sort((a, b) => (b.priority || 0) - (a.priority || 0)); 
+        this.preconditions = config.precondition_definitions;
+        this.metricsConfig = config.metrics_config;
     }
 
     /**
-     * Initializes the kernel by compiling and indexing the provided rules.
-     * This satisfies the mandate for asynchronous initialization of strategic data.
-     * @param {Array<Object>} rawRules - Array of rule definitions.
-     * @returns {Promise<void>}
+     * Evaluates raw telemetry against defined metrics_config to derive boolean preconditions.
+     * @param {Object<string, number>} telemetry - Runtime sensor readings.
+     * @returns {Object<string, boolean>} Derived boolean preconditions.
      */
-    async initialize(rawRules) {
-        if (!Array.isArray(rawRules)) {
-             this.#logger.warn('DialAnalysisRuleEngineKernel initialized without rules array.');
-             return;
-        }
-        this.#compileRules(rawRules);
-    }
-
-    /**
-     * Pre-processes and indexes raw rules for fast lookup using prefix optimization.
-     * Pre-compiles regex strings into RegExp objects.
-     * @param {Array<Object>} rawRules 
-     */
-    #compileRules(rawRules) {
-        rawRules.forEach(rule => {
-            // 1. Pre-compile Regex object if present
-            if (rule.regex && typeof rule.regex === 'string') {
-                try {
-                    // Store the compiled regex on the rule object itself for reuse
-                    rule._compiledRegex = new RegExp(rule.regex);
-                } catch (e) {
-                    this.#logger.warn(`[DialAnalysisRuleEngineKernel] Skipping invalid regex in rule ${rule.id || 'unknown'}: ${e.message}`);
-                    return; 
-                }
-            }
-            
-            // 2. Determine indexing key (prefix up to 3 chars or 'default')
-            const prefix = rule.prefix ? String(rule.prefix).substring(0, 3) : 'default';
-
-            if (!this.#ruleSets.has(prefix)) {
-                this.#ruleSets.set(prefix, []);
-            }
-            this.#ruleSets.get(prefix).push(rule);
-        });
-    }
-
-    /**
-     * Analyzes a dial string against all rules using prefix optimization.
-     * Core logic is now asynchronous, aligning with strategic execution mandates.
-     * @param {string} dialString
-     * @returns {Promise<{input: string, normalized: string, match: boolean, ruleId?: string, metadata?: Object}>}
-     */
-    async analyze(dialString) {
-        if (!dialString) return { input: '', normalized: '', match: false };
+    derivePreconditions(telemetry) {
+        const derived = {};
         
-        // Step 1: Normalize input (remove non-dialing characters immediately)
-        const normalizedDial = String(dialString).replace(/[^0-9+*#]/g, '');
+        for (const [key, definition] of Object.entries(this.preconditions)) {
+            const metricKey = definition.check;
+            const metricConf = this.metricsConfig[metricKey];
+            const value = telemetry[metricKey];
 
-        // Step 2: Select candidate rule sets based on prefix (highly efficient lookup)
-        const prefixKey = normalizedDial.substring(0, Math.min(3, normalizedDial.length)) || 'default';
-        
-        // Combine specific prefix rules with any 'default' global rules
-        const candidateRules = [
-            ...(this.#ruleSets.get(prefixKey) || []),
-            ...(prefixKey !== 'default' ? (this.#ruleSets.get('default') || []) : [])
-        ];
-
-        // Step 3: Execute rules sequentially using the abstracted executor
-        for (const rule of candidateRules) {
-            try {
-                // The injected ruleEvaluationEngine handles the actual execution logic.
-                const result = await this.#ruleEvaluationEngine.execute(normalizedDial, rule);
+            // Check if configuration exists and telemetry data is present and valid (not null/undefined)
+            if (metricConf && typeof value === 'number') {
+                const { threshold, operator } = metricConf;
                 
-                if (result.match) {
-                    return {
-                        input: dialString,
-                        normalized: normalizedDial,
-                        match: true,
-                        ruleId: rule.id,
-                        metadata: result.metadata || rule.metadata,
-                    };
-                }
-            } catch (error) {
-                this.#logger.error(`[DialAnalysisRuleEngineKernel] Failed to execute rule ID ${rule.id}:`, error);
+                // Use the static comparator map, falling back to default if operator is unknown
+                const comparator = DialAnalysisRuleEngine.COMPARATORS[operator] || DialAnalysisRuleEngine.COMPARATORS.DEFAULT;
+
+                derived[key] = comparator(value, threshold);
+            } else if (metricConf) {
+                // If configuration exists but telemetry is missing, precondition is defaulted to false/safe
+                derived[key] = false;
             }
         }
+        return derived;
+    }
 
-        return { input: dialString, normalized: normalizedDial, match: false };
+    /**
+     * Internal helper to execute a single logical clause (AND/OR/NOT_ANY).
+     * @param {Object} logic - { operator: string, references: string[] }
+     * @param {Object<string, boolean>} derivedPreconditions
+     * @returns {boolean}
+     */
+    _evaluateLogic(logic, derivedPreconditions) {
+        const { operator, references } = logic;
+
+        switch (operator) {
+            case "AND":
+                // Must check against `true` explicitly to handle potential undefined references gracefully
+                return references.every(ref => derivedPreconditions[ref] === true);
+            case "OR":
+                return references.some(ref => derivedPreconditions[ref] === true);
+            case "NOT_ANY": 
+                // True if NONE of the referenced preconditions are true.
+                return !references.some(ref => derivedPreconditions[ref] === true);
+            case "NOT_ALL": 
+                // True if at least one referenced precondition is NOT true.
+                return references.some(ref => derivedPreconditions[ref] === false || derivedPreconditions[ref] === undefined);
+            case "DEFAULT":
+                return true;
+            default:
+                console.warn(`[DialAnalysisRuleEngine] Unknown logic operator in rule: ${operator}`);
+                return false;
+        }
+    }
+
+    /**
+     * Executes response rules against derived preconditions, respecting rule priority.
+     * @param {Object<string, boolean>} derivedPreconditions
+     * @returns {string | null} The determined output action or null.
+     */
+    executeRules(derivedPreconditions) {
+        for (const rule of this.rules) {
+            if (this._evaluateLogic(rule.logic, derivedPreconditions)) {
+                return rule.output; 
+            }
+        }
+        return null; // No rule matched
     }
 }
+
+export default DialAnalysisRuleEngine;
