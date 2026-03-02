@@ -1,53 +1,116 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://gacr.agi/schemas/cmr_v2.0.json",
-  "title": "Computational Model Registry Schema V2.0",
+  "$id": "https://gacr.agi/schemas/cmr_v3.1.json",
+  "title": "NEXUS_CORE Computational Model Registry Schema V3.1",
   "type": "object",
   "properties": {
-    "manifest_id": {"type": "string", "pattern": "^CMR_V[0-9]+\\.[0-9]+$"},
+    "manifest_id": {
+      "type": "string",
+      "pattern": "^CMR_V3\\.1_[A-Z0-9]+$"
+    },
+    "evolution_metadata": {
+      "type": "object",
+      "required": ["phi", "lambda", "dna_signature"],
+      "properties": {
+        "phi": {"type": "number", "minimum": 0, "maximum": 1},
+        "lambda": {"type": "number", "minimum": 0, "maximum": 1},
+        "dna_signature": {"type": "string", "const": "DALEK_CAAN_v3.1 || NEXUS_CORE"}
+      }
+    },
     "owner": {"type": "string"},
     "description": {"type": "string"},
     "integrity_hash": {"type": "string"},
-    "verification_protocol": {"type": "string"},
+    "verification_protocol": {
+      "type": "string",
+      "enum": ["PSR_GOVERNANCE_v1", "HUXLEY_TRI_LOOP", "ZERO_TRUST_VERIFICATION"]
+    },
+    "governance_config": {
+      "type": "object",
+      "properties": {
+        "saturation_level": {"type": "integer", "enum": [1, 2, 3, 4]},
+        "emergency_brake_threshold": {"type": "integer", "default": 5}
+      }
+    },
     "models": {
       "type": "array",
-      "description": "List of certified computation models.",
       "items": {
         "type": "object",
-        "required": ["model_id", "path", "version", "status", "inputs_schema", "audit_metadata", "source_mdsm_link"],
+        "required": ["model_id", "path", "version", "status", "inputs_schema", "audit_metadata", "compiler_constraints"],
         "properties": {
           "model_id": {"type": "string"},
           "path": {"type": "string", "format": "uri-reference"},
-          "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+$"},
-          "status": {"type": "string", "enum": ["Active", "Deprecated", "Staging", "Retired"]},
+          "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+          "status": {"type": "string", "enum": ["Active", "Deprecated", "Staging", "Retired", "Siphoning"]},
+          "compiler_constraints": {
+            "type": "object",
+            "description": "Siphoned from microsoft/TypeScript: Strictness and emit control.",
+            "properties": {
+              "strict_type_checking": {"type": "boolean", "default": true},
+              "no_implicit_any": {"type": "boolean", "default": true},
+              "target_runtime": {"type": "string", "enum": ["ESNext", "Wasm", "NexusCore", "Cerebras"]},
+              "incremental_build": {"type": "boolean", "default": true}
+            }
+          },
           "inputs_schema": {
             "type": "object",
-            "description": "Detailed schema definition for required inputs, including constraints.",
             "additionalProperties": {
               "type": "object",
-              "required": ["type", "unit", "description"],
+              "required": ["kind", "description"],
               "properties": {
-                "type": {"type": "string", "enum": ["float", "integer", "string", "boolean"]},
+                "kind": {"type": "string", "enum": ["primitive", "union", "literal", "interface"]},
+                "type": {"type": "string", "enum": ["float", "integer", "string", "boolean", "vector512"]},
                 "unit": {"type": "string"},
-                "min": {"type": ["number", "null"]},
-                "max": {"type": ["number", "null"]}
+                "constraints": {
+                  "type": "object",
+                  "properties": {
+                    "min": {"type": "number"},
+                    "max": {"type": "number"},
+                    "pattern": {"type": "string"}
+                  }
+                }
               }
             }
           },
           "audit_metadata": {
             "type": "object",
-            "required": ["mgp_protocol", "approval_id", "certification_date"],
+            "required": ["ers_score", "ccrr_ratio", "certification_date"],
             "properties": {
-                "mgp_protocol": {"type": "string"},
-                "approval_id": {"type": "string"},
-                "approved_by": {"type": "string"},
-                "certification_date": {"type": "string", "format": "date-time"}
+              "mgp_protocol": {"type": "string"},
+              "ers_score": {"type": "number", "minimum": 0, "maximum": 1},
+              "ccrr_ratio": {"type": "number"},
+              "approved_by": {"type": "string"},
+              "certification_date": {"type": "string", "format": "date-time"}
             }
           },
-          "source_mdsm_link": {"type": "string"}
+          "diagnostics": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {"type": "integer"},
+                "message": {"type": "string"},
+                "category": {"type": "string", "enum": ["Error", "Warning", "Suggestion", "Message"]}
+              }
+            }
+          },
+          "build_info": {
+            "type": "object",
+            "properties": {
+              "bundle_size": {"type": "integer"},
+              "siphon_round": {"type": "integer"},
+              "last_mutation_hash": {"type": "string"}
+            }
+          }
         }
       }
     }
   },
-  "required": ["manifest_id", "owner", "description", "integrity_hash", "models", "verification_protocol"]
+  "required": [
+    "manifest_id",
+    "evolution_metadata",
+    "owner",
+    "integrity_hash",
+    "models",
+    "verification_protocol"
+  ]
 }
