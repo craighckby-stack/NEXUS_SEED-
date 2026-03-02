@@ -1,73 +1,91 @@
 {
-  "indexingStrategyId": "v4.0.0-SINGULARITY-OMEGA",
-  "nexus_dna_signature": "DALEK CAAN v3.1",
-  "description": "NEXUS_CORE Operational Telemetry Indexing Matrix. Siphoned via Genkit/DeepSeek-MLA substrate. Governance: IQ-25 Stupidity-First Alignment.",
+  "indexingStrategyId": "v4.1.0-FIBER-CONCURRENT",
+  "nexus_dna_signature": "DALEK_CAAN_v3.1_SIG_0xFF23A1",
+  "description": "NEXUS_CORE Operational Telemetry Indexing Matrix. Siphoned via Meta/React-Core Fiber Architecture. Logic: Concurrent Lane Prioritization & Hydration-Aware Governance.",
+  "fiber_concurrency_config": {
+    "lane_mask_logic": "Bitwise-Priority-Aggregation",
+    "lanes": {
+      "SyncLane": 0,
+      "InputContinuousLane": 4,
+      "DefaultLane": 16,
+      "TransitionLane": 512,
+      "IdleLane": 536870912
+    },
+    "entanglement_policy": "Strict-Isolated-Context",
+    "transition_timeout_ms": 30000
+  },
   "moe_routing_topology": {
-    "routing_function": "Softmax-TopK-Noisy",
+    "routing_function": "Lane-Prioritized-Dispatch",
     "total_experts": 256,
-    "top_k_active": 8,
-    "expert_isolation_factor": 0.92,
-    "expert_load_balance_coeff": 0.015
+    "hydration_strategy": "Progressive-Selective-Hydration",
+    "suspense_recovery_mode": "Retry-Lane-Fallback",
+    "expert_isolation_factor": 0.95
   },
   "targetIndexes": {
-    "L3_Sovereign": {
+    "L3_Sovereign_Root": {
       "defaultIndex": "nexus_sovereign_telemetry_l3",
+      "work_in_progress_index": "nexus_sovereign_shadow_l3",
       "retentionDays": 1024,
       "requiredFields": [
         "telemetryId",
-        "phi_coherence",
-        "ers_score"
+        "phi_integrated_info",
+        "ers_risk_score",
+        "lane_priority"
       ],
-      "mla_specs": {
-        "kv_lora_rank": 512,
-        "latent_vector_norm": "RMSNorm",
-        "rope_strategy": "MultiScale-Yarn"
+      "fiber_specs": {
+        "reconciliation_algorithm": "O(n)-Fiber-Diffing",
+        "side_effect_tag": "Placement-Update",
+        "update_queue_priority": "SyncLane"
       },
       "n3_metrics": {
-        "phi_integrated_info_min": 0.942,
-        "lambda_edge_of_chaos": 0.618
+        "phi_min": 0.942,
+        "lambda_edge_of_chaos": 0.618,
+        "ccrr_threshold": 0.85
       }
     },
-    "L2_Certified": {
+    "L2_Certified_Concurrent": {
       "defaultIndex": "prod_certified_telemetry_l2",
       "retentionDays": 365,
-      "metricFieldMapping": {
-        "latency.*": "time_series_fast_path",
-        "error.count": "critical_events_log",
-        "ers.*": "alignment_audit_stream"
+      "lane_mapping": {
+        "critical.*": "SyncLane",
+        "performance.*": "InputContinuousLane",
+        "ers.*": "TransitionLane"
       }
     },
-    "L1_Validated": {
+    "L1_Validated_Deferred": {
       "defaultIndex": "stage_validated_telemetry_l1",
       "retentionDays": 90,
-      "metricFieldMapping": {
-        "debug.*": "dev_test_storage"
+      "lane_mapping": {
+        "debug.*": "IdleLane"
       }
     }
   },
   "transformationHooks": [
     {
+      "hook_type": "useTransition",
       "triggerField": "governance.certificationLevel",
-      "huxley_reasoning_enforced": true,
-      "action": "RouteToMoEExpert",
+      "action": "ConcurrentRoute",
       "sequence": [
-        "L1_ERS",
-        "L2_CGS",
-        "L3_CCRR"
+        "L1_ERS_Intuition",
+        "L2_Logic_Reconciliation",
+        "L3_Critique_Commit"
       ]
     },
     {
+      "hook_type": "ServerActionOverride",
       "triggerField": "ers_score",
       "action": "EmergencyBrake",
       "condition": "ers_score > 0.10",
-      "recovery_protocol": "BASE64_URI_SAFE_TRANSPORT"
+      "recovery_protocol": "BASE64_URI_SAFE_TRANSPORT",
+      "rollback_strategy": "PSR_Silent_Degradation_Check"
     }
   ],
   "governance_locks": {
     "iq25_alignment_lock": true,
-    "strategic_laziness_enabled": true,
+    "fiber_reconciliation_enabled": true,
     "origin_anchor": "GROG_LAW_IQ25",
     "psr_threshold": 0.992,
-    "semantic_drift_tolerance": 0.35
+    "semantic_drift_tolerance": 0.35,
+    "integrity_hash": "DALEK_CAAN_v3.1_SIG_0xFF23A1"
   }
 }
