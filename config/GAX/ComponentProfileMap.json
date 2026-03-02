@@ -1,232 +1,61 @@
-import React, { useState, useEffect, useRef, useReducer, useCallback } from 'react';
-import ReactDOM from 'react-dom';
-
-class Config {
-  static get staticConfig() {
-    return {
-      VERSION: "1.0.0",
-      env: process.env.NODE_ENV || "development"
-    };
-  }
-
-  constructor(values = {}) {
-    this.setValues(values);
-  }
-
-  setValues(values) {
-    Object.assign(this, values);
-  }
-
-  static get defaultConfig() {
-    return {
-      foo: 'bar',
-      baz: true
-    };
-  }
-
-  static get configSchema() {
-    return {
-      type: 'object',
-      properties: {
-        foo: { type: 'string' },
-        baz: { type: 'boolean' }
-      }
-    };
-  }
-
-  validate() {
-    try {
-      const schema = Config.configSchema;
-      const validator = new (require('jsonschema').Validator)();
-      validator.checkSchema(schema);
-      validator.validate(this, schema);
-    } catch (e) {
-      console.error('Config validation error:', e);
-      throw e;
+{
+  "map_version": "3.0",
+  "description": "Priority-based mapping of system artifacts (ID, Path, Tag) to defined constraint profiles. Used by the GAX validation engine (v94.1+) for dynamic strictness enforcement. Version 3.0 introduces explicit activity toggles, structured notes, and supported match type declarations.",
+  "mapping_schema": "PRIORITY_ARRAY_V3",
+  "supported_match_types": [
+    "ID",
+    "TAG",
+    "PATH_REGEX",
+    "FALLBACK"
+  ],
+  "mappings": [
+    {
+      "priority": 100,
+      "is_active": true,
+      "match_type": "ID",
+      "target": "Core_Scheduler_v95",
+      "profile_id": "CRITICAL_PERFORMANCE",
+      "notes": "Ensures minimal latency constraints for primary synchronization loop."
+    },
+    {
+      "priority": 95,
+      "is_active": true,
+      "match_type": "TAG",
+      "target": "HIGH_THROUGHPUT",
+      "profile_id": "CRITICAL_PERFORMANCE",
+      "notes": "Catch-all for infrastructure components supporting heavy I/O workloads."
+    },
+    {
+      "priority": 80,
+      "is_active": true,
+      "match_type": "ID",
+      "target": "Data_Storage_Engine",
+      "profile_id": "HIGH_CAPACITY_TCO",
+      "notes": "Balancing resource efficiency against long-term storage viability."
+    },
+    {
+      "priority": 70,
+      "is_active": true,
+      "match_type": "PATH_REGEX",
+      "target": "^src/gateways/internal/.*",
+      "profile_id": "NORMAL_SECURITY",
+      "notes": "Standard security profile for intra-system communication channels."
+    },
+    {
+      "priority": 60,
+      "is_active": false,
+      "match_type": "ID",
+      "target": "Internal_API_Gateway",
+      "profile_id": "NORMAL_SECURITY",
+      "notes": "Redundant rule, disabled in favor of PATH_REGEX (priority 70) for broader coverage."
+    },
+    {
+      "priority": 0,
+      "is_active": true,
+      "match_type": "FALLBACK",
+      "target": "*",
+      "profile_id": "BASE_PROFILE",
+      "notes": "Default minimum constraint requirements for unmapped components."
     }
-  }
+  ]
 }
-
-class LifecycleEvent {
-  constructor(event) {
-    this.event = event;
-  }
-}
-
-class LifecycleHandler {
-  constructor(handler) {
-    this.handler = handler;
-  }
-
-  bind(target = this) {
-    this.handler = this.handler.bind(target);
-  }
-
-  execute() {
-    this.handler();
-  }
-}
-
-class NexusCore {
-  #lifecycle = {
-    configured: false,
-    loaded: false,
-    shuttingDown: false
-  };
-
-  #status = "INIT";
-
-  get status() {
-    return this.#status;
-  }
-
-  set status(value) {
-    this.#status = value;
-    const currentValue = this.#status;
-    const lifecycle = this.#lifecycle;
-    if (value !== 'INIT') {
-      console.log(`NexusCore instance is ${value}.`);
-      if (value === 'SHUTDOWN') {
-        lifecycle.shuttingDown = false;
-      }
-    }
-    if (currentValue === 'INIT' && value !== 'INIT') {
-      lifecycle.configured = true;
-    }
-  }
-
-  get lifecycle() {
-    return this.#lifecycle;
-  }
-
-  configure(config) {
-    this.validateConfig(config);
-    this.onLifecycleEvent("CONFIGURED");
-    this.#lifecycle.configured = true;
-    this.config = config;
-    this.injectTools();
-  }
-
-  validateConfig(config) {
-    const configSchema = Config.configSchema;
-    try {
-      const validator = new (require('jsonschema').Validator)();
-      validator.checkSchema(configSchema);
-      validator.validate(config, configSchema);
-    } catch (e) {
-      console.error('Config validation error:', e);
-      throw e;
-    }
-  }
-
-  onLifecycleEvent(event, handler) {
-    const lifecycleHandler = new LifecycleHandler(handler);
-    this.#lifecycle[event] = lifecycleHandler;
-  }
-
-  get on() {
-    return (event, handler) => {
-      const lifecycleEvent = new LifecycleEvent(event);
-      this.onLifecycleEvent(event, handler);
-    };
-  }
-
-  executeLifecycleEvent(event) {
-    if (this.#lifecycle[event]) {
-      this.#lifecycle[event].bind(this).execute();
-    }
-  }
-
-  injectTools() {
-    const toolCode = `
-      console.log("Injecting tools...");
-      const toolbox = new window.MetaskillsToolbar();
-      toolbox.registerTool('InjectedTool', document.createElement('div'));
-      return toolbox.injectTools();
-    `;
-    const toolbox = new window.MetaskillsToolbar();
-    toolbox.injectTools(toolCode);
-  }
-
-  async load() {
-    await this.executeLifecycleEvent("CONFIGURED");
-    try {
-      console.log("Loading...");
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log("Loading complete...");
-      this.#lifecycle.loaded = true;
-      this.executeLifecycleEvent("LOADED");
-    } catch (e) {
-      console.error('Load error:', e);
-    }
-  }
-
-  async shutdown() {
-    try {
-      if (!this.#lifecycle.shuttingDown) {
-        console.log("Shutdown initiated...");
-        this.#lifecycle.shuttingDown = true;
-        this.executeLifecycleEvent("SHUTTING_DOWN");
-        console.log("Shutdown complete...");
-        this.status = "SHUTDOWN";
-      }
-    } catch (e) {
-      console.error("Shutdown error:", e);
-    }
-  }
-
-  async start() {
-    const startMethodOrder = ["configure", "load", "shutdown"];
-    for (const methodName of startMethodOrder) {
-      if (this[methodName] instanceof Function) {
-        await this[methodName]();
-      }
-    }
-  }
-
-  async destroy() {
-    this.status = "DESTROYED";
-    this.#lifecycle = {
-      configured: false,
-      loaded: false,
-      shuttingDown: false
-    };
-  }
-
-  async on(event, handler) {
-    await this.onLifecycleEvent(event, handler);
-  }
-}
-
-class SyntheticSynergyManager {
-  constructor() {
-    this.tools = {};
-    this.toolbox = new window.MetaskillsToolbar();
-    this.injectedTools = {};
-  }
-
-  registerTool(toolName, element) {
-    this.toolbox.registerTool(toolName, element);
-    this.injectedTools[toolName] = toolName;
-  }
-
-  injectTools(toolCode) {
-    this.toolbox.injectTools(toolCode);
-  }
-}
-
-const nexusCore = new NexusCore();
-const synergyManager = new SyntheticSynergyManager();
-
-nexusCore.on('DESTROYED', () => {
-  console.log("NexusCore instance destroyed.");
-});
-nexusCore.configure(Config.defaultConfig);
-nexusCore.on('CONFIGURED', () => synergyManager.injectTools(`
-      console.log(\"Injecting synergy tools...\");
-      return true;
-    `));
-nexusCore.start();
-nexusCore.load();
-nexusCore.shutdown();
-nexusCore.destroy();
