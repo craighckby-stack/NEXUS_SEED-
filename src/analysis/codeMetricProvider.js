@@ -1,107 +1,50 @@
 /**
- * Code Metric Provider Kernel - src/analysis/CodeMetricProviderKernel.js
- * ID: CMP_V2
+ * Code Metric Provider - src/analysis/codeMetricProvider.js
+ * ID: CMP_V1
  * Role: Core AST Analysis and Metric Calculation
  *
- * This kernel provides raw, objective structural metrics (e.g., Cyclomatic Complexity, LOC)
- * by interacting with system I/O proxies (file system access) and utility kernels.
+ * This utility provides the raw, objective structural metrics (e.g., Cyclomatic Complexity, LOC)
+ * by interacting directly with code parsers and static analysis libraries (e.g., Esprima, complexity-report).
  */
 
 import fs from 'fs/promises';
 
-/**
- * Defines the standard structure for code metrics returned by the provider.
- */
-interface CodeMetrics {
-    cyclomaticComplexity: number;
-    maintainabilityIndex: number; // Normalized 0.0 to 1.0
-    couplingDegree: number; // Count of external imports/dependencies
-    linesOfCode: number;
-}
-
-// Assumed interface for the injected tool
-interface BasicStringValidatorToolKernel {
-    validate(input: string, fieldName: string): { valid: boolean, message: string };
-}
-
-export class CodeMetricProviderKernel {
-    #stringValidator: BasicStringValidatorToolKernel;
-    
-    constructor(validator: BasicStringValidatorToolKernel) {
-        this.#stringValidator = validator;
-        this.#setupDependencies();
-    }
-
-    /**
-     * Extracts synchronous dependency validation and assignment.
-     */
-    #setupDependencies(): void {
-        if (!this.#stringValidator || typeof this.#stringValidator.validate !== 'function') {
-            throw new Error("CMP_V2: Missing or invalid BasicStringValidatorToolKernel dependency.");
-        }
-    }
-
-    /**
-     * I/O Proxy: Delegates path validation to the injected utility.
-     * @param {string} componentPath - Full file path to the code component.
-     */
-    #delegateToValidatorValidate(componentPath: string): void {
-        const result = this.#stringValidator.validate(componentPath, 'Component Path');
-        
-        if (!result.valid) {
-            throw new Error(result.message);
-        }
-    }
-
-    /**
-     * I/O Proxy: Reads the file content asynchronously from the file system.
-     */
-    async #delegateToFileSystemRead(componentPath: string): Promise<string> {
-        // Enforces isolation of the fs/promises dependency
-        return fs.readFile(componentPath, 'utf-8');
-    }
-    
-    /**
-     * I/O Proxy: Logs error during file read/analysis failure.
-     */
-    #logAnalysisError(componentPath: string, error: Error): void {
-        console.error(`CMP_V2: Error reading file ${componentPath}.`, error.message);
-    }
-
-    /** 
-     * Core Logic: Calculates or simulates metrics based on code content.
-     * (Replaces _simulateMetrics)
-     */
-    #calculateMetrics(code: string): CodeMetrics { 
-        const loc = code.split('\n').length;
-        const randomness = Math.sin(loc * 0.01) * 0.15 + 0.1;
-        return {
-            cyclomaticComplexity: 8 + Math.floor(randomness * 10),
-            maintainabilityIndex: 0.7 - randomness,
-            couplingDegree: 3 + Math.floor(randomness * 5),
-            linesOfCode: loc
-        };
+export class CodeMetricProvider {
+    constructor() {
+        // Configuration for external parsers or internal AST handlers goes here.
+        // If we integrated tools like 'escomplex', they would be managed here.
     }
 
     /**
      * Reads and parses component code to derive structural metrics.
-     *
+     * NOTE: This method must contain the actual AST traversal and complexity calculation logic.
+     * 
      * @param {string} componentPath - Full file path to the code component.
-     * @returns {Promise<CodeMetrics>} Raw, calculated metrics.
+     * @returns {Promise<{
+     *     cyclomaticComplexity: number,
+     *     maintainabilityIndex: number, // Normalized 0.0 to 1.0
+     *     couplingDegree: number, // Count of external imports/dependencies
+     *     linesOfCode: number
+     * }>} Raw, calculated metrics.
      */
-    async analyzeCodeStructure(componentPath: string): Promise<CodeMetrics> {
-        this.#delegateToValidatorValidate(componentPath);
+    async analyzeCodeStructure(componentPath) {
+        if (typeof componentPath !== 'string' || componentPath.length === 0) {
+            throw new Error('Component path must be provided.');
+        }
 
         try {
-            const code = await this.#delegateToFileSystemRead(componentPath);
+            const code = await fs.readFile(componentPath, 'utf-8');
             
-            // --- REAL AST ANALYSIS LOGIC would be delegated here ---
-            return this.#calculateMetrics(code);
+            // --- Placeholder for REAL AST ANALYSIS LOGIC ---
+            // 1. Use a parser (e.g., Acorn/Babel) to get the AST.
+            // 2. Walk the AST to calculate cyclomatic complexity and coupling.
+            // 3. Apply standard formulas (e.g., SEI Maintainability Index calculation).
+
+            // For V1, we return a simulation based on code length/file path:
+            return this._simulateMetrics(code);
 
         } catch (error) {
-            const err = error as Error;
-            this.#logAnalysisError(componentPath, err);
-
+            console.error(`CMP: Error reading file ${componentPath}.`, error.message);
             // Return failure state metrics indicating potential parsing error
             return {
                 cyclomaticComplexity: 999,
@@ -110,5 +53,17 @@ export class CodeMetricProviderKernel {
                 linesOfCode: 0
             };
         }
+    }
+    
+    /** Simple simulation helper based on complexity until full integration. */
+    _simulateMetrics(code) {
+        const loc = code.split('\n').length;
+        const randomness = Math.sin(loc * 0.01) * 0.15 + 0.1;
+        return Promise.resolve({
+            cyclomaticComplexity: 8 + Math.floor(randomness * 10),
+            maintainabilityIndex: 0.7 - randomness, // Tends to be higher if lines are fewer
+            couplingDegree: 3 + Math.floor(randomness * 5),
+            linesOfCode: loc
+        });
     }
 }
