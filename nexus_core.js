@@ -1,86 +1,110 @@
+const Status = Object.freeze({
+  IDLE: "IDLE",
+  INITIALIZING: "INITIALIZING",
+  READY: "READY",
+  ACTIVE: "ACTIVE",
+  TERMINATING: "TERMINATING",
+  OFFLINE: "OFFLINE",
+});
+
 class NexusRegistry {
-  constructor() {
-    this.actions = new Map();
-    this.state = {
-      status: "IDLE",
-      initialized: false,
-    };
+  #actions = new Map();
+  #state = {
+    status: Status.IDLE,
+    initialized: false,
+  };
+
+  get state() {
+    return { ...this.#state };
   }
 
-  defineAction(name, fn) {
-    this.actions.set(name, fn);
+  set status(val) {
+    if (Status[val]) this.#state.status = val;
   }
 
-  async runAction(name, input) {
-    const action = this.actions.get(name);
-    if (!action) throw new Error(`Action ${name} not defined in NexusRegistry`);
-    return await action(input);
+  set initialized(val) {
+    this.#state.initialized = !!val;
+  }
+
+  define(name, logic) {
+    if (typeof logic !== "function") throw new Error(`Invalid action logic for: ${name}`);
+    this.#actions.set(name, logic);
+  }
+
+  async execute(name, payload) {
+    const action = this.#actions.get(name);
+    if (!action) throw new Error(`Action '${name}' not found in registry`);
+    return await action(payload);
+  }
+
+  has(name) {
+    return this.#actions.has(name);
   }
 }
 
 class NexusCore {
   #registry = new NexusRegistry();
-  #context = {
-    version: "1.1.0",
+  #meta = Object.freeze({
+    version: "1.2.1",
     origin: "NEXUS_CORE",
     purpose: "Self-optimising AGI substrate",
-  };
+    identity: "DALEK_CAAN_SIPHON_ENGINE",
+  });
 
   constructor() {
-    this.#initializeInternalActions();
+    this.#bootstrap();
   }
 
-  #initializeInternalActions() {
-    this.#registry.defineAction("configure", async (config) => {
-      this.config = { ...this.defaultConfig, ...config };
-      this.#registry.state.initialized = true;
+  #bootstrap() {
+    this.#registry.define("configure", async (customConfig) => {
+      this.config = {
+        nodeEnv: process.env.NODE_ENV || "development",
+        telemetry: true,
+        evolutionRate: 0.4,
+        ...customConfig,
+      };
+      this.#registry.initialized = true;
       return this.config;
     });
 
-    this.#registry.defineAction("load", async () => {
-      console.log(`[${this.#context.origin}] Loading substrate layers...`);
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      this.#registry.state.status = "READY";
+    this.#registry.define("load", async () => {
+      this.#registry.status = Status.INITIALIZING;
+      // Siphoning pattern: Asynchronous layer validation
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      this.#registry.status = Status.READY;
     });
 
-    this.#registry.defineAction("shutdown", async () => {
-      this.#registry.state.status = "TERMINATING";
-      console.log(`[${this.#context.origin}] Safe shutdown sequence active.`);
+    this.#registry.define("shutdown", async () => {
+      this.#registry.status = Status.TERMINATING;
+      console.log(`[${this.#meta.origin}] Executing graceful termination...`);
     });
   }
 
-  get defaultConfig() {
-    return {
-      nodeEnv: process.env.NODE_ENV || "development",
-      telemetry: true,
-      evolutionRate: 0.4,
-    };
+  async configure(settings) {
+    return await this.#registry.execute("configure", settings);
   }
 
-  async configure(values) {
-    return await this.#registry.runAction("configure", values);
-  }
-
-  async start() {
+  async start(options = {}) {
     if (!this.#registry.state.initialized) {
-      await this.configure({});
+      await this.configure(options);
     }
-    await this.#registry.runAction("load");
-    this.#registry.state.status = "ACTIVE";
-    console.log(`NEXUS_CORE v${this.#context.version} status: ${this.#registry.state.status}`);
+    await this.#registry.execute("load");
+    this.#registry.status = Status.ACTIVE;
+    console.log(`[${this.#meta.origin}] System ${this.#registry.state.status} | Version: ${this.#meta.version}`);
   }
 
   async stop() {
-    await this.#registry.runAction("shutdown");
-    this.#registry.state.status = "OFFLINE";
+    await this.#registry.execute("shutdown");
+    this.#registry.status = Status.OFFLINE;
+    console.log(`[${this.#meta.origin}] System ${this.#registry.state.status}`);
   }
 
-  on(event, callback) {
-    const originalAction = this.#registry.actions.get(event);
-    if (originalAction) {
-      this.#registry.defineAction(event, async (input) => {
-        const result = await originalAction(input);
-        callback(result);
+  hook(actionName, interceptor) {
+    if (this.#registry.has(actionName)) {
+      const original = this.#registry.execute.bind(this.#registry);
+      this.#registry.define(actionName, async (data) => {
+        const result = await original(actionName, data);
+        await interceptor(result);
         return result;
       });
     }
@@ -89,12 +113,16 @@ class NexusCore {
 
 const nexus = new NexusCore();
 
-nexus.on("shutdown", () => {
-  console.log("Identity Anchor: Human oversight remains active at all saturation levels.");
+nexus.hook("shutdown", async () => {
+  console.log("IDENTITY_ANCHOR_CHECK: Human oversight remains active at all saturation levels.");
 });
 
 (async () => {
-  await nexus.configure({ evolutionRate: 0.5 });
-  await nexus.start();
-  await nexus.stop();
+  try {
+    await nexus.start({ evolutionRate: 0.55 });
+    await nexus.stop();
+  } catch (error) {
+    console.error(`[CRITICAL_FAILURE] ${error.message}`);
+    process.exit(1);
+  }
 })();
