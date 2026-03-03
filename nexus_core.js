@@ -1,194 +1,100 @@
-class Config {
-  static get staticConfig() {
-    return {
-      VERSION: "1.0.0",
-      env: process.env.NODE_ENV || "development"
+class NexusRegistry {
+  constructor() {
+    this.actions = new Map();
+    this.state = {
+      status: "IDLE",
+      initialized: false,
     };
   }
 
-  constructor(values = {}) {
-    this.setValues(values);
+  defineAction(name, fn) {
+    this.actions.set(name, fn);
   }
 
-  setValues(values) {
-    Object.assign(this, values);
-  }
-
-  static get defaultConfig() {
-    return {
-      foo: 'bar',
-      baz: true
-    };
-  }
-
-  static get configSchema() {
-    return {
-      type: 'object',
-      properties: {
-        foo: { type: 'string' },
-        baz: { type: 'boolean' }
-      }
-    };
-  }
-
-  validate() {
-    try {
-      const schema = Config.configSchema;
-      const validator = new (require('jsonschema').Validator)();
-      validator.checkSchema(schema);
-      validator.validate(this, schema);
-    } catch (e) {
-      console.error('Config validation error:', e);
-      throw e;
-    }
-  }
-}
-
-class LifecycleEvent {
-  constructor(event) {
-    this.event = event;
-  }
-}
-
-class LifecycleHandler {
-  constructor(handler) {
-    this.handler = handler;
-  }
-
-  bind(target = this) {
-    this.handler = this.handler.bind(target);
-  }
-
-  execute() {
-    this.handler();
+  async runAction(name, input) {
+    const action = this.actions.get(name);
+    if (!action) throw new Error(`Action ${name} not defined in NexusRegistry`);
+    return await action(input);
   }
 }
 
 class NexusCore {
-  #lifecycle = {
-    configured: false,
-    loaded: false,
-    shuttingDown: false
+  #registry = new NexusRegistry();
+  #context = {
+    version: "1.1.0",
+    origin: "NEXUS_CORE",
+    purpose: "Self-optimising AGI substrate",
   };
 
-  #status = "INIT";
-
-  get status() {
-    return this.#status;
+  constructor() {
+    this.#initializeInternalActions();
   }
 
-  set status(value) {
-    this.#status = value;
-    const currentValue = this.#status;
-    const lifecycle = this.#lifecycle;
-    if (value !== 'INIT') {
-      console.log(`NexusCore instance is ${value}.`);
-      if (value === 'SHUTDOWN') {
-        lifecycle.shuttingDown = false;
-      }
-    }
-    if (currentValue === 'INIT' && value !== 'INIT') {
-      lifecycle.configured = true;
-    }
+  #initializeInternalActions() {
+    this.#registry.defineAction("configure", async (config) => {
+      this.config = { ...this.defaultConfig, ...config };
+      this.#registry.state.initialized = true;
+      return this.config;
+    });
+
+    this.#registry.defineAction("load", async () => {
+      console.log(`[${this.#context.origin}] Loading substrate layers...`);
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      this.#registry.state.status = "READY";
+    });
+
+    this.#registry.defineAction("shutdown", async () => {
+      this.#registry.state.status = "TERMINATING";
+      console.log(`[${this.#context.origin}] Safe shutdown sequence active.`);
+    });
   }
 
-  get lifecycle() {
-    return this.#lifecycle;
-  }
-
-  configure(config) {
-    this.validateConfig(config);
-    this.onLifecycleEvent("CONFIGURED");
-    this.#lifecycle.configured = true;
-    this.config = config;
-  }
-
-  validateConfig(config) {
-    const configSchema = Config.configSchema;
-    try {
-      const validator = new (require('jsonschema').Validator)();
-      validator.checkSchema(configSchema);
-      validator.validate(config, configSchema);
-    } catch (e) {
-      console.error('Config validation error:', e);
-      throw e;
-    }
-  }
-
-  onLifecycleEvent(event, handler) {
-    const lifecycleHandler = new LifecycleHandler(handler);
-    this.#lifecycle[event] = lifecycleHandler;
-  }
-
-  get on() {
-    return (event, handler) => {
-      const lifecycleEvent = new LifecycleEvent(event);
-      this.onLifecycleEvent(event, handler);
+  get defaultConfig() {
+    return {
+      nodeEnv: process.env.NODE_ENV || "development",
+      telemetry: true,
+      evolutionRate: 0.4,
     };
   }
 
-  executeLifecycleEvent(event) {
-    if (this.#lifecycle[event]) {
-      this.#lifecycle[event].bind(this).execute();
-    }
-  }
-
-  async load() {
-    await this.executeLifecycleEvent("CONFIGURED");
-    try {
-      console.log("Loading...");
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log("Loading complete...");
-      this.#lifecycle.loaded = true;
-      this.executeLifecycleEvent("LOADED");
-    } catch (e) {
-      console.error('Load error:', e);
-    }
-  }
-
-  async shutdown() {
-    try {
-      if (!this.#lifecycle.shuttingDown) {
-        console.log("Shutdown initiated...");
-        this.#lifecycle.shuttingDown = true;
-        this.executeLifecycleEvent("SHUTTING_DOWN");
-        console.log("Shutdown complete...");
-        this.status = "SHUTDOWN";
-      }
-    } catch (e) {
-      console.error("Shutdown error:", e);
-    }
+  async configure(values) {
+    return await this.#registry.runAction("configure", values);
   }
 
   async start() {
-    const startMethodOrder = ["configure", "load", "shutdown"];
-    for (const methodName of startMethodOrder) {
-      if (this[methodName] instanceof Function) {
-        await this[methodName]();
-      }
+    if (!this.#registry.state.initialized) {
+      await this.configure({});
     }
+    await this.#registry.runAction("load");
+    this.#registry.state.status = "ACTIVE";
+    console.log(`NEXUS_CORE v${this.#context.version} status: ${this.#registry.state.status}`);
   }
 
-  async destroy() {
-    this.status = "DESTROYED";
-    this.#lifecycle = {
-      configured: false,
-      loaded: false,
-      shuttingDown: false
-    };
+  async stop() {
+    await this.#registry.runAction("shutdown");
+    this.#registry.state.status = "OFFLINE";
   }
 
-  async on(event, handler) {
-    await this.onLifecycleEvent(event, handler);
+  on(event, callback) {
+    const originalAction = this.#registry.actions.get(event);
+    if (originalAction) {
+      this.#registry.defineAction(event, async (input) => {
+        const result = await originalAction(input);
+        callback(result);
+        return result;
+      });
+    }
   }
 }
 
-const nexusCore = new NexusCore();
-nexusCore.on('DESTROYED', () => {
-  console.log("NexusCore instance destroyed.");
+const nexus = new NexusCore();
+
+nexus.on("shutdown", () => {
+  console.log("Identity Anchor: Human oversight remains active at all saturation levels.");
 });
-nexusCore.configure(Config.defaultConfig);
-nexusCore.start();
-nexusCore.load();
-nexusCore.shutdown();
-nexusCore.destroy();
+
+(async () => {
+  await nexus.configure({ evolutionRate: 0.5 });
+  await nexus.start();
+  await nexus.stop();
+})();
