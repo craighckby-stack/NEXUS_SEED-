@@ -1,58 +1,69 @@
 {
-  "manifest_version": "2.0.0",
-  "config_id": "ECVM_TIS",
-  "metadata": {
-    "gate_id": "S4.5",
-    "description": "Normalized definition of mandatory telemetry input sources (TIS) for ECVM validation checks."
+  "manifest_id": "CMR_V9.1.0-ECVM-TIS-EVO_2",
+  "owner": "DALEK_CAAN_v3.1",
+  "evolutionary_context": {
+    "round": 2,
+    "saturation_level": 2,
+    "n3_monitoring": {
+      "phi_target": 0.85,
+      "lambda_zone": [0.5, 0.8]
+    },
+    "huxley_tri_loop": {
+      "ers_baseline": 0.15,
+      "cgs_threshold": 0.75
+    }
   },
-  "telemetry_inputs": [
+  "telemetry_registry": [
     {
-      "source_id": "API_PERF",
-      "source_name": "API_Performance_Monitor",
-      "data_path": "metrics.latency.ms",
-      "required_by": [
-        "CVA-201"
-      ],
-      "schema_ref": "GACR/Schemas/APITelemetry.json",
-      "retrieval_config": {
-        "protocol": "HTTP/2_PULL",
-        "schedule": {
-          "type": "INTERVAL",
-          "interval_ms": 500
-        }
+      "source_id": "API_PERF_SIPHON",
+      "vector_path": "metrics.latency.ms",
+      "huxley_tier": "L0_INGESTION",
+      "validation": {
+        "schema_ref": "GACR/Schemas/APITelemetry.json",
+        "ers_score_max": 0.1
+      },
+      "transport": {
+        "protocol": "BUN_HTTP_3_QUIC",
+        "strategy": "PULL",
+        "interval_ms": 500
       }
     },
     {
-      "source_id": "DTEM_CACHE",
-      "source_name": "DTEM_Cache_Status",
-      "data_path": "cache_status.last_update_ts",
-      "required_by": [
-        "CVA-305"
-      ],
-      "schema_ref": "GACR/Schemas/DTEMCacheStatus.json",
-      "retrieval_config": {
-        "protocol": "IPC_MOCK",
-        "schedule": {
-          "type": "FIXED_RATE",
-          "rate_seconds": 30
-        }
+      "source_id": "DTEM_CACHE_STATE",
+      "vector_path": "cache_status.last_update_ts",
+      "huxley_tier": "L1_INTUITION",
+      "validation": {
+        "schema_ref": "GACR/Schemas/DTEMCacheStatus.json",
+        "ers_score_max": 0.05
+      },
+      "transport": {
+        "protocol": "IPC_DOMAIN_SOCKET",
+        "strategy": "FIXED_RATE",
+        "rate_seconds": 30
       }
     },
     {
-      "source_id": "RESOURCE_ALLOC",
-      "source_name": "Resource_Allocator_Feed",
-      "data_path": "resource_pool.utilization_summary",
-      "required_by": [
-        "CVA-412"
-      ],
-      "schema_ref": "GACR/Schemas/ResourceTelemetry.json",
-      "retrieval_config": {
-        "protocol": "GRPC_BI_STREAM",
-        "schedule": {
-          "type": "EVENT_DRIVEN",
-          "debounce_ms": 100
-        }
+      "source_id": "METABOLIC_RESOURCE_FEED",
+      "vector_path": "resource_pool.utilization_summary",
+      "huxley_tier": "L2_LOGIC",
+      "validation": {
+        "schema_ref": "GACR/Schemas/ResourceTelemetry.json",
+        "ers_score_max": 0.2
+      },
+      "transport": {
+        "protocol": "GRPC_BI_STREAM_V2",
+        "strategy": "EVENT_DRIVEN",
+        "debounce_ms": 100
       }
     }
-  ]
+  ],
+  "governance": {
+    "failure_mode": "GROG_DEATH_LOG",
+    "psr_threshold": 0.35,
+    "death_log_path": "/logs/grog_deaths/ecvm_tis_round_2.lesson"
+  },
+  "integrity": {
+    "dna_version": "3.1",
+    "signature": "DALEK_CAAN_v3.1_SIG_0xFF12_ROUND_2_STABLE"
+  }
 }
