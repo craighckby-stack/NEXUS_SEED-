@@ -1,42 +1,69 @@
 {
+  "mc:Ignorable": "nx mce react fiber lanes scheduler w r",
+  "namespaces": {
+    "nx": "https://nexus-core.agi/governance",
+    "mce": "http://schemas.openxmlformats.org/markup-compatibility/2006",
+    "react": "https://react.dev/core/reconciliation",
+    "fiber": "https://react.dev/core/fiber-tree",
+    "w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+  },
   "General": {
     "ServiceName": "GACR.TelemetryAggregator",
     "Environment": "${ENV:PRODUCTION}",
-    "ConfigVersion": 2.0,
-    "ReloadPolicy": "HotReload",
-    "ShardingKey": "source_id"
+    "ConfigVersion": "3.1.0-CONVERGED",
+    "nx:settings": {
+      "w:docDefaults": {
+        "pPrDefault": {
+          "scheduler:priority": "Normal",
+          "nx:governance_mode": "Adaptive"
+        }
+      },
+      "cascading_inheritance": {
+        "resolver": "RecursiveFlatten",
+        "depth_limit": 8
+      }
+    }
   },
   "Ingestion": {
-    "Sources": [
+    "rId_Map": [
       {
-        "Name": "InternalMetrics",
-        "Type": "HTTP",
-        "Endpoint": "/api/v2/metrics",
-        "RateLimitPerMinute": 100000,
-        "SchemaValidationLevel": "Strict"
+        "rId": "rId1",
+        "type": "InternalMetrics/HTTP",
+        "target": "/api/v2/metrics",
+        "properties": {
+          "w:pStyle": "HighThroughput",
+          "lanes:mask": "0b00001"
+        }
       },
       {
-        "Name": "TracingEvents",
-        "Type": "Kafka",
-        "Topic": "gacr.telemetry.traces",
-        "BufferSizeMB": 512
+        "rId": "rId2",
+        "type": "TracingEvents/Kafka",
+        "target": "gacr.telemetry.traces",
+        "properties": {
+          "w:pStyle": "BufferedStream",
+          "fiber:key": "nexus-trace-01"
+        }
       }
     ],
     "MaxQueueDepthGB": 10
   },
   "Processing": {
-    "Pipeline": [
-      "SchemaEnforcement",
-      "DynamicFilter",
-      "PiiAnonymization",
-      "MetricsAggregation"
-    ],
+    "fiber_tree_reconciliation": {
+      "type": "Block",
+      "fiber:tag": 1,
+      "runs": [
+        { "rStyle": "SchemaEnforcement", "react:memoize": true },
+        { "rStyle": "DynamicFilter", "ac:complexity_limit": 500 },
+        { "rStyle": "PiiAnonymization", "nx:governance_mode": "Strict" },
+        { "rStyle": "MetricsAggregation", "lanes:active": "UserBlocking" }
+      ]
+    },
     "AdaptiveSampling": {
       "Enabled": true,
       "PolicyType": "ResourceUtilization",
       "TargetCPUUtilization": 0.75,
-      "MinSamplingRate": 0.001,
-      "MaxSamplingRate": 1.0
+      "MinSamplingRate": 0.001
     },
     "BatchingPolicy": {
       "MaxEvents": 5000,
@@ -47,17 +74,23 @@
   "Export": {
     "Destinations": [
       {
+        "rId": "rId3",
         "Name": "DataLakeArchive",
-        "Type": "S3",
-        "Bucket": "gacr-telemetry-archive-v2",
-        "Format": "Parquet",
-        "DeliveryGuarantee": "AtLeastOnce"
+        "target": "s3://gacr-telemetry-archive-v2",
+        "mce:compatibility_mode": "v5.0"
       },
       {
+        "rId": "rId4",
         "Name": "RealtimeMonitoring",
-        "Type": "PrometheusPushGateway",
-        "URL": "http://monitor.gacr.internal:9091"
+        "target": "http://monitor.gacr.internal:9091",
+        "scheduler:priority": "Immediate"
       }
     ]
-  }
+  },
+  "Relationships": [
+    { "rId": "rId1", "type": "https://nexus-core.agi/rel/source", "targetMode": "Internal" },
+    { "rId": "rId2", "type": "https://nexus-core.agi/rel/source", "targetMode": "Internal" },
+    { "rId": "rId3", "type": "https://nexus-core.agi/rel/destination", "targetMode": "External" },
+    { "rId": "rId4", "type": "https://nexus-core.agi/rel/destination", "targetMode": "External" }
+  ]
 }
