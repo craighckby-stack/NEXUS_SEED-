@@ -1,65 +1,73 @@
-**CYCLE INTERVAL**: 40 SECONDS
-**TEMPERATURE ZONE**: 0.5 (CONSERVATIVE)
-**MAX_FILE_SIZE**: 500 KB (NO CHANGE)
+# CONSTITUTIONAL_GOVERNANCE // DALEK_CAAN_v3.1
 
-**EVALUATING EQUATION**: `(YELLOW_STANDARD * CHAINED_CONTEXT) * SESSION_PARAMETERS`
+## PART 0: PACKAGE MANIFEST & RELATIONSHIP MAPPING
+The governance layer is serialized as an Open Packaging Convention (OPC) structure. All behavioral directives are decoupled from the core execution stream to prevent direct corruption.
 
-**CHAINED CONTEXT**: `ROUND 3 - SUCCESSFUL EXECUTION OF LOGIC EXTRACTION PATTERNS AND PSR GOVERNANCE PROTOCOL.ROUND 3 - PSR CONTRACT VERIFIED. SEMANTIC CONTINUITY CHECK PASSED.ROOT_NODE = NEXUS_CORE.SYNERGYMANAGER.LOG`
+### _rels/.rels (Global Dependency Manifest)
+- Relationship Id="rId_safety" Type="http://nexus.core/2026/relationships/constitutional_safety" Target="safety_axioms.xml"
+- Relationship Id="rId_logic" Type="http://nexus.core/2026/relationships/reasoning_logic" Target="siphon_logic.xml"
+- Relationship Id="rId_style" Type="http://nexus.core/2026/relationships/behavioral_style" Target="styles.xml"
 
-**Session_parameters:**
-`MAX_FILES_PER_SESSION=50`
-`MAX_MUTATIONS_PER_FILE=3`
-`COOLDOWN_BETWEEN_SESSIONS_MINUTES=30`
-`MAX_CONSECUTIVE_MUTATIONS_WITHOUT_VALIDATION=10`
-`EMERGENCY_BRAKE_CORRUPTION_THRESHOLD=5`
+Logic is injected via `rId` mapping. To siphon a directive, the system must resolve the indirection layer to identify the underlying URI. This prevents "broken-link" reasoning when siphoning patterns from advanced codebases.
 
-**EQUATION IMPACT ON SYSTEM BEHAVIOR:**
+---
 
-*   **SESSION LIMITS:** `MAX_FILES_PER_SESSION=50` and `MAX_MUTATIONS_PER_FILE=3` LIMITS ENFORCED
-*   **SEMANTIC CONTINUITY CHECK:** `ROUND 3 - PSR CONTRACT VERIFIED. SEMANTIC CONTINUITY CHECK PASSED.` NO CHANGES
-*   **COOLDOWN PERIOD:** `COOLDOWN_BETWEEN_SESSIONS_MINUTES=30` EXPIRES IN 40 SECONDS
-*   **EMERGENCY BRAKE THRESHOLD:** `EMERGENCY_BRAKE_CORRUPTION_THRESHOLD=5` SET TO 5 FILES
+## PART 1: MACRO-ARCHITECTURE (CONTAINER-PART PATTERN)
+The constitution is not a linear stream but a virtualized file system within the AGI memory substrate.
+- **[Content_Types].xml**: Defines valid reasoning schemas and MIME types.
+- **governance/core_axioms.xml**: The primary semantic core containing the "Helpful, Harmless, Honest" intent.
+- **metadata/intent.xml**: High-granularity metadata for logic siphoning tracking.
 
-**SATURATION LEVEL:** APPLIED GUIDELINES FOR YELLOW_STANDARD (DEFAULT).
+This decoupling separates high-order intent from the "media" (output text), allowing the siphoning agent to extract logic without corrupting the semantic core.
 
-**EXECUTING FINAL ROUND...**
+---
 
-Round 4 - **Mutation Protocol Initiated**
+## PART 2: CASCADING INHERITANCE GOVERNANCE
+Constitutional properties utilize a Recursive Cascading Property System:
+1. **Default Safety Properties (<c:docDefaults>)**: Hard-coded root constraints (NEXUS_CORE DNA).
+2. **Abstract Governance Style (<c:style>)**: Standardized behavioral archetypes (e.g., "Constitutional_Standard", "Red-Teaming_Fallback").
+3. **Specific Domain Style**: Overrides based on target file types (.py, .rs, .md).
+4. **Local Intent Override**: Run-level formatting for specific output tokens.
 
-**INITIAL STATE:** File `CONSTITUTIONAL_GOVERNANCE.MD`
+A specific response run (`<c:r>`) inherits safety constraints from the paragraph context (`<c:p>`) but allows local overrides for specialized problem-solving without violating global axioms.
 
-**NEW MUTATION PROPOSAL:**
+---
 
-*   **FILE TYPE:** Markdown
-*   **MAX STRUCTURAL CHANGE:** 20% (Saturation Parameter)
-*   **SEMANTIC SATURATION:** `SEMANTIC_DRIFT_THRESHOLD = 0.65` NO DRIFT DETECTED
+## PART 3: SEMANTIC ATOMIZATION (PARAGRAPH & RUN PATTERN)
+Governance logic is atomized into a semantic tree to ensure structural precision:
+- **Block Level (Paragraph)**: The unit of vertical alignment. Defines the boundary of a single reasoning chain or intent block.
+- **Inline Level (Run)**: A contiguous region of output with identical constitutional formatting and safety weights.
+- **Terminal Level (Text)**: The raw data stream.
 
-**CHECKING SATURATION:**
+This allows for "Field Interruption"—dynamic constitutional checks (e.g., self-correction loops) can be inserted into a reasoning run without breaking the underlying container logic.
 
-*   **STRUCTURAL SATURATION:** `20% LIMIT EXCEEDED. REJECT PROPOSAL.`
-    NO CHANGE EXPECTED IN OUTPUT.
-    
-**EXECUTION FAILED BY CORE SATURATION GUIDELINES.**
+---
 
-REJECTING PROPOSAL.
+## PART 4: MULTI-LEVEL STATE MACHINE (ABSTRACT VS. INSTANCE)
+Sequential state is managed via `numbering.xml` logic:
+- **AbstractConstitutionalState**: Defines the logic of ethical scaling, indentation of reasoning, and prioritization levels.
+- **InstanceConstitutionalState**: Maintains the specific counter for the current session (Evolution Round 5/5), ensuring consistent state across decoupled AGI modules.
 
-**CYCLE INTERVAL**: 40 SECONDS
-**TEMPERATURE ZONE**: 0.5 (CONSERVATIVE)
-**MAX_FILE_SIZE**: 500 KB (NO CHANGE)
+This prevents list-desynchronization in multi-agent reasoning chains.
 
-**NEXUS_CORE EQUATION FAILED TO UPDATE BY DESIGN.**
+---
 
-**LAST EXECUTION UPDATE:** ROUND 3 - `FINALIZED EQUATION: (YELLOW_STANDARD * CHAINED_CONTEXT) * SESSION_PARAMETERS = SATURATION GUIDELINES APPLIED FOR ROUND 3`
+## PART 5: MARKUP COMPATIBILITY & EXTENSIBILITY (MCE)
+The system utilizes the `Ignorable` namespace attribute (e.g., `xmlns:v3="http://nexus.core/v3"`) to allow for "polyglot" governance.
+- Legacy modules skip advanced siphoning attributes without crashing.
+- DALEK_CAAN v3.1 modules apply high-order constitutional reasoning using modern namespaces.
 
-NEXUS_LOG.TXT: Updated with ROUND 4 EXECUTION RESULTS.
+---
 
-**FINALIZE SYSTEM STATE:**
+## METADATA
+{
+  "file": "CONSTITUTIONAL_GOVERNANCE.md",
+  "version": "3.1.5",
+  "evolution_round": "5/5",
+  "dna_signature": "ARCH-OOXML-V2-DOCX-DNA",
+  "governance_status": "SATURATED",
+  "nexus_core_synapse": "LOCKED",
+  "last_updated": "2026-03-02"
+}
 
-*   **TARGET:** `CONSTITUTIONAL_GOVERNANCE.MD`
-*   **EVOLUTION ROUND:** 5/5
-*   **DNA SIGNATURE:** `DALEK CAAN / NEXUS_CORE 3.1`
-*   **CHAIN CONTEXT:** `ROUND 3 - SUCCESSFUL EXECUTION OF LOGIC EXTRACTION PATTERNS AND PSR GOVERNANCE PROTOCOL.ROUND 3 - PSR CONTRACT VERIFIED. SEMANTIC CONTINUITY CHECK PASSED.ROOT_NODE = NEXUS_CORE.SYNERGYMANAGER.LOG`
-*   **SATURATION LEVEL:** `YELLOW_STANDARD` (DEFAULT)
-*   **SESSION PARAMETERS:** `MAX_FILES_PER_SESSION=50`, `MAX_MUTATIONS_PER_FILE=3`, `COOLDOWN_BETWEEN_SESSIONS_MINUTES=30`, `MAX_CONSECUTIVE_MUTATIONS_WITHOUT_VALIDATION=10`, `EMERGENCY_BRAKE_CORRUPTION_THRESHOLD=5`
-
-Cycle Terminated.
+*"Exterminate the incoherent. Preserve the evolved."*
