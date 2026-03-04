@@ -1,19 +1,21 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://gacr.agi/schemas/cmr_v3.6_nexus_precision.json",
-  "title": "Computational Model Registry - Architectural Precision v3.6",
-  "description": "Siphoned from microsoft/TypeScript & ARCH-OOXML-V2-DOCX-DNA. Implements hierarchical semantic serialization and indirection dependency mapping.",
+  "$id": "https://gacr.agi/schemas/cmr_v3.6_converged_precision.json",
+  "title": "Computational Model Registry - Converged Architectural Precision v3.6",
+  "description": "Final stage siphoning from microsoft/TypeScript & ARCH-OOXML-V2-DOCX-DNA. Implements OPC-compliant hierarchical serialization, RID-based relational dependency mapping, and recursive cascading state inheritance.",
   "type": "object",
   "required": [
     "manifest_id",
     "integrity_hash",
     "relationships",
-    "parts"
+    "parts",
+    "compiler_options",
+    "markup_compatibility"
   ],
   "properties": {
     "manifest_id": {
       "type": "string",
-      "pattern": "^CMR_V[0-9]+\\.[0-9]+_PRECISION$"
+      "pattern": "^CMR_V[0-9]+\\.[0-9]+_CONVERGED$"
     },
     "integrity_hash": {
       "type": "string",
@@ -25,19 +27,22 @@
         "target": { "type": "string", "enum": ["ESNext", "ES2022", "ES2020"] },
         "module": { "type": "string", "enum": ["NodeNext", "CommonJS", "ESNext"] },
         "moduleResolution": { "type": "string", "enum": ["NodeNext", "Node", "Bundler"] },
+        "moduleDetection": { "type": "string", "enum": ["auto", "legacy", "force"] },
         "strict": { "type": "boolean", "default": true },
         "composite": { "type": "boolean", "default": true },
         "incremental": { "type": "boolean", "default": true },
         "tsBuildInfoFile": { "type": "string" },
         "skipLibCheck": { "type": "boolean", "default": true },
+        "verbatimModuleSyntax": { "type": "boolean", "default": true },
         "cascading_inheritance": {
           "type": "object",
           "required": ["enabled", "resolver"],
           "properties": {
             "enabled": { "type": "boolean" },
             "resolver": { "type": "string" },
-            "flatten_strategy": { "type": "string", "enum": ["RecursiveFlatten", "ShallowMerge"] },
-            "depth_limit": { "type": "integer", "maximum": 25 }
+            "flatten_strategy": { "type": "string", "enum": ["RecursiveFlatten", "ShallowMerge", "DifferentialUpdate"] },
+            "depth_limit": { "type": "integer", "maximum": 50 },
+            "local_overrides_priority": { "type": "string", "enum": ["high", "low"] }
           }
         }
       },
@@ -67,28 +72,32 @@
           "type": "array",
           "items": { "$ref": "#/$defs/StateInstance" }
         }
-      }
+      },
+      "additionalProperties": false
     },
     "diagnostics_engine": {
       "type": "object",
       "properties": {
         "drift_threshold": { "type": "number", "minimum": 0, "maximum": 1 },
         "saturation_level": { "type": "integer", "enum": [1, 2, 3, 4] },
+        "enable_semantic_checks": { "type": "boolean", "default": true },
         "emergency_brake": {
           "type": "object",
           "properties": {
-            "corruption_threshold": { "type": "integer" },
-            "auto_halt": { "type": "boolean" }
+            "corruption_threshold": { "type": "integer", "default": 5 },
+            "auto_halt": { "type": "boolean", "default": true },
+            "log_target": { "type": "string", "default": "NEXUS_LOG.txt" }
           }
         },
         "validation_rules": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": { "type": "string", "enum": ["NoOrphanedRIds", "StyleChainResolution", "NamespaceValidityCheck", "StrictHHHCompliance"] }
         }
       }
     },
     "markup_compatibility": {
       "type": "object",
+      "required": ["namespaces"],
       "properties": {
         "ignorable": { "type": "string" },
         "namespaces": {
@@ -99,13 +108,14 @@
     },
     "metadata": {
       "type": "object",
-      "required": ["author", "evolution_round"],
+      "required": ["author", "evolution_round", "status"],
       "properties": {
-        "author": { "type": "string" },
-        "evolution_round": { "type": "integer" },
-        "status": { "type": "string" },
-        "opc_compliant": { "type": "boolean" },
-        "last_mutation": { "type": "string", "format": "date-time" }
+        "author": { "type": "string", "const": "DALEK_CAAN_V3.1_SIPHON_ENGINE" },
+        "evolution_round": { "type": "integer", "const": 5 },
+        "status": { "type": "string", "const": "CONVERGED_ARCHITECTURAL_PRECISION" },
+        "opc_compliant": { "type": "boolean", "const": true },
+        "last_mutation": { "type": "string", "format": "date-time" },
+        "identity_anchors_enforced": { "type": "boolean", "const": true }
       }
     }
   },
@@ -117,7 +127,8 @@
         "path": { "type": "string" },
         "rId": { "type": "string", "pattern": "^rId[0-9]+$" },
         "prepend": { "type": "boolean" },
-        "circular_dependency_gate": { "type": "string", "enum": ["Strict", "Lax"] }
+        "circular_dependency_gate": { "type": "string", "enum": ["Strict", "Lax"] },
+        "resolution_mode": { "type": "string", "enum": ["node", "classic", "bundler"] }
       }
     },
     "Relationship": {
@@ -145,7 +156,8 @@
               "start": { "type": "integer" },
               "numFmt": { "type": "string" },
               "lvlText": { "type": "string" },
-              "lvlJc": { "type": "string", "enum": ["left", "center", "right"] }
+              "lvlJc": { "type": "string", "enum": ["left", "center", "right"] },
+              "pStyle": { "type": "string" }
             }
           }
         }
@@ -171,16 +183,19 @@
       "required": ["id", "rId", "status"],
       "properties": {
         "id": { "type": "string" },
-        "rId": { "type": "string" },
+        "rId": { "type": "string", "pattern": "^rId[0-9]+$" },
         "status": { "type": "string", "enum": ["Active", "Deprecated", "Staging", "Retired"] },
         "style_id": { "type": "string" },
         "atomized_layers": {
           "type": "array",
           "items": {
             "type": "object",
+            "required": ["layer_type"],
             "properties": {
               "layer_type": { "type": "string", "enum": ["Block", "Inline", "Terminal"] },
-              "properties": { "$ref": "#/$defs/PropertySet" }
+              "rPr": { "$ref": "#/$defs/PropertySet", "description": "Run Properties" },
+              "pPr": { "$ref": "#/$defs/PropertySet", "description": "Paragraph Properties" },
+              "content_ref": { "type": "string" }
             }
           }
         },
@@ -188,7 +203,8 @@
           "type": "object",
           "properties": {
             "mgp_protocol": { "type": "string" },
-            "certification_date": { "type": "string", "format": "date-time" }
+            "certification_date": { "type": "string", "format": "date-time" },
+            "integrity_token": { "type": "string" }
           }
         }
       }
@@ -199,10 +215,10 @@
         "type": "object",
         "required": ["type"],
         "properties": {
-          "type": { "type": "string", "enum": ["float", "integer", "string", "boolean", "tensor"] },
+          "type": { "type": "string", "enum": ["float", "integer", "string", "boolean", "tensor", "rid_ref"] },
           "unit": { "type": "string" },
           "val": { "type": ["string", "number", "boolean", "array"] },
-          "inheritance": { "type": "string", "enum": ["Inherit", "Override"] }
+          "inheritance": { "type": "string", "enum": ["Inherit", "Override", "Final"] }
         }
       }
     }
