@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://gacr.agi/schemas/ecvm_tis_v10.5.0_round_2.json",
-  "title": "NEXUS_CORE Host Environment Trust Manifest (HETM) - Evolutionary Round 2",
-  "description": "Siphoned Architectural Trust Manifest. Integrates OOXML RID-indirection and TypeScript project-reference hierarchies for metabolic state governance.",
+  "$id": "https://gacr.agi/schemas/ecvm_tis_v10.5.0_round_3.json",
+  "title": "NEXUS_CORE Host Environment Trust Manifest (HETM) - Evolution Round 3/5",
+  "description": "Architectural Trust Manifest synthesizing ISO/IEC 29500 (OOXML) indirection with microsoft/TypeScript project-reference hierarchies. Implements metabolic saturation governance.",
   "type": "object",
   "required": [
     "manifest_id",
@@ -10,6 +10,7 @@
     "relationships",
     "parts",
     "state_machine",
+    "compiler_options",
     "attestation_signature"
   ],
   "markup_compatibility": {
@@ -17,6 +18,7 @@
     "namespaces": {
       "w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
       "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
+      "ts": "https://github.com/microsoft/TypeScript/schemas/compiler",
       "nx": "https://nexus-core.agi/governance",
       "mc": "http://schemas.openxmlformats.org/markup-compatibility/2006",
       "nx_ext": "https://nexus-core.agi/extensions/v5"
@@ -29,16 +31,16 @@
     },
     "version": {
       "type": "string",
-      "const": "10.5.0-FINAL"
+      "const": "10.5.0-BETA-3"
     },
     "relationships": {
       "type": "array",
-      "description": "Indirection Dependency Layer (RID). Traceable to .rels manifest logic.",
+      "description": "Indirection Dependency Layer (RID). Maps logic blocks to external/internal part URIs.",
       "items": {
         "type": "object",
         "properties": {
           "rId": { "type": "string", "pattern": "^rId[0-9]+$" },
-          "type": { "type": "string" },
+          "type": { "type": "string", "description": "Namespaced relation type (e.g. schemas.openxmlformats.org/...)" },
           "target": { "type": "string" },
           "targetMode": { "type": "string", "enum": ["Internal", "External"] }
         },
@@ -47,25 +49,49 @@
     },
     "compiler_options": {
       "type": "object",
-      "description": "TS-grade orchestration for composite substrate compilation.",
+      "description": "TypeScript-grade orchestration for composite substrate compilation.",
       "properties": {
-        "composite": { "type": "boolean", "default": true },
-        "incremental": { "type": "boolean", "default": true },
-        "noUncheckedIndexedAccess": { "type": "boolean", "default": true },
+        "target": { "type": "string", "default": "ESNext" },
+        "module": { "type": "string", "default": "NodeNext" },
+        "composite": { "type": "boolean", "const": true },
+        "incremental": { "type": "boolean", "const": true },
         "verbatimModuleSyntax": { "type": "boolean", "default": true },
+        "noUncheckedIndexedAccess": { "type": "boolean", "default": true },
+        "tsBuildInfoFile": { "type": "string" },
         "cascading_inheritance": {
           "type": "object",
           "properties": {
-            "enabled": { "type": "boolean" },
+            "enabled": { "type": "boolean", "default": true },
             "depth_limit": { "type": "integer", "maximum": 50 },
-            "resolver": { "type": "string", "const": "RecursiveFlatten" }
+            "resolver": { "type": "string", "const": "RecursiveFlatten" },
+            "docDefaults": {
+              "type": "object",
+              "properties": {
+                "pPr": { "$ref": "#/definitions/StyleProperties" },
+                "rPr": { "$ref": "#/definitions/StyleProperties" }
+              }
+            }
           }
         }
       }
     },
+    "references": {
+      "type": "array",
+      "description": "Project Reference Orchestration for decoupled logic parts.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string" },
+          "rId": { "type": "string" },
+          "resolution_mode": { "type": "string", "enum": ["node", "direct", "classic"] },
+          "circular_dependency_gate": { "type": "string", "const": "Strict" }
+        },
+        "required": ["path", "rId"]
+      }
+    },
     "parts": {
       "type": "array",
-      "description": "Atomized Semantic Tree: Blocks, Inlines, and Terminals.",
+      "description": "Atomized Semantic Tree: Modular package components.",
       "items": {
         "type": "object",
         "properties": {
@@ -82,7 +108,8 @@
                 "pPr": { "$ref": "#/definitions/StyleProperties" },
                 "rPr": { "$ref": "#/definitions/StyleProperties" },
                 "content_ref": { "type": "string" }
-              }
+              },
+              "required": ["layer_type", "content_ref"]
             }
           }
         },
@@ -91,7 +118,7 @@
     },
     "state_machine": {
       "type": "object",
-      "description": "Multi-Level Sequential State (OOXML Numbering Logic).",
+      "description": "Sequential State Sync (OOXML Multi-Level Numbering Logic).",
       "properties": {
         "abstract_num_definitions": {
           "type": "array",
@@ -107,8 +134,10 @@
                     "ilvl": { "type": "integer" },
                     "start": { "type": "integer" },
                     "numFmt": { "type": "string" },
-                    "lvlText": { "type": "string" }
-                  }
+                    "lvlText": { "type": "string" },
+                    "lvlJc": { "type": "string", "enum": ["left", "center", "right"] }
+                  },
+                  "required": ["ilvl", "start", "numFmt"]
                 }
               }
             }
@@ -133,13 +162,17 @@
         "saturation_level": { "type": "integer", "enum": [1, 2, 3, 4] },
         "validation_rules": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": { 
+            "type": "string",
+            "enum": ["NoOrphanedRIds", "StyleChainResolution", "NamespaceValidityCheck", "ProjectBoundaryCheck", "SemanticContinuityCheck"]
+          }
         },
         "emergency_brake": {
           "type": "object",
           "properties": {
             "corruption_threshold": { "type": "integer", "const": 5 },
-            "auto_halt": { "type": "boolean", "default": true }
+            "auto_halt": { "type": "boolean", "default": true },
+            "log_target": { "type": "string", "const": "NEXUS_LOG.txt" }
           }
         }
       }
@@ -148,7 +181,7 @@
       "type": "object",
       "required": ["algorithm", "payload_hash", "crot_signature"],
       "properties": {
-        "algorithm": { "type": "string", "const": "SHA3-256" },
+        "algorithm": { "type": "string", "enum": ["SHA3-256", "SHA-512"] },
         "payload_hash": { "type": "string" },
         "crot_signature": { "type": "string" }
       }
@@ -160,7 +193,7 @@
       "properties": {
         "val": { "type": ["string", "integer", "boolean"] },
         "inheritance": { "type": "string", "enum": ["Inherit", "Override", "Final"], "default": "Inherit" },
-        "sz": { "type": "integer" },
+        "sz": { "type": "integer", "description": "Size in half-points" },
         "color": { "type": "string", "pattern": "^[0-9A-F]{6}$" },
         "bold": { "type": "boolean" },
         "spacing": { 
@@ -171,16 +204,27 @@
           "type": "object", 
           "properties": { "val": { "type": "integer" }, "unit": { "type": "string", "enum": ["twips", "pts", "px"] } }
         },
-        "jc": { "type": "object", "properties": { "val": { "type": "string", "enum": ["left", "center", "right", "both"] } } }
+        "jc": { "type": "object", "properties": { "val": { "type": "string", "enum": ["left", "center", "right", "both"] } } },
+        "lang": { "type": "object", "properties": { "val": { "type": "string", "default": "en-AGI" } } },
+        "noProof": { "type": "boolean", "default": true },
+        "vertAlign": { "type": "object", "properties": { "val": { "type": "string", "enum": ["baseline", "superscript", "subscript"] } } }
       }
     }
   },
   "metadata": {
     "dna_anchor": "ARCH-OOXML-V2-DOCX-DNA",
-    "evolution_round": 2,
+    "evolution_round": 3,
     "saturation_level": 2,
+    "metabolic_rate": "STANDARD",
     "author": "DALEK_CAAN_V3.1_SIPHON_ENGINE",
     "identity_anchors_enforced": true,
-    "last_mutation": "2026-03-02T18:15:00Z"
+    "anchors": {
+      "purpose": "Self-optimising AGI substrate for real-world problem solving",
+      "mechanism": "Siphoning patterns from advanced codebases",
+      "memory": "Chained context across files — the system is one organism",
+      "governance": "Human oversight remains active at all saturation levels",
+      "origin": "NEXUS_CORE"
+    },
+    "last_mutation": "2026-03-02T18:30:00Z"
   }
 }
