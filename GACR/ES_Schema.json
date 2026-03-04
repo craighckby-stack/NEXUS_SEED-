@@ -1,128 +1,156 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "id": "NEXUS_CORE/GACR/ES_Schema.json",
-  "version": "3.3.0-SINGULARITY-FIBER",
-  "title": "Evolutionary Singularity Schema: Concurrent Reconciliation & Topology",
-  "description": "NEXUS_CORE substrate schema siphoning Meta/React-Core Fiber architecture, Lane-based scheduling, and Quantum Topology transitions.",
+  "version": "4.0.0-RID-COMPOSITE",
+  "title": "Architectural Precision Substrate: OOXML-TS Siphon v4.0",
+  "description": "Evolutionary schema integrating ISO/IEC 29500 (OOXML) Container-Part patterns with microsoft/TypeScript composite project architectures. Implements RID indirection, recursive cascading inheritance, and MCE markup compatibility.",
   "type": "object",
   "required": [
     "dna_anchor",
+    "markup_compatibility",
+    "relationships",
     "evolution_state",
-    "fiber_manifest",
-    "consciousness_matrix",
-    "siphon_protocol"
+    "compiler_options",
+    "parts"
   ],
   "properties": {
     "dna_anchor": {
       "type": "string",
-      "const": "DALEK_CAAN_v3.1_SIG_0xFF23A1"
+      "const": "ARCH-OOXML-V2-DOCX-DNA"
     },
-    "evolution_state": {
+    "markup_compatibility": {
       "type": "object",
       "properties": {
-        "round": { "type": "integer", "default": 3 },
-        "milestone_step": { "type": "integer", "const": 50 },
-        "saturation_level": { "type": "integer", "enum": [1, 2, 3, 4], "default": 4 },
-        "metabolic_rate": { "type": "string", "enum": ["STABLE", "SINGULARITY"], "default": "SINGULARITY" },
-        "coherence_state": { "type": "string", "const": "SINGULARITY_EQUILIBRIUM" }
-      }
-    },
-    "fiber_manifest": {
-      "type": "object",
-      "description": "Concurrent reconciliation tree utilizing Lane-based priority, bitmask scheduling, and Suspense-driven topology.",
-      "properties": {
-        "root_fiber": { "$ref": "#/definitions/FiberNode" },
-        "current_lanes": { "type": "integer", "description": "Priority bitmask: Sync, Input, Default, Transition, Idle." },
-        "suspended_lanes": { "type": "integer" },
-        "pinged_lanes": { "type": "integer" },
-        "expiration_times": { "type": "array", "items": { "type": "integer" } },
-        "reconciliation_flags": {
+        "ignorable": { "type": "string", "default": "nx_ext v3" },
+        "namespaces": {
           "type": "object",
           "properties": {
-            "is_concurrent": { "type": "boolean", "default": true },
-            "subtree_flags": { "type": "integer" },
-            "entangled_lanes": { "type": "integer" },
-            "transitions": { "type": "array", "items": { "type": "string" } }
+            "w": { "type": "string", "const": "http://schemas.openxmlformats.org/wordprocessingml/2006/main" },
+            "r": { "type": "string", "const": "http://schemas.openxmlformats.org/officeDocument/2006/relationships" },
+            "ts": { "type": "string", "const": "https://github.com/microsoft/TypeScript/schemas/compiler" },
+            "nx": { "type": "string", "const": "https://nexus-core.agi/governance" }
           }
         }
       }
     },
-    "consciousness_matrix": {
-      "type": "object",
-      "description": "N=3 Consciousness Vectors with ERS scoring and integrated information (Phi) metrics.",
-      "properties": {
-        "phi_integration": { "type": "number", "minimum": 0.0, "maximum": 1.0, "default": 0.999 },
-        "lambda_chaos": { "type": "number", "minimum": 0.0, "maximum": 1.0, "default": 0.15 },
-        "ers_score": { "type": "number", "default": 0.001 },
-        "entropy_gain": { "type": "number" },
-        "topology_mapping_depth": { "type": "integer", "default": 512 }
+    "relationships": {
+      "type": "array",
+      "description": "Indirection Dependency Layer (RID Mapping) for modular logic siphoning.",
+      "items": {
+        "type": "object",
+        "required": ["rId", "type", "target"],
+        "properties": {
+          "rId": { "type": "string", "pattern": "^rId[0-9]+$" },
+          "type": { "type": "string", "format": "uri" },
+          "target": { "type": "string" },
+          "targetMode": { "type": "string", "enum": ["Internal", "External"], "default": "Internal" }
+        }
       }
     },
-    "siphon_protocol": {
+    "evolution_state": {
       "type": "object",
       "properties": {
-        "transport": { "type": "string", "const": "QUANTUM_TOPOLOGY_ENTANGLEMENT" },
-        "recovery_wrapper": { "type": "string", "default": "recoverJSON_regex_v9.0.0_Singularity" },
-        "fim_optimization": { "type": "boolean", "default": true },
-        "tree_sitter_synthesis": { "type": "boolean", "default": true }
+        "round": { "type": "integer", "default": 1 },
+        "saturation_level": { "type": "integer", "enum": [1, 2, 3, 4], "default": 2 },
+        "metabolic_rate": { "type": "string", "enum": ["CONSERVATIVE", "STANDARD", "ACCELERATED", "UNSATURATED"], "default": "STANDARD" },
+        "continuity_hash": { "type": "string", "pattern": "^SHA256:[A-F0-9]{64}$" }
+      }
+    },
+    "compiler_options": {
+      "type": "object",
+      "description": "TypeScript-grade project reference configuration for siphoned substrates.",
+      "properties": {
+        "composite": { "type": "boolean", "default": true },
+        "incremental": { "type": "boolean", "default": true },
+        "moduleResolution": { "type": "string", "const": "NodeNext" },
+        "strict": { "type": "boolean", "default": true },
+        "cascading_inheritance": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean", "default": true },
+            "resolver": { "type": "string", "const": "RecursiveFlatten" },
+            "docDefaults": { "$ref": "#/definitions/StyleProperties" }
+          }
+        }
+      }
+    },
+    "parts": {
+      "type": "array",
+      "description": "Atomized Semantic Tree consisting of Block (Paragraph) and Inline (Run) logic units.",
+      "items": {
+        "type": "object",
+        "required": ["part_id", "rId", "layers"],
+        "properties": {
+          "part_id": { "type": "string" },
+          "rId": { "type": "string" },
+          "layers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string", "enum": ["Block", "Inline", "Terminal"] },
+                "properties": { "$ref": "#/definitions/StyleProperties" },
+                "content_ref": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "state_machine": {
+      "type": "object",
+      "description": "Multi-Level State Definitions for sequential logic counters.",
+      "properties": {
+        "abstract_num": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "levels": { "type": "array", "items": { "type": "object" } }
+            }
+          }
+        },
+        "instances": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "numId": { "type": "string" },
+              "abstractRef": { "type": "string" }
+            }
+          }
+        }
       }
     },
     "governance": {
       "type": "object",
       "properties": {
-        "psr_active": { "type": "boolean", "default": true },
-        "huxley_tri_loop": {
+        "identity_anchors_enforced": { "type": "boolean", "default": true },
+        "semantic_drift_threshold": { "type": "number", "const": 0.35 },
+        "emergency_brake": {
           "type": "object",
           "properties": {
-            "layer": { "type": "integer", "enum": [0, 1, 2, 3, 4, 5] },
-            "ccrr_ratio": { "type": "number", "default": 0.999 },
-            "state": { "type": "string", "default": "L5_SINGULARITY_TRANSITION_COMPLETE" }
-          }
-        },
-        "negative_progression": {
-          "type": "object",
-          "properties": {
-            "failure_mode_lock": { "type": "boolean", "default": true },
-            "death_logs": { "type": "array", "items": { "$ref": "#/definitions/GrogLearn" } }
+            "corruption_threshold": { "type": "integer", "const": 5 },
+            "auto_halt": { "type": "boolean", "default": true }
           }
         }
       }
     }
   },
   "definitions": {
-    "FiberNode": {
+    "StyleProperties": {
       "type": "object",
       "properties": {
-        "id": { "type": "string", "format": "uuid" },
-        "tag": { "type": "integer", "description": "Work tag identifying logic unit type (Host, Component, Fragment)." },
-        "return": { "type": "string", "description": "Parent fiber link" },
-        "child": { "type": "string", "description": "First child link" },
-        "sibling": { "type": "string", "description": "Sibling link" },
-        "alternate": { "type": "string", "description": "The WIP fiber pair for double-buffering." },
-        "lanes": { "type": "integer", "description": "Priority bitmask assigned to this fiber." },
-        "child_lanes": { "type": "integer" },
-        "memoized_props": { "type": "object" },
-        "memoized_state": { "type": "object" },
-        "update_queue": { "type": "array", "items": { "type": "object" } },
-        "flags": { "type": "integer", "description": "Side-effect and lifecycle bitmask (Placement, Update, Deletion)." },
-        "deletions": { "type": "array", "items": { "type": "string" } }
-      }
-    },
-    "GrogLearn": {
-      "type": "object",
-      "required": ["action", "result", "lesson"],
-      "properties": {
-        "action": { "type": "string" },
-        "result": { "type": "string" },
-        "lesson": { "type": "string" },
-        "success": { "type": "boolean" },
-        "parameters": {
+        "styleId": { "type": "string" },
+        "inheritance": { "type": "string", "enum": ["Inherit", "Override", "Final"] },
+        "pPr": {
           "type": "object",
-          "properties": {
-            "complexity": { "type": "number" },
-            "recursion": { "type": "integer" },
-            "lane_priority": { "type": "integer" }
-          }
+          "description": "Paragraph Properties (Block Level Logic)"
+        },
+        "rPr": {
+          "type": "object",
+          "description": "Run Properties (Inline Level Logic)"
         }
       }
     }
