@@ -1,34 +1,84 @@
 {
   "$id": "GACR/TelemetrySourceSchema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "NEXUS_CORE Telemetry Aggregator Schema (Fiber-Augmented)",
-  "description": "Hierarchical semantic telemetry schema utilizing React-Fiber reconciliation and OOXML-DocX relational mapping logic.",
+  "title": "NEXUS_CORE Telemetry Aggregator (Architect-Precise v3.1)",
+  "description": "Hierarchical semantic telemetry schema siphoned from Meta/React-Core Fiber and ISO/IEC 29500 (OOXML). Implements Indirection Dependency Layering and Concurrent Lane Reconciliation.",
   "type": "array",
-  "mc:Ignorable": "nx mce react fiber lanes scheduler",
+  "mc:Ignorable": "nx mce react fiber lanes scheduler w r ac hook docx",
   "items": {
     "type": "object",
     "properties": {
-      "constraint_id": { "type": "string", "description": "Reference to the governing constraint." },
-      "monitor_id": { "type": "string" },
-      "timestamp_ms": { "type": "integer", "format": "int64", "description": "Aggregation timestamp." },
-      "metric_value": { "type": ["number", "string", "boolean"], "description": "The extracted metric value." },
-      "data_type": { "type": "string", "enum": ["GAUGE", "COUNTER", "BOOLEAN", "HISTOGRAM"] },
-      "rId": { "type": "string", "description": "Relationship ID mapping to external part URI in _rels manifest." },
-      "fiber_context": {
+      "pStyle": {
+        "type": "string",
+        "description": "Cascading Style ID (word/styles.xml). Resolves to recursive inheritance chain: Default -> Abstract -> Instance -> Local Override."
+      },
+      "rId": {
+        "type": "string",
+        "pattern": "^rId[0-9]+$",
+        "description": "Relationship ID mapping to indirection manifest (_rels/.rels). Decentralizes path resolution from semantic core."
+      },
+      "reconciliation_node": {
         "type": "object",
         "properties": {
-          "lane": { "type": "string", "description": "React-inspired concurrent lane for update prioritization." },
-          "pStyle": { "type": "string", "description": "Cascading style inheritance ID for telemetry formatting." },
-          "expiration_ms": { "type": "integer", "description": "Fiber-level time limit before work is committed." },
+          "fiber_tag": { "type": "integer", "enum": [0, 1, 2, 3, 4, 5], "description": "Fiber component type classification." },
+          "lane_mask": { "type": "string", "pattern": "^0b[01]{5}$", "description": "Priority bitmask for concurrent telemetry processing." },
+          "expiration_ms": { "type": "integer", "description": "Scheduler-defined deadline for work commitment." },
+          "effect_tag": { "type": "string", "enum": ["Placement", "Update", "Deletion", "Hydrating"] },
           "memoize": { "type": "boolean", "default": true }
+        },
+        "required": ["lane_mask", "fiber_tag"]
+      },
+      "sequential_state": {
+        "type": "object",
+        "properties": {
+          "abstractNumId": { "type": "string", "description": "The logic blueprint for the telemetry sequence." },
+          "numId": { "type": "string", "description": "The specific instance counter of the siphoned sequence." },
+          "ilvl": { "type": "integer", "minimum": 0, "maximum": 9, "description": "Hierarchical indentation level." }
         }
       },
-      "source_metadata": { 
-        "type": "object", 
-        "additionalProperties": true, 
-        "description": "Raw metadata including docx:coreProperties and react:flags." 
+      "payload": {
+        "type": "object",
+        "properties": {
+          "metric_value": { "type": ["number", "string", "boolean"] },
+          "data_type": { "type": "string", "enum": ["GAUGE", "COUNTER", "BOOLEAN", "HISTOGRAM"] },
+          "timestamp_ms": { "type": "integer", "format": "int64" }
+        },
+        "required": ["metric_value", "timestamp_ms"]
+      },
+      "markup_compatibility": {
+        "type": "object",
+        "properties": {
+          "Ignorable": { "type": "string" },
+          "ProcessContent": { "type": "string" },
+          "MustUnderstand": { "type": "string" }
+        }
+      },
+      "core_properties": {
+        "type": "object",
+        "properties": {
+          "dc:title": { "type": "string" },
+          "docx:version": { "type": "string" },
+          "docx:revision": { "type": "integer" },
+          "docx:contentStatus": { "type": "string" },
+          "react:flags": { "type": "object", "additionalProperties": { "type": "boolean" } }
+        }
       }
     },
-    "required": ["constraint_id", "monitor_id", "timestamp_ms", "metric_value", "data_type", "rId"]
+    "required": ["pStyle", "rId", "reconciliation_node", "payload"]
+  },
+  "definitions": {
+    "RelationshipManifest": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "Id": { "type": "string" },
+          "Type": { "type": "string", "format": "uri" },
+          "Target": { "type": "string" },
+          "TargetMode": { "type": "string", "enum": ["Internal", "External"] }
+        },
+        "required": ["Id", "Type", "Target"]
+      }
+    }
   }
 }
