@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://gacr.agi/schemas/cmr_v3.1.json",
-  "title": "Computational Model Registry Schema - Nexus Edition",
-  "description": "Architectural Registry for AGI Model Substrates leveraging Hierarchical Semantic Serialization.",
+  "$id": "https://gacr.agi/schemas/cmr_v3.5_architectural.json",
+  "title": "Computational Model Registry Schema - Nexus Architectural Edition",
+  "description": "High-precision registry for AGI substrates implementing OPC-Relational Mapping and TypeScript-derived composite patterns.",
   "type": "object",
   "required": [
     "manifest_id",
@@ -19,12 +19,30 @@
     "owner": {
       "type": "string"
     },
-    "settings": {
-      "$ref": "#/$defs/GlobalSettings"
+    "integrity_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of the complete instantiation state."
+    },
+    "references": {
+      "type": "array",
+      "description": "Project-level references for composite model structures, analogous to TypeScript build-references.",
+      "items": {
+        "$ref": "#/$defs/ProjectReference"
+      }
+    },
+    "engine_options": {
+      "type": "object",
+      "description": "Global compiler and runtime parameters for the Siphon Engine.",
+      "properties": {
+        "strict": { "type": "boolean", "default": true },
+        "composite": { "type": "boolean", "default": true },
+        "incremental": { "type": "boolean", "default": true },
+        "inheritance_depth": { "type": "integer", "default": 10 }
+      }
     },
     "relationships": {
       "type": "array",
-      "description": "Indirection Dependency Layer (RID Mapping) for external resources.",
+      "description": "Indirection Dependency Layer (RID) mapping target URIs to internal identifiers.",
       "items": {
         "$ref": "#/$defs/Relationship"
       }
@@ -35,161 +53,103 @@
         "$ref": "#/$defs/ModelInstance"
       }
     },
+    "state_machine": {
+      "type": "object",
+      "description": "Multi-level state definitions for list-style sequential execution (DNA-AbstractNum Pattern).",
+      "properties": {
+        "abstract_definitions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/AbstractState" }
+        }
+      }
+    },
     "markup_compatibility": {
       "type": "object",
       "properties": {
-        "ignorable": {
-          "type": "string"
-        },
+        "ignorable": { "type": "string" },
         "namespaces": {
           "type": "object",
-          "additionalProperties": {
-            "type": "string",
-            "format": "uri"
-          }
+          "additionalProperties": { "type": "string", "format": "uri" }
         }
       }
     }
   },
   "$defs": {
-    "GlobalSettings": {
+    "ProjectReference": {
       "type": "object",
+      "required": ["path", "rId"],
       "properties": {
-        "compliance_mode": {
-          "type": "string",
-          "enum": [
-            "Strict",
-            "Transitional",
-            "Lax"
-          ]
-        },
-        "default_inheritance_depth": {
-          "type": "integer",
-          "default": 10
-        }
+        "path": { "type": "string" },
+        "rId": { "type": "string", "pattern": "^rId[0-9]+$" },
+        "circular_gate": { "type": "string", "enum": ["Strict", "Lax"] }
       }
     },
     "Relationship": {
       "type": "object",
-      "required": [
-        "rId",
-        "type",
-        "target"
-      ],
+      "required": ["rId", "type", "target"],
       "properties": {
-        "rId": {
-          "type": "string",
-          "pattern": "^rId[0-9]+$"
-        },
-        "type": {
-          "type": "string",
-          "format": "uri"
-        },
-        "target": {
-          "type": "string"
-        },
-        "targetMode": {
-          "type": "string",
-          "enum": [
-            "Internal",
-            "External"
-          ]
-        }
+        "rId": { "type": "string", "pattern": "^rId[0-9]+$" },
+        "type": { "type": "string", "format": "uri" },
+        "target": { "type": "string" },
+        "targetMode": { "type": "string", "enum": ["Internal", "External"] },
+        "checksum": { "type": "string" }
       }
     },
-    "ModelInstance": {
+    "AbstractState": {
       "type": "object",
-      "required": [
-        "model_id",
-        "rId",
-        "version",
-        "status",
-        "audit_metadata"
-      ],
+      "required": ["state_id", "levels"],
       "properties": {
-        "model_id": {
-          "type": "string"
-        },
-        "rId": {
-          "description": "Pointer to Relationship Manifest entry for model binary/source.",
-          "type": "string"
-        },
-        "version": {
-          "type": "string",
-          "pattern": "^[0-9]+\\.[0-9]+$"
-        },
-        "status": {
-          "type": "string",
-          "enum": [
-            "Active",
-            "Deprecated",
-            "Staging",
-            "Retired"
-          ]
-        },
-        "style_id": {
-          "type": "string",
-          "description": "Link to cascading property set for input constraints."
-        },
-        "inputs_schema": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/$defs/InputProperty"
-          }
-        },
-        "audit_metadata": {
-          "type": "object",
-          "required": [
-            "mgp_protocol",
-            "approval_id",
-            "certification_date"
-          ],
-          "properties": {
-            "mgp_protocol": {
-              "type": "string"
-            },
-            "approval_id": {
-              "type": "string"
-            },
-            "certification_date": {
-              "type": "string",
-              "format": "date-time"
+        "state_id": { "type": "string" },
+        "levels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "depth": { "type": "integer" },
+              "logic_format": { "type": "string" },
+              "override_priority": { "type": "string", "enum": ["High", "Standard"] }
             }
           }
         }
       }
     },
-    "InputProperty": {
+    "ModelInstance": {
       "type": "object",
-      "required": [
-        "type",
-        "unit"
-      ],
+      "required": ["model_id", "rId", "status"],
       "properties": {
-        "type": {
-          "type": "string",
-          "enum": [
-            "float",
-            "integer",
-            "string",
-            "boolean"
-          ]
+        "model_id": { "type": "string" },
+        "rId": { "type": "string", "description": "Relational link to model source." },
+        "status": { "type": "string", "enum": ["Active", "Deprecated", "Staging", "Retired"] },
+        "style_id": { "type": "string", "description": "Cascading property set for input constraints (Latent Styling DNA)." },
+        "state_mapping": {
+          "type": "object",
+          "properties": {
+            "num_id": { "type": "string" },
+            "abstract_ref": { "type": "string" }
+          }
         },
-        "unit": {
-          "type": "string"
+        "interface": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/Property" }
         },
-        "min": {
-          "type": [
-            "number",
-            "null"
-          ]
-        },
-        "max": {
-          "type": [
-            "number",
-            "null"
-          ]
+        "audit": {
+          "type": "object",
+          "required": ["mgp_protocol", "certification_date"],
+          "properties": {
+            "mgp_protocol": { "type": "string" },
+            "certification_date": { "type": "string", "format": "date-time" }
+          }
         }
+      }
+    },
+    "Property": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "type": "string", "enum": ["float", "integer", "string", "boolean", "tensor"] },
+        "unit": { "type": "string" },
+        "min": { "type": ["number", "null"] },
+        "max": { "type": ["number", "null"] }
       }
     }
   }
