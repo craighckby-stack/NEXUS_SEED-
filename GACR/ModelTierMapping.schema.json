@@ -1,66 +1,135 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "GACR/ModelTierMapping.schema.json",
-  "title": "Model Tier Mapping Configuration Schema",
+  "title": "Model Tier Mapping Configuration Schema [NEXUS_CORE v3.1]",
+  "description": "Architectural substrate for self-optimising model tiering using OOXML-DocX Relational Dependency and React-Fiber Concurrency patterns.",
   "type": "object",
   "properties": {
+    "mc:Ignorable": {
+      "type": "string",
+      "default": "nx mce react fiber lanes scheduler"
+    },
+    "namespaces": {
+      "type": "object",
+      "additionalProperties": { "type": "string", "format": "uri" },
+      "default": {
+        "nx": "https://nexus-core.agi/governance",
+        "mce": "http://schemas.openxmlformats.org/markup-compatibility/2006",
+        "react": "https://react.dev/core/reconciliation",
+        "fiber": "https://react.dev/core/fiber-tree"
+      }
+    },
     "mapping_version": {
       "type": "string",
-      "enum": ["2.0"],
-      "description": "Schema version control."
+      "enum": ["2.5.0-CONVERGED"],
+      "description": "NEXUS-grade version control with AlphaCode pattern optimization."
     },
-    "default_tier_id": {
-      "type": "string",
-      "description": "The ID of the tier assigned if no rule matches."
-    },
-    "tier_definitions": {
+    "settings": {
       "type": "object",
-      "patternProperties": {
-        "^[A-Z0-9_]+$": {
+      "properties": {
+        "cascading_inheritance": {
           "type": "object",
           "properties": {
-            "priority_level": {"type": "integer"},
-            "description": {"type": "string"},
-            "sla_target_ms": {"type": "integer"},
-            "redundancy_level": {"type": "string"}
-          },
-          "required": ["priority_level", "sla_target_ms"]
+            "enabled": { "type": "boolean", "default": true },
+            "resolver": { "type": "string", "enum": ["RecursiveFlatten", "ShallowMerge"] },
+            "docDefaults": { "$ref": "#/$defs/tierProperties" }
+          }
         }
-      },
-      "minProperties": 1
+      }
     },
-    "assignment_rules": {
+    "abstract_tier_definitions": {
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
-          "rule_id": {"type": "string"},
-          "assign_tier_id": {"type": "string"},
-          "rationale": {"type": "string"},
-          "criteria": {
-            "type": "object",
-            "properties": {
-              "match_type": {"type": "string", "enum": ["exact_id", "tag_match", "regex_id"]},
-              "values": {"type": "array", "items": {"type": "string"}, "description": "Used for exact_id/regex_id matching.", "minItems": 1},
-              "tags": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "key": {"type": "string"},
-                    "operator": {"type": "string", "enum": ["equals", "not_equals", "less_than", "greater_than"]},
-                    "value": {"type": "string"}
-                  },
-                  "required": ["key", "operator", "value"]
-                }
-              }
-            },
-            "required": ["match_type"]
+          "abstractNumId": { "type": "string" },
+          "name": { "type": "string" },
+          "multiLevelType": { "type": "string", "enum": ["single", "hybridFiber", "multiLevel"] },
+          "levels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "ilvl": { "type": "integer" },
+                "tierPr": { "$ref": "#/$defs/tierProperties" },
+                "fiber:workTag": { "type": "string" }
+              },
+              "required": ["ilvl", "tierPr"]
+            }
           }
         },
-        "required": ["rule_id", "assign_tier_id", "criteria"]
+        "required": ["abstractNumId", "name", "levels"]
+      }
+    },
+    "tier_instance_mapping": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "numId": { "type": "string" },
+          "abstractNumId": { "type": "string" },
+          "rId": { "type": "string", "pattern": "^rId_[A-Z0-9]+$" },
+          "status": { "type": "string", "enum": ["CONVERGED", "DEGRADED", "STABLE"] },
+          "fiber:key": { "type": "string" },
+          "fiber:lanes": { "type": "string", "enum": ["Sync", "Default", "Input", "Idle"] }
+        },
+        "required": ["numId", "abstractNumId", "rId"]
+      }
+    },
+    "relational_dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "rId": { "type": "string" },
+          "type": { "type": "string", "format": "uri" },
+          "target": { "type": "string" },
+          "targetMode": { "type": "string", "enum": ["Internal", "External"] },
+          "rule": {
+            "type": "object",
+            "properties": {
+              "rule_id": { "type": "string" },
+              "criteria": {
+                "type": "object",
+                "properties": {
+                  "match_type": { "type": "string", "enum": ["exact_id", "tag_match", "regex_id"] },
+                  "values": { "type": "array", "items": { "type": "string" } },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "key": { "type": "string" },
+                        "operator": { "type": "string", "enum": ["equals", "not_equals", "less_than", "greater_than"] },
+                        "value": { "type": "string" }
+                      }
+                    }
+                  }
+                },
+                "required": ["match_type"]
+              }
+            }
+          }
+        },
+        "required": ["rId", "type", "target"]
       }
     }
   },
-  "required": ["mapping_version", "default_tier_id", "tier_definitions", "assignment_rules"]
+  "required": ["mapping_version", "abstract_tier_definitions", "tier_instance_mapping", "relational_dependencies"],
+  "$defs": {
+    "tierProperties": {
+      "type": "object",
+      "properties": {
+        "priority_level": { "type": "integer" },
+        "sla_target_ms": { "type": "integer" },
+        "redundancy_level": { "type": "string" },
+        "availability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "nx:governance_mode": { "type": "string", "enum": ["Strict", "Adaptive", "Passive"] },
+        "lanes:mask": { "type": "string", "pattern": "^0b[01]+$" },
+        "scheduler:priority": { "type": "string", "enum": ["ImmediatePriority", "UserBlockingPriority", "NormalPriority", "LowPriority", "IdlePriority"] },
+        "react:memoize": { "type": "boolean" }
+      },
+      "required": ["priority_level", "sla_target_ms"]
+    }
+  }
 }
