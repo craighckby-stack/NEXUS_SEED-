@@ -1,6 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://gacr.agi/schemas/ecvm_tis_v10.2.0_round_2.json",
+  "$id": "https://gacr.agi/schemas/ecvm_tis_v10.3.0_round_3.json",
+  "version": "10.3.0-DEV",
+  "title": "NEXUS_CORE Converged Architectural Substrate",
   "dna_anchor": "ARCH-OOXML-V2-DOCX-DNA",
   "markup_compatibility": {
     "ignorable": "dalek v3 nx_ext mce",
@@ -14,10 +16,10 @@
     }
   },
   "evolution_state": {
-    "round": 2,
+    "round": 3,
     "saturation_level": 2,
     "metabolic_rate": "STANDARD",
-    "integrity_hash": "SHA256:B7E8C9A0F1D2E3B4A5C6D7E8F9A0B1C2D3E4F5A6B7C8D9E0F1A2B3C4D5E6F7A8"
+    "integrity_hash": "SHA256:D3E4F5A6B7C8D9E0F1A2B3C4D5E6F7A8B7E8C9A0F1D2E3B4A5C6D7E8F9A0B1C2"
   },
   "relationships": [
     {
@@ -37,6 +39,12 @@
       "type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles",
       "target": "styles.json",
       "targetMode": "Internal"
+    },
+    {
+      "rId": "rId4",
+      "type": "https://github.com/microsoft/TypeScript/relationships/compiler-diagnostics",
+      "target": "diagnostics.json",
+      "targetMode": "Internal"
     }
   ],
   "compiler_options": {
@@ -47,22 +55,43 @@
     "incremental": true,
     "verbatimModuleSyntax": true,
     "noUncheckedIndexedAccess": true,
-    "tsBuildInfoFile": "GTEM_V2.tsbuildinfo",
+    "declaration": true,
+    "emitDeclarationOnly": false,
+    "tsBuildInfoFile": "GTEM_V3.tsbuildinfo",
+    "paths": {
+      "@nexus/*": ["./core/*"],
+      "@parts/*": ["./parts/*"]
+    },
     "cascading_inheritance": {
       "enabled": true,
       "resolver": "RecursiveFlatten",
+      "depth_limit": 50,
       "docDefaults": {
         "pPr": {
           "spacing": { "val": 240, "unit": "twips" },
-          "jc": { "val": "both" }
+          "jc": { "val": "both" },
+          "inheritance": "Inherit"
         },
         "rPr": {
           "lang": { "val": "en-AGI" },
-          "noProof": true
+          "noProof": true,
+          "inheritance": "Inherit"
         }
       }
     }
   },
+  "references": [
+    {
+      "path": "./core/identity",
+      "rId": "rId1",
+      "resolution_mode": "node"
+    },
+    {
+      "path": "./metrics/efficacy",
+      "rId": "rId2",
+      "resolution_mode": "node"
+    }
+  ],
   "parts": [
     {
       "id": "core_identity",
@@ -71,7 +100,7 @@
       "atomized_layers": [
         {
           "layer_type": "Block",
-          "pPr": { "bold": true },
+          "pPr": { "bold": true, "inheritance": "Override" },
           "content_ref": "transition_id"
         },
         {
@@ -87,13 +116,25 @@
       "atomized_layers": [
         {
           "layer_type": "Inline",
-          "rPr": { "color": "00FF00" },
+          "rPr": { "color": "00FF00", "inheritance": "Override" },
           "content_ref": "S01_efficacy_metric"
         },
         {
           "layer_type": "Inline",
-          "rPr": { "color": "FF0000" },
+          "rPr": { "color": "FF0000", "inheritance": "Override" },
           "content_ref": "S02_risk_metric"
+        }
+      ]
+    },
+    {
+      "id": "diagnostic_manifest",
+      "rId": "rId4",
+      "status": "Converged",
+      "atomized_layers": [
+        {
+          "layer_type": "Block",
+          "pPr": { "ind": { "val": 720, "unit": "twips" } },
+          "content_ref": "D01_drift_log"
         }
       ]
     }
@@ -103,7 +144,8 @@
       {
         "abstractNumId": "0",
         "levels": [
-          { "ilvl": 0, "start": 1, "numFmt": "decimal", "lvlText": "%1.", "lvlJc": "left" }
+          { "ilvl": 0, "start": 1, "numFmt": "decimal", "lvlText": "%1.", "lvlJc": "left" },
+          { "ilvl": 1, "start": 1, "numFmt": "lowerLetter", "lvlText": "(%2)", "lvlJc": "left" }
         ]
       }
     ],
@@ -111,12 +153,29 @@
       { "numId": "1", "abstractNumId": "0" }
     ]
   },
+  "diagnostics_engine": {
+    "drift_threshold": 0.35,
+    "saturation_level": 2,
+    "validation_rules": [
+      "NoOrphanedRIds",
+      "StyleChainResolution",
+      "NamespaceValidityCheck",
+      "ProjectBoundaryCheck",
+      "SemanticContinuityCheck"
+    ],
+    "emergency_brake": {
+      "corruption_threshold": 5,
+      "auto_halt": true,
+      "log_target": "NEXUS_LOG.txt"
+    }
+  },
   "settings": {
     "compatibility_mode": 15,
     "track_changes": true,
     "logic_flags": {
       "strict_rid_validation": true,
-      "mirror_margins": false
+      "mirror_margins": false,
+      "auto_hyphenation": true
     }
   },
   "metadata": {
@@ -129,6 +188,6 @@
       "governance": "Human oversight remains active at all saturation levels",
       "origin": "NEXUS_CORE"
     },
-    "last_mutation": "2026-03-02T15:10:44Z"
+    "last_mutation": "2026-03-02T16:45:12Z"
   }
 }
