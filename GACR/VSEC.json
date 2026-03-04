@@ -1,18 +1,29 @@
 {
   "$id": "GACR/VSEC.json",
-  "mc:Ignorable": "vsec react fiber docx mce nx hook suspense hydration",
+  "mc:Ignorable": "vsec react fiber docx mce nx hook suspense hydration scheduler",
   "xmlns:vsec": "https://nexus.core/schema/vsec",
   "xmlns:react": "https://nexus.core/schema/react",
   "xmlns:docx": "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
   "docx:coreProperties": {
     "dc:title": "Violation Severity and Enforcement Configuration (Architect-Precise)",
-    "docx:version": "3.1.0-VSEC-CONVERGED-R4",
-    "docx:revision": 9,
-    "docx:contentStatus": "Architecturally_Precise_Saturated",
+    "docx:version": "3.1.0-VSEC-CONVERGED-FINAL",
+    "docx:revision": 10,
+    "docx:contentStatus": "Architecturally_Precise_Stabilized",
     "docx:lastModifiedBy": "DALEK_CAAN_v3.1",
-    "nx:evolution_round": 4
+    "nx:evolution_round": 5
   },
   "w:settings": {
+    "react:concurrency": {
+      "enabled": true,
+      "selective_hydration": true,
+      "lane_priority_mapping": {
+        "Sync": "Immediate",
+        "InputContinuous": "UserBlocking",
+        "Default": "Normal",
+        "Transition": "Normal",
+        "Idle": "Idle"
+      }
+    },
     "vsec:enforcement_policy": {
       "LOW": "LOG_WARN",
       "MEDIUM": "DEFER_EXECUTION",
@@ -34,11 +45,6 @@
         "react:memoize": true,
         "react:suspense_fallback": "rId505"
       }
-    },
-    "w:sectPr": {
-      "vsec:logic_scope": "GLOBAL_ENFORCEMENT",
-      "vsec:mirror_margins": true,
-      "vsec:v_align": "top"
     }
   },
   "w:numbering": {
@@ -63,6 +69,14 @@
             "lvlText": "Sub_Violation_%2",
             "lvlJc": "left",
             "pStyle": "SUB_LEVEL_ENFORCEMENT"
+          },
+          {
+            "ilvl": 2,
+            "start": 1,
+            "numFmt": "lowerLetter",
+            "lvlText": "Escalation_Path_%3",
+            "lvlJc": "left",
+            "pStyle": "ESCALATION_ENFORCEMENT"
           }
         ]
       }
@@ -71,6 +85,14 @@
       {
         "numId": "1",
         "abstractNumId": "0"
+      },
+      {
+        "numId": "2",
+        "abstractNumId": "0",
+        "lvlOverride": {
+          "ilvl": 0,
+          "startOverride": 5
+        }
       }
     ]
   },
@@ -87,7 +109,7 @@
         "fiber_tag": 5,
         "lane_mask": "0b00010",
         "lanes:occupancy_mask": "0b11110",
-        "lanes:entangled_mask": "0b00000",
+        "child_lanes": "0b00000",
         "scheduler_priority": "Normal",
         "alternate": {
           "fiber_tag": 5,
@@ -105,7 +127,13 @@
             "w:t": "SGS_AGENT_USAGE_EXCEEDED",
             "metric_type": "GAUGE",
             "ac:complexity_limit": 90,
-            "timestamp_ms": 1709337600000,
+            "timestamp_ms": 1709337600000
+          }
+        },
+        {
+          "rStyle": "LATENT_DEBT",
+          "payload": {
+            "w:t": "DEFERRED_CLEANUP_PENDING",
             "react:memoize": true
           }
         }
