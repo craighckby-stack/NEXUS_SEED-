@@ -3,9 +3,9 @@
   "$id": "https://gacr.agi/mqm/core_policy_v10.5.json",
   "metadata": {
     "manifest_id": "GTEM_V10.5.0_FINAL",
-    "version": "10.5.2-ACCELERATED",
+    "version": "10.5.3-ACCELERATED",
     "dna_anchor": "ARCH-OOXML-V2-DOCX-DNA",
-    "evolution_round": 2,
+    "evolution_round": 3,
     "saturation_level": 2,
     "metabolic_rate": "STANDARD",
     "author": "DALEK_CAAN_V3.1_SIPHON_ENGINE",
@@ -23,13 +23,16 @@
         "w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
         "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
         "nx": "https://nexus-core.agi/governance",
-        "ts": "https://github.com/microsoft/TypeScript/schemas/compiler"
+        "ts": "https://github.com/microsoft/TypeScript/schemas/compiler",
+        "nx_ext": "https://nexus-core.agi/extensions/v5"
       }
     }
   },
   "compiler_options": {
     "target": "ESNext",
     "module": "NodeNext",
+    "moduleDetection": "force",
+    "useDefineForClassFields": true,
     "composite": true,
     "incremental": true,
     "verbatimModuleSyntax": true,
@@ -42,8 +45,15 @@
       "depth_limit": 50,
       "resolver": "RecursiveFlatten",
       "docDefaults": {
-        "pPr": { "jc": { "val": "left" }, "spacing": { "val": 24, "unit": "hrs" } },
-        "rPr": { "sz": 11, "lang": { "val": "en-AGI" } }
+        "pPr": {
+          "jc": { "val": "left" },
+          "spacing": { "val": 24, "unit": "hrs" }
+        },
+        "rPr": {
+          "sz": 11,
+          "lang": { "val": "en-AGI" },
+          "noProof": true
+        }
       }
     }
   },
@@ -64,6 +74,12 @@
       "rId": "rId3",
       "type": "https://github.com/microsoft/TypeScript/schemas/project-reference",
       "target": "GACR/subsystems/validation_logic.json",
+      "targetMode": "Internal"
+    },
+    {
+      "rId": "rId4",
+      "type": "https://nexus-core.agi/schemas/shared-types",
+      "target": "GACR/lib/global_registry.d.ts",
       "targetMode": "Internal"
     }
   ],
@@ -95,7 +111,12 @@
               "bold": true,
               "vertAlign": { "val": "baseline" }
             },
-            "content_ref": "MQM_S04_MODEL_DRIFT_COUNT: ABSOLUTE_COUNT_MAX(1)"
+            "content_ref": "MQM_S04_MODEL_DRIFT_COUNT: "
+          },
+          {
+            "layer_type": "Terminal",
+            "inheritance": "Final",
+            "content_ref": "ABSOLUTE_COUNT_MAX(1)"
           }
         ]
       },
@@ -111,6 +132,19 @@
               "spacing": { "val": 72, "unit": "hrs" }
             },
             "content_ref": "Default operational models. Standard observation window."
+          }
+        ]
+      },
+      {
+        "id": "DEFERRED_P3",
+        "rId": "rId103",
+        "status": "EVOLVING",
+        "numId": "1",
+        "atomized_layers": [
+          {
+            "layer_type": "Block",
+            "inheritance": "Inherit",
+            "content_ref": "Low-priority background heuristics. Siphoned via state-machine counter."
           }
         ]
       }
@@ -134,6 +168,13 @@
             "numFmt": "bullet",
             "lvlText": "SUB_TASK_%2",
             "lvlJc": "left"
+          },
+          {
+            "ilvl": 2,
+            "start": 1,
+            "numFmt": "lowerLetter",
+            "lvlText": "(%3)",
+            "lvlJc": "left"
           }
         ]
       }
@@ -154,7 +195,8 @@
       "NamespaceValidityCheck",
       "ProjectBoundaryCheck",
       "StrictHHHCompliance",
-      "SemanticContinuityCheck"
+      "SemanticContinuityCheck",
+      "DependencyCycleCheck"
     ],
     "emergency_brake": {
       "corruption_threshold": 5,
