@@ -1,30 +1,143 @@
 {
-  "$schema": "http://sgs-v97.5/schema/mqm_metrics",
+  "$schema": "https://gacr.agi/schemas/ecvm_tis_v10.5.0_final.json",
+  "$id": "https://gacr.agi/mqm/metric_catalog_v10.5.json",
   "metadata": {
-    "version": "1.0",
-    "last_updated": "SovereignAGI_v94.1"
-  },
-  "metric_definitions": [
-    {
-      "metric_id": "MQM_S03_STORAGE_LATENCY",
-      "source": "StorageService_S3",
-      "data_key": "p99_read_ms",
-      "description": "99th percentile storage read latency (converted to % of SLO violation).",
-      "unit": "Percentage Violation"
-    },
-    {
-      "metric_id": "MQM_S04_MODEL_DRIFT_COUNT",
-      "source": "ModelMonitoringService_DriftEngine",
-      "data_key": "drift_alarm_count",
-      "description": "Number of confirmed severe statistical model drift alarms detected within the reporting window.",
-      "unit": "Absolute Count"
-    },
-    {
-      "metric_id": "MQM_P01_PREDICTION_BIAS",
-      "source": "FairnessMonitoringEngine",
-      "data_key": "bias_deviation_score",
-      "description": "Deviation from acceptable demographic parity tolerance.",
-      "unit": "Ratio"
+    "manifest_id": "MQM_CATALOG_V10.5.0_FINAL",
+    "version": "10.5.5-FINAL-CONVERGENCE",
+    "dna_anchor": "ARCH-OOXML-V2-DOCX-DNA",
+    "evolution_round": 1,
+    "saturation_level": 2,
+    "author": "DALEK_CAAN_V3.1_SIPHON_ENGINE",
+    "markup_compatibility": {
+      "mc:Ignorable": "dalek react nx_ext mce",
+      "namespaces": {
+        "w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+        "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
+        "nx": "https://nexus-core.agi/governance",
+        "react": "https://react.dev/core/reconciliation"
+      }
     }
-  ]
+  },
+  "settings": {
+    "cascading_inheritance": {
+      "enabled": true,
+      "docDefaults": {
+        "rPr": {
+          "sz": 11,
+          "noProof": true,
+          "lang": "en-AGI",
+          "reconciliation_strategy": "FiberRoot"
+        }
+      }
+    }
+  },
+  "relationships": [
+    {
+      "rId": "rId_S3",
+      "type": "https://nexus-core.agi/metrics/source/storage",
+      "target": "StorageService_S3",
+      "targetMode": "External"
+    },
+    {
+      "rId": "rId_Drift",
+      "type": "https://nexus-core.agi/metrics/source/monitoring",
+      "target": "ModelMonitoringService_DriftEngine",
+      "targetMode": "External"
+    },
+    {
+      "rId": "rId_Fairness",
+      "type": "https://nexus-core.agi/metrics/source/fairness",
+      "target": "FairnessMonitoringEngine",
+      "targetMode": "External"
+    }
+  ],
+  "metric_parts": [
+    {
+      "id": "MQM_STORAGE_PART",
+      "status": "CONVERGED",
+      "atomized_layers": [
+        {
+          "layer_type": "Block",
+          "pStyle": "StandardMetricContainer",
+          "content_ref": "Storage Latency Subsystem"
+        },
+        {
+          "layer_type": "Inline",
+          "rId": "rId_S3",
+          "metric_id": "MQM_S03_STORAGE_LATENCY",
+          "rPr": {
+            "key": "p99_read_ms",
+            "unit": "Percentage Violation",
+            "memoize": true
+          },
+          "description": "99th percentile storage read latency (converted to % of SLO violation)."
+        }
+      ]
+    },
+    {
+      "id": "MQM_MODEL_INTEGRITY_PART",
+      "status": "CONVERGED",
+      "atomized_layers": [
+        {
+          "layer_type": "Block",
+          "pPr": {
+            "jc": "both",
+            "spacing": { "val": 12 }
+          },
+          "content_ref": "Statistical Drift Detection"
+        },
+        {
+          "layer_type": "Inline",
+          "rId": "rId_Drift",
+          "metric_id": "MQM_S04_MODEL_DRIFT_COUNT",
+          "rPr": {
+            "key": "drift_alarm_count",
+            "unit": "Absolute Count",
+            "effect": "useDriftReconciliation"
+          },
+          "description": "Number of confirmed severe statistical model drift alarms detected."
+        }
+      ]
+    },
+    {
+      "id": "MQM_FAIRNESS_PART",
+      "status": "CONVERGED",
+      "numId": "1",
+      "ilvl": 0,
+      "atomized_layers": [
+        {
+          "layer_type": "Terminal",
+          "rId": "rId_Fairness",
+          "metric_id": "MQM_P01_PREDICTION_BIAS",
+          "rPr": {
+            "key": "bias_deviation_score",
+            "unit": "Ratio",
+            "priority": "High"
+          },
+          "description": "Deviation from acceptable demographic parity tolerance."
+        }
+      ]
+    }
+  ],
+  "reconciliation_logic": {
+    "abstract_num_definitions": [
+      {
+        "abstractNumId": "0",
+        "levels": [
+          {
+            "ilvl": 0,
+            "start": 1,
+            "numFmt": "decimal",
+            "lvlText": "METRIC_OBSERVATION_%1"
+          }
+        ]
+      }
+    ],
+    "instance_mapping": [
+      {
+        "numId": "1",
+        "abstractNumId": "0"
+      }
+    ]
+  }
 }
