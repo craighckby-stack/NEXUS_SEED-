@@ -1,1 +1,108 @@
-[object Object]
+{
+  "nexus_core": {
+    "version": "3.1.0",
+    "signature": "ARCH-OOXML-V2-DOCX-DNA",
+    "identity": {
+      "purpose": "Self-optimising AGI substrate for real-world problem solving",
+      "mechanism": "Siphoning patterns from advanced codebases",
+      "origin": "NEXUS_CORE"
+    }
+  },
+  "package_manifest": {
+    "parts": [
+      {
+        "uri": "/GACR/AdaptiveSamplingEngine.ts",
+        "contentType": "application/vnd.nexus.siphon.engine.v3+ts",
+        "rId": "rId1"
+      },
+      {
+        "uri": "/governance/SATURATION.md",
+        "contentType": "application/vnd.nexus.governance.saturation+md",
+        "rId": "rId2"
+      }
+    ],
+    "relationships": [
+      {
+        "id": "rId1",
+        "type": "http://schemas.nexus.org/core/2026/relationships/engine",
+        "target": "AdaptiveSamplingEngine.ts"
+      },
+      {
+        "id": "rId2",
+        "type": "http://schemas.nexus.org/core/2026/relationships/governance",
+        "target": "SATURATION.md"
+      }
+    ]
+  },
+  "siphon_options": {
+    "compiler": "microsoft/TypeScript-v5.x",
+    "target_ecmascript": "ESNext",
+    "module_resolution": "node",
+    "strict_hhh_compliance": true,
+    "experimental_decorators": true,
+    "emit_decorator_metadata": true,
+    "skip_lib_check": true,
+    "cascading_inheritance": {
+      "enabled": true,
+      "resolver": "CascadingStyleResolver",
+      "default_pPr": "Normal",
+      "default_rPr": "StandardText"
+    }
+  },
+  "state_machine": {
+    "abstract_num_definitions": [
+      {
+        "abstractNumId": "0",
+        "levels": [
+          {
+            "ilvl": 0,
+            "start": 1,
+            "numFmt": "decimal",
+            "lvlText": "%1.",
+            "lvlJc": "left"
+          },
+          {
+            "ilvl": 1,
+            "start": 1,
+            "numFmt": "alphaLowe",
+            "lvlText": "(%2)",
+            "lvlJc": "left"
+          }
+        ]
+      }
+    ],
+    "instance_mapping": [
+      {
+        "numId": "101",
+        "abstractNumId": "0"
+      }
+    ]
+  },
+  "capability_saturation": {
+    "level": 2,
+    "mode": "STANDARD",
+    "thresholds": {
+      "structural": 0.4,
+      "semantic_drift": 0.35,
+      "velocity_max_files": 50
+    },
+    "emergency_brake": {
+      "corruption_threshold": 5,
+      "log_target": "NEXUS_LOG.txt"
+    }
+  },
+  "markup_compatibility": {
+    "ignorable": "ve o r v",
+    "namespaces": {
+      "w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+      "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
+      "aim": "http://schemas.nexus.org/agi/instantiation/2026/main"
+    }
+  },
+  "metadata": {
+    "author": "DALEK_CAAN_V3.1",
+    "last_mutation": "2026-03-02T04:00:00Z",
+    "evolution_round": 1,
+    "status": "STABLE"
+  }
+}
