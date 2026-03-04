@@ -1,5 +1,3 @@
-To execute the mutation protocol, we need to integrate the DALEK CAAN architecture with the HETM_Verifier v3.1. Below is the adapted code, assuming the `SATURATION	md` file is the point of truth for the system's operational directives:
-
 import json
 import logging
 from typing import Dict, Any, List, Optional
