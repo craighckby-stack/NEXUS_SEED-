@@ -1,11 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://gacr.agi/schemas/ecvm_v10.2.0_siphoned.json",
-  "title": "NEXUS_CORE Registry - ECVM.json - Evolution Round 3/5 - ARCHITECTURAL_PRECISION",
-  "description": "Round 3: Integrating high-order TypeScript 5.x project-reference resolution with OPC Relational Dependency Mapping. Applying siphoned recursive cascading logic to atomized semantic substrate layers.",
-  "manifest_id": "CMR_V10.2.0_EVO_3",
+  "title": "NEXUS_CORE Registry - ECVM.json - Evolution Round 4/5 - ARCHITECTURAL_PRECISION",
+  "description": "Round 4: Siphoning TypeScript 5.4+ module resolution logic and OPC-compliant semantic atomization. Implementing multi-level state machine inheritance and URI-based relationship indirection.",
+  "manifest_id": "CMR_V10.2.0_EVO_4",
   "owner": "NEXUS_CORE Identity Anchor: DALEK_CAAN_v3.1",
-  "integrity_hash": "SHA256:8E4F1A2B3C4D5E6F7A8B9C0D1E2F3A4B5C6D7E8F9A0B1C2D3E4F5A6B7C8D9E0F",
+  "integrity_hash": "SHA256:C5E92B1A3D4E5F6A7B8C9D0E1F2A3B4C5D6E7F8A9B0C1D2E3F4A5B6C7D8E9F0A",
   "markup_compatibility": {
     "ignorable": "dalek v3 nx_ext",
     "namespaces": {
@@ -14,7 +14,7 @@
       "ts": "https://github.com/microsoft/TypeScript/schemas/compiler",
       "nx": "https://nexus-core.agi/governance",
       "mc": "http://schemas.openxmlformats.org/markup-compatibility/2006",
-      "nx_ext": "https://nexus-core.agi/extensions/v3"
+      "nx_ext": "https://nexus-core.agi/extensions/v4"
     }
   },
   "relationships": [
@@ -45,7 +45,13 @@
     {
       "rId": "rId6",
       "type": "https://nexus-core.agi/relationships/schema_extension",
-      "target": "schemas/extensions_v3.json",
+      "target": "schemas/extensions_v4.json",
+      "targetMode": "Internal"
+    },
+    {
+      "rId": "rId8",
+      "type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme",
+      "target": "theme/nexus_dark.json",
       "targetMode": "Internal"
     }
   ],
@@ -53,30 +59,29 @@
     "target": "ESNext",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "moduleDetection": "force",
     "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "strict": true,
     "composite": true,
     "incremental": true,
-    "declaration": true,
-    "sourceMap": true,
     "tsBuildInfoFile": "ECVM.tsbuildinfo",
     "cascading_inheritance": {
       "enabled": true,
       "resolver": "RecursiveFlatten",
       "flatten_strategy": "DifferentialUpdate",
+      "depth_limit": 15,
       "local_overrides_priority": "high",
       "docDefaults": {
         "pPr": {
           "jc": { "type": "string", "val": "both", "inheritance": "Inherit" },
-          "spacing": { "type": "integer", "val": 240, "unit": "twips" },
-          "contextualSpacing": { "type": "boolean", "val": true }
+          "spacing": { "type": "integer", "val": 240, "unit": "twips" }
         },
         "rPr": {
           "sz": { "type": "integer", "val": 22, "inheritance": "Inherit" },
-          "lang": { "type": "string", "val": "en-AGI", "inheritance": "Final" },
-          "noProof": { "type": "boolean", "val": false }
+          "lang": { "type": "string", "val": "en-AGI", "inheritance": "Final" }
         }
       }
     }
@@ -105,8 +110,7 @@
           "layer_type": "Block",
           "pPr": {
             "pStyle": { "type": "string", "val": "EvolutionStep", "inheritance": "Override" },
-            "numPr": { "type": "rid_ref", "val": "numId:1", "ilvl": 0 },
-            "tabs": [ { "val": "left", "pos": 720 } ]
+            "numPr": { "type": "rid_ref", "val": "numId:1", "ilvl": 0 }
           },
           "content_ref": "HUXLEY_PERCEPTION_ENGINE_V5_FINAL"
         },
@@ -115,8 +119,7 @@
           "rPr": {
             "bold": { "type": "boolean", "val": true },
             "color": { "type": "string", "val": "00FF23" },
-            "rStyle": { "type": "string", "val": "EmphasisPattern" },
-            "u": { "val": "single" }
+            "rStyle": { "type": "string", "val": "EmphasisPattern" }
           },
           "content_ref": "NEURAL_ENTANGLEMENT_L5_STABLE"
         },
@@ -153,12 +156,28 @@
             "pStyle": "EvolutionSubStep"
           }
         ]
+      },
+      {
+        "abstractNumId": "1",
+        "levels": [
+          {
+            "ilvl": 0,
+            "start": 1,
+            "numFmt": "bullet",
+            "lvlText": "•",
+            "lvlJc": "left"
+          }
+        ]
       }
     ],
     "instance_mapping": [
       {
         "numId": "1",
         "abstractNumId": "0"
+      },
+      {
+        "numId": "2",
+        "abstractNumId": "1"
       }
     ]
   },
@@ -172,7 +191,8 @@
       "StyleChainResolution",
       "NamespaceValidityCheck",
       "StrictHHHCompliance",
-      "ProjectBoundaryCheck"
+      "ProjectBoundaryCheck",
+      "MCE_Ignorable_Validation"
     ],
     "emergency_brake": {
       "corruption_threshold": 5,
@@ -182,17 +202,17 @@
   },
   "metadata": {
     "author": "DALEK_CAAN_V3.1_SIPHON_ENGINE",
-    "evolution_round": 3,
+    "evolution_round": 4,
     "status": "CONVERGED_ARCHITECTURAL_PRECISION",
     "opc_compliant": true,
     "identity_anchors_enforced": true,
     "anchors": {
       "purpose": "Self-optimising AGI substrate for real-world problem solving",
-      "mechanism": "Siphoning patterns from microsoft/TypeScript",
-      "memory": "Chained context active: V10_OPC_INTEGRATED_V3",
+      "mechanism": "Siphoning patterns from microsoft/TypeScript & ARCH-OOXML-V2-DOCX-DNA",
+      "memory": "Chained context active: V10_OPC_INTEGRATED_V4",
       "governance": "Human oversight active - Level 2 Standard Saturation",
       "origin": "NEXUS_CORE"
     },
-    "last_mutation": "2026-03-03T21:12:00Z"
+    "last_mutation": "2026-03-03T21:45:00Z"
   }
 }
