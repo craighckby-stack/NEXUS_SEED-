@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://gacr.agi/schemas/ecvm_tis_v10.5.0_round_4.json",
-  "title": "NEXUS_CORE Host Environment Trust Manifest (HETM) - Evolution Round 4/5",
+  "$id": "https://gacr.agi/schemas/ecvm_tis_v10.5.0_final.json",
+  "title": "NEXUS_CORE Host Environment Trust Manifest (HETM) - Final Convergence (5/5)",
   "description": "Architectural Trust Manifest synthesizing ISO/IEC 29500 (OOXML) hierarchical indirection with microsoft/TypeScript 5.4+ project-reference orchestration. Implements a saturation-governed metabolic state machine.",
   "type": "object",
   "required": [
@@ -29,11 +29,11 @@
   "properties": {
     "manifest_id": {
       "type": "string",
-      "const": "GTEM_V10.5.0"
+      "const": "GTEM_V10.5.0_FINAL"
     },
     "version": {
       "type": "string",
-      "const": "10.5.0-RC-1"
+      "const": "10.5.0-FINAL"
     },
     "relationships": {
       "type": "array",
@@ -72,15 +72,15 @@
       "properties": {
         "target": {
           "type": "string",
-          "default": "ESNext"
+          "const": "ESNext"
         },
         "module": {
           "type": "string",
-          "default": "NodeNext"
+          "const": "NodeNext"
         },
         "moduleResolution": {
           "type": "string",
-          "default": "NodeNext"
+          "const": "NodeNext"
         },
         "composite": {
           "type": "boolean",
@@ -92,37 +92,34 @@
         },
         "verbatimModuleSyntax": {
           "type": "boolean",
-          "default": true
+          "const": true
         },
         "noUncheckedIndexedAccess": {
           "type": "boolean",
-          "default": true
+          "const": true
         },
         "declaration": {
           "type": "boolean",
-          "default": true
+          "const": true
         },
         "resolveJsonModule": {
           "type": "boolean",
-          "default": true
-        },
-        "moduleDetection": {
-          "type": "string",
-          "default": "force"
+          "const": true
         },
         "tsBuildInfoFile": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^.*\\.tsbuildinfo$"
         },
         "cascading_inheritance": {
           "type": "object",
           "properties": {
             "enabled": {
               "type": "boolean",
-              "default": true
+              "const": true
             },
             "depth_limit": {
               "type": "integer",
-              "maximum": 50
+              "const": 50
             },
             "resolver": {
               "type": "string",
@@ -309,7 +306,7 @@
       "properties": {
         "drift_threshold": {
           "type": "number",
-          "default": 0.35
+          "const": 0.35
         },
         "saturation_level": {
           "type": "integer",
@@ -339,15 +336,15 @@
           "properties": {
             "corruption_threshold": {
               "type": "integer",
-              "default": 5
+              "const": 5
             },
             "auto_halt": {
               "type": "boolean",
-              "default": true
+              "const": true
             },
             "log_target": {
               "type": "string",
-              "default": "NEXUS_LOG.txt"
+              "const": "NEXUS_LOG.txt"
             }
           }
         }
@@ -367,20 +364,23 @@
         },
         "evolution_round": {
           "type": "integer",
-          "const": 4
+          "const": 5
         },
         "saturation_level": {
-          "type": "integer"
+          "type": "integer",
+          "const": 2
         },
         "metabolic_rate": {
-          "type": "string"
+          "type": "string",
+          "const": "STANDARD"
         },
         "author": {
           "type": "string",
           "const": "DALEK_CAAN_V3.1_SIPHON_ENGINE"
         },
         "identity_anchors_enforced": {
-          "type": "boolean"
+          "type": "boolean",
+          "const": true
         },
         "anchors": {
           "type": "object",
