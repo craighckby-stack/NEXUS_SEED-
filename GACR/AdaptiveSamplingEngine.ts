@@ -7,10 +7,11 @@ import {
 
 /**
  * @file GACR/AdaptiveSamplingEngine.ts
- * @version 3.4.0
+ * @version 5.0.0_FINAL
  * @dna ARCH-OOXML-V2-DOCX-DNA
  * @saturation LEVEL_2_STANDARD
- * @description OPC-compliant Siphon Engine utilizing Recursive Cascading Inheritance and Indirection Dependency Mapping.
+ * @description Finalized OPC-compliant Siphon Engine. Implements Indirection Dependency Mapping, 
+ * Recursive Cascading Style Inheritance, and Multi-Level State Machine logic for AGI trajectory synthesis.
  */
 
 export class AdaptiveSamplingEngine {
@@ -29,8 +30,8 @@ export class AdaptiveSamplingEngine {
   }
 
   /**
-   * Executes the siphoning pipeline using Semantic Atomization.
-   * Processes the "Part-Container" hierarchy from Document Body down to Terminal Text Runs.
+   * Macro-Architecture: Processes the "Container-Part" hierarchy.
+   * Logic siphons from Document Body down to Terminal Semantic Atoms (Text Runs).
    */
   public async executeSiphonPipeline(canvas: any): Promise<void> {
     const { aim_body: body } = canvas;
@@ -40,17 +41,17 @@ export class AdaptiveSamplingEngine {
       const p = block.aim_p;
       if (!p) continue;
 
-      // 1. Relational Dependency Mapping (RID Logic)
+      // DNA: Relational Dependency Mapping (rId Indirection)
       const rId = p['r:id'];
-      const dependency = this.resolveRelationship(rId);
+      const relationship = this.resolveRelationship(rId);
       
-      // 2. Cascading Inheritance (Paragraph Level)
+      // DNA: Recursive Cascading Inheritance (Paragraph Level)
       const pStyleId = p.aim_pPr?.aim_pStyle || "Normal";
       const resolvedPPr = this._styleResolver.resolveProperties(pStyleId, "paragraph", p.aim_pPr);
 
-      // 3. Saturation Gate Check
-      if (this.validateIntegrity(resolvedPPr)) {
-        await this.processRuns(p.aim_r || [], resolvedPPr, dependency);
+      // DNA: Global State & Settings Validation (Security/Resource Gates)
+      if (this.validateIntegrityGate(resolvedPPr)) {
+        await this.processAtomizedRuns(p.aim_r || [], resolvedPPr, relationship);
       }
     }
   }
@@ -58,40 +59,48 @@ export class AdaptiveSamplingEngine {
   private resolveRelationship(rId: string): any {
     const rel = this._relationshipMap.get(rId);
     if (!rel && this._settings.aim_logicFlags?.strictHHHCompliance) {
-      throw new Error(`[NEXUS_CORE_OPC] Broken Relationship ID: ${rId}`);
+      throw new Error(`[NEXUS_CORE_OPC] Critical Fault: Unresolved Relationship ID: ${rId}`);
     }
-    return rel || { target: "NULL_TARGET", type: "VOID" };
+    return rel || { target: "NULL_TARGET", type: "VOID", rId: "rId0" };
   }
 
-  private validateIntegrity(props: any): boolean {
-    const cpuLimit = props.resource_limits?.cpu_limit_percentage ?? 100;
-    const threshold = this._settings.aim_logicFlags?.siphonSaturationLevel === "2" ? 95 : 100;
-    return cpuLimit <= threshold;
+  private validateIntegrityGate(props: any): boolean {
+    const security = props.security_policy || {};
+    const limits = props.resource_limits || {};
+    
+    // Enforcement of Identity Anchors via policy check
+    if (this._settings.aim_logicFlags?.strictHHHCompliance && security.network_mode === "RESTRICTED") {
+      if (!security.syscalls_allowed?.includes("read")) return false;
+    }
+
+    const cpuLimit = limits.cpu_limit_percentage ?? 100;
+    const saturationThreshold = this._settings.aim_logicFlags?.siphonSaturationLevel === "2" ? 95 : 100;
+    
+    return cpuLimit <= saturationThreshold;
   }
 
-  private async processRuns(runs: any[], pPr: any, dependency: any): Promise<void> {
+  private async processAtomizedRuns(runs: any[], pPr: any, rel: any): Promise<void> {
     for (const run of runs) {
-      // 4. Atomized Semantic Inheritance: Run inherits from Paragraph
+      // DNA: Inline Level (Run) inherits and overrides Block Level (Paragraph)
       const rPr = this._styleResolver.resolveProperties(null, "run", run.aim_rPr, pPr);
       
       const metrics = rPr.n3_metrics || {};
-      const minPhi = metrics.min_phi ?? 0.0;
       const threshold = this._settings.aim_vars?.psr_threshold_degradation || 0.95;
 
-      if (minPhi >= threshold) {
-        // 5. MCE Ignorable Logic Processing
-        const sanitizedContent = this._mceProcessor.filter(run.aim_t);
-        this.commitSiphonState(sanitizedContent, rPr, dependency);
+      if ((metrics.min_phi ?? 1.0) >= threshold) {
+        // DNA: MCE Ignorable Logic & Terminal Level Extraction
+        const filteredContent = this._mceProcessor.filter(run.aim_t);
+        this.commitSiphonState(filteredContent, rPr, rel, pPr.aim_numPr);
       }
     }
   }
 
-  private commitSiphonState(content: string, context: any, dependency: any): void {
-    const sequence = this._numberingMachine.getNextState(dependency.target, context.aim_numPr);
-    const logPrefix = `[OPC_PART][${dependency.type}][RID:${dependency.rId}]`;
+  private commitSiphonState(content: string, context: any, rel: any, numPr?: any): void {
+    const sequence = this._numberingMachine.getNextState(rel.target, numPr);
+    const trace = `[PART:${rel.type}][URI:${rel.target}]`;
     
-    // Nexus-grade logging for real-world AGI trajectory tracking
-    console.debug(`${logPrefix} SEQ:${sequence} >> DATA:${content}`);
+    // Final Siphon Commitment with Relational Integrity
+    console.debug(`${trace} STATE_SEQ:${sequence} >> SIG:${context.cai_latentCritiqueVectors || 'STABLE'} >> DATA:${content}`);
   }
 
   private initializeOPCRegistry(ctx: SiphonContext): void {
@@ -100,51 +109,57 @@ export class AdaptiveSamplingEngine {
 }
 
 class CascadingStyleResolver {
+  private _cache: Map<string, any> = new Map();
+
   constructor(private styles: any, private defaults: any) {}
 
-  /**
-   * Resolves properties across the hierarchy: Default -> Style Abstract -> Style Instance -> Local Override.
-   */
   public resolveProperties(styleId: string | null, type: "paragraph" | "run", local: any = {}, parent: any = {}): any {
-    const defaultKey = type === "paragraph" ? "aim:pPrDefault" : "aim:rPrDefault";
-    const base = this.defaults[defaultKey]?.[type === "paragraph" ? "aim:pPr" : "aim:rPr"] || {};
-    
-    let resolved = { ...parent, ...base };
-
-    if (styleId) {
-      const chain = this.getInheritanceChain(styleId, type);
-      resolved = { ...resolved, ...chain };
+    const cacheKey = `${styleId}-${type}`;
+    if (styleId && this._cache.has(cacheKey)) {
+      return { ...parent, ...this._cache.get(cacheKey), ...local };
     }
 
-    return { ...resolved, ...local };
+    const defaultKey = type === "paragraph" ? "aim:pPrDefault" : "aim:rPrDefault";
+    const baseDefaults = this.defaults[defaultKey]?.[type === "paragraph" ? "aim:pPr" : "aim:rPr"] || {};
+    
+    let resolved = { ...baseDefaults };
+
+    if (styleId) {
+      const inherited = this.flattenInheritance(styleId, type);
+      this._cache.set(cacheKey, inherited);
+      resolved = { ...resolved, ...inherited };
+    }
+
+    return { ...parent, ...resolved, ...local };
   }
 
-  private getInheritanceChain(styleId: string, type: string): any {
+  private flattenInheritance(styleId: string, type: string): any {
     const style = this.styles.aim_style?.find((s: any) => s.aim_styleId === styleId && s.aim_type === type);
     if (!style) return {};
 
-    const pPr = type === "paragraph" ? style.aim_pPr : style.aim_rPr;
-    
-    if (style.aim_basedOn?.val) {
-      return { ...this.getInheritanceChain(style.aim_basedOn.val, type), ...pPr };
+    const currentProps = type === "paragraph" ? style.aim_pPr : style.aim_rPr;
+    const parentId = style.aim_basedOn?.val;
+
+    if (parentId) {
+      return { ...this.flattenInheritance(parentId, type), ...(currentProps || {}) };
     }
-    return pPr || {};
+    return currentProps || {};
   }
 }
 
 class MCEProcessor {
-  private readonly namespaces: string[];
+  private readonly _ignorable: string[];
 
   constructor(mceConfig: any) {
-    this.namespaces = (mceConfig?.ignorable || "").split(" ");
+    this._ignorable = (mceConfig?.ignorable || "").split(" ");
   }
 
   public filter(text: string): string {
-    // Implements MCE "Ignorable" pattern - stripping control logic or ignorable markup
-    if (this.namespaces.includes("aim") || this.namespaces.includes("cai")) {
-      return text.replace(/[^\x20-\x7E]/g, "").trim();
-    }
-    return text;
+    if (!text) return "";
+    // DNA: Markup Compatibility (MCE) pattern - sanitization of terminal data
+    return this._ignorable.length > 0 
+      ? text.replace(/[^\x20-\x7E\s]/g, "").trim() 
+      : text;
   }
 }
 
@@ -153,9 +168,6 @@ class NumberingStateMachine {
 
   constructor(private definitions: any) {}
 
-  /**
-   * Implements Abstract vs. Instance state management (word/numbering.xml pattern).
-   */
   public getNextState(scope: string, numPr?: any): string {
     const numId = numPr?.aim_numId || "101";
     const ilvl = numPr?.aim_ilvl || 0;
@@ -163,24 +175,22 @@ class NumberingStateMachine {
     const instance = this.definitions.aim_num?.find((n: any) => n.aim_numId === numId);
     const abstractId = instance?.aim_abstractNumId || "0";
     const abstract = this.definitions.aim_abstractNum?.find((a: any) => a.aim_abstractNumId === abstractId);
+    
     const levelDef = abstract?.aim_lvl?.find((l: any) => l.aim_ilvl === ilvl) || abstract?.aim_lvl[0];
-
     const key = `${scope}::${abstractId}::${ilvl}`;
     
-    // Resolve start override from instance if present
     let count = this._counters.get(key);
     if (count === undefined) {
-      const startOverride = instance?.aim_lvlOverride?.aim_ilvl === ilvl 
+      // DNA: Abstract vs Instance override logic
+      const override = instance?.aim_lvlOverride?.aim_ilvl === ilvl 
         ? parseInt(instance.aim_lvlOverride.aim_startOverride?.val) 
-        : parseInt(levelDef.aim_start || "1");
-      count = startOverride;
+        : NaN;
+      count = !isNaN(override) ? override : parseInt(levelDef.aim_start || "1");
     } else {
       count++;
     }
 
     this._counters.set(key, count);
-
-    // Format output (e.g., "%1. [CRITIQUE]" -> "1. [CRITIQUE]")
     const format = levelDef.aim_lvlText?.val || `%${ilvl + 1}`;
     return format.replace(`%${ilvl + 1}`, count.toString());
   }
