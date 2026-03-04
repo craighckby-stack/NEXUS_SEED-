@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "GACR/Schemas/APITelemetry.json",
-  "title": "API Performance Metrics Telemetry Schema [NEXUS_CORE v3.1 MUTATION_2]",
-  "description": "Architectural Evolution: Siphoning React-Fiber 'WorkLoop' lifecycle phases and OOXML 'Abstract-Instance' numbering logic for stateful telemetry sequencing and cascading property inheritance.",
+  "title": "API Performance Metrics Telemetry Schema [NEXUS_CORE v3.1 MUTATION_3]",
+  "description": "Architectural Evolution: Siphoning React-Fiber 'WorkLoop' lifecycle phases and OOXML 'Abstract-Instance' numbering logic. Implements Recursive Cascading Property resolution and Indirection Dependency Layers (RID) for sub-50ms telemetry reconciliation.",
   "type": "object",
   "mc:Ignorable": "nx mce react fiber lanes scheduler w r ac",
   "namespaces": {
@@ -17,103 +17,121 @@
     "ac": "https://alphacode.deepmind/logic/v2"
   },
   "properties": {
-    "timestamp_ms": {
-      "type": "integer"
-    },
-    "document_settings": {
+    "timestamp_ms": { "type": "integer" },
+    "settings": {
       "type": "object",
-      "description": "Global Telemetry Configuration Object (word/settings.xml pattern).",
+      "description": "Global Telemetry Configuration Object (word/settings.xml).",
       "properties": {
         "nx:mirror_governance": { "type": "boolean", "default": true },
         "mce:compatibility_mode": { "type": "string", "default": "v5.0" },
-        "w:docDefaults": { "$ref": "#/$defs/cascadingProperties" }
+        "cascading_inheritance": {
+          "type": "object",
+          "properties": {
+            "resolver": { "type": "string", "enum": ["RecursiveFlatten", "AtomizedSiphon"], "default": "RecursiveFlatten" },
+            "docDefaults": { "$ref": "#/$defs/cascadingProperties" }
+          }
+        }
       }
     },
     "abstract_event_definitions": {
       "type": "array",
-      "description": "OOXML numbering.xml abstractNum logic. Defines telemetry event templates.",
+      "description": "OOXML abstractNum logic. Defines telemetry logic templates (Abstract Style).",
       "items": {
         "type": "object",
         "properties": {
-          "abstractId": { "type": "string" },
-          "multiLevelType": { "type": "string", "enum": ["hybridFiber", "sequential", "concurrent"] },
+          "abstractNumId": { "type": "string" },
+          "multiLevelType": { "type": "string", "enum": ["hybridFiber", "competitive", "clustered"] },
           "levels": {
             "type": "array",
             "items": {
               "type": "object",
               "properties": {
                 "ilvl": { "type": "integer" },
-                "scheduler:priority": { "type": "string" },
+                "scheduler:priority": { "type": "string", "enum": ["Immediate", "UserBlocking", "Normal", "Low", "Idle"] },
                 "w:pPr": { "$ref": "#/$defs/paragraphProperties" }
               }
             }
           }
-        }
+        },
+        "required": ["abstractNumId", "levels"]
       }
     },
-    "telemetry_context": {
-      "type": "object",
-      "properties": {
-        "r:id": { "type": "string", "pattern": "^rId[0-9]+$" },
-        "fiber:execution_mode": { "type": "integer", "enum": [0, 1, 2, 4, 8] },
-        "lanes:active_mask": { "type": "string", "description": "31-bit integer mask for concurrent lanes." },
-        "ac:cluster_id": { "type": "string" }
-      }
-    },
-    "metrics_fiber_tree": {
+    "event_instances": {
       "type": "array",
-      "description": "Atomized Semantic Tree following the React Fiber and OOXML Paragraph/Run logic.",
+      "description": "OOXML num logic. Binds specific telemetry instances to abstract logic templates.",
       "items": {
         "type": "object",
         "properties": {
+          "numId": { "type": "string" },
+          "abstractNumId": { "type": "string" },
+          "rId": { "type": "string", "pattern": "^rId[0-9]+$" },
+          "ac:cluster_id": { "type": "string" },
+          "fiber:lanes": { "type": "string" }
+        },
+        "required": ["numId", "abstractNumId"]
+      }
+    },
+    "telemetry_fiber_tree": {
+      "type": "array",
+      "description": "Atomized Semantic Tree following Paragraph (Block) and Run (Inline) patterns.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "enum": ["Block", "Inline"] },
           "fiber:tag": { "type": "integer" },
-          "fiber:key": { "type": "string" },
-          "w:pStyle": { "type": "string", "description": "Pointer to abstract_event_definitions levels." },
-          "lifecycle": {
-            "type": "object",
-            "properties": {
-              "render_phase": {
-                "type": "object",
-                "properties": {
-                  "duration_ms": { "type": "number" },
-                  "scheduler:yield_count": { "type": "integer" }
-                }
-              },
-              "commit_phase": {
-                "type": "object",
-                "properties": {
-                  "duration_ms": { "type": "number" },
-                  "mutation_count": { "type": "integer" }
+          "w:pStyle": { "type": "string", "description": "Pointer to numId instance." },
+          "pPr": { "$ref": "#/$defs/paragraphProperties" },
+          "runs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rStyle": { "type": "string" },
+                "rPr": { "$ref": "#/$defs/runProperties" },
+                "lifecycle": {
+                  "type": "object",
+                  "properties": {
+                    "render_phase": {
+                      "type": "object",
+                      "properties": {
+                        "duration_ms": { "type": "number" },
+                        "scheduler:yield_count": { "type": "integer" }
+                      }
+                    },
+                    "commit_phase": {
+                      "type": "object",
+                      "properties": {
+                        "duration_ms": { "type": "number" },
+                        "mutation_count": { "type": "integer" }
+                      }
+                    }
+                  }
+                },
+                "terminal": {
+                  "type": "object",
+                  "properties": {
+                    "is_field": { "type": "boolean" },
+                    "value": { "type": "string" }
+                  }
                 }
               }
             }
           },
-          "metrics": {
-            "type": "object",
-            "properties": {
-              "latency": {
-                "type": "object",
-                "properties": {
-                  "value": { "type": "number" },
-                  "w:rPr": { "$ref": "#/$defs/runProperties" }
-                }
-              }
-            }
-          },
-          "child": { "type": "array", "items": { "$ref": "#/properties/metrics_fiber_tree/items" } }
+          "child": { "type": "array", "items": { "$ref": "#/properties/telemetry_fiber_tree/items" } }
         }
       }
     },
     "relationships": {
       "type": "array",
-      "description": "Indirection Dependency Layer for external telemetry parts.",
+      "description": "Indirection Dependency Layer (RID Mapping). Decouples metrics from implementation.",
       "items": {
         "type": "object",
         "properties": {
           "rId": { "type": "string" },
           "type": { "type": "string", "format": "uri" },
           "target": { "type": "string" },
-          "targetMode": { "type": "string", "enum": ["Internal", "External"] }
+          "targetMode": { "type": "string", "enum": ["Internal", "External"] },
+          "ac:verification_score": { "type": "number", "minimum": 0, "maximum": 1 }
         },
         "required": ["rId", "type", "target"]
       }
@@ -121,15 +139,15 @@
   },
   "required": [
     "timestamp_ms",
-    "document_settings",
-    "metrics_fiber_tree",
+    "settings",
+    "telemetry_fiber_tree",
     "relationships"
   ],
   "$defs": {
     "cascadingProperties": {
       "type": "object",
       "properties": {
-        "lanes:mask": { "type": "string", "default": "0b000000000000000000000000001" },
+        "lanes:mask": { "type": "string", "default": "0x00000001" },
         "react:memoize": { "type": "boolean", "default": true },
         "nx:governance_mode": { "type": "string", "enum": ["Strict", "Adaptive"] }
       }
@@ -137,8 +155,8 @@
     "paragraphProperties": {
       "type": "object",
       "properties": {
-        "w:jc": { "type": "string" },
-        "scheduler:priority": { "type": "string", "enum": ["Immediate", "UserBlocking", "Normal", "Low", "Idle"] },
+        "w:jc": { "type": "string", "enum": ["start", "center", "end", "both"] },
+        "scheduler:priority": { "type": "string" },
         "fiber:lanes": { "type": "string" }
       }
     },
