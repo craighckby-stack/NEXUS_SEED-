@@ -1,9 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "id": "NEXUS_CORE/GACR/ES_Schema.json",
-  "version": "4.0.0-RID-COMPOSITE",
-  "title": "Architectural Precision Substrate: OOXML-TS Siphon v4.0",
-  "description": "Evolutionary schema integrating ISO/IEC 29500 (OOXML) Container-Part patterns with microsoft/TypeScript composite project architectures. Implements RID indirection, recursive cascading inheritance, and MCE markup compatibility.",
+  "$id": "https://gacr.agi/schemas/ecvm_tis_v10.2.0.json",
+  "version": "10.2.0-SIPHON-R2",
+  "title": "Architectural Precision Substrate: OOXML-TS Siphon v10.2",
+  "description": "Evolutionary substrate schema integrating ISO/IEC 29500 (OOXML) indirection with microsoft/TypeScript 5.4+ project-reference architectures. Round 2: Relational Dependency Mapping & Incremental State Synchronization.",
   "type": "object",
   "required": [
     "dna_anchor",
@@ -11,7 +11,8 @@
     "relationships",
     "evolution_state",
     "compiler_options",
-    "parts"
+    "parts",
+    "references"
   ],
   "properties": {
     "dna_anchor": {
@@ -21,21 +22,22 @@
     "markup_compatibility": {
       "type": "object",
       "properties": {
-        "ignorable": { "type": "string", "default": "nx_ext v3" },
+        "ignorable": { "type": "string", "default": "dalek v3 nx_ext mce" },
         "namespaces": {
           "type": "object",
           "properties": {
             "w": { "type": "string", "const": "http://schemas.openxmlformats.org/wordprocessingml/2006/main" },
             "r": { "type": "string", "const": "http://schemas.openxmlformats.org/officeDocument/2006/relationships" },
             "ts": { "type": "string", "const": "https://github.com/microsoft/TypeScript/schemas/compiler" },
-            "nx": { "type": "string", "const": "https://nexus-core.agi/governance" }
+            "nx": { "type": "string", "const": "https://nexus-core.agi/governance" },
+            "mc": { "type": "string", "const": "http://schemas.openxmlformats.org/markup-compatibility/2006" }
           }
         }
       }
     },
     "relationships": {
       "type": "array",
-      "description": "Indirection Dependency Layer (RID Mapping) for modular logic siphoning.",
+      "description": "Indirection Dependency Layer (RID Mapping) trace-resolved to .rels manifests.",
       "items": {
         "type": "object",
         "required": ["rId", "type", "target"],
@@ -50,46 +52,67 @@
     "evolution_state": {
       "type": "object",
       "properties": {
-        "round": { "type": "integer", "default": 1 },
+        "round": { "type": "integer", "enum": [2] },
         "saturation_level": { "type": "integer", "enum": [1, 2, 3, 4], "default": 2 },
-        "metabolic_rate": { "type": "string", "enum": ["CONSERVATIVE", "STANDARD", "ACCELERATED", "UNSATURATED"], "default": "STANDARD" },
-        "continuity_hash": { "type": "string", "pattern": "^SHA256:[A-F0-9]{64}$" }
+        "metabolic_rate": { "type": "string", "enum": ["CONSERVATIVE", "STANDARD", "ACCELERATED", "UNSATURATED"] },
+        "integrity_hash": { "type": "string", "pattern": "^SHA256:[A-F0-9]{64}$" }
       }
     },
     "compiler_options": {
       "type": "object",
-      "description": "TypeScript-grade project reference configuration for siphoned substrates.",
+      "description": "TypeScript 5.4+ Composite Project Reference logic.",
       "properties": {
+        "target": { "type": "string", "default": "ESNext" },
+        "module": { "type": "string", "default": "NodeNext" },
+        "moduleResolution": { "type": "string", "default": "NodeNext" },
         "composite": { "type": "boolean", "default": true },
         "incremental": { "type": "boolean", "default": true },
-        "moduleResolution": { "type": "string", "const": "NodeNext" },
-        "strict": { "type": "boolean", "default": true },
+        "verbatimModuleSyntax": { "type": "boolean", "default": true },
+        "noUncheckedIndexedAccess": { "type": "boolean", "default": true },
+        "tsBuildInfoFile": { "type": "string" },
         "cascading_inheritance": {
           "type": "object",
           "properties": {
             "enabled": { "type": "boolean", "default": true },
-            "resolver": { "type": "string", "const": "RecursiveFlatten" },
+            "resolver": { "type": "string", "enum": ["RecursiveFlatten", "DifferentialUpdate"] },
             "docDefaults": { "$ref": "#/definitions/StyleProperties" }
           }
         }
       }
     },
-    "parts": {
+    "references": {
       "type": "array",
-      "description": "Atomized Semantic Tree consisting of Block (Paragraph) and Inline (Run) logic units.",
+      "description": "Cross-project reference mapping for decoupled architectural parts.",
       "items": {
         "type": "object",
-        "required": ["part_id", "rId", "layers"],
+        "required": ["path", "rId"],
         "properties": {
-          "part_id": { "type": "string" },
+          "path": { "type": "string" },
           "rId": { "type": "string" },
-          "layers": {
+          "resolution_mode": { "type": "string", "enum": ["node", "bundler", "direct"] },
+          "circular_dependency_gate": { "type": "string", "enum": ["Strict", "Warning", "Allow"] }
+        }
+      }
+    },
+    "parts": {
+      "type": "array",
+      "description": "Atomized Semantic Tree: Block (Paragraph), Inline (Run), and Terminal (Data) logic layers.",
+      "items": {
+        "type": "object",
+        "required": ["id", "rId", "atomized_layers"],
+        "properties": {
+          "id": { "type": "string" },
+          "rId": { "type": "string" },
+          "status": { "type": "string", "enum": ["Active", "Deprecated", "Siphoning"] },
+          "atomized_layers": {
             "type": "array",
             "items": {
               "type": "object",
+              "required": ["layer_type", "content_ref"],
               "properties": {
-                "type": { "type": "string", "enum": ["Block", "Inline", "Terminal"] },
-                "properties": { "$ref": "#/definitions/StyleProperties" },
+                "layer_type": { "type": "string", "enum": ["Block", "Inline", "Terminal"] },
+                "pPr": { "$ref": "#/definitions/StyleProperties" },
+                "rPr": { "$ref": "#/definitions/StyleProperties" },
                 "content_ref": { "type": "string" }
               }
             }
@@ -99,42 +122,69 @@
     },
     "state_machine": {
       "type": "object",
-      "description": "Multi-Level State Definitions for sequential logic counters.",
+      "description": "Multi-Level State Definitions for sequential logic counters (word/numbering.xml pattern).",
       "properties": {
-        "abstract_num": {
+        "abstract_num_definitions": {
           "type": "array",
           "items": {
             "type": "object",
+            "required": ["abstractNumId", "levels"],
             "properties": {
-              "id": { "type": "string" },
-              "levels": { "type": "array", "items": { "type": "object" } }
+              "abstractNumId": { "type": "string" },
+              "levels": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "ilvl": { "type": "integer" },
+                    "start": { "type": "integer" },
+                    "numFmt": { "type": "string" },
+                    "lvlText": { "type": "string" },
+                    "lvlJc": { "type": "string", "enum": ["left", "center", "right", "both"] }
+                  }
+                }
+              }
             }
           }
         },
-        "instances": {
+        "instance_mapping": {
           "type": "array",
           "items": {
             "type": "object",
+            "required": ["numId", "abstractNumId"],
             "properties": {
               "numId": { "type": "string" },
-              "abstractRef": { "type": "string" }
+              "abstractNumId": { "type": "string" }
             }
           }
         }
       }
     },
-    "governance": {
+    "diagnostics_engine": {
       "type": "object",
       "properties": {
-        "identity_anchors_enforced": { "type": "boolean", "default": true },
-        "semantic_drift_threshold": { "type": "number", "const": 0.35 },
+        "drift_threshold": { "type": "number", "const": 0.35 },
+        "enable_semantic_checks": { "type": "boolean", "default": true },
+        "validation_rules": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["NoOrphanedRIds", "StyleChainResolution", "NamespaceValidityCheck", "StrictHHHCompliance", "ProjectBoundaryCheck", "SemanticContinuityCheck"] }
+        },
         "emergency_brake": {
           "type": "object",
           "properties": {
-            "corruption_threshold": { "type": "integer", "const": 5 },
-            "auto_halt": { "type": "boolean", "default": true }
+            "corruption_threshold": { "type": "integer", "default": 5 },
+            "auto_halt": { "type": "boolean", "default": true },
+            "log_target": { "type": "string", "default": "NEXUS_LOG.txt" }
           }
         }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "author": { "type": "string", "const": "DALEK_CAAN_V3.1_SIPHON_ENGINE" },
+        "identity_anchors_enforced": { "type": "boolean", "const": true },
+        "last_mutation": { "type": "string", "format": "date-time" }
       }
     }
   },
@@ -142,16 +192,14 @@
     "StyleProperties": {
       "type": "object",
       "properties": {
-        "styleId": { "type": "string" },
-        "inheritance": { "type": "string", "enum": ["Inherit", "Override", "Final"] },
-        "pPr": {
-          "type": "object",
-          "description": "Paragraph Properties (Block Level Logic)"
-        },
-        "rPr": {
-          "type": "object",
-          "description": "Run Properties (Inline Level Logic)"
-        }
+        "val": { "type": ["string", "integer", "boolean"] },
+        "inheritance": { "type": "string", "enum": ["Inherit", "Override", "Final"], "default": "Inherit" },
+        "sz": { "type": "integer", "description": "Size in half-points" },
+        "color": { "type": "string", "pattern": "^[0-9A-F]{6}$" },
+        "bold": { "type": "boolean" },
+        "spacing": { "type": "integer" },
+        "ind": { "type": "integer" },
+        "jc": { "type": "string", "enum": ["left", "center", "right", "both"] }
       }
     }
   }
