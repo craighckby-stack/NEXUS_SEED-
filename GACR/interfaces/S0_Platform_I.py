@@ -1,13 +1,14 @@
 from typing import Protocol, List, Dict, Optional, Any, Union, Literal, runtime_checkable
 from enum import IntFlag
 
-# --- GACR/interfaces/S0_Platform_I.py (DALEK_CAAN v3.1 - Evolution Round 4/5) ---
-# Siphoning React-Core (Lanes/Fiber/Suspense) & ISO/IEC 29500 (OPC/RID/MCE) Synthesis.
+# --- GACR/interfaces/S0_Platform_I.py (DALEK_CAAN v3.1 - Evolution Round 5/5) ---
+# ARCH-OOXML-V2-DOCX-DNA Converged with React-Core Fiber/Lane Orchestration.
+# Final Architectural Precision: Semantic Atomization & Indirection Dependency Mapping.
 
 class Lane(IntFlag):
     """
     React-Siphon: 31-bit priority mask for concurrent work scheduling.
-    Aligned with VSEC lane_priority_mapping for enforcement tiers.
+    Aligned with VSEC lane_priority_mapping (Sync=0x1, Default=0x10, etc).
     """
     SYNC = 0b0000000000000000000000000000001
     INPUT_CONTINUOUS = 0b0000000000000000000000000000100
@@ -18,39 +19,41 @@ class Lane(IntFlag):
 
 RelationshipID = str # DNA Pattern 2: Indirection pointer (rId) mapping to URI/Part
 EffectTag = Literal["Placement", "Update", "Deletion", "Hydrating", "Visibility"]
+PriorityLevel = Literal["Immediate", "UserBlocking", "Normal", "Low", "Idle"]
 
 @runtime_checkable
 class FiberNode(Protocol):
     """
     React-Siphon: Atomic unit of platform reconciliation.
-    Implements 'Alternate' double-buffering and React 18+ Lane Entanglement.
+    Implements DNA Pattern 4 (Semantic Atomization) and React 18+ Lane Entanglement.
     """
     tag: int
-    lanes: Lane
+    lane_mask: Lane
     child_lanes: Lane
-    entangled_lanes: Lane
-    alternate: Optional['FiberNode']
+    entangled_mask: Lane
+    scheduler_priority: PriorityLevel
     effect_tag: EffectTag
+    alternate: Optional['FiberNode']
     memoized_props: Dict[str, Any]
     memoized_state: Any
     update_queue: Optional[List[Any]]
-    dependencies: Optional[RelationshipID] # Pointer to _rels/.rels part
+    rId: RelationshipID # Pointer to _rels/.rels part
 
 @runtime_checkable
 class CascadingProperties(Protocol):
     """DNA Pattern 3: Recursive Inheritance Style Logic (ISO/IEC 29500 styles.xml)."""
     def resolve_inheritance(self, style_id: str, local_overrides: Dict[str, Any]) -> Dict[str, Any]:
-        """Flatten: docDefaults -> abstractStyle -> specificStyle -> directFormatting."""
+        """Flatten: docDefaults -> abstractStyle -> specificStyle -> Local Override."""
         ...
 
 @runtime_checkable
 class NumberingState(Protocol):
     """DNA Pattern 5: Multi-Level State Machine (abstractNum vs. num instances)."""
     def next_sequence(self, num_id: str, ilvl: int) -> int:
-        """Manages sequential state counters across decoupled fiber execution."""
+        """Manages sequential state counters (Severity_Vector_%1) across platform fibers."""
         ...
 
-    def override_start(self, num_id: str, ilvl: int, start_val: int) -> None:
+    def apply_override(self, num_id: str, ilvl: int, start_override: int) -> None:
         """Applies lvlOverride logic to specific numbering instances."""
         ...
 
@@ -61,23 +64,23 @@ class CRACryptoInterface(Protocol):
         ...
 
     def rotate_keys(self, settings_rId: RelationshipID) -> None:
-        """Traces Relationship ID to global security settings for key rotation."""
+        """Traces Relationship ID to word/settings.xml for global key rotation."""
         ...
 
 class HIPAHardwareInterface(Protocol):
     """Siphons: React Suspense/Hydration + Semantic Atomization."""
-    def hydrate_component(self, rId: RelationshipID, boundary_id: str) -> bool:
-        """Selective Hydration: Transitions dehydrated hardware state to active."""
+    def hydrate_boundary(self, rId: RelationshipID, boundary_id: str) -> bool:
+        """Selective Hydration: Transitions dehydrated hardware state (0x00FF) to active."""
         ...
 
-    def should_yield(self, lane: Lane) -> bool:
-        """Scheduler: Checks if high-priority lane pressure (Sync) requires interruption."""
+    def should_yield(self) -> bool:
+        """Scheduler: Checks if high-priority lane pressure requires interruption."""
         ...
 
     def emit_telemetry(self) -> List[Dict[str, Union[str, Dict[str, Any]]]]:
         """
         Semantic Atomization: Returns block-level Paragraphs (w:p) 
-        containing atomized inline Runs (w:r).
+        containing atomized inline Runs (w:r) with rStyle metadata.
         """
         ...
 
@@ -87,33 +90,37 @@ class NetSecInterface(Protocol):
         """Resolves URI via Relationship mapping and retrieves part content."""
         ...
 
-    def filter_mce(self, content: Any, ignorable: List[str]) -> Any:
+    def process_mce(self, content: Any, ignorable: List[str]) -> Any:
         """DNA Pattern 6: Markup Compatibility - Strips/skips unknown logic tiers."""
         ...
 
 class S0PlatformPackage(Protocol):
     """
-    Macro-Architecture: Container-Part Pattern (OPC).
-    Converged Nexus_Core substrate utilizing React Fiber and ISO/IEC 29500 logic.
+    Macro-Architecture: Container-Part Pattern (OPC / ISO/IEC 29500).
+    Converged Nexus_Core substrate utilizing React Fiber and OOXML logic.
     """
     crypto: CRACryptoInterface
     hardware: HIPAHardwareInterface
     network: NetSecInterface
     
-    # Core Packaging & Global State
-    manifest: Dict[RelationshipID, str] # _rels/.rels indirection layer
-    global_settings: Dict[str, Any]      # word/settings.xml global config
+    # Global Repository State
+    manifest: Dict[RelationshipID, Dict[str, str]] # _rels/.rels indirection
+    global_settings: Dict[str, Any]                # word/settings.xml
     inheritance_engine: CascadingProperties
     sequence_manager: NumberingState
 
-    def reconcile_state(self, root_fiber: FiberNode, sync_lane: Lane) -> None:
+    def reconcile(self, root: FiberNode, sync_lane: Lane) -> None:
         """React-Siphon: Performs the work loop across the platform fiber tree."""
         ...
 
-    def map_relationship(self, rId: RelationshipID, target_uri: str, type_uri: str) -> None:
+    def map_relationship(self, rId: RelationshipID, target: str, type_uri: str) -> None:
         """DNA Pattern 2: Explicit Dependency Injection via Relationship mapping."""
         ...
 
-    def get_vsec_policy(self, severity_level: str) -> str:
-        """Chained Context: Retrieves enforcement policy (LOG_WARN, ISOLATE_HARD, etc)."""
+    def get_enforcement_policy(self, severity: Literal["LOW", "MEDIUM", "HIGH", "CRITICAL", "CATASTROPHIC"]) -> str:
+        """Chained Context: Retrieves policy action (LOG_WARN, ISOLATE_HARD, etc)."""
+        ...
+
+    def trap_violation(self, violation_type: str, fiber: FiberNode) -> None:
+        """Maps violation hierarchy to fiber effect tags and VSEC enforcement."""
         ...
