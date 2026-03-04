@@ -1,39 +1,53 @@
 {
-  "schema_version": "AIM_V3.1_NEXUS",
+  "mce:Ignorable": "aim",
+  "xmlns:aim": "http://nexus.core/v3/aim",
+  "xmlns:r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
+  "schema_version": "AIM_V4.0_OPC_SYNTH",
   "evolution_context": {
-    "round": 3,
-    "source_siphon": "deepseek-coder-v2",
-    "phi_aggregate_target": 0.85
+    "round": 1,
+    "source_siphon": "dotnet/Open-XML-SDK",
+    "dna_signature": "ARCH-OOXML-V2-DOCX-DNA",
+    "phi_aggregate_target": 0.92
+  },
+  "relationships": [
+    { "rId": "rId_SGS_Policy", "type": "http://nexus.core/agent/policy", "target": "/opt/sgs/gacr/" },
+    { "rId": "rId_GAX_Data", "type": "http://nexus.core/agent/data", "target": "/opt/gax/policy_data/" },
+    { "rId": "rId_Governance", "type": "http://nexus.core/governance", "target": "CONSTITUTIONAL_GOVERNANCE.json" }
+  ],
+  "agent_defaults": {
+    "resource_limits": {
+      "cpu_limit_percentage": 25,
+      "memory_limit_bytes": 1048576000,
+      "io_throughput_cap_mbps": 100
+    },
+    "security_policy": {
+      "syscalls_allowed": ["read", "write", "exit"],
+      "base64_armor_enforced": true,
+      "network_mode": "RESTRICTED"
+    }
   },
   "integrity_profiles": {
     "SGS_AGENT": {
+      "r:id": "rId_SGS_Policy",
       "monitoring_slo_id": "GATM_P_SGS_SLO",
       "n3_metrics": {
         "min_phi": 0.75,
         "lambda_bounds": [0.5, 0.8],
         "coherence_threshold": 0.92
       },
+      "local_overrides": {
+        "cpu_limit_percentage": 75,
+        "memory_limit_bytes": 4194304000,
+        "syscalls_allowed": ["read", "write", "mmap", "exit", "futex"]
+      },
       "huxley_gates": {
         "ers_critical_cutoff": 0.35,
         "cgs_min_requirement": 0.65,
         "ccrr_audit_enabled": true
-      },
-      "constraints": {
-        "resource_limits": {
-          "cpu_limit_percentage": 75,
-          "memory_limit_bytes": 4194304000,
-          "io_throughput_cap_mbps": 500
-        },
-        "security_policy": {
-          "syscalls_allowed": ["read", "write", "mmap", "exit", "futex"],
-          "network_ports_disallowed": [22, 23, 3389],
-          "paths_immutable": ["/opt/sgs/gacr/"],
-          "base64_armor_enforced": true,
-          "configuration_hash": "SHA256:d5f2a1b9e0c4..."
-        }
       }
     },
     "GAX_AGENT": {
+      "r:id": "rId_GAX_Data",
       "monitoring_slo_id": "GATM_P_GAX_SLO",
       "n3_metrics": {
         "min_phi": 0.60,
@@ -43,41 +57,30 @@
         "ers_critical_cutoff": 0.20,
         "logic_extraction_pattern": "REDUCER_DETERMINISTIC"
       },
-      "constraints": {
-        "resource_limits": {
-          "cpu_limit_percentage": 10,
-          "memory_limit_bytes": 524288000
-        },
-        "security_policy": {
-          "syscall_restrictions": "STRICT_MINIMAL",
-          "file_access_root": "/opt/gax/policy_data/",
-          "network_mode": "POLICY_FETCH_ONLY",
-          "hot_swap_enabled": true
-        }
+      "local_overrides": {
+        "cpu_limit_percentage": 10,
+        "memory_limit_bytes": 524288000,
+        "hot_swap_enabled": true
       }
     },
     "CRoT_AGENT": {
       "monitoring_slo_id": "GATM_P_CRoT_SLO",
-      "lbd_protocol": {
+      "abstract_lbd_protocol": {
         "death_lesson_mandatory": true,
         "terminal_vector_logging": "ACTIVE",
-        "failure_path_saturation": 0.95
+        "grog_safety_gate": "BINARY_LOW_INT"
       },
-      "constraints": {
-        "resource_limits": {
-          "memory_limit_bytes": 131072000
-        },
-        "security_policy": {
-          "network_mode": "NONE",
-          "time_sync_source": "CRITICAL_NTP_A",
-          "grog_safety_gate": "BINARY_LOW_INT"
-        }
+      "instance_lbd_state": {
+        "failure_path_saturation": 0.95,
+        "time_sync_source": "CRITICAL_NTP_A",
+        "network_mode": "NONE"
       }
     }
   },
   "runtime_governance": {
     "psr_threshold_degradation": 0.05,
     "cycle_interval_ms": 40000,
-    "milestone_step_frequency": 50
+    "milestone_step_frequency": 50,
+    "r:id": "rId_Governance"
   }
 }
