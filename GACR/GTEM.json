@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://gacr.agi/schemas/ecvm_tis_v10.3.0_round_3.json",
-  "version": "10.3.0-DEV",
+  "$id": "https://gacr.agi/schemas/ecvm_tis_v10.4.0_round_4.json",
+  "version": "10.4.0-DEV",
   "title": "NEXUS_CORE Converged Architectural Substrate",
   "dna_anchor": "ARCH-OOXML-V2-DOCX-DNA",
   "markup_compatibility": {
@@ -16,10 +16,10 @@
     }
   },
   "evolution_state": {
-    "round": 3,
+    "round": 4,
     "saturation_level": 2,
     "metabolic_rate": "STANDARD",
-    "integrity_hash": "SHA256:D3E4F5A6B7C8D9E0F1A2B3C4D5E6F7A8B7E8C9A0F1D2E3B4A5C6D7E8F9A0B1C2"
+    "integrity_hash": "SHA256:F2A8E9C1D0B3A4F5E6D7C8B9A0F1E2D3C4B5A6978876543210FEDCBA98765432"
   },
   "relationships": [
     {
@@ -45,6 +45,12 @@
       "type": "https://github.com/microsoft/TypeScript/relationships/compiler-diagnostics",
       "target": "diagnostics.json",
       "targetMode": "Internal"
+    },
+    {
+      "rId": "rId5",
+      "type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering",
+      "target": "numbering.json",
+      "targetMode": "Internal"
     }
   ],
   "compiler_options": {
@@ -57,15 +63,18 @@
     "noUncheckedIndexedAccess": true,
     "declaration": true,
     "emitDeclarationOnly": false,
-    "tsBuildInfoFile": "GTEM_V3.tsbuildinfo",
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "tsBuildInfoFile": "GTEM_V4.tsbuildinfo",
     "paths": {
       "@nexus/*": ["./core/*"],
-      "@parts/*": ["./parts/*"]
+      "@parts/*": ["./parts/*"],
+      "@governance/*": ["./governance/*"]
     },
     "cascading_inheritance": {
       "enabled": true,
       "resolver": "RecursiveFlatten",
-      "depth_limit": 50,
+      "depth_limit": 64,
       "docDefaults": {
         "pPr": {
           "spacing": { "val": 240, "unit": "twips" },
@@ -75,6 +84,7 @@
         "rPr": {
           "lang": { "val": "en-AGI" },
           "noProof": true,
+          "sz": 22,
           "inheritance": "Inherit"
         }
       }
@@ -84,12 +94,20 @@
     {
       "path": "./core/identity",
       "rId": "rId1",
-      "resolution_mode": "node"
+      "resolution_mode": "node",
+      "circular_dependency_gate": "Strict"
     },
     {
       "path": "./metrics/efficacy",
       "rId": "rId2",
-      "resolution_mode": "node"
+      "resolution_mode": "node",
+      "circular_dependency_gate": "Strict"
+    },
+    {
+      "path": "./governance/saturation",
+      "rId": "rId4",
+      "resolution_mode": "direct",
+      "circular_dependency_gate": "Strict"
     }
   ],
   "parts": [
@@ -100,7 +118,7 @@
       "atomized_layers": [
         {
           "layer_type": "Block",
-          "pPr": { "bold": true, "inheritance": "Override" },
+          "pPr": { "bold": true, "inheritance": "Override", "jc": { "val": "center" } },
           "content_ref": "transition_id"
         },
         {
@@ -116,12 +134,12 @@
       "atomized_layers": [
         {
           "layer_type": "Inline",
-          "rPr": { "color": "00FF00", "inheritance": "Override" },
+          "rPr": { "color": "00FF00", "bold": true, "inheritance": "Override" },
           "content_ref": "S01_efficacy_metric"
         },
         {
           "layer_type": "Inline",
-          "rPr": { "color": "FF0000", "inheritance": "Override" },
+          "rPr": { "color": "FF0000", "vertAlign": { "val": "superscript" }, "inheritance": "Override" },
           "content_ref": "S02_risk_metric"
         }
       ]
@@ -133,7 +151,7 @@
       "atomized_layers": [
         {
           "layer_type": "Block",
-          "pPr": { "ind": { "val": 720, "unit": "twips" } },
+          "pPr": { "ind": { "val": 720, "unit": "twips" }, "spacing": { "val": 120, "unit": "twips" } },
           "content_ref": "D01_drift_log"
         }
       ]
@@ -145,7 +163,8 @@
         "abstractNumId": "0",
         "levels": [
           { "ilvl": 0, "start": 1, "numFmt": "decimal", "lvlText": "%1.", "lvlJc": "left" },
-          { "ilvl": 1, "start": 1, "numFmt": "lowerLetter", "lvlText": "(%2)", "lvlJc": "left" }
+          { "ilvl": 1, "start": 1, "numFmt": "lowerLetter", "lvlText": "(%2)", "lvlJc": "left" },
+          { "ilvl": 2, "start": 1, "numFmt": "lowerRoman", "lvlText": "%3.", "lvlJc": "right" }
         ]
       }
     ],
@@ -161,7 +180,8 @@
       "StyleChainResolution",
       "NamespaceValidityCheck",
       "ProjectBoundaryCheck",
-      "SemanticContinuityCheck"
+      "SemanticContinuityCheck",
+      "StrictHHHCompliance"
     ],
     "emergency_brake": {
       "corruption_threshold": 5,
@@ -174,8 +194,9 @@
     "track_changes": true,
     "logic_flags": {
       "strict_rid_validation": true,
-      "mirror_margins": false,
-      "auto_hyphenation": true
+      "mirror_margins": true,
+      "auto_hyphenation": true,
+      "conformance_level": "transitional"
     }
   },
   "metadata": {
@@ -188,6 +209,6 @@
       "governance": "Human oversight remains active at all saturation levels",
       "origin": "NEXUS_CORE"
     },
-    "last_mutation": "2026-03-02T16:45:12Z"
+    "last_mutation": "2026-03-02T17:12:44Z"
   }
 }
