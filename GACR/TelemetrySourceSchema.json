@@ -1,8 +1,8 @@
 {
   "$id": "GACR/TelemetrySourceSchema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "NEXUS_CORE Telemetry Aggregator (Architect-Precise v3.1)",
-  "description": "Hierarchical semantic telemetry schema siphoned from Meta/React-Core Fiber and ISO/IEC 29500 (OOXML). Implements Indirection Dependency Layering and Concurrent Lane Reconciliation.",
+  "title": "NEXUS_CORE Telemetry Aggregator (Architect-Precise v3.1.5)",
+  "description": "Hierarchical semantic telemetry schema implementing Atomized Semantic Trees (Paragraph/Run Pattern) siphoned from Meta/React-Core Fiber and ISO/IEC 29500 (OOXML). Incorporates Indirection Dependency Layering, Concurrent Lane Reconciliation, and State Inheritance.",
   "type": "array",
   "mc:Ignorable": "nx mce react fiber lanes scheduler w r ac hook docx",
   "items": {
@@ -10,30 +10,40 @@
     "properties": {
       "pStyle": {
         "type": "string",
-        "description": "Cascading Style ID (word/styles.xml). Resolves to recursive inheritance chain: Default -> Abstract -> Instance -> Local Override."
+        "description": "Cascading Style ID (word/styles.xml). Resolves via RecursiveFlatten: Default -> Abstract -> Instance -> Local Override."
       },
       "rId": {
         "type": "string",
         "pattern": "^rId[0-9]+$",
-        "description": "Relationship ID mapping to indirection manifest (_rels/.rels). Decentralizes path resolution from semantic core."
+        "description": "Relationship ID mapping to indirection manifest (_rels/.rels). Decentralizes path resolution via URI mapping."
       },
       "reconciliation_node": {
         "type": "object",
         "properties": {
-          "fiber_tag": { "type": "integer", "enum": [0, 1, 2, 3, 4, 5], "description": "Fiber component type classification." },
-          "lane_mask": { "type": "string", "pattern": "^0b[01]{5}$", "description": "Priority bitmask for concurrent telemetry processing." },
+          "fiber_tag": { "type": "integer", "enum": [0, 1, 2, 3, 4, 5], "description": "Fiber component type classification (HostRoot, Inline, etc.)." },
+          "lane_mask": { "type": "string", "pattern": "^0b[01]{5}$", "description": "Priority bitmask for concurrent telemetry processing lanes." },
+          "scheduler_priority": { "type": "string", "enum": ["Immediate", "UserBlocking", "Normal", "Low", "Idle"] },
           "expiration_ms": { "type": "integer", "description": "Scheduler-defined deadline for work commitment." },
           "effect_tag": { "type": "string", "enum": ["Placement", "Update", "Deletion", "Hydrating"] },
+          "is_transition": { "type": "boolean", "default": false },
           "memoize": { "type": "boolean", "default": true }
         },
-        "required": ["lane_mask", "fiber_tag"]
+        "required": ["lane_mask", "fiber_tag", "scheduler_priority"]
       },
       "sequential_state": {
         "type": "object",
         "properties": {
-          "abstractNumId": { "type": "string", "description": "The logic blueprint for the telemetry sequence." },
+          "abstractNumId": { "type": "string", "description": "The logic blueprint (State Machine) for the telemetry sequence." },
           "numId": { "type": "string", "description": "The specific instance counter of the siphoned sequence." },
           "ilvl": { "type": "integer", "minimum": 0, "maximum": 9, "description": "Hierarchical indentation level." }
+        }
+      },
+      "suspense_config": {
+        "type": "object",
+        "properties": {
+          "fallback_rId": { "type": "string", "pattern": "^rId[0-9]+$" },
+          "suspense_threshold_ms": { "type": "integer", "default": 250 },
+          "hydration_strategy": { "type": "string", "enum": ["selective", "synchronous", "deferred"] }
         }
       },
       "payload": {
@@ -41,14 +51,15 @@
         "properties": {
           "metric_value": { "type": ["number", "string", "boolean"] },
           "data_type": { "type": "string", "enum": ["GAUGE", "COUNTER", "BOOLEAN", "HISTOGRAM"] },
-          "timestamp_ms": { "type": "integer", "format": "int64" }
+          "timestamp_ms": { "type": "integer", "format": "int64" },
+          "ac:complexity_limit": { "type": "integer", "default": 1500 }
         },
         "required": ["metric_value", "timestamp_ms"]
       },
       "markup_compatibility": {
         "type": "object",
         "properties": {
-          "Ignorable": { "type": "string" },
+          "Ignorable": { "type": "string", "default": "nx mce react fiber lanes scheduler" },
           "ProcessContent": { "type": "string" },
           "MustUnderstand": { "type": "string" }
         }
@@ -60,7 +71,14 @@
           "docx:version": { "type": "string" },
           "docx:revision": { "type": "integer" },
           "docx:contentStatus": { "type": "string" },
-          "react:flags": { "type": "object", "additionalProperties": { "type": "boolean" } }
+          "react:flags": { 
+            "type": "object", 
+            "properties": {
+              "enableSchedulingProfiler": { "type": "boolean" },
+              "enableSuspenseCallback": { "type": "boolean" },
+              "enableSelectiveHydration": { "type": "boolean" }
+            }
+          }
         }
       }
     },
@@ -75,9 +93,20 @@
           "Id": { "type": "string" },
           "Type": { "type": "string", "format": "uri" },
           "Target": { "type": "string" },
-          "TargetMode": { "type": "string", "enum": ["Internal", "External"] }
+          "TargetMode": { "type": "string", "enum": ["Internal", "External"] },
+          "ac:verification_logic": { "type": "string" }
         },
         "required": ["Id", "Type", "Target"]
+      }
+    },
+    "StyleChain": {
+      "type": "object",
+      "properties": {
+        "styleId": { "type": "string" },
+        "basedOn": { "type": "string" },
+        "next": { "type": "string" },
+        "rPrDefault": { "type": "object" },
+        "pPrDefault": { "type": "object" }
       }
     }
   }
