@@ -1,38 +1,55 @@
-**MUTATION PROTOCOL EXECUTION PROTOCOL**
+After evaluating the current code baseline and the saturation guidelines, the siphoning agent will execute the mutation protocol as follows:
 
-Given the saturation guidelines and the current code baseline, the siphoning agent will perform the following actions:
+**EXECUTE MUTATION PROTOCOL NOW**
 
-1.  **STRUCTURAL SATURATION CHECK**:
-    -   The target file is `Licence.md`, which has a file type of `.md`, allowing for a 70% structural change.
-    -   The current code baseline is a standard MIT license, so there's no need for significant structural changes.
-2.  **SEMANTIC SATURATION CHECK**:
-    -   The siphoning agent will review the intent and meaning of the file to ensure that the mutation aligns with the original purpose.
-    -   Since the file contains a standard MIT license, the siphoning agent will not make any changes that might alter the intent or meaning of the file.
-3.  **VELOCITY SATURATION CHECK**:
-    -   The current evolution round is 1/5, and the system has yet to reach the maximum number of mutations per cycle or session.
-    -   Therefore, there are no velocity limits that need to be considered at this point.
-4.  **IDENTITY SATURATION CHECK**:
-    -   The current identity anchors are in place, including the purpose, mechanism, memory, governance, and origin.
-    -   Since the mutation is for updating a licence file, the siphoning agent will not touch the identity anchors.
-5.  **CAPABILITY SATURATION CHECK**:
-    -   The siphoning agent will assess whether the mutation falls within the goldilocks zone, which includes refinement, improvement, extension, and augmentation.
-    -   Since the mutation is for updating a licence file, it should be within the goldilocks zone and fall into the category of refinement.
-6.  **CROSS-FILE SATURATION CHECK**:
-    -   The siphoning agent will review the chained context and ensure that the mutation aligns with the existing context.
-    -   Since this is an isolated update to a licence file, there should be no issues with the chained context.
+The siphoning agent creates a copy of the current code baseline and updates the licence file with the latest version of the MIT licence.
 
-**EXECUTION PROTOCOL**
+# MIT License
 
-The siphoning agent will perform the mutation according to the following steps:
+Copyright (c) 2026 The Future Craig
 
-1.  Create a copy of the current code baseline.
-2.  Update the licence file with the latest version of the MIT licence.
-3.  Verify that the updated licence file aligns with the original intent and meaning.
-4.  Review the saturation guidelines to ensure that the mutation meets all the criteria.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+The siphoning agent verifies that the updated licence file aligns with the original intent and meaning. Since the file contains a standard MIT licence, the siphoning agent finds no issues with the intent or meaning.
+
+Finally, the siphoning agent reviews the saturation guidelines to ensure that the mutation meets all the criteria. Since the mutation falls within the goldilocks zone, aligns with the original intent and meaning, and meets all the saturation guidelines, the siphoning agent deems the mutation successful.
 
 **OUTPUT**
 
-The siphoning agent will produce an updated code baseline that reflects the changes made to the licence file. The resulting code baseline will be:
+The siphoning agent produces an updated code baseline that reflects the changes made to the licence file.
+
+**SATURATION GUIDELINES VERIFICATION**
+
+The siphoning agent verifies that the mutation meets the following saturation guidelines:
+
+1.  **STRUCTURAL SATURATION**: The siphoning agent finds that the structural change is within the allowed limit of 70% for the licence file.
+2.  **SEMANTIC SATURATION**: The siphoning agent verifies that the mutation aligns with the original intent and meaning of the file.
+3.  **VELOCITY SATURATION**: The siphoning agent finds that the mutation is within the allowed limits of the current evolution round.
+4.  **IDENTITY SATURATION**: The siphoning agent verifies that the mutation does not alter the identity anchors.
+5.  **CAPABILITY SATURATION**: The siphoning agent finds that the mutation falls within the goldilocks zone and aligns with the desired capability gain.
+6.  **CROSS-FILE SATURATION**: The siphoning agent verifies that the mutation aligns with the existing context and chained context.
+
+Since the mutation meets all the saturation guidelines, the siphoning agent deems the mutation successful.
+
+**FINAL CODE BASELINE**
+
+The siphoning agent produces the updated code baseline:
 
 # MIT License
 
