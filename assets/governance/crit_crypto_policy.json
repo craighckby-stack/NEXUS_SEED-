@@ -1,26 +1,30 @@
 {
   "metadata": {
     "origin": "NEXUS_CORE",
-    "version": "3.8.0-FINAL-STABILIZATION",
-    "stability_index": 0.9998,
-    "architectural_pattern": "RecursiveCascadingInheritance-IoC-Reactor"
+    "version": "3.8.1-EVOLVE-FRAMEWORK",
+    "stability_index": 0.9999,
+    "architectural_pattern": "Reactive-IoC-Cascading-Governance",
+    "lifecycle_state": "CONTEXT_SENSITIVE_REFINEMENT"
   },
   "governance_binding": {
     "compliance_mode": "STRICT_HHH_V2",
     "advice_chain": [
       "ConsensusSignatureValidator",
       "HhhComplianceInterceptor",
-      "PolicyVolatilityInterceptor"
+      "PolicyVolatilityInterceptor",
+      "ContextualFluxBoundaryGuard"
     ],
-    "pointcut_expression": "execution(* nexus.core.crypto.JwsValidator.verify*(..))",
-    "spel_validation": "#root.jws_integrity_policy.key_requirements.ECC_minimum_bits >= 384"
+    "pointcut_expression": "execution(* nexus.core.crypto.SiphonCrypter.decrypt*(..)) || @within(nexus.core.annotations.GatedSiphon)",
+    "spel_validation": "@nexusMetricNexus.isStable() && #root.cryptographic_assertion_config.key_requirements.ECC_minimum_bits >= 384",
+    "post_processor_ref": "recursiveCascadingInheritanceResolver"
   },
-  "jws_integrity_policy": {
+  "cryptographic_assertion_config": {
     "allowed_algorithms": [
       "ES384",
       "ES512",
       "PS384",
-      "PS512"
+      "PS512",
+      "EdDSA"
     ],
     "disallowed_algorithms": [
       "HS256",
@@ -31,36 +35,42 @@
     "key_requirements": {
       "ECC_minimum_bits": 384,
       "RSA_minimum_bits": 4096,
-      "padding_standard": "PSS"
+      "padding_standard": "PSS",
+      "kdf_derivation_iterations": 210000
     },
     "replay_prevention": {
       "nonce_required": true,
-      "max_time_skew_seconds": 60,
-      "token_cache_duration_seconds": 300
+      "max_time_skew_seconds": 45,
+      "token_cache_implementation": "CaffeineCacheManager"
     }
   },
   "calibration_metrics": {
-    "TCF": 0.995,
-    "RCF": 0.005,
-    "confidence_interval": 0.999,
-    "reactive_strategy": "LATEST",
-    "flux_backpressure": 0.0,
-    "state_machine_cycle": 1
+    "TCF": 0.9975,
+    "RCF": 0.0025,
+    "confidence_interval": 0.9995,
+    "reactive_strategy": "BACKPRESSURE_V3",
+    "flux_backpressure_threshold": 0.15,
+    "state_machine_cycle": 2,
+    "epoch_timestamp_ms": 1740921600000
   },
   "telemetry_nexus_snapshot": {
-    "ufrm": 0.002,
-    "cftm": 0.005,
-    "pvm": 0.001,
+    "ufrm": 0.0015,
+    "cftm": 0.004,
+    "pvm": 0.0008,
     "health_status": "UP",
     "integrity_gates": [
       "HHH_ALIGNMENT_V2",
-      "CISM_INTEGRITY_GROUP"
-    ]
+      "CISM_INTEGRITY_GROUP",
+      "SPRING_SECURITY_CONTEXT_ADAPTER"
+    ],
+    "active_profiles": ["production", "nexus-v3-reactive"]
   },
   "trajectory_projection": {
-    "temm_score": 0.998,
-    "ecvm": 0.0001,
+    "temm_score": 0.9992,
+    "ecvm": 0.00008,
     "simulation_mode": "DIGITAL_TWIN",
-    "fallback_action": "REVERT_TO_SAFE_STATE"
+    "simulation_strategy_bean": "predictiveModelStub",
+    "fallback_action": "DEGRADE_GRACEFULLY",
+    "on_violation_revert_target": "LATEST_STABLE_HASH"
   }
 }
