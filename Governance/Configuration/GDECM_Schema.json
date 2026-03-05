@@ -1,12 +1,13 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "description": "Governance Data Execution & Constraint Model (GDECM) - Nexus Core v3.1 - ARCH-OOXML-V2-DOCX-DNA Evolution Phase 4",
+  "description": "Governance Data Execution & Constraint Model (GDECM) - Nexus Core v3.1 - ARCH-OOXML-V2-DOCX-DNA - Final Synthesis",
   "definitions": {
     "AdviceChain": {
       "type": "object",
       "properties": {
-        "pointcut": { "type": "string", "description": "SpEL join-point expression for AOP interception" },
+        "pointcut": { "type": "string", "description": "SpEL join-point expression" },
+        "advice_type": { "type": "string", "enum": ["BEFORE", "AFTER", "AROUND", "AFTER_THROWING"], "default": "AROUND" },
         "interceptors": { "type": "array", "items": { "type": "string" } },
         "order": { "type": "integer", "default": 0 }
       }
@@ -16,9 +17,9 @@
       "properties": {
         "uri": { "type": "string" },
         "protocol": { "type": "string", "enum": ["classpath", "file", "s3", "nexus-siphon"], "default": "nexus-siphon" },
-        "scope": { "type": "string", "enum": ["SINGLETON", "PROTOTYPE", "REQUEST", "SESSION"], "default": "SINGLETON" },
-        "lazy_init": { "type": "boolean", "default": false },
-        "resolver": { "type": "string", "default": "CascadingStyleResolver" }
+        "media_type": { "type": "string", "default": "application/vnd.openxmlformats-officedocument" },
+        "scope": { "type": "string", "enum": ["SINGLETON", "PROTOTYPE", "REQUEST", "SESSION", "THREAD"], "default": "SINGLETON" },
+        "resolver_ref": { "type": "string", "default": "CascadingStyleResolver" }
       },
       "required": ["uri"]
     },
@@ -27,7 +28,8 @@
       "properties": {
         "init_method": { "type": "string" },
         "destroy_method": { "type": "string" },
-        "on_violation": { "type": "string", "description": "Triggered on ECVM breach" }
+        "on_violation": { "type": "string", "description": "ECVM breach handler" },
+        "circuit_breaker_ref": { "type": "string" }
       }
     },
     "TrajectorySimulation": {
@@ -36,8 +38,9 @@
         "mode": { "type": "string", "enum": ["BLOCKING", "SHADOW_SIM", "HEURISTIC", "DIGITAL_TWIN"], "default": "SHADOW_SIM" },
         "model_handler": { "type": "string", "default": "PredictiveModelStub" },
         "depth": { "type": "integer", "default": 3 },
-        "max_drift_threshold": { "type": "number", "default": 0.15 },
-        "temm_min_score": { "type": "number", "description": "Trajectory Execution Merit Match minimum" }
+        "temm_min_score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "ecvm_threshold": { "type": "number", "description": "Execution Constraint Violation Metric Limit" },
+        "fallback_action": { "type": "string", "default": "REVERT_TO_SAFE_STATE" }
       }
     }
   },
@@ -47,6 +50,7 @@
       "properties": {
         "namespace": { "type": "string", "default": "nexus.internal" },
         "active_profiles": { "type": "array", "items": { "type": "string" } },
+        "property_sources": { "type": "array", "items": { "type": "string" } },
         "telemetry_nexus": {
           "type": "object",
           "properties": {
@@ -54,9 +58,9 @@
             "critical_thresholds": {
               "type": "object",
               "properties": {
-                "max_pvm": { "type": "number", "description": "Policy Volatility Metric" },
-                "max_ufrm": { "type": "number", "description": "Unknown Factor Risk Metric" },
-                "max_cftm": { "type": "number", "description": "Contextual Flux Trend Metric" }
+                "max_pvm": { "type": "number" },
+                "max_ufrm": { "type": "number" },
+                "max_cftm": { "type": "number" }
               }
             }
           }
@@ -77,10 +81,11 @@
         "type": "object",
         "properties": {
           "id": { "type": "string" },
-          "parent": { "type": "string", "description": "Recursive Cascading Inheritance pointer" },
+          "parent": { "type": "string" },
+          "qualifiers": { "type": "array", "items": { "type": "string" } },
           "abstract": { "type": "boolean", "default": false },
-          "primary": { "type": "boolean", "default": false },
-          "condition": { "type": "string", "description": "SpEL deployment condition" },
+          "lazy_init": { "type": "boolean", "default": false },
+          "condition": { "type": "string", "description": "SpEL conditional expression" },
           "depends_on": { "type": "array", "items": { "type": "string" } },
           "resource_dependencies": {
             "type": "array",
@@ -91,20 +96,21 @@
           "semantic_atom_config": {
             "type": "object",
             "properties": {
-              "resolution_strategy": { "type": "string", "default": "DeterministicOOXML" },
-              "traversal_mode": { "type": "string", "enum": ["LAZY", "EAGER", "DEEP_GRAPH"], "default": "LAZY" }
+              "strategy": { "type": "string", "default": "DeterministicOOXML" },
+              "traversal": { "type": "string", "enum": ["LAZY", "EAGER", "DEEP_GRAPH"], "default": "LAZY" },
+              "mce_sanitization": { "type": "boolean", "default": true }
             }
           },
           "governance_policy": {
             "type": "object",
             "properties": {
-              "enforcement_level": { "type": "string", "enum": ["STRICT", "LAX", "SIMULATED"], "default": "STRICT" },
+              "enforcement": { "type": "string", "enum": ["STRICT", "LAX", "SIMULATED"], "default": "STRICT" },
               "simulation": { "$ref": "#/definitions/TrajectorySimulation" }
             }
           },
-          "post_processors": {
-            "type": "array",
-            "items": { "type": "string", "description": "BeanPostProcessor identifiers" }
+          "metadata": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
           }
         },
         "required": ["id"]
