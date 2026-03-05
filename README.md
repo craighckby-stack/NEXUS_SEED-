@@ -1,49 +1,24 @@
-# DALEK_CAAN Project README
-=====================================================
+# DALEK_CAAN
 
 ## Project Overview
------------------
-
-DALEK_CAAN is a system designed to evolve code by integrating patterns from external repositories.
+DALEK_CAAN is an automated system designed to evolve local source code by identifying and integrating architectural patterns derived from external software repositories. The system modifies existing codebases to align with high-level structural standards.
 
 ## Siphoning Process
------------------
-
-The DALEK_CAAN system utilizes a siphoning process to select architectural origins (i.e., DeepMind, Google) and applies their patterns to local files. This process involves the following technical steps:
-
-*   Retrieving patterns from external repositories
-*   Matching patterns with local files
-*   Applying selected patterns to local files
+The siphoning mechanism facilitates code evolution through the following technical steps:
+1.  **Origin Selection:** The system identifies target architectural origins, specifically focusing on established frameworks and repositories from organizations such as DeepMind and Google.
+2.  **Pattern Extraction:** Structural and logic patterns are parsed from the selected origins.
+3.  **Pattern Application:** These external patterns are applied to local files, transforming the local architecture to mirror the technical characteristics of the source origins.
 
 ## Chained Context
------------------
-
-To ensure consistency across evolved files, DALEK_CAAN implements a chained context mechanism. This shared state/memory stores context information and updates it accordingly, maintaining consistency across the evolved files.
+To ensure logical integrity during the evolution process, DALEK_CAAN implements a **Chained Context** architecture:
+*   **Shared Memory State:** A centralized state management layer tracks all modifications.
+*   **Consistency Enforcement:** The shared state ensures that changes applied to individual files remain consistent with the broader system architecture, preventing technical debt or structural divergence during iterative updates.
 
 ## Current Status
-----------------
+The project is currently in its preliminary phase.
 
-*   Number of files processed: 170
-*   Latest file processed: assets/policies/audit/sbcm_audit_config.json
-*   Data integrity (DNA Signature): None
-*   Context Summary:
-    context_summary:
-  policy_metadata:
-    policy_id: SBCM-941B
-    audit_version: v2.0.0
-    description: Configuration for Sovereign Behavioral Constraint Monitoring (SBCM) audit streams.
-  telemetry_config:
-    default_collection_interval_ms: 1000
-    metrics:
-      system_resource:
-        - name: cpu_utilization_percent
-          priority: HIGH
-        - name: memory_pressure_ratio
-          priority: HIGH
-      performance:
-        - name: dependency_load_
-
-## Saturation Status
--------------------
-
-The DALEK_CAAN system is currently in an active state.
+*   **Files Processed:** Manual
+*   **Latest File:** `nexus_core.js`
+*   **DNA Signature:** None
+*   **Context Summary:** Initial State
+*   **Saturation Status:** None
