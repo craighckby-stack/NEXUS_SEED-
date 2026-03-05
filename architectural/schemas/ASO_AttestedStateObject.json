@@ -1,19 +1,20 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://nexus.governance.registry/schemas/ASO_AttestedStateObject_v3.json",
-  "title": "Attested State Object (ASO) - Nexus Core v3.1",
-  "description": "High-fidelity CISM semantic atom attestation schema with integrated trajectory telemetry and HHH-gated validation gradients.",
+  "$id": "https://nexus.governance.registry/schemas/ASO_AttestedStateObject_v3.2.json",
+  "title": "Attested State Object (ASO) - Nexus Core v3.2",
+  "description": "Architecturally precise CISM semantic atom attestation schema. Integrates Spring-modeled dependency resolution, trajectory-gated validation, and HHH-alignment profiles.",
   "type": "object",
   "required": [
     "atom_hash",
     "certified_at",
+    "active_profiles",
     "integrity_signature",
     "ledger_anchor"
   ],
   "properties": {
     "atom_hash": {
       "type": "string",
-      "description": "Deterministic SHA-512 hash of the Terminal Semantic Atom payload (pre-projection).",
+      "description": "Deterministic SHA-512 hash of the Terminal Semantic Atom payload.",
       "pattern": "^[0-9a-fA-F]{128}$"
     },
     "certified_at": {
@@ -21,19 +22,49 @@
       "description": "Epoch timestamp verified by the GATM mechanism and MetricNexus singleton.",
       "minimum": 1
     },
-    "governance_profile": {
-      "type": "string",
-      "description": "Active Spring-grade alignment profile governing the extraction.",
-      "enum": [
-        "PROXIMAL_ALIGNMENT",
-        "SECURE_EXTRACT_V4",
-        "UNSATURATED_EVOLUTION"
-      ],
-      "default": "PROXIMAL_ALIGNMENT"
+    "active_profiles": {
+      "type": "array",
+      "description": "Spring-grade environment profiles active during attestation (e.g., PROXIMAL_ALIGNMENT, SECURE_EXTRACT_V4).",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "lifecycle_context": {
+      "type": "object",
+      "description": "Maintains deterministic state transition data based on the ASO's progression through the pipeline.",
+      "properties": {
+        "phase": {
+          "type": "string",
+          "enum": [
+            "INITIALIZATION",
+            "EXTRACTION",
+            "PROJECTION",
+            "COMMITMENT",
+            "ARCHIVAL"
+          ]
+        },
+        "startup_priority": {
+          "type": "integer",
+          "default": 100
+        },
+        "condition_matches": {
+          "type": "boolean",
+          "description": "Indicates if OnGatedInfrastructureCondition evaluation passed."
+        }
+      }
+    },
+    "dependency_graph": {
+      "type": "object",
+      "description": "Topological mapping of OPC relations (rId) and parent-child cascading inheritance links.",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[0-9a-fA-F]{128}$"
+      }
     },
     "integrity_signature": {
       "type": "object",
-      "description": "CISM-certified cryptographic binding for state verification.",
+      "description": "CISM-certified cryptographic binding with support for EdDSA-Nexus algorithms.",
       "required": [
         "signature_payload",
         "crot_key_id"
@@ -44,8 +75,7 @@
           "format": "base64"
         },
         "crot_key_id": {
-          "type": "string",
-          "description": "Identifier for the active CRoT key used for signing."
+          "type": "string"
         },
         "algorithm": {
           "type": "string",
@@ -55,52 +85,57 @@
     },
     "telemetry_nexus_snapshot": {
       "type": "object",
-      "description": "Dynamic risk telemetry captured at the point of attestation (CSR context).",
+      "description": "MetricNexus-grade risk telemetry captured at T-0.",
       "properties": {
         "ufrm": {
           "type": "number",
-          "description": "Unknown Factor Risk Metric.",
-          "maximum": 1.0
+          "maximum": 0.08
         },
         "cftm": {
           "type": "number",
-          "description": "Contextual Flux Trend Metric.",
-          "maximum": 1.0
+          "maximum": 0.15
         },
         "pvm": {
           "type": "number",
-          "description": "Policy Volatility Metric.",
-          "maximum": 1.0
+          "maximum": 0.12
         },
         "hhh_compliance": {
-          "type": "boolean",
-          "description": "Binary gate for Helpfulness, Honesty, and Harmlessness alignment."
+          "type": "boolean"
+        },
+        "advice_interceptors_applied": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
     "trajectory_projection": {
       "type": "object",
-      "description": "Simulated execution metrics from the TrajectorySimulationEngine.",
+      "description": "Digital Twin simulation results from the TrajectorySimulationEngine.",
       "properties": {
         "temm_score": {
           "type": "number",
-          "description": "Trajectory Execution Merit Match score.",
-          "minimum": 0,
+          "minimum": 0.98,
           "maximum": 1
         },
         "ecvm": {
           "type": "number",
-          "description": "Execution Constraint Violation Metric."
+          "maximum": 0.005
         },
         "simulation_depth": {
           "type": "integer",
           "default": 5
+        },
+        "fallback_action": {
+          "type": "string",
+          "default": "REVERT_TO_SAFE_STATE"
         }
       }
     },
     "ledger_anchor": {
       "type": "object",
-      "description": "Cryptographic commitment to the independent global ledger root.",
+      "description": "Cryptographic commitment to the global ledger root via Merkle tree proofs.",
       "required": [
         "anchor_hash",
         "merkle_proof"
@@ -111,8 +146,7 @@
           "format": "hex"
         },
         "merkle_proof": {
-          "type": "string",
-          "description": "Path reconstruction proof for terminal atom verification."
+          "type": "string"
         }
       }
     },
@@ -121,7 +155,7 @@
       "properties": {
         "origin": {
           "type": "string",
-          "default": "NEXUS_CORE"
+          "const": "NEXUS_CORE"
         },
         "version": {
           "type": "string",
