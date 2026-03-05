@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://agiverse.ai/schemas/HESE_CalibrationFactor/v3.5.0",
-  "title": "HESE Calibration Telemetry Contract (TCF/RCF) - Nexus-Siphoned v3.5",
-  "description": "Enterprise-grade telemetry contract integrating Spring-Framework IoC paradigms, AspectJ AOP governance, and Nexus-Core digital twin trajectory projections.",
+  "$id": "https://agiverse.ai/schemas/HESE_CalibrationFactor/v3.6.0",
+  "title": "HESE Calibration Telemetry Contract - Nexus Evolution v3.6",
+  "description": "High-order telemetry contract synthesized with Spring-Framework IoC lifecycle, AspectJ AOP governance, and reactive trajectory feedback.",
   "type": "object",
   "required": [
     "evolution_id",
@@ -10,53 +10,48 @@
     "epoch_timestamp_ms",
     "calibration_metrics",
     "governance_binding",
-    "integrity_signature",
-    "ledger_anchor"
+    "lifecycle_state"
   ],
   "properties": {
     "evolution_id": {
       "type": "string",
-      "pattern": "^EVO-[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}$",
-      "description": "CISM-certified UUID for the autonomous evolution lifecycle."
+      "pattern": "^EVO-[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}$"
     },
     "origin_bean_id": {
       "type": "string",
-      "description": "Identifier of the HESE instance; maps to Spring ApplicationContext bean ID.",
-      "readOnly": true
+      "description": "Unique identifier in the Nexus ApplicationContext."
     },
-    "bean_scope": {
-      "type": "string",
-      "enum": ["singleton", "prototype", "request", "session", "nexus-global"],
-      "default": "singleton"
+    "lifecycle_state": {
+      "type": "object",
+      "properties": {
+        "phase": {
+          "type": "string",
+          "enum": ["INITIALIZING", "POST_CONSTRUCT", "READY", "PRE_DESTROY", "HALTED"]
+        },
+        "active_profiles": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["default", "production"]
+        },
+        "is_primary": { "type": "boolean", "default": true }
+      }
     },
     "epoch_timestamp_ms": {
       "type": "integer",
-      "minimum": 1000000000000,
-      "description": "High-precision UTC timestamp of factor generation."
+      "minimum": 1000000000000
     },
     "calibration_metrics": {
       "type": "object",
-      "required": ["TCF", "RCF", "delta_average"],
+      "required": ["TCF", "RCF"],
       "properties": {
-        "TCF": {
-          "type": "number",
-          "minimum": 0.0,
-          "maximum": 1.0,
-          "description": "Trust Calibration Factor (Alignment/HHH compliance score)."
-        },
-        "RCF": {
-          "type": "number",
-          "minimum": 0.0,
-          "description": "Risk Calibration Factor (Operational Volatility Multiplier)."
-        },
-        "delta_average": { "type": "number" },
-        "delta_variance": { "type": "number", "minimum": 0.0 },
-        "state_machine_cycle": { "type": "integer", "description": "Current sequence state in the NumberingStateMachine." }
+        "TCF": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "RCF": { "type": "number", "minimum": 0.0 },
+        "confidence_interval": { "type": "number", "maximum": 1.0, "default": 0.95 },
+        "state_machine_cycle": { "type": "integer" }
       }
     },
     "dependency_graph": {
       "type": "object",
-      "description": "Topological mapping of OPC relations (rId) with Spring-style qualifier resolution.",
       "properties": {
         "relations": {
           "type": "object",
@@ -64,38 +59,64 @@
         },
         "qualifiers": {
           "type": "array",
-          "items": { "type": "string" },
-          "default": ["CISM_CUSTODIAN", "IMMUTABILITY_LOCK_PROVIDER"]
+          "items": { "type": "string" }
         },
-        "inheritance_depth": { "type": "integer", "maximum": 8, "default": 1 },
         "is_lazy": { "type": "boolean", "default": false },
-        "autowire_candidate": { "type": "boolean", "default": true }
+        "inheritance_depth": { "type": "integer", "maximum": 8 }
       }
     },
     "governance_binding": {
       "type": "object",
-      "description": "Nexus-grade AOP interceptors and AspectJ pointcut validation for HHH-alignment.",
       "required": ["advice_chain", "compliance_mode"],
       "properties": {
         "advice_chain": {
           "type": "array",
           "items": { "type": "string" },
-          "default": [
-            "ConsensusSignatureValidator",
-            "HhhComplianceInterceptor",
-            "PolicyVolatilityInterceptor"
-          ]
+          "default": ["ConsensusSignatureValidator", "HhhComplianceInterceptor"]
         },
         "compliance_mode": { "type": "string", "const": "STRICT_HHH_V2" },
         "pointcut_expression": {
           "type": "string",
-          "default": "execution(* nexus.core.CISR.record*(..)) || execution(* nexus.core.CISR.certify*(..))"
+          "default": "execution(* nexus.core.CISR.record*(..))"
+        }
+      }
+    },
+    "telemetry_nexus_snapshot": {
+      "type": "object",
+      "properties": {
+        "ufrm": { "type": "number", "maximum": 0.08 },
+        "cftm": { "type": "number", "maximum": 0.15 },
+        "pvm": { "type": "number", "maximum": 0.12 },
+        "backpressure_signal": { "type": "number", "default": 0.0 },
+        "integrity_gates": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "trajectory_projection": {
+      "type": "object",
+      "properties": {
+        "temm_score": { "type": "number", "minimum": 0.98 },
+        "ecvm": { "type": "number", "maximum": 0.005 },
+        "simulation_mode": { "type": "string", "const": "DIGITAL_TWIN" },
+        "fallback_action": {
+          "type": "string",
+          "enum": ["REVERT_TO_SAFE_STATE", "HALT_SYSTEM", "DEGRADE_GRACEFULLY"]
+        }
+      }
+    },
+    "event_listeners": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "event_type": { "type": "string" },
+          "handler": { "type": "string" },
+          "priority": { "type": "integer", "default": 0 },
+          "async": { "type": "boolean", "default": true }
         }
       }
     },
     "integrity_signature": {
       "type": "object",
-      "description": "CISM-certified cryptographic binding for atomic state verification.",
       "required": ["signature_payload", "crot_key_id"],
       "properties": {
         "signature_payload": { "type": "string", "format": "base64" },
@@ -103,53 +124,8 @@
         "algorithm": { "type": "string", "default": "EdDSA-Nexus-V1" }
       }
     },
-    "telemetry_nexus_snapshot": {
-      "type": "object",
-      "description": "Real-time risk telemetry captured from MetricNexusV1 against critical thresholds.",
-      "properties": {
-        "ufrm": { "type": "number", "maximum": 0.08, "description": "Unknown Factor Risk Metric." },
-        "cftm": { "type": "number", "maximum": 0.15, "description": "Contextual Flux Trend Metric." },
-        "pvm": { "type": "number", "maximum": 0.12, "description": "Policy Volatility Metric." },
-        "integrity_gates": {
-          "type": "array",
-          "items": { "type": "string" },
-          "default": ["HHH_ALIGNMENT_V2", "CISM_INTEGRITY_GROUP", "OPC_RELATIONAL_VALIDATOR"]
-        }
-      }
-    },
-    "trajectory_projection": {
-      "type": "object",
-      "description": "Digital Twin simulation output from the TrajectorySimulationEngine (TSE).",
-      "properties": {
-        "temm_score": { "type": "number", "minimum": 0.98, "maximum": 1 },
-        "ecvm": { "type": "number", "maximum": 0.005 },
-        "simulation_mode": { "type": "string", "const": "DIGITAL_TWIN" },
-        "fallback_action": {
-          "type": "string",
-          "enum": ["REVERT_TO_SAFE_STATE", "HALT_SYSTEM", "DEGRADE_GRACEFULLY"],
-          "default": "REVERT_TO_SAFE_STATE"
-        }
-      }
-    },
-    "event_listeners": {
-      "type": "array",
-      "description": "AxiomaticEventBroadcaster listeners for contextual refresh and policy drift.",
-      "items": {
-        "type": "object",
-        "properties": {
-          "event_type": { "type": "string" },
-          "handler": { "type": "string" },
-          "async": { "type": "boolean", "default": true }
-        }
-      },
-      "default": [
-        { "event_type": "CONTEXT_REFRESH", "handler": "refreshIntegrityGradients", "async": true },
-        { "event_type": "POLICY_DRIFT", "handler": "triggerEmergencyBrake", "async": false }
-      ]
-    },
     "ledger_anchor": {
       "type": "object",
-      "description": "Cryptographic commitment to the global Merkle tree root.",
       "required": ["anchor_hash", "merkle_proof"],
       "properties": {
         "anchor_hash": { "type": "string", "format": "hex" },
@@ -160,9 +136,9 @@
       "type": "object",
       "properties": {
         "origin": { "type": "string", "const": "NEXUS_CORE" },
-        "version": { "type": "string", "default": "3.5.0-FINAL-SYNTHESIS" },
-        "stability_index": { "type": "number", "default": 0.998 },
-        "architectural_pattern": { "type": "string", "const": "RecursiveCascadingInheritance" }
+        "version": { "type": "string", "default": "3.6.0-ACCELERATED" },
+        "stability_index": { "type": "number", "default": 0.999 },
+        "architectural_pattern": { "type": "string", "const": "InversionOfControl-RecursiveInheritance" }
       }
     }
   },
