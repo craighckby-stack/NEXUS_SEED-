@@ -1,69 +1,89 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "description": "Governance Data Execution & Constraint Model (GDECM) - Nexus Core v3.1",
+  "description": "Governance Data Execution & Constraint Model (GDECM) - Nexus Core v3.1 - Spring-Siphoned Architectures",
+  "definitions": {
+    "AdviceChain": {
+      "type": "object",
+      "properties": {
+        "pointcut": { "type": "string", "description": "SpEL expression for execution join-points" },
+        "interceptors": {
+          "type": "array",
+          "items": { "type": "string", "description": "Fully qualified Nexus Interceptor class" }
+        }
+      }
+    },
+    "ResourceDescriptor": {
+      "type": "object",
+      "properties": {
+        "uri": { "type": "string", "description": "Protocol-prefixed resource (e.g., 'siphon://', 'voted://')" },
+        "resolver": { "type": "string", "enum": ["LAZY_PROXY", "EAGER_SINGLETON", "PROTOTYPE"], "default": "EAGER_SINGLETON" },
+        "required": { "type": "boolean", "default": true }
+      }
+    }
+  },
   "properties": {
-    "context_registry": {
+    "environment_context": {
       "type": "object",
       "properties": {
         "namespace": { "type": "string", "default": "nexus.internal" },
-        "telemetry_nexus_binding": { "type": "string", "description": "Mapping to MetricNexus for volatility tracking (UFRM/CFTM)" }
+        "active_profiles": { "type": "array", "items": { "type": "string" }, "default": ["default"] },
+        "telemetry_nexus": {
+          "type": "object",
+          "properties": {
+            "binding": { "type": "string", "default": "MetricNexusV1" },
+            "critical_thresholds": {
+              "type": "object",
+              "properties": {
+                "max_pvm": { "type": "number", "description": "Policy Volatility Metric limit" },
+                "max_ufrm": { "type": "number", "description": "Unknown Factor Risk Metric limit" },
+                "max_cftm": { "type": "number", "description": "Contextual Flux Trend Metric limit" }
+              }
+            }
+          }
+        }
       }
+    },
+    "abstract_templates": {
+      "type": "array",
+      "description": "Recursive Cascading Inheritance templates for stages",
+      "items": { "$ref": "#/properties/stages/items" }
     },
     "stages": {
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
-          "stage_id": { "type": "string" },
-          "condition": { 
-            "type": "string", 
-            "description": "SpEL-inspired activation expression (e.g., '#pvm < 0.35 && profiles.active == 'secure'')" 
-          },
-          "lifecycle": {
-            "type": "object",
-            "properties": {
-              "pre_proxy_advice": { "type": "string" },
-              "post_execution_callback": { "type": "string" }
-            }
-          },
-          "dependencies": {
+          "id": { "type": "string" },
+          "parent_id": { "type": ["string", "null"], "description": "Inheritance pointer for style/constraint cascading" },
+          "condition": { "type": "string", "description": "Conditional deployment SpEL (e.g., '@nexus.isSecure() && #pvm < 0.2')" },
+          "order": { "type": "integer", "default": 0 },
+          "resource_dependencies": {
             "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "artifact_key": { "type": "string", "description": "Resource-abstracted key (e.g., 'voted://Proposal.Voted')" },
-                "required": { "type": "boolean", "default": true },
-                "resolution_strategy": { "type": "string", "enum": ["EAGER", "LAZY"], "default": "EAGER" },
-                "attestation_check": {
-                  "type": "object",
-                  "properties": {
-                    "method": { 
-                      "type": "string", 
-                      "enum": ["HASH_SHA256", "CRYPTO_SIGNATURE", "TIMELOCK", "SCHEMA_VALIDATION", "SPEL_EXPRESSION"] 
-                    },
-                    "target_hash": { "type": ["string", "null"] },
-                    "required_signer": { "type": ["string", "null"] }
-                  },
-                  "required": ["method"]
-                },
-                "schema_pointer": { "type": ["string", "null"] }
-              },
-              "required": ["artifact_key", "attestation_check"]
-            }
+            "items": { "$ref": "#/definitions/ResourceDescriptor" }
           },
-          "execution_constraints": {
+          "advice_chain": { "$ref": "#/definitions/AdviceChain" },
+          "governance_policy": {
             "type": "object",
             "properties": {
-              "max_trajectory_drift": { "type": "number", "default": 0.15 },
-              "hhh_compliance_gate": { "type": "boolean", "default": true },
-              "resource_profile": { "type": "string", "enum": ["LOW_LATENCY", "HIGH_THROUGHPUT", "SIMULATION_SHADOW"] }
+              "hhh_enforcement": { "type": "boolean", "default": true },
+              "constraint_taxonomy_refs": { "type": "array", "items": { "type": "string" } },
+              "simulation_mode": { 
+                "type": "string", 
+                "enum": ["BLOCKING", "SHADOW_SIM", "HEURISTIC_ONLY"], 
+                "default": "BLOCKING" 
+              },
+              "max_trajectory_drift": { "type": "number", "default": 0.15 }
             }
+          },
+          "post_processors": {
+            "type": "array",
+            "items": { "type": "string", "description": "BeanPostProcessor equivalents for trajectory results" }
           }
         },
-        "required": ["stage_id", "dependencies"]
+        "required": ["id", "resource_dependencies"]
       }
     }
   },
-  "required": ["stages"]
+  "required": ["stages", "environment_context"]
 }
