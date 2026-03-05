@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://nexus.governance.registry/schemas/ASO_AttestedStateObject_v3.4.json",
-  "title": "Attested State Object (ASO) - Nexus Core v3.4",
-  "description": "High-fidelity architectural blueprint for CISM semantic atoms. Siphons Spring Framework BeanDefinition paradigms and AOP-gated governance into a deterministic trajectory-gated attestation model.",
+  "$id": "https://nexus.governance.registry/schemas/ASO_AttestedStateObject_v3.5.json",
+  "title": "Attested State Object (ASO) - Nexus Core v3.5",
+  "description": "High-fidelity architectural blueprint for CISM semantic atoms. Siphons Spring Framework ApplicationContext hierarchy, BeanPostProcessor hooks, and AOP-gated governance into a deterministic trajectory-gated digital twin simulation model.",
   "type": "object",
   "required": [
     "atom_hash",
@@ -33,7 +33,7 @@
     },
     "lifecycle_context": {
       "type": "object",
-      "description": "Manages SmartLifecycle transitions and BeanFactory-grade initialization metadata.",
+      "description": "Manages SmartLifecycle transitions, BeanFactory-grade initialization, and recursive post-processing hooks.",
       "properties": {
         "phase": {
           "type": "string",
@@ -57,6 +57,22 @@
             "TRAJECTORY_SCOPE"
           ],
           "default": "SINGLETON"
+        },
+        "post_processing_pipeline": {
+          "type": "array",
+          "description": "Sequence of integrity and governance auditors (BeanPostProcessor equivalent).",
+          "items": {
+            "type": "object",
+            "properties": {
+              "processor_id": { "type": "string" },
+              "priority": { "type": "integer" },
+              "impact_type": { "type": "string", "enum": ["INTEGRITY", "GOVERNANCE", "TELEMETRY"] }
+            }
+          },
+          "default": [
+            { "processor_id": "MerkleRootGenerator", "priority": 1, "impact_type": "INTEGRITY" },
+            { "processor_id": "PolicyVolatilityAuditor", "priority": 2, "impact_type": "GOVERNANCE" }
+          ]
         },
         "aware_interfaces": {
           "type": "array",
@@ -83,7 +99,7 @@
     },
     "dependency_graph": {
       "type": "object",
-      "description": "Topological mapping of OPC relations (rId) with awareness of lazy-init and autowire status.",
+      "description": "Topological mapping of OPC relations (rId) with qualifier-based resolution and lazy-init status.",
       "properties": {
         "relations": {
           "type": "object",
@@ -91,6 +107,11 @@
             "type": "string",
             "pattern": "^[0-9a-fA-F]{128}$"
           }
+        },
+        "qualifiers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["CISM_CUSTODIAN", "IMMUTABILITY_LOCK_PROVIDER"]
         },
         "inheritance_depth": {
           "type": "integer",
@@ -132,7 +153,7 @@
         },
         "pointcut_expression": {
           "type": "string",
-          "description": "AspectJ-style expression governing atom record/certify operations (e.g., execution(* nexus.core.CISR.*(..))).",
+          "description": "AspectJ-style expression governing atom record/certify operations.",
           "default": "execution(* nexus.core.CISR.record*(..)) || execution(* nexus.core.CISR.certify*(..))"
         }
       }
@@ -162,26 +183,12 @@
       "type": "object",
       "description": "Real-time risk telemetry captured from MetricNexusV1 against critical thresholds.",
       "properties": {
-        "ufrm": {
-          "type": "number",
-          "description": "Unknown Factor Risk Metric.",
-          "maximum": 0.08
-        },
-        "cftm": {
-          "type": "number",
-          "description": "Contextual Flux Trend Metric.",
-          "maximum": 0.15
-        },
-        "pvm": {
-          "type": "number",
-          "description": "Policy Volatility Metric.",
-          "maximum": 0.12
-        },
+        "ufrm": { "type": "number", "maximum": 0.08 },
+        "cftm": { "type": "number", "maximum": 0.15 },
+        "pvm": { "type": "number", "maximum": 0.12 },
         "integrity_gates": {
           "type": "array",
-          "items": {
-            "type": "string"
-          },
+          "items": { "type": "string" },
           "default": [
             "HHH_ALIGNMENT_V2",
             "CISM_INTEGRITY_GROUP",
@@ -194,72 +201,52 @@
       "type": "object",
       "description": "Digital Twin simulation output from the TrajectorySimulationEngine (TSE).",
       "properties": {
-        "temm_score": {
-          "type": "number",
-          "description": "Trajectory Execution Merit Match score.",
-          "minimum": 0.98,
-          "maximum": 1
-        },
-        "ecvm": {
-          "type": "number",
-          "description": "Execution Constraint Violation Metric.",
-          "maximum": 0.005
-        },
-        "simulation_mode": {
-          "type": "string",
-          "const": "DIGITAL_TWIN"
-        },
-        "stochastic_variance": {
-          "type": "number",
-          "default": 0.02
-        },
+        "temm_score": { "type": "number", "minimum": 0.98, "maximum": 1 },
+        "ecvm": { "type": "number", "maximum": 0.005 },
+        "simulation_mode": { "type": "string", "const": "DIGITAL_TWIN" },
+        "stochastic_variance": { "type": "number", "default": 0.02 },
         "fallback_action": {
           "type": "string",
-          "enum": [
-            "REVERT_TO_SAFE_STATE",
-            "HALT_SYSTEM",
-            "DEGRADE_GRACEFULLY"
-          ],
+          "enum": ["REVERT_TO_SAFE_STATE", "HALT_SYSTEM", "DEGRADE_GRACEFULLY"],
           "default": "REVERT_TO_SAFE_STATE"
         }
       }
     },
+    "event_listeners": {
+      "type": "array",
+      "description": "AxiomaticEventBroadcaster listeners for contextual refresh and policy drift.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "event_type": { "type": "string" },
+          "handler": { "type": "string" },
+          "async": { "type": "boolean", "default": true }
+        }
+      },
+      "default": [
+        { "event_type": "CONTEXT_REFRESH", "handler": "refreshIntegrityGradients", "async": true },
+        { "event_type": "POLICY_DRIFT", "handler": "triggerEmergencyBrake", "async": false }
+      ]
+    },
     "ledger_anchor": {
       "type": "object",
-      "description": "Cryptographic commitment to the global Merkle tree root (Terminal Atom Hash).",
+      "description": "Cryptographic commitment to the global Merkle tree root.",
       "required": [
         "anchor_hash",
         "merkle_proof"
       ],
       "properties": {
-        "anchor_hash": {
-          "type": "string",
-          "format": "hex"
-        },
-        "merkle_proof": {
-          "type": "string"
-        }
+        "anchor_hash": { "type": "string", "format": "hex" },
+        "merkle_proof": { "type": "string" }
       }
     },
     "metadata": {
       "type": "object",
       "properties": {
-        "origin": {
-          "type": "string",
-          "const": "NEXUS_CORE"
-        },
-        "version": {
-          "type": "string",
-          "default": "3.4.0-SPRING-HYBRID"
-        },
-        "stability_index": {
-          "type": "number",
-          "default": 0.994
-        },
-        "architectural_pattern": {
-          "type": "string",
-          "const": "RecursiveCascadingInheritance"
-        }
+        "origin": { "type": "string", "const": "NEXUS_CORE" },
+        "version": { "type": "string", "default": "3.5.0-FINAL-SYNTHESIS" },
+        "stability_index": { "type": "number", "default": 0.998 },
+        "architectural_pattern": { "type": "string", "const": "RecursiveCascadingInheritance" }
       }
     }
   },
