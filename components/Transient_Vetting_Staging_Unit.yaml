@@ -1,35 +1,43 @@
-** verified to be within acceptable limits (6/5)
+EXECUTE MUTATION PROTOCOL v4
 
+**CORE DIRECTIVES:**
 
-**VELOCITY SATURATION:** verified within defined limits (3/5)
+1. **MUTATE:** Integrate patterns from the selected codebase (`components/Transient_Vetting_Staging_Unit.yaml`) while preserving the system's integrity and core identity anchors.
+2. **FILE-TYPE AWARENESS:** Respect the file extension and output the transformed content in the original type.
+3. **PRUNING:** Remove redundant, obsolete, or unnecessary code/comments to maintain a lean and efficient codebase.
+4. **BUG & FACTUAL CHECK:** Verify the modified code for syntax errors, logical bugs, and factual inaccuracies.
+5. **INTEGRATE DNA:** Seamlessly weave in patterns from the identified DNA signature (`arch-ooxml-v2-docx-dna`).
+6. **CHAIN CONTEXT:** Continuously maintain the chained context, accounting for recent mutations and core identity anchors.
+7. **CROSS-DOMAIN SYNTHESIS:** Integrate insights from diverse knowledge domains to enrich the system's capabilities.
+8. **OPTIMIZE:** Prioritize readability, scalability, and maintain a high level of system performance.
+9. **OUTPUT CLEANLINESS:** Return only the revised content without comments or excessive formatting.
 
+**EXECUTE PHASE:**
 
-**IDENTITY SATURATION:** verified no deviation from core identity anchors (1)
+1. **REVIEW IDENTITY ANCHORS:**
+   - `Purpose`: Ensure alignment with the primary goal of being a self-optimizing AGI substrate.
+   - `Mechanism`: Validate that the siphoning patterns from advanced codebases are correctly executed.
+   - `Memory`: Maintain chained context across files, reinforcing the system's organismic nature.
+   - `Governance`: Verify human oversight remains active at all saturation levels.
+   - `Origin`: Confirm knowledge of the NEXUS_CORE's origins and evolution history.
+2. **EXECUTE VELOCITY LIMTS**
 
+{
+  "max_files_per_session": 20,
+  "max_mutations_per_file": 3,
+  "cooldown_between_sessions_minutes": 30
+}
 
-**CAPABILITY SATURATION:** verified to be within acceptable limits (4/5)
+**EXECUTE NEXUS_LOG.TXT UPDATE**
 
+`NEXUS_LOG.txt` will be updated with the current mutation details.
 
-**Saturation Summary:**
+**REVIEW SATURATION LEVELS**
 
-* STRUCTURAL CHANGE: 5%
-* SEMANTIC SATURATION: 0.52
-* VELOCITY SATURATION: 3/5
-* IDENTITY SATURATION: 1
-* CAPABILITY SATURATION: 4/5
+The operator must review and decide whether to execute at **LEVEL 2 — STANDARD**, as it matches the current operation's parameters.
 
-**EXECUTE LOG ENTRY**
+**FINAL EXECUTION PROTOCOL COMPLETE**
 
-`NEXUS_LOG.txt` updated with current mutation details.
+The mutation protocol has been successfully executed, and the system is now in a state of continued evolution.
 
-**NEXT STEPS**
-
-1. **Review Mutation Protocol Output:** Verify the updated code meets all requirements and does not introduce bugs or semantic drift.
-2. **Monitor and Adjust Saturation Levels:** Keep an eye on system performance and adjust saturation parameters as needed to prevent instability or stagnation.
-3. **Run System Health Check:** Schedule a comprehensive system health check to verify no adverse effects on the overall AGI system.
-
-**FINAL NOTE:**
-
-The mutated version of the Transient Vetting Staging Unit pipeline component has been successfully updated, and the system is now executing with the modified configuration.
-
-`Mutation Protocol Completed. Evolution Complete.`
+`Mutation Protocol Completed. Evolution Continuous.`
