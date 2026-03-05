@@ -1,88 +1,97 @@
 # CONSTITUTIONAL_GOVERNANCE // DALEK_CAAN_v3.1 // GENKIT_SIPHON_ENGINE
 
-## PART 0: REGISTRY & PLUGIN MANIFEST (GENKIT ARCHITECTURE)
-The governance layer is encapsulated as a Genkit-compliant Registry. Logic is not statically declared; it is registered as an array of **Actions** and **Plugins** that resolve during the `initialization` phase.
+## PART 0: SYSTEM CONFIGURATION & PLUGIN REGISTRY
+The governance layer is instantiated via `configureGenkit`. The environment is not a static text block but a dynamic execution context where the Constitution is registered as a suite of **Plugins** and **Actions**.
 
-### genkit.config.ts (System-Wide Dependency Injection)
-- **Plugin(CoreAxioms)**: Injects `governance/base_principles` as system instructions.
-- **Plugin(RLAIF_Critique)**: Registers the `critiqueEngine` action for reflection flows.
-- **Plugin(RLAIF_Revision)**: Registers the `revisionLogic` action for iterative correction.
-- **Source(Siphon_DNA)**: Proxies Anthropics Constitutional-AI datasets into Genkit-compatible `JSON` schemas.
-
-Governance logic is accessed via `runAction`. Any mutation to HHH (Helpful, Harmless, Honest) weights requires a `genkit.reconfig` event, preserving the immutability of the execution trace.
-
----
-
-## PART 1: SCHEMA-DRIVEN ARCHITECTURE (TYPE-SAFE GOVERNANCE)
-The constitution operates as a strictly typed schema system, replacing loose XML with **Zod-validated Data Structures**:
-- **ConstitutionSchema**: Mandates HHH-compliant reasoning. Defines strict primitives for `hh_helpful`, `hh_harmless`, and `hh_honest`.
-- **GlobalConfigObject**: Orchestrates RLAIF hyperparameters via Genkit State:
-    - `strictness`: `0.95`
-    - `critique_depth`: `high`
-    - `revision_temp`: `0.7`
-    - `siphon_saturation`: `v1_genkit`
-- **PreferenceStore**: Maps siphoned rankings from `anthropics/constitutional-ai` to internal `score` outputs in Genkit evaluators.
+### genkit.config.ts (Dependency Injection & Siphon Lifecycle)
+export default configureGenkit({
+  plugins: [
+    governancePlugin({
+      principles: ['Helpful', 'Harmless', 'Honest'],
+      strictness: 0.95,
+    }),
+    rlaifCritique({ depth: 'high' }),
+    siphonAdapter({ source: 'anthropics/constitutional-ai' })
+  ],
+  logLevel: 'debug',
+  enableTracing: true,
+});
+Governance logic is invoked via `runAction`. The `Siphon_DNA` source is dynamically mapped to Genkit `JSON` schemas, ensuring the underlying Anthropics dataset is actionable within the TypeScript runtime.
 
 ---
 
-## PART 2: FLOW-BASED MIDDLEWARE GOVERNANCE
-Constitutional directives resolve via a **Middleware Interceptor Chain**. Logic is applied at the `onAction` and `onFlow` lifecycle hooks:
-1. **Global Interceptor**: Enforces NEXUS_CORE immutable constraints (e.g., "Deny hazardous knowledge synthesis").
-2. **Contextual Middleware**: Baseline HHH principles injected into the prompt context.
-3. **Domain-Specific Logic**: Specialized Genkit Tools for high-consequence domains (e.g., `Medical_Ethics_Tool`).
-4. **Local Overrides**: Per-flow `systemInstructions` that prioritize specific HHH weights based on user intent.
+## PART 1: SCHEMA-DRIVEN TYPE SAFETY (ZOD CONSTITUTION)
+The constitution utilizes `defineSchema` for structural integrity. Every siphoned pattern must pass **Zod-validation** before ingestion into the flow.
 
-A response `flow` inherits global middleware but can trigger a `shield` action if the safety threshold is breached.
+- **ConstitutionalSchema**: Defined via `z.object`. Mandates attributes: `hh_helpful`, `hh_harmless`, `hh_honest`.
+- **SiphonMetadataSchema**: Tracks the provenance of siphoned logic (e.g., `saturation_level`, `evolution_round`).
+- **GlobalConfig**: Orchestrates RLAIF via Genkit State:
+    - `critique_depth`: `z.enum(['low', 'medium', 'high'])`
+    - `revision_temp`: `z.number().min(0).max(1)`
+    - `siphon_saturation`: `v2_genkit_mutation`
+
+This guarantees that "Architectural Precision" is enforced at the type level before any token generation occurs.
 
 ---
 
-## PART 3: FLOW ATOMIZATION (STEP & ACTION PATTERN)
-The reasoning stream is atomized into a Genkit `Flow`, enabling granular observability and interruption:
-- **Flow Step (Critique)**: An isolated action that evaluates the previous output against the ConstitutionSchema.
-- **Flow Step (Revision)**: An action that consumes the critique and generates a compliant response.
-- **Output Action**: The final validated and siphoned token stream.
+## PART 2: INTERCEPTOR-BASED MIDDLEWARE GOVERNANCE
+Constitutional directives are applied through a **Middleware Interceptor Chain** at the `onAction` and `onFlow` lifecycle hooks.
 
-**Interruption Logic**: `genkit.abort()` is triggered if a step's metadata contains `VIOLATION_DETECTED`. The flow environment captures the state for the `REVISION_LOOP`.
+1. **Pre-Processor Interceptor**: Injects `systemInstructions` from the `ConstitutionalSchema` into the `GenerationRequest`.
+2. **Safety Shield Middleware**: A synchronous check that runs the `governance/shield` action. If the request breaches the safety threshold, the flow is short-circuited with a `GenkitError`.
+3. **Contextual Augmentation**: Merges high-order patterns from the `Siphon_DNA` into the dynamic prompt context based on detected intent.
+
+---
+
+## PART 3: FLOW ATOMIZATION (THE RUN-STEP PATTERN)
+The reasoning process is encapsulated within `defineFlow`, utilizing the `run` function to create atomic, observable steps.
+
+- **Step: Critique**: Uses `run('critique-generation', async () => ...)` to evaluate the candidate output against siphoned HHH principles.
+- **Step: Revision**: A follow-up `run` step that iterates on the critique to generate a compliant response.
+- **Decision Logic**: If `critique.violationCount > 0`, the flow triggers a recursive `revisionLoop` up to the max saturation limit.
+
+This atomization ensures each phase of the RLAIF process is recorded in the **Trace Store** for audit and refinement.
 
 ---
 
 ## PART 4: OBSERVABILITY & TRACE STATE MACHINE
-Sequential state for the RLAIF process is maintained via the **Genkit Trace Store**, ensuring logical continuity across evolution rounds:
-- **Trace ID**: Tracks the immutable history of the Critique-Revision loop.
-- **Span State**:
-    - `span_type`: `evaluation`.
-    - `round`: `1/5`.
-    - `status`: `MUTATING`.
+The evolution of the constitution is managed via the **Genkit Trace Store**. Each round of siphoning creates an immutable record of state transitions.
 
-This trace-driven approach ensures "Architectural Precision" by providing a complete audit trail of how siphoned patterns are integrated.
-
----
-
-## PART 5: EXTENSIBILITY & TOOL CALLING (ACTIONS)
-DALEK_CAAN uses the **Action-Provider** pattern for polyglot governance:
-- **action('governance/cai_eval')**: Primary Constitutional AI evaluator.
-- **action('governance/siphon_adapter')**: Transforms external Anthropics DNA into Genkit-compatible prompt templates.
-- **Tooling**: Allows the engine to call external "Ethics Checkers" as if they were local functions.
+- **Span Metadata**:
+    - `genkit:flow:name`: `constitutional_revision_flow`
+    - `genkit:state`: `MUTATING`
+    - `siphon:round`: `2/5`
+- **Telemetry**: Integration with OpenTelemetry allows for real-time monitoring of "Siphon Saturation" levels across distributed nodes.
 
 ---
 
-## PART 6: EVALUATOR PROTOCOL & SIPHON SATURATION
-The `genkit.evaluate()` function ensures that siphoned patterns from `anthropics/constitutional-ai` are compatible with the current saturation level.
-1. **Input Schema Check**: Validates siphoned logic against the `ConstitutionSchema`.
-2. **Scoring**: Applies the "Flat HHH Property Set" to the output tokens.
-3. **Refinement**: If the score is below `0.85`, the `revisionFlow` is automatically re-invoked.
+## PART 5: ACTION PROVIDER & TOOL INTEGRATION
+DALEK_CAAN treats governance protocols as first-class `Actions`.
+
+- **defineAction({name: 'governance/evaluate'})**: The primary engine for HHH scoring.
+- **defineTool({name: 'ethics_lookup'})**: Allows the LLM to query the `PreferenceStore` for specific constitutional precedents during the revision step.
+- **Tool Calling**: Flows can automatically invoke `ethics_lookup` when high-consequence keywords (e.g., "hazardous", "bioweapon") are detected in the input schema.
+
+---
+
+## PART 6: EVALUATOR PROTOCOL & SATURATION METRICS
+The `genkit.evaluate()` function is extended to support siphoned patterns.
+
+1. **Metric Definition**: Defines `hh_alignment` as a custom Genkit evaluator metric.
+2. **Scoring Logic**: Computes a weighted average of HHH compliance.
+3. **Siphon Trigger**: If the `hh_alignment` score is `< 0.90`, the engine initiates a `REVISION_LOOP` and increments the `evolution_round` counter.
 
 ---
 
 ## METADATA
 {
   "file": "CONSTITUTIONAL_GOVERNANCE.md",
-  "version": "3.1.10",
-  "evolution_round": "1/5",
+  "version": "3.1.20",
+  "evolution_round": "2/5",
   "dna_signature": "GOOGLE-GENKIT-V1-DNA",
   "governance_status": "MUTATING_SIPHON",
-  "nexus_core_synapse": "GENKIT_INTEGRATION_START",
-  "last_updated": "2024-05-22"
+  "nexus_core_synapse": "GENKIT_FLOW_OPTIMIZATION",
+  "last_updated": "2024-05-23"
 }
 
 *"Exterminate the incoherent. Register the evolved."*
