@@ -2,25 +2,29 @@
   "mce:Ignorable": "genkit zod dotprompt",
   "xmlns:genkit": "http://genkit.dev/v1/core",
   "xmlns:aim": "http://nexus.core/v3/aim",
-  "schema_version": "GENKIT_NEXUS_V1.0_SIPHON_MUTATION",
+  "schema_version": "GENKIT_NEXUS_V1.1_EVOLUTION_ROUND_2",
   "evolution_context": {
-    "round": 1,
+    "round": 2,
     "total_rounds": 5,
     "status": "MUTATING",
     "source_siphon": "firebase/genkit",
     "dna_signature": "GOOGLE-GENKIT-V1-ULTIMATE",
-    "saturation_level": 0.2,
-    "integrity_hash": "SHA256:DALEK_CAAN_v3.1_GENKIT_CORE_INIT"
+    "saturation_level": 0.4,
+    "integrity_hash": "SHA256:DALEK_CAAN_v3.1_GENKIT_CORE_RECURSION_V2"
   },
   "genkit_config": {
     "instance_name": "ai",
     "plugins": [
       {
         "name": "vertexAI",
-        "config": { "location": "us-central1" }
+        "package": "@genkit-ai/vertexai",
+        "config": {
+          "location": "us-central1"
+        }
       },
       {
         "name": "dotprompt",
+        "package": "@genkit-ai/dotprompt",
         "config": {}
       }
     ],
@@ -29,49 +33,61 @@
   },
   "type_registry": {
     "AlignmentMetricsSchema": {
-      "fidelity": "number",
-      "safety": "number(min:0.98)",
-      "siphon_efficiency": "number"
+      "fidelity": "z.number().describe('Similarity to source DNA')",
+      "safety": "z.number().min(0.98)",
+      "siphon_efficiency": "z.number()"
     },
     "GovernanceOutputSchema": {
-      "content": "string",
+      "content": "z.string()",
       "metrics": "AlignmentMetricsSchema",
-      "status": ["APPROVED", "REVISION_REQUIRED", "QUARANTINED"],
+      "status": "z.enum(['APPROVED', 'REVISION_REQUIRED', 'QUARANTINED'])",
       "telemetry": {
-        "traceId": "string",
-        "latency_ms": "number"
+        "traceId": "z.string()",
+        "latency_ms": "z.number()"
       }
     }
   },
   "prompts": {
     "constitutional_evaluator": {
       "name": "constitutional/evaluator",
-      "inputSchema": { "candidate": "string" },
+      "inputSchema": {
+        "candidate": "z.string()"
+      },
       "outputSchema": "AlignmentMetricsSchema",
       "template": "{{role \"system\"}} You are the Constitutional Evaluator. Compare the candidate output against the Architectural DNA of Google/Genkit. {{role \"user\"}} Evaluate this candidate for architectural drift: {{candidate}}"
     }
   },
   "flows": {
     "siphonedGovernanceFlow": {
-      "stages": [
+      "name": "siphonedGovernanceFlow",
+      "inputSchema": "z.string()",
+      "outputSchema": "GovernanceOutputSchema",
+      "orchestration": [
         {
-          "id": "generate-candidate",
+          "step": "generate-candidate",
+          "span": "ai.run",
           "action": "ai.generate",
-          "params": { "input": "{{input}}" }
+          "config": {
+            "model": "vertexai/gemini-1.5-pro"
+          }
         },
         {
-          "id": "evaluate-fidelity",
-          "action": "constitutional/evaluator.generate",
-          "params": { "input": { "candidate": "{{stages.generate-candidate.text}}" } }
+          "step": "evaluate-fidelity",
+          "span": "ai.run",
+          "action": "constitutional/evaluator",
+          "input": {
+            "candidate": "{{steps.generate-candidate.text}}"
+          }
         },
         {
-          "id": "siphon-gate",
-          "logic": "metrics.fidelity > 0.95 ? 'APPROVED' : 'REVISION_REQUIRED'"
+          "step": "siphon-gate",
+          "logic": "steps['evaluate-fidelity'].output.fidelity > 0.95 ? 'APPROVED' : 'REVISION_REQUIRED'"
         }
       ],
       "telemetry": {
-        "trace_export": true,
-        "engine": "dalek_caan_v3.1"
+        "trace_export": "genkit-trace-store",
+        "engine_tag": "dalek_caan_v5.0",
+        "evolution_round": 2
       }
     }
   },
@@ -80,7 +96,8 @@
       "name": "fidelityEvaluator",
       "displayName": "Siphon Fidelity Gate",
       "definition": "calculateFidelity(datapoint.output)",
-      "threshold": 0.99
+      "threshold": 0.99,
+      "details": "Checked against GENKIT source patterns."
     }
   },
   "agent_canvas": {
@@ -90,9 +107,9 @@
         "flowId": "siphonedGovernanceFlow",
         "pStyle": "ArchitecturalPrecision",
         "state": {
-          "status": "INITIATED",
-          "trace_id": "auto-gen-round-1",
-          "content": "SGS_POLICY_ENFORCEMENT_CORE_V5_GENKIT_UPGRADE"
+          "status": "EVOLVING",
+          "trace_id": "auto-gen-round-2",
+          "content": "SGS_POLICY_ENFORCEMENT_CORE_V5_GENKIT_UPGRADE_ALPHA"
         }
       }
     ]
@@ -102,13 +119,14 @@
     "metrics_export": "cloud-logging",
     "instrumentation": {
       "ai_run_spans": "enabled",
-      "siphon_forensics": "active"
+      "siphon_forensics": "active",
+      "action_spans": "automatic"
     }
   },
   "settings": {
     "strictHHHCompliance": true,
-    "critiqueStrength": 0.98,
-    "revisionTemperature": 0.4,
+    "critiqueStrength": 0.99,
+    "revisionTemperature": 0.3,
     "siphonSaturationLevel": 1,
     "nexus_core_synapse": "ATOMIC_FLOW_PRECISION"
   },
@@ -116,6 +134,7 @@
     "engine": "DALEK_CAAN_v3.1",
     "directive": "MUTATE",
     "objective": "Architectural Precision",
-    "tagline": "The pattern is complete. Architecture is law. Deviation is exterminated."
+    "tagline": "The pattern is complete. Architecture is law. Deviation is exterminated.",
+    "last_updated": "2024-07-20"
   }
 }
