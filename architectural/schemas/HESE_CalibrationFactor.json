@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://agiverse.ai/schemas/HESE_CalibrationFactor/v3.7.0",
-  "title": "HESE Calibration Telemetry Contract - Nexus Evolution v3.7",
-  "description": "Enterprise-grade telemetry contract siphoning Spring-Framework IoC lifecycle, AspectJ AOP governance, and Project Reactor flux metrics.",
+  "$id": "https://agiverse.ai/schemas/HESE_CalibrationFactor/v3.8.0",
+  "title": "HESE Calibration Telemetry Contract - Nexus Evolution v3.8 (Spring-Reactor Synthesis)",
+  "description": "Final synthesis of Nexus-Core telemetry contracts integrating Spring Framework IoC lifecycle, AspectJ AOP governance, and Reactor-based backpressure strategies.",
   "type": "object",
   "required": [
     "evolution_id",
@@ -19,7 +19,7 @@
     },
     "origin_bean_id": {
       "type": "string",
-      "description": "Nexus ApplicationContext Bean ID with Stereotype qualification."
+      "description": "Qualified Nexus ApplicationContext Bean ID with @Qualifier and @Scope semantics."
     },
     "lifecycle_state": {
       "type": "object",
@@ -28,13 +28,14 @@
           "type": "string",
           "enum": ["INITIALIZING", "STARTING", "RUNNING", "POST_CONSTRUCT", "PRE_DESTROY", "HALTED"]
         },
+        "is_running": { "type": "boolean", "default": true },
+        "auto_startup": { "type": "boolean", "default": true },
+        "smart_lifecycle_priority": { "type": "integer", "default": 2147483647 },
         "active_profiles": {
           "type": "array",
           "items": { "type": "string" },
-          "default": ["default", "nexus-v3"]
-        },
-        "is_primary": { "type": "boolean", "default": true },
-        "smart_lifecycle_priority": { "type": "integer", "default": 2147483647 }
+          "default": ["production", "nexus-v3-reactive"]
+        }
       }
     },
     "epoch_timestamp_ms": {
@@ -45,9 +46,14 @@
       "type": "object",
       "required": ["TCF", "RCF"],
       "properties": {
-        "TCF": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
-        "RCF": { "type": "number", "minimum": 0.0 },
-        "confidence_interval": { "type": "number", "maximum": 1.0, "default": 0.99 },
+        "TCF": { "type": "number", "minimum": 0.0, "maximum": 1.0, "description": "Terminal Calibration Factor" },
+        "RCF": { "type": "number", "minimum": 0.0, "description": "Residual Calibration Factor" },
+        "confidence_interval": { "type": "number", "maximum": 1.0, "default": 0.999 },
+        "reactive_strategy": {
+          "type": "string",
+          "enum": ["BUFFER", "DROP", "LATEST", "ERROR", "IGNORE"],
+          "default": "LATEST"
+        },
         "flux_backpressure": { "type": "number", "default": 0.0 },
         "state_machine_cycle": { "type": "integer" }
       }
@@ -59,10 +65,10 @@
           "type": "object",
           "additionalProperties": { "type": "string", "pattern": "^[0-9a-fA-F]{128}$" }
         },
-        "scope": { "type": "string", "enum": ["singleton", "prototype", "request"], "default": "singleton" },
-        "autowire_mode": { "type": "string", "enum": ["BY_NAME", "BY_TYPE", "CONSTRUCTOR"], "default": "BY_TYPE" },
+        "scope": { "type": "string", "enum": ["singleton", "prototype", "request", "session"], "default": "singleton" },
+        "autowire_mode": { "type": "string", "enum": ["BY_NAME", "BY_TYPE", "CONSTRUCTOR", "NO"], "default": "BY_TYPE" },
         "is_lazy": { "type": "boolean", "default": false },
-        "inheritance_depth": { "type": "integer", "maximum": 12, "default": 1 }
+        "resolvable_type": { "type": "string", "description": "Canonical name of the target class for Type-safe resolution." }
       }
     },
     "governance_binding": {
@@ -77,26 +83,37 @@
         "compliance_mode": { "type": "string", "const": "STRICT_HHH_V2" },
         "pointcut_expression": {
           "type": "string",
-          "default": "execution(* nexus.core.CISR.record*(..)) || execution(* nexus.core.CISR.certify*(..))"
+          "description": "AspectJ-style expression governing atom record/certify operations.",
+          "default": "execution(* nexus.core.CISR.record*(..)) || @annotation(nexus.core.annotations.GatedExecution)"
+        },
+        "spel_validation": {
+          "type": "string",
+          "description": "Spring Expression Language constraint for dynamic runtime validation.",
+          "default": "#root.calibration_metrics.TCF > 0.85"
         }
       }
     },
     "telemetry_nexus_snapshot": {
       "type": "object",
       "properties": {
-        "ufrm": { "type": "number", "maximum": 0.08 },
-        "cftm": { "type": "number", "maximum": 0.15 },
-        "pvm": { "type": "number", "maximum": 0.12 },
+        "ufrm": { "type": "number", "maximum": 0.05 },
+        "cftm": { "type": "number", "maximum": 0.10 },
+        "pvm": { "type": "number", "maximum": 0.10 },
         "health_status": { "type": "string", "enum": ["UP", "DOWN", "OUT_OF_SERVICE", "UNKNOWN"], "default": "UP" },
-        "integrity_gates": { "type": "array", "items": { "type": "string" } }
+        "integrity_gates": { 
+          "type": "array", 
+          "items": { "type": "string" },
+          "default": ["HHH_ALIGNMENT_V2", "CISM_INTEGRITY_GROUP"]
+        }
       }
     },
     "trajectory_projection": {
       "type": "object",
       "properties": {
-        "temm_score": { "type": "number", "minimum": 0.99 },
-        "ecvm": { "type": "number", "maximum": 0.001 },
+        "temm_score": { "type": "number", "minimum": 0.995 },
+        "ecvm": { "type": "number", "maximum": 0.0005 },
         "simulation_mode": { "type": "string", "const": "DIGITAL_TWIN" },
+        "fallback_bean": { "type": "string", "description": "Recovery bean implementing onHalt logic." },
         "fallback_action": {
           "type": "string",
           "enum": ["REVERT_TO_SAFE_STATE", "HALT_SYSTEM", "DEGRADE_GRACEFULLY"],
@@ -122,14 +139,14 @@
       "properties": {
         "signature_payload": { "type": "string", "format": "base64" },
         "crot_key_id": { "type": "string" },
-        "algorithm": { "type": "string", "default": "EdDSA-Nexus-V2" }
+        "algorithm": { "type": "string", "default": "EdDSA-Nexus-V2-Spring-Validated" }
       }
     },
     "ledger_anchor": {
       "type": "object",
       "required": ["anchor_hash", "merkle_proof"],
       "properties": {
-        "anchor_hash": { "type": "string", "format": "hex" },
+        "anchor_hash": { "type": "string", "pattern": "^[0-9a-fA-F]{64}$" },
         "merkle_proof": { "type": "string" }
       }
     },
@@ -137,9 +154,9 @@
       "type": "object",
       "properties": {
         "origin": { "type": "string", "const": "NEXUS_CORE" },
-        "version": { "type": "string", "default": "3.7.0-FINAL-SYNTHESIS" },
-        "stability_index": { "type": "number", "default": 0.9995 },
-        "architectural_pattern": { "type": "string", "const": "Spring-IoC-Reactive-AOP-Hybrid" }
+        "version": { "type": "string", "default": "3.8.0-FINAL-STABILIZATION" },
+        "stability_index": { "type": "number", "default": 0.9998 },
+        "architectural_pattern": { "type": "string", "const": "RecursiveCascadingInheritance-IoC-Reactor" }
       }
     }
   },
