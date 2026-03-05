@@ -1,55 +1,100 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://agiverse.ai/schemas/HESE_CalibrationFactor/v1.0.0",
-  "title": "HESE Calibration Telemetry Contract (TCF/RCF)",
-  "description": "Defines the required payload structure for Trust (TCF) and Risk (RCF) Calibration Factors broadcast by the High-Efficacy Stability Engine (HESE) to upstream arbiters.",
+  "$id": "https://agiverse.ai/schemas/HESE_CalibrationFactor/v1.1.0",
+  "title": "HESE Calibration Telemetry Contract (TCF/RCF) - Nexus-Siphoned Edition",
+  "description": "Defines high-fidelity telemetry payload structure for Trust (TCF) and Risk (RCF) factors, integrating Spring-inspired AOP interceptors and Nexus-Core telemetry snapshots.",
   "type": "object",
   "properties": {
     "evolution_id": {
       "type": "string",
       "pattern": "^EVO-[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}$",
-      "description": "UUID identifier for the autonomous code evolution batch contributing to the factor calculation."
+      "description": "UUID identifier for the autonomous code evolution batch."
     },
     "origin_system_id": {
       "type": "string",
-      "description": "Identifier of the HESE instance generating this factor.",
+      "description": "Identifier of the HESE instance; maps to Spring context bean ID.",
       "readOnly": true
     },
     "epoch_timestamp_ms": {
       "type": "integer",
       "minimum": 1000000000000,
-      "description": "High-precision UTC timestamp (milliseconds since epoch) of factor generation."
+      "description": "High-precision UTC timestamp of factor generation."
     },
-    "TCF": {
-      "type": "number",
-      "minimum": 0.0,
-      "maximum": 1.0,
-      "exclusiveMaximum": true,
-      "description": "Trust Calibration Factor (0.0=Low Trust, approaching 1.0=Perfect Alignment)."
+    "calibration_metrics": {
+      "type": "object",
+      "required": ["TCF", "RCF", "delta_average", "delta_variance"],
+      "properties": {
+        "TCF": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Trust Calibration Factor (Alignment metric)."
+        },
+        "RCF": {
+          "type": "number",
+          "minimum": 0.5,
+          "description": "Risk Calibration Factor (Operational Risk Multiplier)."
+        },
+        "delta_average": { "type": "number" },
+        "delta_variance": { "type": "number", "minimum": 0.0 }
+      }
     },
-    "RCF": {
-      "type": "number",
-      "minimum": 0.5,
-      "description": "Risk Calibration Factor (Multiplier affecting MCRA's Operational Risk Buffer). Minimum set to 0.5 to maintain a risk floor."
+    "telemetry_snapshot": {
+      "type": "object",
+      "description": "Real-time volatility metrics captured from MetricNexusV1.",
+      "properties": {
+        "ufrm": { "type": "number", "maximum": 0.08, "description": "Unknown Factor Risk Metric." },
+        "cftm": { "type": "number", "maximum": 0.15, "description": "Contextual Flux Trend Metric." },
+        "pvm": { "type": "number", "maximum": 0.12, "description": "Policy Volatility Metric." }
+      }
     },
-    "delta_average": {
-      "type": "number",
-      "description": "The normalized historical average of the prediction error ($\bar{\Delta}_T$)."
+    "governance_binding": {
+      "type": "object",
+      "description": "Nexus-grade AOP interceptors for HHH-alignment validation.",
+      "properties": {
+        "advice_chain": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["HhhComplianceInterceptor", "PolicyVolatilityInterceptor"]
+        },
+        "pointcut_expression": {
+          "type": "string",
+          "default": "execution(* nexus.core.HESE.calibrate*(..))"
+        }
+      }
     },
-    "delta_variance": {
-      "type": "number",
-      "minimum": 0.0,
-      "description": "The statistical variance ($\\sigma^2$) of prediction errors in the recent window. Must be non-negative and is crucial for RCF calculation."
+    "dependency_mapping": {
+      "type": "object",
+      "description": "Topological mapping of autowired dependencies and OPC relations.",
+      "properties": {
+        "autowire_candidate": { "type": "boolean", "default": true },
+        "inheritance_depth": { "type": "integer", "maximum": 8, "default": 1 },
+        "is_lazy": { "type": "boolean", "default": false }
+      }
+    },
+    "ledger_anchor": {
+      "type": "object",
+      "required": ["anchor_hash"],
+      "properties": {
+        "anchor_hash": { "type": "string", "format": "hex" },
+        "merkle_proof": { "type": "string" }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "version": { "type": "string", "default": "3.5.0-FINAL-SYNTHESIS" },
+        "architectural_pattern": { "type": "string", "const": "RecursiveCascadingInheritance" },
+        "stability_index": { "type": "number", "default": 0.998 }
+      }
     }
   },
   "required": [
     "evolution_id",
     "origin_system_id",
     "epoch_timestamp_ms",
-    "TCF",
-    "RCF",
-    "delta_average",
-    "delta_variance"
+    "calibration_metrics",
+    "ledger_anchor"
   ],
   "additionalProperties": false
 }
