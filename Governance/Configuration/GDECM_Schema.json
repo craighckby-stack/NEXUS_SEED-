@@ -1,16 +1,13 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "description": "Governance Data Execution & Constraint Model (GDECM) - Nexus Core v3.1 - ARCH-OOXML-V2-DOCX-DNA",
+  "description": "Governance Data Execution & Constraint Model (GDECM) - Nexus Core v3.1 - ARCH-OOXML-V2-DOCX-DNA Evolution Phase 4",
   "definitions": {
     "AdviceChain": {
       "type": "object",
       "properties": {
-        "pointcut": { "type": "string", "description": "SpEL join-point expression" },
-        "interceptors": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
+        "pointcut": { "type": "string", "description": "SpEL join-point expression for AOP interception" },
+        "interceptors": { "type": "array", "items": { "type": "string" } },
         "order": { "type": "integer", "default": 0 }
       }
     },
@@ -18,11 +15,30 @@
       "type": "object",
       "properties": {
         "uri": { "type": "string" },
-        "scope": { "type": "string", "enum": ["SINGLETON", "PROTOTYPE", "REQUEST"], "default": "SINGLETON" },
+        "protocol": { "type": "string", "enum": ["classpath", "file", "s3", "nexus-siphon"], "default": "nexus-siphon" },
+        "scope": { "type": "string", "enum": ["SINGLETON", "PROTOTYPE", "REQUEST", "SESSION"], "default": "SINGLETON" },
         "lazy_init": { "type": "boolean", "default": false },
-        "resolver": { "type": "string", "default": "DefaultSiphonResolver" }
+        "resolver": { "type": "string", "default": "CascadingStyleResolver" }
       },
       "required": ["uri"]
+    },
+    "LifecycleHooks": {
+      "type": "object",
+      "properties": {
+        "init_method": { "type": "string" },
+        "destroy_method": { "type": "string" },
+        "on_violation": { "type": "string", "description": "Triggered on ECVM breach" }
+      }
+    },
+    "TrajectorySimulation": {
+      "type": "object",
+      "properties": {
+        "mode": { "type": "string", "enum": ["BLOCKING", "SHADOW_SIM", "HEURISTIC", "DIGITAL_TWIN"], "default": "SHADOW_SIM" },
+        "model_handler": { "type": "string", "default": "PredictiveModelStub" },
+        "depth": { "type": "integer", "default": 3 },
+        "max_drift_threshold": { "type": "number", "default": 0.15 },
+        "temm_min_score": { "type": "number", "description": "Trajectory Execution Merit Match minimum" }
+      }
     }
   },
   "properties": {
@@ -30,7 +46,6 @@
       "type": "object",
       "properties": {
         "namespace": { "type": "string", "default": "nexus.internal" },
-        "parent_context": { "type": ["string", "null"] },
         "active_profiles": { "type": "array", "items": { "type": "string" } },
         "telemetry_nexus": {
           "type": "object",
@@ -48,10 +63,13 @@
         }
       }
     },
-    "abstract_templates": {
-      "type": "array",
-      "description": "Recursive Cascading templates for stage inheritance",
-      "items": { "$ref": "#/properties/stages/items" }
+    "global_constraints": {
+      "type": "object",
+      "properties": {
+        "strict_hhh_compliance": { "type": "boolean", "default": true },
+        "axiomatic_constraint_taxonomy": { "type": "string", "default": "CORE_SAFETY_V2" },
+        "required_integrity_gates": { "type": "array", "items": { "type": "string" } }
+      }
     },
     "stages": {
       "type": "array",
@@ -59,38 +77,39 @@
         "type": "object",
         "properties": {
           "id": { "type": "string" },
-          "parent": { "type": "string", "description": "Bean-style inheritance pointer" },
+          "parent": { "type": "string", "description": "Recursive Cascading Inheritance pointer" },
           "abstract": { "type": "boolean", "default": false },
+          "primary": { "type": "boolean", "default": false },
           "condition": { "type": "string", "description": "SpEL deployment condition" },
           "depends_on": { "type": "array", "items": { "type": "string" } },
           "resource_dependencies": {
             "type": "array",
             "items": { "$ref": "#/definitions/ResourceDescriptor" }
           },
+          "lifecycle": { "$ref": "#/definitions/LifecycleHooks" },
           "advice_chain": { "$ref": "#/definitions/AdviceChain" },
+          "semantic_atom_config": {
+            "type": "object",
+            "properties": {
+              "resolution_strategy": { "type": "string", "default": "DeterministicOOXML" },
+              "traversal_mode": { "type": "string", "enum": ["LAZY", "EAGER", "DEEP_GRAPH"], "default": "LAZY" }
+            }
+          },
           "governance_policy": {
             "type": "object",
             "properties": {
-              "hhh_enforcement": { "type": "boolean", "default": true },
-              "axiomatic_verification": { "type": "string", "enum": ["STRICT", "LAX", "SIMULATED"], "default": "STRICT" },
-              "simulation_strategy": { 
-                "type": "object",
-                "properties": {
-                  "mode": { "type": "string", "enum": ["BLOCKING", "SHADOW_SIM", "HEURISTIC"], "default": "BLOCKING" },
-                  "depth": { "type": "integer", "default": 3 },
-                  "max_drift": { "type": "number", "default": 0.15 }
-                }
-              }
+              "enforcement_level": { "type": "string", "enum": ["STRICT", "LAX", "SIMULATED"], "default": "STRICT" },
+              "simulation": { "$ref": "#/definitions/TrajectorySimulation" }
             }
           },
           "post_processors": {
             "type": "array",
-            "items": { "type": "string" }
+            "items": { "type": "string", "description": "BeanPostProcessor identifiers" }
           }
         },
         "required": ["id"]
       }
     }
   },
-  "required": ["stages", "environment_context"]
+  "required": ["stages", "environment_context", "global_constraints"]
 }
