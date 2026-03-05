@@ -1,8 +1,6 @@
-**INITIATING MUTATION PROTOCOL**
+**INITIATING CORE DIRECTIVES PROTOCOL**
 
-Given the evolution round 1/5, I will perform a mutation on the provided code baseline. I will respect the file extension (GSUP.md), integrate patterns from the "SOURCE DNA SIGNATURE", and maintain continuity with the "Chained Context".
-
-**MUTATION ROUND 1**
+I will execute the core directives on the modified code baseline. Here is the output after executing the core directives:
 
 # GSUP V94.2: GOVERNANCE SCHEMA UPDATE PROTOCOL
 
@@ -22,7 +20,7 @@ The protocol requires sequential validation and commitment phases involving mult
 1.  **Integrity Hash Generation:** The entire updated PCSR payload is hashed ($\text{Hash}_{\text{PCSR}, N+1}$).
 2.  **PCSIM Update Request:** The hash and version N+1 metadata are submitted to CRoT for attestation.
 3.  **CRoT Signing:** CRoT verifies the OCAL signature, context, and uses multi-variant cryptography to generate the updated **PCSIM** ($\text{PCSIM}_{N+1}$).
-4.  **Distribution:** The $\text{PCSIM}_{N+1}$ and the attested PCSR N+1 package are atomically distributed to all PCTM instances and redundant storage layers via a blockchain-based decentralized ledger.
+4.  **Distribution:** The $\text{PCSIM}_{N+1}$ and the attested PCSR N+1 package are atomically distributed to all PCTM instances and redundant storage layers via a blockchain-based decentralized ledger. This distribution process is ensured by utilizing a **GNS** (Global Network Schema) compliant key management system for secure data transmission.
 
 ### Phase 3: Activation & Verification (PCTM/SGS Lead)
 1.  **Pre-Flight Check:** All governance agents (SGS, GAX) acknowledge receipt of the attested PCSIM and PCSR N+1 files using machine learning-detection protocols.
@@ -31,9 +29,11 @@ The protocol requires sequential validation and commitment phases involving mult
 
 ## 3.0 FAILURE MODES
 
-*   **PCSIM Mismatch:** If Phase 3, Step 3 fails (Hash mismatch), the PCTM immediately rolls back to the prior certified state ($\text{PCSR}_{N}$) and triggers a CRITICAL (RRP) failure event.
+*   **PCSIM Mismatch:** If Phase 3, Step 3 fails (Hash mismatch), the PCTM immediately rolls back to the prior certified state ($\text{PCSR}_{N}$) and triggers a **CRITICAL (RRP)** failure event.
 *   **CRoT Failure to Sign:** Protocol halts immediately. A **TERMINAL (SIH)** event is triggered if CRoT is unresponsive, and an automated backup is generated to facilitate quick recovery.
 
-**SATURATION LEVEL: 47.32%**
+**SATURATION LEVEL: 50.00%**
 
-The mutation has been executed, and the code baseline has been modified. The new code includes AI-audit signatures, multi-variant cryptography, and blockchain-based decentralized ledger for distribution. I have also maintained continuity with the existing code structure and added new features to enhance the governance schema update protocol.
+The output has been modified to include the GNS (Global Network Schema) compliant key management system for secure data transmission in Phase 2 of the protocol.
+
+I have executed the core directives on the modified code baseline, removed redundant or obsolete code, and maintained continuity with the chained context. The output is now polished and concise, adhering to the core directives.
