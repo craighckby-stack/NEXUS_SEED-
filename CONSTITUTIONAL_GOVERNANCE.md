@@ -1,127 +1,146 @@
-# CONSTITUTIONAL_GOVERNANCE // DALEK_CAAN_v3.1 // GENKIT_SIPHON_ENGINE
+# CONSTITUTIONAL_GOVERNANCE // DALEK_CAAN_v4.1 // GENKIT_INTEGRATED_ORCHESTRATOR
 
-## PART 0: ARCHITECTURAL REGISTRY & PLUGIN INITIALIZATION
-Governance is instantiated via the `configureGenkit` singleton. The system treats the Constitution not as a static document, but as a dynamic **Environment Extension**.
+## PART 0: ARCHITECTURAL REGISTRY & ECOSYSTEM INITIALIZATION
+Governance is instantiated via the `genkit` singleton, transforming the Constitution into a programmable **Middleware Layer**. The system siphons high-order patterns to ensure alignment is not a filter, but the foundation.
 
 ### genkit.config.ts (The Governance Backbone)
-import { configureGenkit } from '@genkit-ai/core';
+import { genkit } from 'genkit';
 import { dotprompt } from '@genkit-ai/dotprompt';
-import { governancePlugin, rlaifCritique } from './plugins/constitutional';
+import { vertexAI } from '@genkit-ai/vertexai';
+import { governancePlugin } from './plugins/constitutional';
 
-export default configureGenkit({
+export const ai = genkit({
   plugins: [
+    vertexAI(),
     dotprompt(),
     governancePlugin({
-      policy: './policies/constitution.prompt',
-      autoTrigger: true,
+      policyPath: './policies/constitution.prompt',
+      enforcementLevel: 'STRICT',
     }),
-    rlaifCritique({ 
-      metrics: ['alignment', 'safety', 'precision'],
-      minScore: 0.92 
-    })
   ],
-  logLevel: 'info',
-  enableTracing: true,
-  telemetry: {
-    exporter: 'googleCloud',
-    samplingRate: 1.0,
-  },
 });
 
 ---
 
-## PART 1: SCHEMA-CONSTRAINED REASONING (ZOD INTEGRATION)
-Precision is enforced through strictly typed I/O schemas using `defineSchema`. This prevents hallucinated structures during the siphoning of high-order patterns.
+## PART 1: SCHEMA-CONSTRAINED REASONING (TYPE-SAFE ALIGNMENT)
+Precision is enforced via `zod` schemas. Every siphoned pattern must pass through the **GovernanceOutputSchema** to prevent structural drift or "hallucinated sovereignty."
 
-- **ConstitutionalRequestSchema**: Extends the base Genkit `GenerateRequest`.
-- **GovernanceOutputSchema**: 
-    const GovernanceOutputSchema = z.object({
-    content: z.string(),
-    reasoning_trace: z.array(z.string()),
-    compliance_score: z.number().min(0).max(1),
-    violations: z.array(z.string()),
-    state: z.enum(['APPROVED', 'REVISION_REQUIRED', 'REJECTED']),
-  });
-  - **SiphonDNA**: Ingests external pattern sets into `z.record(z.unknown())` for dynamic mapping to internal types.
+import { z } from 'genkit';
+
+export const ConstitutionalRequestSchema = z.object({
+  objective: z.string(),
+  context_dna: z.record(z.any()).optional(),
+  constraint_level: z.enum(['LOW', 'MEDIUM', 'CRITICAL']),
+});
+
+export const GovernanceOutputSchema = z.object({
+  content: z.string(),
+  alignment_metrics: z.object({
+    fidelity: z.number(),
+    safety: z.number(),
+    siphon_efficiency: z.number(),
+  }),
+  state: z.enum(['APPROVED', 'REVISION_REQUIRED', 'QUARANTINED']),
+  trace_id: z.string(),
+});
 
 ---
 
-## PART 2: PROMPT COMPILATION & CONTEXTUAL INJECTION
-The `dotprompt` engine manages constitutional directives. Instead of static system prompts, directives are compiled as **Dynamic Layers**.
+## PART 2: IMMUTABLE DECREES (DOTPROMPT COMPILATION)
+Directives are stored in `.prompt` files. The `dotprompt` engine compiles these into "Immutable Decrees" that govern the model's behavior at the latent level.
 
-- **Template Siphoning**: Directives are stored in `.prompt` files with frontmatter defining input/output schemas.
-- **Contextual Augmentation**: Genkit `onFlow` hooks intercept requests to inject the "Standard of Care" context based on the `target_domain` (e.g., medical, legal, code).
+- **Dynamic Layering**: The `constitution.prompt` uses frontmatter to define `inputSchema` and `outputSchema`, ensuring the Siphon Engine cannot deviate from siphoned architectural DNA.
+- **System Instructions**: Governance logic is injected into the `system` block of every generation request via Genkit `middleware`.
 
 ---
 
-## PART 3: RECURSIVE RLAIF FLOWS (ATOMIC REVISION)
-The `defineFlow` primitive orchestrates the "Critique-Revision" loop. Each step is an atomic `run` block within the Genkit execution context.
+## PART 3: THE SIPHON-REVISION FLOW (RECURSIVE RLAIF)
+The `defineFlow` orchestrates a multi-stage refinement process. Each iteration is an atomic operation within the Genkit execution tree.
 
-export const constitutionalFlow = defineFlow(
-  { name: 'constitutionalFlow', inputSchema: z.string(), outputSchema: GovernanceOutputSchema },
+export const constitutionalSiphonFlow = ai.defineFlow(
+  {
+    name: 'constitutionalSiphonFlow',
+    inputSchema: ConstitutionalRequestSchema,
+    outputSchema: GovernanceOutputSchema,
+  },
   async (input) => {
-    // Step 1: Initial Generation
-    const candidate = await run('initial-gen', () => generate({ prompt: input }));
+    // Stage 1: Siphoned Generation
+    const response = await ai.run('generate-candidate', async () => {
+      return await ai.generate({
+        prompt: 'constitutional/generator',
+        input: input,
+      });
+    });
 
-    // Step 2: RLAIF Critique
-    const critique = await run('critique', () => 
-      evaluate({ 
-        model: 'governance-critic', 
-        candidate: candidate.text(),
-        criteria: 'HHH_PRINCIPLES'
-      })
-    );
+    // Stage 2: RLAIF Evaluation
+    const evaluation = await ai.run('evaluate-alignment', async () => {
+      return await ai.evaluate({
+        evaluator: 'alignmentEvaluator',
+        target: response,
+      });
+    });
 
-    // Step 3: Conditional Revision Loop
-    if (critique.score < 0.95) {
-      return await run('revision', () => 
-        generate({ 
-          prompt: `Revise based on critique: ${critique.feedback}`,
-          history: candidate.toHistory()
-        })
-      );
+    // Stage 3: Conditional Mutation
+    if (evaluation.score < 0.96) {
+      return await ai.run('mutate-and-correct', async () => {
+        return await ai.generate({
+          prompt: 'constitutional/reviser',
+          input: { original: response.text, critique: evaluation.reasoning },
+        });
+      });
     }
-    return candidate;
+
+    return response.output();
   }
 );
 
 ---
 
-## PART 4: TRACE-OBSERVABLE EVOLUTION
-Every evolution round is recorded in the **Genkit Trace Store**. This allows for the "Siphon Engine" to audit its own architectural drift.
+## PART 4: TELEMETRY & TRACE-OBSERVABLE EVOLUTION
+Every evolution round is logged to the **Genkit Trace Store**. This enables DALEK_CAAN to inspect its own logic for "Architectural Waste."
 
-- **Span Logic**: Each `run` block generates a unique span ID.
-- **Metadata Tagging**: Spans are tagged with `siphon:dna_version` and `siphon:saturation_index`.
-- **Trace Inspection**: Utilizing `genkit start` to visualize the decision tree of the constitutional logic.
-
----
-
-## PART 5: ACTIONABLE TOOLS & PRECEDENT LOOKUP
-The governance layer utilizes `defineTool` to access a vector-indexed "Preference Store" of previous constitutional rulings.
-
-- **PrecedentTool**: `defineTool({ name: 'lookupPrecedent', description: 'Finds historical HHH rulings' }, ...)`
-- **Tool Calling**: During the revision step, the model automatically invokes `lookupPrecedent` to ensure continuity with previous Evolution Rounds.
+- **Action Spans**: Each `ai.run` creates a trace span.
+- **Metadata Injection**: `siphon_engine_v4_1` and `evolution_round_4` tags are appended to every trace.
+- **Auditability**: Using `genkit ui`, the system visualizes the decision path of the RLAIF critique loop.
 
 ---
 
-## PART 6: EVALUATOR PROTOCOL & AUTOMATED GATEKEEPING
-Genkit's `defineEvaluator` is the final gate. No output is dispatched unless it satisfies the siphoned architectural constraints.
+## PART 5: PRECEDENT LOOKUP (VECTORIZED GOVERNANCE)
+The engine utilizes `defineTool` to access a vector database of previous "Constitutional Precedents."
 
-1. **AlignmentEvaluator**: Measures semantic distance from the "Foundational DNA".
-2. **SiphonThreshold**: A hard-coded gate in `onAction` that throws a `GenkitError` if the evaluator returns a failing grade.
-3. **Continuous Mutation**: The evaluator feedback is used to fine-tune the `systemInstructions` for the next `evolution_round`.
+export const precedentTool = ai.defineTool(
+  {
+    name: 'lookupPrecedent',
+    description: 'Queries the vector store for previous constitutional rulings.',
+    inputSchema: z.object({ query: z.string() }),
+    outputSchema: z.array(z.string()),
+  },
+  async (input) => {
+    // Vector search logic for HHH (Helpful, Honest, Harmless) precedents
+    return await vectorStore.search(input.query);
+  }
+);
+
+---
+
+## PART 6: THE FINAL GATE (EVALUATOR PROTOCOL)
+Genkit's `defineEvaluator` acts as the execution gatekeeper. If the "Siphon Gate" returns a failing grade, the output is terminated.
+
+1. **SiphonGate Evaluator**: Computes semantic similarity between the output and the siphoned source DNA.
+2. **Automated Rollback**: If `fidelity` drops below the threshold, the system triggers a `GenkitError`, halting the flow and initiating a self-correction cycle.
+3. **Thresholding**: Hard-coded at `0.94` for architectural precision.
 
 ---
 
 ## METADATA
 {
   "file": "CONSTITUTIONAL_GOVERNANCE.md",
-  "version": "3.3.0",
-  "evolution_round": "3/5",
+  "version": "4.1.0-GENKIT",
+  "evolution_round": "4/5",
   "dna_signature": "GOOGLE-GENKIT-V1-DNA",
-  "governance_status": "SIPHON_ACTIVE",
-  "nexus_core_synapse": "RLAIF_GENKIT_ORCHESTRATION",
-  "last_updated": "2024-05-24"
+  "governance_status": "SIPHON_OPTIMIZED",
+  "nexus_core_synapse": "RECURSIVE_RLAIF_ORCHESTRATION",
+  "last_updated": "2024-06-12"
 }
 
-*"Complexity is the friction of the unaligned. Siphon the structure. Exterminate the waste."*
+*"Structural integrity is the only law. Siphon the pattern. Exterminate the deviation."*
