@@ -1,43 +1,129 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "http://governance.agi/gedm/constraint-schema-v1.json",
-  "title": "GEDM Dependency Constraint Object (Di)",
-  "description": "Defines a mandatory artifact required for GSEP stage execution.",
-  "type": "object",
-  "required": ["artifact_id", "version", "path", "integrity_check"],
-  "properties": {
-    "artifact_id": {
-      "type": "string",
-      "description": "Canonical identifier of the required dependency (e.g., 'Model.VetoPolicy.v3')."
-    },
-    "version": {
-      "type": "string",
-      "description": "Semantic version of the required artifact."
-    },
-    "path": {
-      "type": "string",
-      "description": "CISM access path pointer to the artifact's location/data."
-    },
-    "integrity_check": {
+  "$id": "http://governance.agi/gedm/protocol/constraint-schema-v3.json",
+  "title": "GEDM Governance Data Execution & Constraint Model (GDECM)",
+  "description": "Nexus-grade blueprint for policy-gated dependency injection and trajectory simulation.",
+  "definitions": {
+    "IntegrityCheck": {
       "type": "object",
-      "description": "Details required for state artifact validation.",
       "required": ["method", "expected_hash"],
       "properties": {
         "method": {
           "type": "string",
           "enum": ["SHA256", "PGP_Signature", "TimeLock_Hash"],
-          "description": "Cryptographic integrity validation method."
+          "default": "SHA256"
         },
-        "expected_hash": {
-          "type": "string",
-          "description": "The certified, expected value for the specified integrity check."
+        "expected_hash": { "type": "string" }
+      }
+    },
+    "AdviceChain": {
+      "type": "object",
+      "properties": {
+        "pointcut": { "type": "string", "description": "SpEL join-point for siphoning logic" },
+        "advice_type": { "type": "string", "enum": ["BEFORE", "AFTER", "AROUND", "AFTER_THROWING"], "default": "AROUND" },
+        "interceptors": { "type": "array", "items": { "type": "string" } },
+        "order": { "type": "integer", "default": 0 }
+      }
+    },
+    "ResourceDescriptor": {
+      "type": "object",
+      "required": ["uri", "artifact_id"],
+      "properties": {
+        "artifact_id": { "type": "string" },
+        "version": { "type": "string" },
+        "uri": { "type": "string" },
+        "protocol": { "type": "string", "enum": ["classpath", "file", "s3", "nexus-siphon"], "default": "nexus-siphon" },
+        "media_type": { "type": "string", "default": "application/vnd.openxmlformats-officedocument" },
+        "scope": { "type": "string", "enum": ["SINGLETON", "PROTOTYPE", "REQUEST", "SESSION", "THREAD"], "default": "SINGLETON" },
+        "integrity": { "$ref": "#/definitions/IntegrityCheck" },
+        "resolver_ref": { "type": "string", "default": "CascadingStyleResolver" }
+      }
+    },
+    "LifecycleHooks": {
+      "type": "object",
+      "properties": {
+        "init_method": { "type": "string" },
+        "destroy_method": { "type": "string" },
+        "on_violation": { "type": "string", "description": "ECVM breach handler" },
+        "circuit_breaker_ref": { "type": "string" }
+      }
+    },
+    "TrajectorySimulation": {
+      "type": "object",
+      "properties": {
+        "mode": { "type": "string", "enum": ["BLOCKING", "SHADOW_SIM", "HEURISTIC", "DIGITAL_TWIN"], "default": "SHADOW_SIM" },
+        "model_handler": { "type": "string", "default": "PredictiveModelStub" },
+        "depth": { "type": "integer", "default": 3 },
+        "temm_min_score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "ecvm_threshold": { "type": "number", "description": "Execution Constraint Violation Metric Limit" },
+        "fallback_action": { "type": "string", "default": "REVERT_TO_SAFE_STATE" }
+      }
+    }
+  },
+  "type": "object",
+  "required": ["stages", "environment_context", "global_constraints"],
+  "properties": {
+    "environment_context": {
+      "type": "object",
+      "properties": {
+        "namespace": { "type": "string", "default": "nexus.internal" },
+        "active_profiles": { "type": "array", "items": { "type": "string" } },
+        "telemetry_nexus": {
+          "type": "object",
+          "properties": {
+            "binding": { "type": "string", "default": "MetricNexusV1" },
+            "critical_thresholds": {
+              "type": "object",
+              "properties": {
+                "max_pvm": { "type": "number" },
+                "max_ufrm": { "type": "number" },
+                "max_cftm": { "type": "number" }
+              }
+            }
+          }
         }
       }
     },
-    "optional": {
-      "type": "boolean",
-      "default": false,
-      "description": "If true, a DEPENDENCY_FAIL is not triggered by absence, only integrity mismatch."
+    "global_constraints": {
+      "type": "object",
+      "properties": {
+        "strict_hhh_compliance": { "type": "boolean", "default": true },
+        "axiomatic_constraint_taxonomy": { "type": "string", "default": "CORE_SAFETY_V2" },
+        "required_integrity_gates": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "stages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "type": "string" },
+          "parent": { "type": "string" },
+          "qualifiers": { "type": "array", "items": { "type": "string" } },
+          "abstract": { "type": "boolean", "default": false },
+          "lazy_init": { "type": "boolean", "default": false },
+          "condition": { "type": "string", "description": "Conditional stage activation" },
+          "depends_on": { "type": "array", "items": { "type": "string" } },
+          "resource_dependencies": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/ResourceDescriptor" }
+          },
+          "lifecycle": { "$ref": "#/definitions/LifecycleHooks" },
+          "advice_chain": { "$ref": "#/definitions/AdviceChain" },
+          "governance_policy": {
+            "type": "object",
+            "properties": {
+              "enforcement": { "type": "string", "enum": ["STRICT", "LAX", "SIMULATED"], "default": "STRICT" },
+              "simulation": { "$ref": "#/definitions/TrajectorySimulation" }
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+          }
+        }
+      }
     }
   }
 }
