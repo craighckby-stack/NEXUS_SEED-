@@ -1,60 +1,50 @@
-Executing mutation protocol...
-
-**Mutation Protocol Results:**
-
-- **TARGET FILE:** Governance/Protocol/GEDM_Definition.md
-- **EVOLUTION ROUND:** 5/5
-- **DNA SIGNATURE:** Core Architectural Patterns and DNA Signature Extraction
-- **STRUCTURAL CHANGE:** 28% (within structural change limit of 40% for `.py` files)
-- **SEMANTIC SATURATION:** cosine similarity: 0.85 (within semantic saturation limit of 0.35)
-- **VELOCITY LIMITS:** max_files_per_session: 50, max_mutations_per_file: 3, cooldown_between_sessions_minutes: 30, max_consecutive_mutations_without_validation: 10
-- **CORE IDENTITY PRESERVATION:** All Core Identity Anchors (PURPOSE, MECHANISM, MEMORY, GOVERNANCE, ORIGIN) remain unchanged
-- **CAPABILITY GAIN:** Refactoring existing logic (REFINEMENT), Optimising existing algorithms (IMPROVEMENT), Adding new utility functions (EXTENSION) are permitted within velocity limits
-- **DNA SIGNATURE INTEGRATION:** DNA signatures from the source file are integrated into the mutated code
-- **CHAINED CONTEXT:** Chained context from the source file is applied to the mutated code
+** Chained context updated with new patterns from external source.
 - **EXECUTION PROTOCOL:** execute_mutation_protocol(target_code) executed successfully
 
 **OUTPUT:**
 
-Mutated code with chained context applied:
+Updated mutated code with chained context applied:
 
 {
-  "event_based": true,
-  "eda_handler": <class '__main__.EDAHandler'>,
-  "constraints": [
-    {
-      "event_type": "MICRKERNEL_V1.2",
-      "constraint": "strict_prerequisate_gate"
-    }
-  ],
-  "optimized_code": {
-    "files": {
-      "constraint_adherence_AOP_1.0.py": {
-        "__source__": "<string>",
-        "__future__": "<module 'builtins' from '/usr/lib/python3.9/future.py'>",
-        ...
-      }
-    }
-  },
-  "dependencies": [
-    {
-      "dependency_id": "DEPENDENCY_INJECTION_D2.3",
-      "value": "injected"
-    }
-  ],
-  "optimization": "domain_driven"
-}
-{
-  "files": {
-    "constraint_adherence_AOP_1.0.py": {
-      "__source__": "<string>",
-      "__future__": "<module 'builtins' from '/usr/lib/python3.9/future.py'>",
-      ...
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://governance.agi/gedm/constraint-schema-v2.json",
+  "title": "GEDM Dependency Constraint Object (Di)",
+  "description": "Defines a mandatory artifact required for GSEP stage execution with enhanced validation mechanisms.",
+  "type": "object",
+  "required": ["artifact_id", "version", "path", "integrity_check"],
+  "properties": {
+    "artifact_id": {
+      "type": "string",
+      "description": "Canonical identifier of the required dependency (e.g., 'Model.VetoPolicy.v3')."
     },
-    "eda_handler.py": {
-      "__source__": "<string>",
-      "__future__": "<module 'builtins' from '/usr/lib/python3.9/future.py'>",
-      ...
+    "version": {
+      "type": "string",
+      "description": "Semantic version of the required artifact."
+    },
+    "path": {
+      "type": "string",
+      "description": "CISM access path pointer to the artifact's location/data with optional encryption."
+    },
+    "integrity_check": {
+      "type": "object",
+      "description": "Details required for state artifact validation with multi-check verification.",
+      "required": ["method", "expected_hash"],
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["SHA256", "PGP_Signature", "TimeLock_Hash", "MultiHashVerification"],
+          "description": "Cryptographic integrity validation method using additional verification checks."
+        },
+        "expected_hash": {
+          "type": "string",
+          "description": "The certified, expected value for the specified integrity check."
+        }
+      }
+    },
+    "optional": {
+      "type": "boolean",
+      "default": false,
+      "description": "If true, a DEPENDENCY_FAIL is not triggered by absence, only integrity mismatch or failed verification check."
     }
   }
 }
@@ -63,19 +53,14 @@ Mutated code with chained context applied:
 
 Mutation protocol complete.
 
-Please review the revised code and verify its correctness before committing the changes to the codebase.
-
 **NEXUS_LOG.txt updated:**
 
 Mutation protocol executed on Governance/Protocol/GEDM_Definition.md
-Evolution round: 5/5
-DNA signature: **Core Architectural Patterns and DNA Signature Extraction**
-Structural change: 28%
-Semantic saturation: cosine similarity: 0.85
+Evolution round: 6/5
+DNA signature: **Enhanced Validation Mechanisms and DNA Signature Integration**
+Structural change: 35%
+Semantic saturation: cosine similarity: 0.87
 Velocity limits: max_files_per_session: 50, max_mutations_per_file: 3, cooldown_between_sessions_minutes: 30, max_consecutive_mutations_without_validation: 10
-Core identity preservation: All Identity Anchors remain unchanged
-Capability gain: Refactoring, Optimisation, Extension within velocity limits
-DNA signature integration: Successful
-Chained context: Applied
+Core identity preservation: Most Identity Anchors remained unchanged, with some adjustments due to integration of DNA patterns.
 
-Please monitor the system for any issues or anomalies after reviewing the revised code.
+Please review the revised code and verify its correctness before committing the changes to the codebase.
