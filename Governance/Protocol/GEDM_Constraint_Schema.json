@@ -1,28 +1,33 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "http://governance.agi/gedm/protocol/constraint-schema-v3.3.json",
+  "$id": "http://governance.agi/gedm/protocol/constraint-schema-v4.0.json",
   "title": "GEDM Governance Data Execution & Constraint Model (GDECM)",
-  "description": "Nexus-grade blueprint for policy-gated dependency injection and trajectory simulation, optimized for ARCH-OOXML-V2-DOCX-DNA compliance.",
+  "description": "Architecturally precise schema for AGI trajectory synthesis, siphoning Spring-derived IoC patterns into ARCH-OOXML-V2-DOCX-DNA governance. Optimized for Nexus-grade dependency injection and axiomatic constraint adherence.",
   "definitions": {
+    "AxiomaticContextEvent": {
+      "type": "object",
+      "properties": {
+        "event_type": { "type": "string", "description": "Pattern-matched event identifier" },
+        "pvm_impact": { "type": "number", "description": "Predicted Policy Volatility Metric shift" },
+        "broadcast_scope": { "type": "string", "enum": ["LOCAL", "GLOBAL", "NEXUS"], "default": "LOCAL" }
+      }
+    },
     "IntegrityCheck": {
       "type": "object",
       "required": ["method", "expected_hash"],
       "properties": {
-        "method": {
-          "type": "string",
-          "enum": ["SHA256", "PGP_Signature", "TimeLock_Hash"],
-          "default": "SHA256"
-        },
+        "method": { "type": "string", "enum": ["SHA256", "PGP_Signature", "TimeLock_Hash"], "default": "SHA256" },
         "expected_hash": { "type": "string" }
       }
     },
     "AdviceChain": {
       "type": "object",
       "properties": {
-        "pointcut": { "type": "string", "description": "SpEL join-point for siphoning logic" },
+        "pointcut": { "type": "string", "description": "AspectJ-compliant SpEL join-point for siphoning logic" },
         "advice_type": { "type": "string", "enum": ["BEFORE", "AFTER", "AROUND", "AFTER_THROWING"], "default": "AROUND" },
         "interceptors": { "type": "array", "items": { "type": "string" } },
-        "order": { "type": "integer", "default": 0 }
+        "order": { "type": "integer", "default": 0 },
+        "proxy_target_class": { "type": "boolean", "default": true }
       }
     },
     "MutationPostProcessor": {
@@ -30,7 +35,7 @@
       "properties": {
         "ref": { "type": "string" },
         "order": { "type": "integer", "default": 0 },
-        "applicability_filter": { "type": "string", "description": "SpEL expression for conditional logic execution" }
+        "applicability_filter": { "type": "string", "description": "Conditional logic for post-instantiation refinement" }
       }
     },
     "ResourceDescriptor": {
@@ -42,7 +47,6 @@
         "uri": { "type": "string" },
         "protocol": { "type": "string", "enum": ["classpath", "file", "s3", "nexus-siphon"], "default": "nexus-siphon" },
         "media_type": { "type": "string", "default": "application/vnd.openxmlformats-officedocument" },
-        "scope": { "type": "string", "enum": ["SINGLETON", "PROTOTYPE", "REQUEST", "SESSION", "THREAD"], "default": "SINGLETON" },
         "integrity": { "$ref": "#/definitions/IntegrityCheck" },
         "resolver_ref": { "type": "string", "default": "CascadingStyleResolver" }
       }
@@ -52,7 +56,11 @@
       "properties": {
         "init_method": { "type": "string" },
         "destroy_method": { "type": "string" },
-        "on_violation": { "type": "string", "description": "ECVM breach handler" },
+        "aware_interfaces": { 
+          "type": "array", 
+          "items": { "type": "string", "enum": ["NEXUS_CONTEXT", "METRIC_NEXUS", "TRAJECTORY_ENGINE", "GOVERNANCE_REGISTRY"] } 
+        },
+        "on_violation": { "type": "string", "description": "ECVM breach recovery handler" },
         "circuit_breaker_ref": { "type": "string" }
       }
     },
@@ -87,6 +95,7 @@
         "namespace": { "type": "string", "default": "nexus.internal" },
         "active_profiles": { "type": "array", "items": { "type": "string" } },
         "property_sources": { "type": "array", "items": { "$ref": "#/definitions/PropertySource" } },
+        "event_multicaster": { "type": "string", "default": "AxiomaticEventBroadcaster" },
         "telemetry_nexus": {
           "type": "object",
           "properties": {
@@ -121,10 +130,13 @@
           "id": { "type": "string" },
           "parent": { "type": "string", "description": "Recursive Cascading Inheritance pointer" },
           "qualifiers": { "type": "array", "items": { "type": "string" } },
+          "scope": { "type": "string", "enum": ["SINGLETON", "PROTOTYPE", "CONTEXTUAL", "THREAD"], "default": "SINGLETON" },
           "abstract": { "type": "boolean", "default": false },
           "lazy_init": { "type": "boolean", "default": false },
+          "primary": { "type": "boolean", "default": false },
+          "autowire_candidate": { "type": "boolean", "default": true },
           "factory_bean": { "type": "string" },
-          "condition": { "type": "string", "description": "SpEL conditional activation" },
+          "condition": { "type": "string", "description": "SpEL-based conditional activation" },
           "depends_on": { "type": "array", "items": { "type": "string" } },
           "resource_dependencies": {
             "type": "array",
@@ -133,6 +145,7 @@
           "lifecycle": { "$ref": "#/definitions/LifecycleHooks" },
           "advice_chain": { "$ref": "#/definitions/AdviceChain" },
           "post_processors": { "type": "array", "items": { "$ref": "#/definitions/MutationPostProcessor" } },
+          "event_listeners": { "type": "array", "items": { "$ref": "#/definitions/AxiomaticContextEvent" } },
           "semantic_atom_config": {
             "type": "object",
             "properties": {
