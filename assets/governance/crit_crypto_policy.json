@@ -1,22 +1,28 @@
 {
   "metadata": {
     "origin": "NEXUS_CORE",
-    "version": "3.8.1-EVOLVE-FRAMEWORK",
-    "stability_index": 0.9999,
-    "architectural_pattern": "Reactive-IoC-Cascading-Governance",
-    "lifecycle_state": "CONTEXT_SENSITIVE_REFINEMENT"
+    "version": "3.8.2-FRAMEWORK-REFINED",
+    "stability_index": 0.99995,
+    "architectural_pattern": "Reactive-IoC-Proxy-Cascading-Governance",
+    "lifecycle_state": "PROTOTYPE_BEAN_INITIALIZATION"
   },
   "governance_binding": {
     "compliance_mode": "STRICT_HHH_V2",
+    "proxy_target_class": true,
     "advice_chain": [
       "ConsensusSignatureValidator",
       "HhhComplianceInterceptor",
       "PolicyVolatilityInterceptor",
-      "ContextualFluxBoundaryGuard"
+      "ContextualFluxBoundaryGuard",
+      "SpringSecurityContextAdapter"
     ],
-    "pointcut_expression": "execution(* nexus.core.crypto.SiphonCrypter.decrypt*(..)) || @within(nexus.core.annotations.GatedSiphon)",
-    "spel_validation": "@nexusMetricNexus.isStable() && #root.cryptographic_assertion_config.key_requirements.ECC_minimum_bits >= 384",
-    "post_processor_ref": "recursiveCascadingInheritanceResolver"
+    "pointcut_expression": "execution(* nexus.core.crypto.SiphonCrypter.decrypt*(..)) || @annotation(nexus.core.annotations.GatedSiphon)",
+    "spel_validation": "@nexusMetricNexus.isStable() && #root.cryptographic_assertion_config.key_requirements.ECC_minimum_bits >= 384 && !#root.telemetry_nexus_snapshot.integrity_gates.isEmpty()",
+    "inheritance_resolver": {
+      "parent_policy": "governance/base_crypto_defaults.json",
+      "resolution_strategy": "RECURSIVE_CASCADING_DECORATOR",
+      "memoization_enabled": true
+    }
   },
   "cryptographic_assertion_config": {
     "allowed_algorithms": [
@@ -30,47 +36,65 @@
       "HS256",
       "RS256",
       "PS256",
-      "ES256"
+      "ES256",
+      "SHA1"
     ],
     "key_requirements": {
       "ECC_minimum_bits": 384,
       "RSA_minimum_bits": 4096,
       "padding_standard": "PSS",
-      "kdf_derivation_iterations": 210000
+      "kdf_derivation_iterations": 210000,
+      "secret_key_factory_algorithm": "PBKDF2WithHmacSHA512"
     },
     "replay_prevention": {
       "nonce_required": true,
-      "max_time_skew_seconds": 45,
-      "token_cache_implementation": "CaffeineCacheManager"
+      "max_time_skew_seconds": 30,
+      "token_cache_implementation": "CaffeineCacheManager",
+      "cache_spec": "maximumSize=10000,expireAfterWrite=60s"
     }
   },
   "calibration_metrics": {
-    "TCF": 0.9975,
-    "RCF": 0.0025,
-    "confidence_interval": 0.9995,
+    "TCF": 0.9982,
+    "RCF": 0.0018,
+    "confidence_interval": 0.9998,
     "reactive_strategy": "BACKPRESSURE_V3",
-    "flux_backpressure_threshold": 0.15,
-    "state_machine_cycle": 2,
-    "epoch_timestamp_ms": 1740921600000
+    "flux_backpressure_threshold": 0.12,
+    "state_machine_cycle": 3,
+    "heartbeat_interval_ms": 500
   },
   "telemetry_nexus_snapshot": {
-    "ufrm": 0.0015,
-    "cftm": 0.004,
-    "pvm": 0.0008,
+    "ufrm": 0.0012,
+    "cftm": 0.0035,
+    "pvm": 0.0005,
     "health_status": "UP",
     "integrity_gates": [
       "HHH_ALIGNMENT_V2",
       "CISM_INTEGRITY_GROUP",
-      "SPRING_SECURITY_CONTEXT_ADAPTER"
+      "SPRING_SECURITY_CONTEXT_ADAPTER",
+      "AOP_ADVICE_VERIFIER"
     ],
-    "active_profiles": ["production", "nexus-v3-reactive"]
+    "active_profiles": [
+      "production",
+      "nexus-v3-reactive",
+      "secure-enclave"
+    ]
   },
   "trajectory_projection": {
-    "temm_score": 0.9992,
-    "ecvm": 0.00008,
+    "temm_score": 0.9995,
+    "ecvm": 0.00004,
     "simulation_mode": "DIGITAL_TWIN",
     "simulation_strategy_bean": "predictiveModelStub",
-    "fallback_action": "DEGRADE_GRACEFULLY",
-    "on_violation_revert_target": "LATEST_STABLE_HASH"
+    "fallback_action": "REVERT_TO_SAFE_STATE",
+    "on_violation_revert_target": "LATEST_STABLE_HASH",
+    "condition": "@environment.getProperty('nexus.simulation.enabled', 'true') == 'true'"
+  },
+  "dependency_graph": {
+    "scope": "singleton",
+    "autowire_mode": "BY_TYPE",
+    "is_lazy": false,
+    "relations": {
+      "cryptoProvider": "f3a2b1c0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2",
+      "policyAuditor": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2"
+    }
   }
 }
