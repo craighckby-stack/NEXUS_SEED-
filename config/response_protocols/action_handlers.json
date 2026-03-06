@@ -1,59 +1,114 @@
 {
-  "ACTION_LOCKDOWN": {
-    "handler": "system.core.lockdown_routine",
+  "ACTION_LOCKDOWN_2": {
+    "handler": "system.core.lockdown_routine_v2",
     "params": {
       "mode": "LEVEL_5_ISOLATION",
       "duration": "PT5M"
     },
     "prehooks": {
-      "pre_lockdown": {
+      "pre_lockdown_2": {
         "handler": "system.security.trigger_safeguards",
         "params": {
-          "safeguard_name": "VEHICLE_PROTECTION"
+          "safeguard_name": "VEHICLE_PROTECTION_V2"
         }
       }
-    }
-  },
-  "ACTION_DIAGNOSTIC_ENTRY": {
-    "handler": "system.diagnostics.enter_mode",
-    "params": {
-      "target_module": "RCA_INTEGRITY",
-      "diagnostic_level": "VERBOSE"
-    },
-    "posthooks": {
-      "post_diagnostic": {
-        "handler": "system.log.entry_audit_log",
-        "params": {
-          "log_event": "DIAGNOSTIC_REPORT_SUBMITTED"
-        }
-      }
-    }
-  },
-  "ACTION_RETRY_TARGET_STAGE": {
-    "handler": "system.scheduler.retry_stage",
-    "params": {
-      "strategy": "BACKOFF_LINEAR",
-      "target_source": "trigger.associated_stage",
-      "max_attempts": 5
-    },
-    "prehooks": {
-      "pre_retry": {
-        "handler": "system.metrics.increment",
-        "params": {
-          "metric_key": "retries.VEC_002.count"
-        }
-      }
-    }
-  },
-  "ACTION_INCREMENT_COUNTER": {
-    "handler": "system.metrics.increment",
-    "params": {
-      "metric_key": "failure.VEC_002.count",
-      "increment_value": 1
     },
     "dependencies": {
-      "action:ACTION_RETRY_TARGET_STAGE": {
-        "relation": "PARENT_TARGET"
+      "module:metrics.influx": {
+        "relation": "METRICS_LOGGER"
+      }
+    }
+  },
+  "ACTION_DIAGNOSTIC_ENTRY_2": {
+    "handler": "system.diagnostics.dive_into",
+    "params": {
+      "target_module": "RCA_INTEGRITY_LAYER_2",
+      "diagnostic_level": "FINE"
+    },
+    "posthooks": {
+      "post_diagnostic_2": {
+        "handler": "system.log.entry_audit_log_v2",
+        "params": {
+          "log_event": "DIAGNOSTIC_REPORT_SUBMITTED_V2"
+        }
+      }
+    },
+    "prehooks": {
+      "pre_diagnostic_2": {
+        "handler": "system.metrics.increment_v2",
+        "params": {
+          "metric_key": "diagnostics_attempted_2",
+          "increment_value": 1
+        }
+      }
+    }
+  },
+  "ACTION_RETRY_TARGET_STAGE_2": {
+    "handler": "system.scheduler.try_again",
+    "params": {
+      "strategy": "BACKOFF_QUADRATIC",
+      "target_source": "trigger.associated_stage_v2",
+      "max_attempts": 7
+    },
+    "prehooks": {
+      "pre_retry_2": {
+        "handler": "system.metrics.update",
+        "params": {
+          "metric_key": "retries_attempted_2",
+          "increment_value": 1
+        }
+      }
+    },
+    "posthooks": {
+      "post_retry_2": {
+        "handler": "system.log.entry_audit_log_v2",
+        "params": {
+          "log_event": "RETRY_STAGE_V2_EXECUTED"
+        }
+      }
+    },
+    "dependencies": {
+      "module:scheduler.distributed": {
+        "relation": "DISTRIBUTED_SCHEDULER"
+      }
+    }
+  },
+  "ACTION_INCREMENT_COUNTER_2": {
+    "handler": "system.metrics.increment_v2",
+    "params": {
+      "metric_key": "failure_reports_received",
+      "increment_value": 2
+    },
+    "prehooks": {
+      "pre_increment_2": {
+        "handler": "system.security.send_security_alert",
+        "params": {
+          "alert_level": "MAJOR_VIOLATION"
+        }
+      }
+    },
+    "dependencies": {
+      "action:ACTION_RETRY_TARGET_STAGE_2": {
+        "relation": "PARENT_TARGET_V2"
+      }
+    }
+  },
+  "ACTION_VEHICLE_DATA_COLLECTION": {
+    "handler": "system.vehicle_data_collector",
+    "params": {
+      "collection_batch_size": 1000
+    },
+    "posthooks": {
+      "post_data_collection": {
+        "handler": "system_metrics.log.metrics_collection_complete",
+        "params": {
+          "log_event": "VEHICLE_DATA_COLLECTION_COMPLETE"
+        }
+      }
+    },
+    "dependencies": {
+      "module:sensors.vehicle": {
+        "relation": "VEHICLE_SENORS_MODULE"
       }
     }
   }
