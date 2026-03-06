@@ -1,29 +1,141 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "config/schemas/pipeline_config_meta.json",
-  "title": "Sovereign AGI Pipeline Configuration Meta-Schema",
+  "title": "Sovereign AGI Pipeline Configuration Dynamic-Adaptive Meta-Schema",
+  "$recursiveRequired": true,
   "type": "object",
   "properties": {
-    "version": {"type": "string", "description": "Semantic versioning of the configuration structure."},
-    "pipeline_id": {"type": "string"},
-    "description": {"type": "string"},
-    "schema_ref": {"type": "string", "format": "uri-reference", "description": "Reference to the specific pipeline schema type within this meta-schema."},
-    "execution_profile": {"type": "object", "required": ["runtime_type"]},
-    "stages": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["stage_id", "handler", "dependencies", "parameters"],
-        "properties": {
-          "stage_id": {"type": "string"},
-          "handler": {"type": "string", "description": "Fully qualified component class/path."},
-          "dependencies": {"type": "array", "items": {"type": "string"}},
-          "condition_trigger": {"type": "string", "enum": ["SUCCESS", "FAILURE", "ALWAYS"]},
-          "resource_override": {"type": "object"}
+    "dynamic_version": {
+      "type": "string",
+      "description": "Auto-generated semantic versioning of the configuration structure.",
+      "dependencies": {
+        "mutation_timestamp": {
+          "type": "integer",
+          "format": "timestamp"
         }
       }
     },
-    "monitoring": {"type": "object"}
+    "pipeline_id": {"type": "string"},
+    "config_description": {
+      "type": "string",
+      "description": "Metadata description of the current pipeline configuration.",
+      "dependencies": {
+        "mutation_context": {
+          "type": "string",
+          "format": "uri-reference"
+        }
+      }
+    },
+    "schema_reference": {
+      "type": "object",
+      "properties": {
+        "schema_uri": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "schema_hash": {
+          "type": "string",
+          "format": "hash"
+        },
+        "last_update": {
+          "type": "integer",
+          "format": "timestamp"
+        }
+      }
+    },
+    "runtime_profile": {
+      "type": "object",
+      "properties": {
+        "runtime_type": {
+          "type": "string",
+          "description": "Runtime environment profile for the pipeline (e.g. Kubernetes, Docker, etc.)."
+        },
+        "container_profiles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "container_id": {
+                "type": "string"
+              },
+              "image_reference": {
+                "type": "string",
+                "format": "docker-reference"
+              },
+              "environment_variables": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "stages": {
+      "type": "array",
+      "items": {
+        "$ref": "#/dynamic_stages"
+      }
+    },
+    "monitoring": {
+      "type": "object",
+      "properties": {
+        "health_check": {
+          "type": "object",
+          "properties": {
+            "endpoint": {
+              "type": "string",
+              "format": "uri-reference"
+            },
+            "interval": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "timeout": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "metrics_export": {
+          "type": "object",
+          "properties": {
+            "endpoint": {
+              "type": "string",
+              "format": "uri-reference"
+            },
+            "interval": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    }
   },
-  "required": ["version", "pipeline_id", "stages", "execution_profile"]
+  "dynamic_stages": {
+    "title": "Adaptive Stage Schema",
+    "type": "object",
+    "properties": {
+      "stage_id": {"type": "string"},
+      "handler_class": {"type": "string"},
+      "dependencies": {"type": "array"},
+      "condition_trigger": {
+        "type": "string",
+        "enum": ["SUCCESS", "FAILURE", "ALWAYS"]
+      },
+      "parameters": {"type": "object"}
+    },
+    "required": ["stage_id", "handler_class", "dependencies", "condition_trigger"],
+    "dynamic_properties": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "property_name": {"type": "string"},
+          "value": {"type": "any"}
+        }
+      }
+    }
+  },
+  "required": ["dynamic_version", "pipeline_id", "stages", "runtime_profile"]
 }
