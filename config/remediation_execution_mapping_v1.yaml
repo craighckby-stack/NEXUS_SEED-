@@ -1,5 +1,7 @@
-schemaVersion = "v1"
-executorServiceId = "AHRS-REM-04"
+// DALEK CAAN v3.1 — Evolution Boundary Governance - Configuration file for remediation execution mapping
+
+schemaVersion = "v1";
+executorServiceId = "AHRS-REM-04";
 
 executionMapping = {
   ROLLBACK: {
@@ -9,15 +11,32 @@ executionMapping = {
     mutate: (mutation) => {
       if (mutation.timeoutPolicy === "HIGH_SAFETY") {
         mutation.timeoutInSeconds = 90;
-        mutation.parametersSchema.push({ sourceComponent: "NewSourceComponent", type: "override" });
+        const newOverride = {
+          sourceComponent: "NewSourceComponent",
+          override: true,
+        };
+        mutation.parametersSchema.push(newOverride);
+        mutation.parametersSchema.some((parameter) => {
+          if (parameter.override === true) {
+            mutation.parametersSchema.splice(mutation.parametersSchema.indexOf(parameter), 1);
+            return true;
+          }
+        });
       } else if (mutation.timeoutPolicy === "MEDIUM") {
         mutation.timeoutInSeconds = 60;
-        mutation.parametersSchema.unshift({ pathToOverride: "NewPathToOverride" });
+        const newPath = {
+          pathToOverride: "NewPathToOverride",
+          override: true,
+        };
+        mutation.parametersSchema.unshift(newPath);
       } else if (mutation.timeoutPolicy === "LOW_SAFETY") {
         mutation.timeoutInSeconds = 45;
-        mutation.parametersSchema.pop(["errorThreshold"]);
+        const newErrorThreshold = {
+          errorThreshold: "NewErrorThreshold",
+        };
+        mutation.parametersSchema.pop(newErrorThreshold);
       }
-    }
+    },
   },
   PATCH: {
     processorFunction: "AHRS.Core.PatchingExtension",
@@ -28,10 +47,14 @@ executionMapping = {
         mutation.parameters.push(parameter.name, mutation.parametersSchema.indexOf(parameter));
         mutation.parametersSchema.splice(mutation.parametersSchema.indexOf(parameter), 1);
       });
-      if (!mutation.parametersSchema.some((parameter) => parameter.hasOwnProperty("override"))) {
-        mutation.parametersSchema.push({ newPatchType: "NewPatchType", type: "new" });
+      if (!mutation.parametersSchema.some((parameter) => parameter.override === true)) {
+        const newPatchType = {
+          newPatchType: "NewPatchType",
+          type: "new",
+        };
+        mutation.parametersSchema.push(newPatchType);
       }
-    }
+    },
   },
   CONFIG_UPDATE: {
     processorFunction: "AHRS.Core.ConfigurationManagerUpdater",
@@ -40,15 +63,26 @@ executionMapping = {
     mutate: (mutation) => {
       if (mutation.timeoutPolicy === "HIGH_SAFETY") {
         mutation.timeoutInSeconds = 120;
-        mutation.parametersSchema.filter((element) => element.hasOwnProperty("type") || element.hasOwnProperty("override"));
+        mutation.parametersSchema.filter((element) => element.override === true);
+        const similarity = mutation.parametersSchema.map((element) => element.value).reduce((a, b) => a + b, 0) / mutation.parametersSchema.length;
+        if (similarity < 0.65) {
+          throw new Error("Semantic drift threshold exceeded");
+        }
       } else if (mutation.timeoutPolicy === "MEDIUM") {
         mutation.timeoutInSeconds = 60;
-        mutation.parametersSchema.unshift({ keyPath: "NewKeyPath" });
+        const newKeyPath = {
+          keyPath: "NewKeyPath",
+          override: true,
+        };
+        mutation.parametersSchema.unshift(newKeyPath);
       } else if (mutation.timeoutPolicy === "LOW_SAFETY") {
         mutation.timeoutInSeconds = 30;
-        mutation.parametersSchema.pop(["defaultKeyValue"]);
+        const defaultKeyValue = {
+          defaultKeyValue: "NewDefaultKeyValue",
+        };
+        mutation.parametersSchema.pop(defaultKeyValue);
       }
-    }
+    },
   },
   SCRIPT_EXECUTION: {
     processorFunction: "AHRS.Utility.SandboxRunnerEnhanced",
@@ -57,12 +91,14 @@ executionMapping = {
     mutate: (mutation) => {
       mutation.parametersSchema.forEach((parameter) => {
         mutation.parameters.push(parameter.name, mutation.parametersSchema.indexOf(parameter) % 3 === 0 ? "New" : "Overridden");
-        parameter.type === "override" ? mutation.parametersSchema.splice(mutation.parametersSchema.indexOf(parameter), 1) : null;
+        if (parameter.type === "override") {
+          mutation.parametersSchema.splice(mutation.parametersSchema.indexOf(parameter), 1);
+        }
       });
       if (mutation.parametersSchema.some((parameter) => typeof parameter === "string")) {
         mutation.parametersSchema.forEach((parameter, index) => parameter = { ...parameter, value: index });
       }
-    }
+    },
   },
   VERIFY: {
     processorFunction: "AHRS.Core.StateVerifierExtended",
@@ -71,18 +107,18 @@ executionMapping = {
     mutate: (mutation) => {
       if (mutation.timeoutPolicy === "CUSTOM") {
         mutation.timeoutInSeconds = 90;
-        mutation.parametersSchema.filter(parameter => parameter.hasOwnProperty("customThreshold"));
-        const similarity = mutation.parametersSchema.map(element => element.value).reduce((a, b) => a + b, 0) / mutation.parametersSchema.length;
+        mutation.parametersSchema.filter((parameter) => parameter.customThreshold === true);
+        const similarity = mutation.parametersSchema.map((element) => element.value).reduce((a, b) => a + b, 0) / mutation.parametersSchema.length;
         if (similarity < 0.6) {
           throw new Error("Semantic drift threshold exceeded");
         }
       }
-    }
-  }
-}
+    },
+  },
+};
 
 defaultTimeoutsMs = {
   HIGH_SAFETY: 150000,
   MEDIUM: 90000,
-  LOW_SAFETY: 45000
-}
+  LOW_SAFETY: 45000,
+};
