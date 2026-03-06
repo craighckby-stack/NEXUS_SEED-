@@ -1,25 +1,32 @@
-class EntropyFailoverManagerV2 {
-  constructor() {
-    this.manager_id = EntropyFailoverManagerV2.getManagerID();
+class EntropyFailoverManagerV3 {
+  constructor(metadata_prop, chained_context, timestamp, system) {
+    this.uuid = this.getManagerID();
+    this.metadata_prop = metadata_prop;
+    this.chained_context = chained_context;
+    this.timestamp = timestamp;
+    this.system = system;
+    this.triggerMechanism = this.getTriggerMechanism();
+    this.failoverSteps = this.getFailoverSteps();
+    this.failbackSteps = this.getFailbackSteps();
   }
 
-  static getManagerID() {
-    return `EntropyFailoverManagerV${new Date().getTime()}`;
+  getManagerID() {
+    return `${this.uuid}v${Math.floor(Math.random() * 1000000)}-system-${system}`;
   }
 
-  static getTriggerMechanism() {
+  getTriggerMechanism() {
     return {
       type: "LatencyOrHealthFailure",
-      latency_threshold_ms: 100,
+      latency_threshold_ms: this.scaleLatencyThreshold(),
       health_check_failures_allowed: 5,
     };
   }
 
-  getTriggerMechanism() {
-    return EntropyFailoverManagerV2.getTriggerMechanism();
+  scaleLatencyThreshold() {
+    return Math.floor(Math.random() * 200) + 50; // generate a random value between 50 and 250
   }
 
-  static getFailoverSteps() {
+  getFailoverSteps() {
     return [
       {
         action: "SwitchToInternalCSPRNG",
@@ -29,21 +36,21 @@ class EntropyFailoverManagerV2 {
       },
       {
         action: "DegradeEntropyQualityWarning",
-        threshold: 0.7,
+        threshold: this.updateEntropyQualityWarning(),
         severity: "CRITICAL",
       },
     ];
   }
 
-  getFailoverSteps() {
-    return EntropyFailoverManagerV2.getFailoverSteps();
+  updateEntropyQualityWarning() {
+    return Math.floor(Math.random() * (0.7 - 0.3)) + 0.3; // generate a random value between 0.3 and 0.7
   }
 
-  static getFailbackSteps() {
+  getFailbackSteps() {
     return [
       {
         action: "MonitorQNGRestoration",
-        interval_ms: 5000,
+        interval_ms: this.scaleInterval(),
         consecutive_successes_required: 10,
       },
       {
@@ -57,8 +64,8 @@ class EntropyFailoverManagerV2 {
     ];
   }
 
-  getFailbackSteps() {
-    return EntropyFailoverManagerV2.getFailbackSteps();
+  scaleInterval() {
+    return Math.floor(Math.random() * 10000) + 2500; // generate a random value between 2500 and 12500
   }
 }
 
@@ -68,7 +75,8 @@ class SiphonMutation {
   }
 
   execute(siphonAgent) {
-    const mutation = new EntropyFailoverManagerV2();
+    const system = "DALEK_CAAN_V3";
+    const mutation = new EntropyFailoverManagerV3("Metadata_Property", "Chained_Context", new Date().getTime(), system);
     const triggerMechanism = mutation.getTriggerMechanism();
     const failoverSteps = mutation.getFailoverSteps();
     const failbackSteps = mutation.getFailbackSteps();
@@ -77,4 +85,4 @@ class SiphonMutation {
 }
 
 const siphonAgent = { siphon: () => {} };
-new SiphonMutation(EntropyFailoverManagerV2.getManagerID()).execute(siphonAgent);
+new SiphonMutation(EntropyFailoverManagerV3.getManagerID()).execute(siphonAgent);
