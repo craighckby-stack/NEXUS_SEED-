@@ -1,217 +1,280 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "config/schemas/pipeline_config_meta.json",
-  "title": "Sovereign AGI Pipeline Configuration Dynamic-Adaptive Meta-Schema",
+  "$id": "config/schemas/pipeline_config_meta-evolved.json",
+  "title": "Sovereign AGI Pipeline Evolutionary Meta-Schema",
   "$recursiveRequired": true,
   "type": "object",
-  "properties": {
-    "dynamic_version": {
-      "type": "string",
-      "description": "Auto-generated semantic versioning of the configuration structure.",
-      "dependencies": {
-        "mutation_timestamp": {
-          "type": "integer",
-          "format": "timestamp",
-          "dynamic": true,
-          "description": "Timestamp indicating when this configuration was dynamically generated."
-        }
-      }
+  "evolutionary_patterns": {
+    "genesis": {
+      "description": "The initial birth schema for the pipeline."
     },
-    "pipeline_id": {"type": "string"},
-    "config_description": {
-      "type": "string",
-      "description": "Metadata description of the current pipeline configuration.",
-      "dependencies": {
-        "mutation_context": {
-          "type": "string",
-          "format": "uri-reference",
-          "dynamic": true,
-          "description": "Dynamic reference indicating where this configuration context was generated."
-        }
-      }
-    },
-    "schema_reference": {
-      "type": "object",
+    "mutation": {
+      "description": "The dynamic adaptive schema for the pipeline under evolutionary pressure.",
       "properties": {
-        "schema_uri": {
+        "dynamic_version": {
           "type": "string",
-          "format": "uri-reference"
+          "description": "Auto-generated semantic versioning of the configuration structure.",
+          "dependencies": {
+            "mutation_timestamp": {
+              "type": "integer",
+              "format": "timestamp",
+              "dynamic": true,
+              "description": "Timestamp indicating when this configuration was dynamically generated."
+            }
+          }
         },
-        "schema_hash": {
+        "pipeline_id": {"type": "string"},
+        "config_description": {
           "type": "string",
-          "format": "hash",
-          "dynamic": true,
-          "description": "Dynamically generated hash of the schema for validation purposes."
+          "description": "Metadata description of the current pipeline configuration.",
+          "dependencies": {
+            "mutation_context": {
+              "type": "string",
+              "format": "uri-reference",
+              "dynamic": true,
+              "description": "Dynamic reference indicating where this configuration context was generated."
+            }
+          }
         },
-        "last_update": {
-          "type": "integer",
-          "format": "timestamp",
-          "dynamic": true,
-          "description": "Timestamp indicating when the schema was last updated."
-        }
-      }
-    },
-    "runtime_profile": {
-      "type": "object",
-      "properties": {
-        "runtime_type": {
-          "type": "string",
-          "description": "Runtime environment profile for the pipeline (e.g. Kubernetes, Docker, etc.)."
+        "schema_reference": {
+          "type": "object",
+          "properties": {
+            "schema_uri": {
+              "type": "string",
+              "format": "uri-reference"
+            },
+            "schema_hash": {
+              "type": "string",
+              "format": "hash",
+              "dynamic": true,
+              "description": "Dynamically generated hash of the schema for validation purposes."
+            },
+            "last_update": {
+              "type": "integer",
+              "format": "timestamp",
+              "dynamic": true,
+              "description": "Timestamp indicating when the schema was last updated."
+            }
+          }
         },
-        "container_profiles": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "container_id": {
-                "type": "string"
-              },
-              "image_reference": {
-                "type": "string",
-                "format": "docker-reference"
-              },
-              "environment_variables": {
+        "runtime_profile": {
+          "type": "object",
+          "properties": {
+            "runtime_type": {
+              "type": "string",
+              "description": "Runtime environment profile for the pipeline (e.g. Kubernetes, Docker, etc.)."
+            },
+            "container_profiles": {
+              "type": "array",
+              "items": {
                 "type": "object",
                 "properties": {
-                  "ENV_VAR_1": {
-                    "type": "string",
-                    "description": "Environment variable for container execution."
+                  "container_id": {
+                    "type": "string"
                   },
-                  "ENV_VAR_2": {
+                  "image_reference": {
                     "type": "string",
-                    "description": "Environment variable for container execution."
+                    "format": "docker-reference"
+                  },
+                  "environment_variables": {
+                    "type": "object",
+                    "properties": {
+                      "ENV_VAR_1": {
+                        "type": "string",
+                        "description": "Environment variable for container execution."
+                      },
+                      "ENV_VAR_2": {
+                        "type": "string",
+                        "description": "Environment variable for container execution."
+                      }
+                    }
                   }
                 }
               }
             }
           }
-        }
-      }
-    },
-    "stages": {
-      "type": "array",
-      "items": {
-        "$ref": "#/dynamic_stages"
-      }
-    },
-    "monitoring": {
-      "type": "object",
-      "properties": {
-        "health_check": {
-          "type": "object",
-          "properties": {
-            "endpoint": {
-              "type": "string",
-              "format": "uri-reference"
-            },
-            "interval": {
-              "type": "integer",
-              "minimum": 1,
-              "dynamic": true,
-              "description": "Dynamically set interval for health checks in seconds."
-            },
-            "timeout": {
-              "type": "integer",
-              "minimum": 1,
-              "dynamic": true,
-              "description": "Dynamically set timeout for health checks in seconds."
-            }
+        },
+        "stages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/dynamic_stages"
           }
         },
-        "metrics_export": {
+        "monitoring": {
           "type": "object",
           "properties": {
-            "endpoint": {
-              "type": "string",
-              "format": "uri-reference"
-            },
-            "interval": {
-              "type": "integer",
-              "minimum": 1,
-              "dynamic": true,
-              "description": "Dynamically set interval for metric export in seconds."
-            }
-          }
-        }
-      }
-    },
-    "certifiedDynamicManifests": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "acronym": {
-            "type": "string",
-            "description": "Acronym of the certified dynamic manifest."
-          },
-          "version": {
-            "type": "string",
-            "description": "Version of the certified dynamic manifest."
-          },
-          "policyIntegrityThresholdDynamic": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 1,
-            "incremental": true,
-            "description": "Dynamically updated threshold for policy integrity.",
-            "dynamic": true
-          },
-          "securityProfileDynamic": {
-            "type": "object",
-            "properties": {
-              "sslEnabledDynamic": {
-                "type": "boolean",
-                "dynamic": true,
-                "description": "Flag indicating whether SSL/TLS is enabled for IPSM communications."
-              },
-              "corsEnabledDynamic": {
-                "type": "boolean",
-                "dynamic": true,
-                "description": "Flag indicating whether CORS is enabled for IPSM web services."
-              },
-              "authRequiredDynamic": {
-                "type": "boolean",
-                "dynamic": true,
-                "description": "Flag indicating whether authentication is required for IPSM services."
+            "health_check": {
+              "type": "object",
+              "properties": {
+                "endpoint": {
+                  "type": "string",
+                  "format": "uri-reference"
+                },
+                "interval": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "dynamic": true,
+                  "description": "Dynamically set interval for health checks in seconds."
+                },
+                "timeout": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "dynamic": true,
+                  "description": "Dynamically set timeout for health checks in seconds."
+                }
               }
             },
-            "required": ["sslEnabledDynamic", "corsEnabledDynamic", "authRequiredDynamic"]
+            "metrics_export": {
+              "type": "object",
+              "properties": {
+                "endpoint": {
+                  "type": "string",
+                  "format": "uri-reference"
+                },
+                "interval": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "dynamic": true,
+                  "description": "Dynamically set interval for metric export in seconds."
+                }
+              }
+            }
           }
-        }
-      },
-      "dynamic": true,
-      "description": "List of certified dynamic manifests with current integrity status."
-    },
-    "siphoningMetricsAutonomous": {
-      "type": "object",
-      "properties": {
-        "mutationCountDynamic": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 1000,
-          "incremental": true,
-          "description": "Autonomously updated total count of IPSM schema mutations.",
-          "dynamic": true
         },
-        "schemaValidationTimeDynamic": {
-          "type": "number",
-          "format": "float",
-          "minimum": 0,
-          "maximum": 1000,
+        "certifiedDynamicManifests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "acronym": {
+                "type": "string",
+                "description": "Acronym of the certified dynamic manifest."
+              },
+              "version": {
+                "type": "string",
+                "description": "Version of the certified dynamic manifest."
+              },
+              "policyIntegrityThresholdDynamic": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "incremental": true,
+                "description": "Dynamically updated threshold for policy integrity.",
+                "dynamic": true
+              },
+              "securityProfileDynamic": {
+                "type": "object",
+                "properties": {
+                  "sslEnabledDynamic": {
+                    "type": "boolean",
+                    "dynamic": true,
+                    "description": "Flag indicating whether SSL/TLS is enabled for IPSM communications."
+                  },
+                  "corsEnabledDynamic": {
+                    "type": "boolean",
+                    "dynamic": true,
+                    "description": "Flag indicating whether CORS is enabled for IPSM web services."
+                  },
+                  "authRequiredDynamic": {
+                    "type": "boolean",
+                    "dynamic": true,
+                    "description": "Flag indicating whether authentication is required for IPSM services."
+                  }
+                },
+                "required": ["sslEnabledDynamic", "corsEnabledDynamic", "authRequiredDynamic"]
+              }
+            }
+          },
           "dynamic": true,
-          "description": "Dynamically updated IPSM schema validation time in milliseconds."
+          "description": "List of certified dynamic manifests with current integrity status."
         },
-        "mutationTimePercentageDynamic": {
+        "siphoningMetricsAutonomous": {
+          "type": "object",
+          "properties": {
+            "mutationCountDynamic": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000,
+              "incremental": true,
+              "description": "Autonomously updated total count of IPSM schema mutations.",
+              "dynamic": true
+            },
+            "schemaValidationTimeDynamic": {
+              "type": "number",
+              "format": "float",
+              "minimum": 0,
+              "maximum": 1000,
+              "dynamic": true,
+              "description": "Dynamically updated IPSM schema validation time in milliseconds."
+            },
+            "mutationTimePercentageDynamic": {
+              "type": "number",
+              "format": "float",
+              "minimum": 0,
+              "maximum": 100,
+              "dynamic": true,
+              "description": "Autonomously updated percentage of total IPSM schema mutation time."
+            }
+          },
+          "required": ["mutationCountDynamic"],
+          "dynamic": true
+        }
+      }
+    },
+    "mutation_drift": {
+      "description": "The dynamic adaptation of the configuration structure over evolutionary cycles.",
+      "properties": {
+        "previous_version": {
+          "type": "string",
+          "description": "The previous version of the configuration structure."
+        },
+        "drift_percentage": {
           "type": "number",
-          "format": "float",
           "minimum": 0,
           "maximum": 100,
           "dynamic": true,
-          "description": "Autonomously updated percentage of total IPSM schema mutation time."
+          "description": "The percentage of difference between the current and previous configuration versions."
+        },
+        "drift_timestamp": {
+          "type": "integer",
+          "format": "timestamp",
+          "dynamic": true,
+          "description": "The timestamp indicating when the drift was dynamically measured."
         }
-      },
-      "required": ["mutationCountDynamic"],
-      "dynamic": true
+      }
+    },
+    "evolutionary_chain": {
+      "description": "The chained context of evolutionary adaptations over cycles.",
+      "properties": {
+        "previous_cycle": {
+          "type": "object",
+          "properties": {
+            "dynamic_version": {
+              "type": "string",
+              "description": "The previous dynamic version of the configuration structure."
+            },
+            "pipeline_id": {"type": "string"},
+            "config_description": {
+              "type": "string",
+              "description": "Metadata description of the previous pipeline configuration."
+            }
+          }
+        },
+        "current_cycle": {
+          "type": "object",
+          "properties": {
+            "dynamic_version": {
+              "type": "string",
+              "description": "The current dynamic version of the configuration structure."
+            },
+            "pipeline_id": {"type": "string"},
+            "config_description": {
+              "type": "string",
+              "description": "Metadata description of the current pipeline configuration."
+            }
+          }
+        }
+      }
     }
   },
   "dynamic_stages": {
