@@ -1,49 +1,40 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.agi.system/GRCS_AuditPolicy/v1",
-  "title": "GRCS Audit Policy and Execution Schema",
-  "description": "Defines scheduling, execution policies, and enforcement actions for continuous control verification by the autonomous engine.",
+  "title": "Self-Prioritising GRCS Audit Policy and Execution Schema",
+  "description": "Defines scheduling, execution policies, and enforcement actions for continuous control verification with autonomous engine integration.",
   "type": "object",
   "properties": {
     "policyId": {
       "type": "string",
       "format": "ulid",
-      "description": "Unique identifier for the Audit Policy (referenced by GRCS controls)."
+      "description": "Unique identifier for the self-prioritising Audit Policy.",
+      "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
-    "auditJobs": {
+    "autonomousPolicyRules": {
       "type": "array",
-      "description": "List of scheduled jobs to verify GRCS controls.",
+      "description": "Dynamic scheduling and execution policies with autonomous engine integration.",
       "items": {
         "type": "object",
         "properties": {
-          "jobId": { "type": "string", "format": "ulid" },
-          "targetControlId": {
+          "ruleId": {
             "type": "string",
-            "description": "ID of the control being verified (references GRCS.controls[].controlId)."
+            "format": "ulid",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
           },
-          "schedule": {
-            "type": "string",
-            "format": "cron",
-            "description": "CRON expression for verification frequency."
-          },
-          "severity": {
-            "type": "string",
-            "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"],
-            "description": "Severity of non-compliance if the control fails verification."
-          },
-          "verificationScriptPath": {
-            "type": "string",
-            "description": "Internal system path to the autonomous script or binary performing the verification logic."
+          "controlVerificationInterval": {
+            "type": "integer",
+            "description": "Interval in milliseconds for control verification ( referenced by controlId )."
           },
           "contextWindow": {
             "type": "integer",
             "description": "Number of preceding jobs required for chained context.",
-            "default": 3
+            "default": 5
           }
         },
-        "required": ["jobId", "targetControlId", "schedule", "severity", "verificationScriptPath", "contextWindow"]
+        "required": ["ruleId", "controlVerificationInterval", "contextWindow"]
       }
     }
   },
-  "required": ["policyId", "auditJobs"]
+  "required": ["policyId", "autonomousPolicyRules"]
 }
