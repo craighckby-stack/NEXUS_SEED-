@@ -1,31 +1,93 @@
-# Rollback and Recovery Protocol (RRP) Specification V1.0
-# Defines the mandatory recovery state and actions for every GSEP-C halt condition.
+class RRP {
+  constructor() {
+    this.schema_version = 1.0;
+    this.protocol_mandate = "RRP_EXECUTION IMMEDIATE ON HALT";
+    this.rollback_definitions = {};
+  }
 
-schema_version: 1.0
-protocol_mandate: RRP_EXECUTION_IMMEDIATE_ON_HALT
+  init() {
+    this.rollback_definitions["RRP:SCHEMA_FAIL"] = {
+      trigger_layer: "PRESERVATIVE",
+      recovery_state: "SYSTEM_IDLE",
+      action_type: "LOG_AND_REJECT",
+      artifact_rollback: "SYNTHESIS_REPORT"
+    };
 
-rollback_definitions:
-  RRP:SCHEMA_FAIL:
-    trigger_layer: PRE
-    recovery_state: SYSTEM_IDLE
-    action_type: LOG_AND_REJECT
-    artifact_rollback: RAW_PAYLOAD
+    this.rollback_definitions["RRP:POLICY_VETO"] = {
+      trigger_layer: "GUARDIAN",
+      recovery_state: "GOVERNANCE_LIMBO",
+      action_type: "GOVERNANCE_REJECTION_AND_PVLM_REPORT",
+      artifact_rollback: "VIC",
+      metadata_hook: "_inject_pvlm_review"
+    };
 
-  RRP:POLICY_VETO:
-    trigger_layer: L1
-    recovery_state: SYSTEM_IDLE
-    action_type: GOVERNANCE_REJECTION_AND_PVLM_REPORT
-    artifact_rollback: VIC
+    this.rollback_definitions["RRP:SIM_DIVERGE"] = {
+      trigger_layer: "ORACLE",
+      recovery_state: "ANALYSIS_LIMBO",
+      action_type: "REQUEUE_FOR_ANALYSIS",
+      artifact_rollback: "VIC",
+      diagnostic_hook: "Simulation_Metrics_Dump"
+    };
 
-  RRP:SIM_DIVERGE:
-    trigger_layer: L2
-    recovery_state: SYSTEM_IDLE
-    action_type: REQUEUE_FOR_ANALYSIS
-    artifact_rollback: VIC
-    diagnostic_hook: Simulation_Metrics_Dump
+    this.rollback_definitions["RRP:FINALITY_BREACH"] = {
+      trigger_layer: "FINALITY_GUARD",
+      recovery_state: "SYNTHESIS_EMERGENCY",
+      action_type: "LOG_CRITICAL_FAILURE",
+      artifact_rollback: "L7_STATE_SNAPSHOT"
+    };
+  }
 
-  RRP:FINALITY_BREACH:
-    trigger_layer: L7
-    recovery_state: SYSTEM_IDLE
-    action_type: LOG_CRITICAL_FAILURE
-    artifact_rollback: PRE_L7_STATE
+  mutate(saturation_level, context) {
+    if (saturation_level === "ACCELERATED") {
+      const mutation_keys = Object.keys(this.rollback_definitions);
+      mutation_keys.forEach(key => {
+        const rollback_definition = this.rollback_definitions[key];
+        rollback_definition.action_type = "EXECUTE_DIRECTLY";
+        if (key === "RRP:POLICY_VETO") {
+          rollback_definition.artifact_rollback = "PVLM_REPORT";
+        }
+      });
+    }
+
+    if (saturation_level === "UNSATURATED") {
+      Object.entries(this.rollback_definitions).forEach(([key, value]) => {
+        if (Object.keys(value).includes("metadata_hook")) {
+          delete value.metadata_hook;
+        }
+      });
+    }
+
+    return { ...this.rollback_definitions };
+  }
+
+  saturate() {
+    const current_datetime = new Date();
+    const metadata = {
+      file: " SATURATION.md",
+      version: "1.0.0",
+      system: `DALEK CAAN v${this.schema_version}`,
+      component: "NEXUS_CORE Instantiation System",
+      mutable_by_siphoning_agent: false
+    };
+    Object.assign(metadata, {
+      _genesis_date: current_datetime,
+      _inject_pvlm_review: `_report_pvlm_issues`
+    });
+    return metadata;
+  }
+}
+
+// ES6 Constructor Syntax
+const RRP_V1 = new RRP();
+RRP_V1.init();
+const evolution_snapshot = RRP_V1.mutate("ACCELERATED", {});
+const saturation_metadata = RRP_V1.saturate();
+
+console.log(evolution_snapshot, saturation_metadata);
+
+// Function implementation
+function _report_pvlm_issues() {}
+
+function _inject_pvlm_review() {
+  _report_pvlm_issues();
+}
