@@ -1,13 +1,17 @@
 {
   "$schema": "http://json-schema.org/draft/2020-12/schema",
-  "title": "Remediation Runtime Environment Configuration Schema (v94.2)",
-  "description": "Defines physical constraints and runtime configurations for execution environments referenced by the Playbook Catalog, ensuring secure isolation and unpredictable resource allocation.",
+  "title": "Remediation Runtime Environment Configuration Schema (v94.3)",
+  "description": "Defines physical constraints and runtime configurations for execution environments referenced by the Playbook Catalog, ensuring adaptable isolation and optimized resource allocation.",
   "type": "object",
-  "required": ["environments", "strategy_schema_version"],
+  "required": ["environments", "strategy_schema_version", "enviro_configuration"],
   "properties": {
     "enviro": {
       "type": "object",
-      "description": "A map enabling environmental-aware remediation."
+      "description": "A map enabling environmental-aware remediation, linked to the 'enviro_configuration' field."
+    },
+    "enviro_configuration": {
+      "type": "object",
+      "description": "A configuration object encapsulating the remediation's environmental variables."
     },
     "environments": {
       "type": "object",
@@ -116,6 +120,16 @@
     "strategy_schema_version": {
       "type": "string",
       "description": "Schema metadata versioning remediation handlers and parameters."
+    },
+    "enviro_configuration": {
+      "type": "object",
+      "patternProperties": {
+        "^[A-Z_]+$": {
+          "type": "boolean",
+          "description": "Flag indicating the configuration of each environmental variable."
+        }
+      },
+      "additionalProperties": false
     }
   }
 }
