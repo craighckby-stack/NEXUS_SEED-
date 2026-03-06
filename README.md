@@ -1,21 +1,51 @@
-# NEXUS_CORE Project README
+# NEXUS_CORE Project
 
-## Project Overview
-NEXUS_CORE is a system designed to evolve code by integrating patterns from external repositories.
+**PROJECT OVERVIEW**
+====================
 
-## Technical Requirements
-### Siphoning Process
-NEXUS_CORE extracts architectural patterns from remote sources, such as DeepMind and Google, to inform its evolution process. This involves accessing public repositories and leveraging machine learning or pattern recognition algorithms to identify and extract relevant patterns.
+NEXUS_CORE is a system designed to integrate patterns from external repositories into the codebase, allowing it to evolve over time.
 
-### Chained Context
-The implementation of a shared state or memory is used to ensure consistency across evolved files. This allows NEXUS_CORE to maintain a coherent state across multiple iterations and file modifications.
+**SYSTEM COMPONENTS**
+---------------------
 
-## Current Status
+### SIPHONING PROCESS
 
-* **Files Processed**: 1070 files have been processed by NEXUS_CORE.
-* **Latest File**: The most recently processed file is located at `config/schema/d-03_pdfs.json`.
-* **DNA Signature**: No DNA signature has been assigned to the project.
-* **Context Summary**: Further context information is not available.
-* **Saturation Status**: NEXUS_CORE is currently in an Active saturation state.
+The siphoning process involves selecting architectural origins, such as DeepMind or Google, and applying their patterns to local files. This is achieved by matching the local files with the patterns extracted from the external repositories using various algorithms and data structures.
 
-Documentation is subject to change as the project evolves. This README will be updated to reflect new information and technical developments.
+### CHAINED CONTEXT
+
+A shared state/memory, also known as a chained context, is implemented to ensure consistency across the evolved files. This involves maintaining a thread-safe, in-memory data structure that stores the current state of the evolution process, allowing for deterministic behavior and consistent results.
+
+**CURRENT STATUS**
+-----------------
+
+Current Status:
+- **FILES PROCESSED**: 1080
+- **LATEST FILE**: config/schemas/GRCS.schema.json
+- **DNA SIGNATURE**: None
+- **CONTEXT SUMMARY**: [see DNA SIGNATURE Context below]
+
+**CONTEXT SUMMARY (config/schemas/GRCS.schema.json)**
+---------------------------------------------------
+
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.agi.system/GRCS/v3",
+  "title": "Governance, Risk, Compliance, and Security Configuration (v3)",
+  "description": "Defines global policies, standards, risks, controls, and audit configuration for the autonomous system.",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "$ref": "#/$defs/Version"
+    },
+    "policies": {
+      "type": "array",
+      "description": "High-level governance mandates"
+    }
+  }
+}
+
+**SATURATION STATUS**
+----------------------
+
+Current saturation status: Active.
