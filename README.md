@@ -1,68 +1,20 @@
-# NEXUS_CORE README
-=====================
+# NEXUS_CORE
 
 ## Project Overview
------------------
-
-NEXUS_CORE is a system designed to evolve code by integrating patterns from external repositories.
+NEXUS_CORE is a system that integrates patterns from external repositories to evolve code.
 
 ## Siphoning Process
------------------
-
-The siphoning process involves the following steps:
-
-### Step 1: External Repository Selection
-
-NEXUS_CORE identifies trusted architectural origins, such as DeepMind and Google, to provide patterns for code evolution.
-
-### Step 2: Pattern Selection and Application
-
-The identified patterns are applied to local files, enhancing their functionality and performance.
+The siphoning process selects architectural origins (referenced as "DeepMind" and "Google") to apply to local files. This is achieved by retrieving patterns from external sources, identifying applicable patterns for the local files, and then transforming the local files using the selected patterns.
 
 ## Chained Context
-----------------
+A shared state/memory (suggested by the term "context_summary") ensures consistency across evolved files by maintaining a single instance of state information. This includes model parameters such as forecasting service and calibration targets.
 
-To ensure consistency across evolved files, NEXUS_CORE implements a shared state/memory, known as a "chained context," to store and synchronize the evolution process.
+## Technical Dependencies
+* The siphoning process relies on data generated in "config/resource_forecasting_models.json" to inform pattern selection.
+* The chained context includes:
+  - "forecasting_service" with settings: enabled (true), default model (LSTM_CostPredictor_V3), lookback window (30 days), sensitivity tolerance (2.5%).
+  - "model_parameters" with definitions for LSTM_CostPredictor_V3 including training frequency (24 hours) and feature usage ("cpu_load", "network_iops", "memory_usage").
+  - "calibration_targets" with threshold values for expected cost (p95: 0.15) and expected latency (p99_ms: 500).
 
 ## Current Status
------------------
-
-### Summary
-
-- Total number of files processed: 1040
-- Latest file processed: `config/psca_validation_targets.json`
-
-### Context Summary
-
-{
-  "context": {
-    "summary": "Active"
-  },
-  "critical_configurations": [
-    {
-      "file": "config/key_rotation_schedule.json",
-      "required_checks": [
-        {"type": "minimum_rotation_days", "value": 30},
-        {"type": "key_strength", "algorithm": "ECC-521", "status": "MANDATORY"}
-      ]
-    },
-    {
-      "file": "config/acvm_bounds.json",
-      "required_checks": [
-        {"type": "max_memory_cap", "threshold": "95%", "action_on_breach": "P-M02"},
-        {"type": "max_execution_threads", "limit": 64}
-      ]
-    }
-  ]
-}
-
-### Saturation Status
-
-- Saturation status: Active
-
-## DNA Signature
------------------
-
-None specified.
-
-(Note: Markdown formatting only, without added commentary or embellishments.)
+As of latest file processing, 1050 files have been processed with "config/resource_forecasting_models.json" being the latest updated file. The system is in an active state, indicated by a "SATURATION_STATUS" of "Active".
