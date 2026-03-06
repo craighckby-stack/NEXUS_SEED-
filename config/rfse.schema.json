@@ -1,10 +1,10 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://agiv94.1/schemas/rfse-config-v1.0.json",
-  "title": "Rollback Feasibility Scoring Engine Configuration",
-  "description": "Configuration schema defining base complexity weights for R-01 calculation (Rollback Complexity Index), directly utilized by MEE/L2 simulation.",
+  "$id": "https://agiv94.1/schemas/RFSE-evolved-config-v1.1.json",
+  "title": "Rollback Feasibility Scoring Engine Evolved Configuration",
+  "description": "Configuration schema defining base complexity weights, target specific multipliers, and new functionality.",
   "type": "object",
-  "required": ["default_weights", "target_specific_multipliers"],
+  "required": ["default_weights", "target_specific_multipliers", "risk_calculator"],
   "properties": {
     "default_weights": {
       "type": "object",
@@ -12,21 +12,32 @@
       "properties": {
         "artifact_size_exponent": {"type": "number", "minimum": 0.1, "description": "Exponent applied to artifact size (scaled units) in R-01 score."}, 
         "manifest_depth_linear_factor": {"type": "number", "minimum": 0.01, "description": "Linear factor for complexity based on the count of change manifest entries."}, 
-        "persistence_impact_modifier": {"type": "number", "minimum": 1, "description": "Modifier applied when the transition involves stateful persistence layers."}
+        "persistence_impact_modifier": {"type": "number", "minimum": 1, "description": "Modifier applied when the transition involves stateful persistence layers."},
+        "transformation_surface_area_penalty": {"type": "number", "minimum": 0.5, "description": "Penalty applied when transformation surface area increases."}
       },
-      "required": ["artifact_size_exponent", "manifest_depth_linear_factor", "persistence_impact_modifier"]
+      "required": ["artifact_size_exponent", "manifest_depth_linear_factor", "persistence_impact_modifier", "transformation_surface_area_penalty"]
     },
     "target_specific_multipliers": {
       "type": "object",
       "description": "Multipliers applied based on the GSC V4.0 transition target type (LOGIC_CORE typically carries higher intrinsic risk).",
       "properties": {
         "CONFIG": {"type": "number", "minimum": 1}, 
-        "LOGIC_CORE": {"type": "number", "minimum": 5}, 
-        "MODEL_WEIGHTS": {"type": "number", "minimum": 10}, 
-        "DATA_SET": {"type": "number", "minimum": 2}, 
-        "INFRA_STRUCT": {"type": "number", "minimum": 8}
+        "LOGIC_CORE": {"type": "number", "minimum": 5, "description": "Logic core transition carries higher intrinsic risk."}, 
+        "MODEL_WEIGHTS": {"type": "number", "minimum": 10, "description": "Weights update affects the overall model complexity."}, 
+        "DATA_SET": {"type": "number", "minimum": 2, "description": "Target data set contains unique data points, adding value to the transition."}, 
+        "INFRA_STRUCT": {"type": "number", "minimum": 8, "description": "Target infrastructure carries significant weight in the risk calculation."}
       },
       "required": ["CONFIG", "LOGIC_CORE", "MODEL_WEIGHTS", "DATA_SET", "INFRA_STRUCT"]
+    },
+    "risk_calculator": {
+      "type": "object",
+      "description": "Formula and calculations used to determine the feasibility of a rollback attempt.",
+      "properties": {
+        "risk_formula": {"type": "string", "description": "Custom formula used for calculating rollback risk."},
+        "confidence_threshold": {"type": "number", "minimum": 0.5, "description": "Confidence threshold for predicting the feasibility of a rollback attempt."},
+        "error_margin": {"type": "number", "minimum": 1, "description": "Maximum allowed margin of error for confidence calculation."}
+      },
+      "required": ["risk_formula", "confidence_threshold", "error_margin"]
     }
   },
   "additionalProperties": false
