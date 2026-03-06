@@ -1,22 +1,28 @@
-# NEXUS_CORE
+# NEXUS_CORE Technical Documentation
 
-## Project Overview
-NEXUS_CORE is a system designed for the automated evolution of source code. It functions by identifying, extracting, and integrating architectural patterns from external software repositories into a local codebase to improve structural efficiency and logic.
+## 1. Project Overview
+NEXUS_CORE is an automated system designed for software evolution through the integration of architectural patterns derived from external repositories. The system facilitates structural refinement by mapping validated external design principles to local implementation targets.
 
-## Siphoning Process
-The siphoning mechanism facilitates the systematic ingestion of design patterns from specified architectural origins, such as DeepMind or Google. The process involves:
-1.  **Origin Selection:** Identifying high-utility external repositories.
-2.  **Pattern Extraction:** Analyzing the source for reusable architectural logic.
-3.  **Application:** Mapping and applying these patterns to local target files to facilitate code evolution.
+## 2. Siphoning Process
+The siphoning mechanism is the technical process of identifying, extracting, and adapting architectural origins from high-standard external sources (e.g., DeepMind, Google). This process involves:
+*   **Origin Selection:** Identification of source repositories with high-integrity architectural patterns.
+*   **Pattern Extraction:** Deconstruction of source code into abstract architectural models.
+*   **Application:** Programmatic injection of these patterns into local source files to align local structures with the identified external standards.
 
-## Chained Context
-To maintain synchronization across the codebase, NEXUS_CORE utilizes a Chained Context implementation. This provides a shared state and persistent memory layer that tracks all modifications. This ensures that as individual files evolve, the broader system maintains logical consistency, preventing architectural fragmentation.
+## 3. Chained Context
+Chained Context is the implementation of a shared state and persistent memory layer that ensures global consistency across all evolved files. 
+*   **Shared State:** Maintains a unified record of all modifications to prevent logic drift.
+*   **Dependency Synchronization:** Validates that inter-component dependencies remain operational during code transformation.
+*   **Consistency Enforcement:** Uses the shared memory to ensure that individual file evolutions do not violate the systemic integrity of the project.
 
-## Current Status
-The project is currently in its primary phase of operation.
+## 4. Current Status
+As of the latest telemetry, the system status is as follows:
 
-*   **Files Processed:** Manual
-*   **Latest File:** `nexus_core.js`
-*   **DNA Signature:** None
-*   **Context Summary:** Initial State
 *   **Saturation Status:** Active
+*   **Files Processed:** 1030
+*   **Latest File Modified:** `config/policy/PVE_heuristics.json`
+*   **DNA Signature:** None
+*   **Active Policy:** `ConflictResolutionMatrix_V1`
+*   **Operational Heuristics:**
+    *   **HRC_001 (Scaling_Constraint_Clash):** Triggers `SCALE_DOWN_WITH_GRACEFUL_DECOMMISSION` when `GODM.max_replicas` exceeds `ResourceMgr.available_slots`. Priority is determined by `MIN(QoS_Priority, Operational_Stability)`.
+    *   **HRC_002 (Dependency_Violation):** Monitors state mismatch where `Component.status == 'DOWN'` while `Dependency.status == 'UP'`.
