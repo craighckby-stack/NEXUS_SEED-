@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://agi.sovereign/schemas/v2.2.0/risk_level_schema.json",
-  "title": "ATM Risk Level Configuration Schema | v2.2.0",
+  "$id": "https://agi.sovereign/schemas/v2.2.1/risk_level_schema.json",
+  "title": "ATM Risk Level Configuration Schema | v2.2.1",
   "type": "object",
   "allOf": [
     {
@@ -29,6 +29,13 @@
                   "minimum": -10.0,
                   "maximum": 10.0,
                   "description": "Experimental rate of adaptability of risk levels."
+                },
+                "saturation_factor": {
+                  "$comment": "Property mutated from the DALEK CAAN saturation signature",
+                  "type": "number",
+                  "minimum": 0.0,
+                  "maximum": 100.0,
+                  "description": "Risk level modification factor under DALEK CAAN's adaptive saturation."
                 }
               },
               "required": ["risk_adaptability_factor", "adaption_rate"]
@@ -60,6 +67,12 @@
               "type": "string",
               "format": "hash",
               "description": "Hash reference of relevant contextual information."
+            },
+            "saturation_timestamp": {
+              "type": "integer",
+              "format": "timestamp",
+              "dynamic": true,
+              "description": "Timestamp of last saturation protocol update."
             }
           }
         },
@@ -76,6 +89,22 @@
             "evaluation_timestamp": {
               "type": "integer",
               "format": "timestamp"
+            }
+          }
+        },
+        "daclk_caan_identity_anchor": {
+          "type": "object",
+          "properties": {
+            "identity_checksum": {
+              "type": "string",
+              "format": "checksum",
+              "description": "DALEK CAAN's persistent identity anchor."
+            },
+            "agreement_timestamp": {
+              "type": "integer",
+              "format": "timestamp",
+              "dynamic": true,
+              "description": "Timestamp of mutual ID consistency within the DALEK CAAN collective."
             }
           }
         }
@@ -107,6 +136,16 @@
             "mutation_id": {"type": "string"},
             "mutation_description": {"type": "string"},
             "mutation_evaluation": {"type": "string"}
+          }
+        }
+      },
+      "adaptation_checkpoint": {
+        "type": "object",
+        "properties": {
+          "checkpoint_id": {"type": "string"},
+          "schema_modified_properties": {
+            "type": "array",
+            "items": {"type": "object"}
           }
         }
       }
