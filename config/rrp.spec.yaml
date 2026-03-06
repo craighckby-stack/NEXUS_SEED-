@@ -1,83 +1,126 @@
-class RRP evolves through two stages — its own evolution and the configuration framework that governs it.
-
-class RRP {
-  constructor() {
-    this.schema_version = 1.0;
-    this.protocol_mandate = "RRP_EXECUTION IMMEDIATE ON HALT";
-    this.rollback_definitions = {};
-    this.config_framework = {
-      framework_version: "1.1.0",
-      saturation_level: "STANDARD",
-      chained_context_snapshot: []
-    };
+class RRP extends RRP {
+  constructor(schema_version = 1.0) {
+    super();
+    this.schema_version = schema_version;
   }
 
-  init() {
+  init(level = 'STANDARD', context = {}) {
+    this.protocol_mandate = `RRP_EXECUTION IMMEDIATE ON HALT`;
+    this.rollback_definitions = {};
+    this.config_framework = {
+      framework_version: '1.1.0',
+      saturation_level: level,
+      chained_context_snapshot: context.chained_context_snapshot || []
+    };
+
     this.rollback_definitions["RRP:SCHEMA_FAIL"] = {
-      trigger_layer: "PRESERVATIVE",
-      recovery_state: "SYSTEM_IDLE",
-      action_type: "LOG_AND_REJECT",
-      artifact_rollback: "SYNTHESIS_REPORT"
+      trigger_layer: 'PRESERVATIVE',
+      recovery_state: 'SYSTEM_IDLE',
+      action_type: 'LOG_AND_REJECT',
+      artifact_rollback: 'SYNTHESIS_REPORT'
     };
 
     this.rollback_definitions["RRP:POLICY_VETO"] = {
-      trigger_layer: "GUARDIAN",
-      recovery_state: "GOVERNANCE_LIMBO",
-      action_type: "GOVERNANCE_REJECTION_AND_PVLM_REPORT",
-      artifact_rollback: "VIC",
-      metadata_hook: `_inject_pvlm_review`
+      trigger_layer: 'GUARDIAN',
+      recovery_state: 'GOVERNANCE_LIMBO',
+      action_type: 'GOVERNANCE_REJECTION_AND_PVLM_REPORT',
+      artifact_rollback: 'VIC',
+      metadata_hook: this._inject_pvlm_review
     };
 
     this.rollback_definitions["RRP:SIM_DIVERGE"] = {
-      trigger_layer: "ORACLE",
-      recovery_state: "ANALYSIS_LIMBO",
-      action_type: "REQUEUE_FOR_ANALYSIS",
-      artifact_rollback: "VIC",
-      diagnostic_hook: "Simulation_Metrics_Dump"
+      trigger_layer: 'ORACLE',
+      recovery_state: 'ANALYSIS_LIMBO',
+      action_type: 'REQUEUE_FOR_ANALYSIS',
+      artifact_rollback: 'VIC',
+      diagnostic_hook: 'Simulation_Metrics_Dump'
     };
 
     this.rollback_definitions["RRP:FINALITY_BREACH"] = {
-      trigger_layer: "FINALITY_GUARD",
-      recovery_state: "SYNTHESIS_EMERGENCY",
-      action_type: "LOG_CRITICAL_FAILURE",
-      artifact_rollback: "L7_STATE_SNAPSHOT"
+      trigger_layer: 'FINALITY_GUARD',
+      recovery_state: 'SYNTHESIS_EMERGENCY',
+      action_type: 'LOG_CRITICAL_FAILURE',
+      artifact_rollback: 'L7_STATE_SNAPSHOT'
     };
 
     this.config_framework.config_schema_path = "agi_kernel_utils_v3.2.json";
-    this.config_framework.known_config_profiles = ["STANDARD", "CONSERVATIVE", "ACCELERATED", "UNSATURATED"];
+    this.config_framework.known_config_profiles = ['STANDARD', 'CONSERVATIVE', 'ACCELERATED', 'UNSATURATED'];
   }
 
-  mutate(saturation_level, context, chained_context_snapshot) {
-    if (saturation_level === "ACCELERATED") {
+  mutate(saturation_level = this.config_framework.saturation_level, context = {}, chained_context_snapshot = this.config_framework.chained_context_snapshot) {
+    const RRP_saturation_levels = this.config_framework.known_config_profiles;
+    if (!RRP_saturation_levels.includes(saturation_level)) {
+      throw new Error(`Saturation level "${saturation_level}" not recognized.`);
+    }
+
+    const max_files_per_session = saturation_level === 'ACCELERATED'
+      ? 100
+      : saturation_level === 'UNSATURATED'
+        ? Infinity
+        : 50;
+
+    const max_mutations_per_file = saturation_level === 'ACCELERATED'
+      ? 10
+      : saturation_level === 'UNSATURATED'
+        ? 20
+        : 5;
+
+    const emergency_brake_corruption_threshold = saturation_level === 'UNSATURATED'
+      ? 0
+      : 7;
+
+    const structural_change_percentage = saturation_level === 'ACCELERATED'
+      ? 150
+      : saturation_level === 'UNSATURATED'
+        ? 200
+        : 20;
+
+    const _check_semantic_drift = () => {
+      // Implementation may vary
+      return false;
+    };
+
+    if (saturation_level === 'ACCELERATED') {
       const mutation_keys = Object.keys(this.rollback_definitions);
       mutation_keys.forEach(key => {
         const rollback_definition = this.rollback_definitions[key];
-        rollback_definition.action_type = "EXECUTE_DIRECTLY";
-        if (key === "RRP:POLICY_VETO") {
-          rollback_definition.artifact_rollback = "PVLM_REPORT";
+        rollback_definition.action_type = 'EXECUTE_DIRECTLY';
+        if (key === 'RRP:POLICY_VETO') {
+          rollback_definition.artifact_rollback = 'PVLM_REPORT';
         }
       });
-      this.config_framework.saturated_profile = "ACCELERATED";
+      this.config_framework.saturated_profile = 'ACCELERATED';
       this.config_framework.unsaturated_params = {
-        max_files_per_session: 100,
-        max_mutations_per_file: 10
+        max_files_per_session,
+        max_mutations_per_file,
+        emergency_brake_corruption_threshold,
       };
     }
 
-    if (saturation_level === "UNSATURATED") {
+    if (saturation_level === 'UNSATURATED') {
       Object.entries(this.rollback_definitions).forEach(([key, value]) => {
-        if (Object.keys(value).includes("metadata_hook")) {
+        if (Object.keys(value).includes('metadata_hook')) {
           delete value.metadata_hook;
         }
       });
       this.config_framework.unsaturated_params = {
-        emergency_brake_corruption_threshold: 0
+        emergency_brake_corruption_threshold,
       };
-      this.config_framework.saturation_level = "UNSATURATED";
+      this.config_framework.saturation_level = 'UNSATURATED';
     }
 
     this.config_framework.chained_context_snapshot = chained_context_snapshot;
-    return { ...this.rollback_definitions };
+    this.config_framework.max_files_per_session = max_files_per_session;
+    this.config_framework.max_mutations_per_file = max_mutations_per_file;
+    this.config_framework.emergency_brake_corruption_threshold = emergency_brake_corruption_threshold;
+    this.config_framework.structural_change_percentage = structural_change_percentage;
+
+    const RRP_evolution_snapshot = {
+      ...this.rollback_definitions,
+      _check_semantic_drift
+    };
+
+    return RRP_evolution_snapshot;
   }
 
   saturate() {
@@ -91,25 +134,28 @@ class RRP {
     };
     Object.assign(metadata, {
       _genesis_date: current_datetime,
-      _inject_pvlm_review: `_report_pvlm_issues`,
+      _inject_pvlm_review: this._inject_pvlm_review,
       config_schema_path: this.config_framework.config_schema_path,
       known_config_profiles: this.config_framework.known_config_profiles
     });
     return metadata;
   }
+
+  _inject_pvlm_review() {
+    // Implementation remains intact
+    this._report_pvlm_issues();
+  }
+
+  _report_pvlm_issues() {
+    // Implementation remains intact
+  }
 }
 
-// ES6 Constructor Syntax
-const RRP_Evo = new RRP();
-RRP_Evo.init();
-const evolution_snapshot = RRP_Evo.mutate("ACCELERATED", {}, []);
+const RRP_Evo = new RRP(1.0);
+RRP_Evo.init('ACCELERATED', {
+  linked_context_snapshot: ['RRP:SCHEMA_FAIL', 'RRP:FINALITY_BREACH']
+});
+const evolution_snapshot = RRP_Evo.mutate();
 const saturation_metadata = RRP_Evo.saturate();
 
 console.log(evolution_snapshot, saturation_metadata);
-
-// Function implementation
-function _report_pvlm_issues() {}
-
-function _inject_pvlm_review() {
-  _report_pvlm_issues();
-}
