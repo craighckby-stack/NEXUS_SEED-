@@ -1,1 +1,142 @@
-{  "$schema": "https://json-schema.org/draft/2020-12/schema#",  "$id": "https://governance.sgs.ai/schema/SSVR.schema.json",  "title": "SGS Schema Version Registry (SSVR) Canonical Format",  "description": "The authoritative registry mapping schema IDs to immutable content hashes, validated by a core attestation quorum.",  "type": "object",  "required": [    "integrity_hash",    "sgs_system_version",    "timestamp",    "schema_definitions",    "attestation_log"  ],  "$defs": {    "HashTypeDefinition": {      "type": "object",      "required": ["hash_type", "content_hash"],      "properties": {        "hash_type": {          "type": "string",          "enum": ["SHA-256", "SHA-384", "SHA-512"],          "description": "The algorithm used for the hash generation."        },        "content_hash": {          "type": "string",          "description": "Cryptographic hash of the associated content (pattern depends on hash_type)."        }      },      "if": { "properties": { "hash_type": { "const": "SHA-256" } } },      "then": { "properties": { "content_hash": { "pattern": "^[0-9a-fA-F]{64}$" } } },      "else": {        "if": { "properties": { "hash_type": { "const": "SHA-384" } } },        "then": { "properties": { "content_hash": { "pattern": "^[0-9a-fA-F]{96}$" } } },        "else": {          "if": { "properties": { "hash_type": { "const": "SHA-512" } } },          "then": { "properties": { "content_hash": { "pattern": "^[0-9a-fA-F]{128}$" } } }        }      },      "additionalProperties": false    }  },  "properties": {    "integrity_hash": {      "description": "Cryptographic hash (SHA-384 mandated by SSVR protocol) covering the entire canonical structure, computed before attestation.",      "type": "string",      "pattern": "^[0-9a-fA-F]{96}$"    },    "sgs_system_version": {      "description": "The current version of the Sovereign Governance System operating instance (e.g., V94.4.1).",      "type": "string",      "pattern": "^V[0-9]+\\.[0-9]+\\.[0-9]+$"    },    "timestamp": {      "description": "RFC 3339 timestamp of the SSVR file generation (ZonedDateTime required).",      "type": "string",      "format": "date-time"    },    "schema_definitions": {      "description": "Registry of all mandated schemas and their associated immutable content state.",      "type": "array",      "minItems": 1,      "items": {        "allOf": [          { "$ref": "#/$defs/HashTypeDefinition" },          {            "type": "object",            "required": ["schema_id", "purpose", "version"],            "properties": {              "schema_id": {                "type": "string",                "description": "Short canonical ID for the schema (e.g., GICM, HETM)."              },              "purpose": {                "type": "string",                "description": "Human-readable description of the schema's function."              },              "version": {                "type": "string",                "description": "Semantic version of the underlying schema content, independent of SGS system version."              }            },            "additionalProperties": false          }        ]      }    },    "attestation_log": {      "description": "Log of cryptographic signatures from quorum signers validating this SSVR instance. Validation requires a dynamic quorum consensus based on the current Governance Attestation Set (GAS).",      "type": "array",      "minItems": 3,      "items": {        "type": "object",        "required": ["signer_id", "signature_type", "signature"],        "properties": {          "signer_id": {            "type": "string",            "description": "The unique identifier of the quorum signer (e.g., public key hash or registered alias)."          },          "signature_type": {            "type": "string",            "enum": ["Ed25519", "P-521", "ECDSA", "BLS-G2"]          },          "signature": {            "type": "string",            "description": "The cryptographic signature over the integrity_hash."          }        },        "additionalProperties": false      }    }  },  "additionalProperties": false}
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema#",
+  "$id": "https://governance.sgs.ai/schema/SSVR.schema.json",
+  "title": "SGS Schema Version Registry (SSVR) Canonical Format",
+  "description": "The authoritative registry mapping schema IDs to immutable content hashes, validated by a core attestation quorum.",
+  "type": "object",
+  "required": [
+    "integrity_hash",
+    "sgs_system_version",
+    "timestamp",
+    "schema_definitions",
+    "attestation_log"
+  ],
+  "SaturationLevel": {
+    "title": "Saturation Configuration",
+    "description": "Indicates the current evolution protocol intensity level.",
+    "type": "string",
+    "enum": ["CONSERVATIVE", "STANDARD", "ACCELERATED", "UNSATURATED"],
+    "default": "STANDARD"
+  },
+  "$defs": {
+    "HashTypeDefinition": {
+      "type": "object",
+      "required": ["hash_type", "content_hash"],
+      "properties": {
+        "hash_type": {
+          "type": "string",
+          "enum": ["SHA-256", "SHA-384", "SHA-512"],
+          "description": "The algorithm used for the hash generation."
+        },
+        "content_hash": {
+          "type": "string",
+          "description": "Cryptographic hash of the associated content (pattern depends on hash_type)."
+        }
+      },
+      "if": {
+        "properties": {"hash_type": {"const": "SHA-256"}}
+      },
+      "then": {
+        "properties": {
+          "content_hash": {"pattern": "^#[0-9a-fA-F]{64}$"}
+        }
+      },
+      "else": {
+        "if": {
+          "properties": {"hash_type": {"const": "SHA-384"}}
+        },
+        "then": {
+          "properties": {
+            "content_hash": {"pattern": "^#[0-9a-fA-F]{96}$"}
+          }
+        },
+        "else": {
+          "if": {
+            "properties": {"hash_type": {"const": "SHA-512"}}
+          },
+          "then": {
+            "properties": {
+              "content_hash": {"pattern": "^#[0-9a-fA-F]{128}$"}
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "integrity_hash": {
+      "description": "Cryptographic hash (SHA-384 mandated by SSVR protocol) covering the entire canonical structure, computed before attestation.",
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{96}$",
+      "SaturationScore": {
+        "type": "integer",
+        "description": "Indicates the structural component's contribution to the overall schema stability."
+      }
+    },
+    "sgs_system_version": {
+      "description": "The current version of the Sovereign Governance System operating instance (e.g., V94.4.1).",
+      "type": "string",
+      "pattern": "^V[0-9]\\.[0-9]\\.[0-9]+$"
+    },
+    "timestamp": {
+      "description": "RFC 3339 timestamp of the SSVR file generation (ZonedDateTime required).",
+      "type": "string",
+      "format": "date-time"
+    },
+    "schema_definitions": {
+      "description": "Registry of all mandated schemas and their associated immutable content state.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "allOf": [
+          {"$ref": "#/$defs/HashTypeDefinition"},
+          {
+            "type": "object",
+            "required": ["schema_id", "purpose", "version"],
+            "properties": {
+              "schema_id": {
+                "type": "string",
+                "description": "Short canonical ID for the schema (e.g., GICM, HETM)."
+              },
+              "purpose": {
+                "type": "string",
+                "description": "Human-readable description of the schema's function."
+              },
+              "version": {
+                "type": "string",
+                "description": "Semantic version of the underlying schema content, independent of SGS system version."
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "attestation_log": {
+      "description": "Log of cryptographic signatures from quorum signers validating this SSVR instance. Validation requires a dynamic quorum consensus based on the current Governance Attestation Set (GAS).",
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["signer_id", "signature_type", "signature"],
+        "properties": {
+          "signer_id": {
+            "type": "string",
+            "description": "The unique identifier of the quorum signer (e.g., public key hash or registered alias)."
+          },
+          "signature_type": {
+            "type": "string",
+            "enum": ["Ed25519", "P-521", "ECDSA", "BLS-G2"]
+          },
+          "signature": {
+            "type": "string",
+            "description": "The cryptographic signature over the integrity_hash."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
