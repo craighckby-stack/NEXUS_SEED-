@@ -1,23 +1,79 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "GVDM_V94.1.schema.json",
-  "title": "Governance/Veto/Dependency Manifest Schema V94.1",
+  "$id": "GVDM_V94.2.schema.json",
+  "title": "Governance/Veto/Dependency Manifest Schema V94.2",
   "type": "object",
   "properties": {
-    "manifestId": { "type": "string", "format": "uuid", "description": "A unique identifier for auditing purposes." },
-    "manifestVersion": { "type": "string", "pattern": "^GVDM-V[0-9]+\\.[0-9]+\\.[0-9]+$" },
-    "certifiedTime": { "type": "string", "format": "date-time" },
-    "validUntil": { "type": "string", "format": "date-time", "description": "The time this manifest should be considered deprecated or requires re-certification." },
-    "manifestSignatureKeyId": { "type": "string", "description": "Key identifier used for cryptographically signing this manifest." },
+    "manifestId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "A unique identifier for auditing purposes.",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "manifestVersion": {
+      "type": "string",
+      "pattern": "^GVDM-V(\\d+\\.(\\d+\\.(\\d+)?(\\.\\d+)?))"
+    },
+    "certifiedTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "validUntil": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The time this manifest should be considered deprecated or requires re-certification."
+    },
+    "manifestSignatureKeyId": {
+      "type": "string",
+      "description": "Key identifier used for cryptographically signing this manifest."
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "author": {
+          "type": "string",
+          "description": "The author of the manifest."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The time the manifest was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The time the manifest was last updated."
+        },
+        "updatedBy": {
+          "type": "string",
+          "description": "The author who last updated the manifest."
+        }
+      },
+      "required": ["author", "createdAt", "updatedAt"]
+    },
     "dependencyIntegrityChecklist": {
       "type": "array",
       "items": {
         "type": "object",
         "required": ["name", "hash", "minimumVersion"],
         "properties": {
-          "name": { "type": "string" },
-          "hash": { "type": "string", "pattern": "^sha256:[a-fA-F0-9]{32,64}$" },
-          "minimumVersion": { "type": "string" }
+          "name": {
+            "type": "string",
+            "description": "The name of the dependency."
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^sha256:[a-fA-F0-9]{32,64}$",
+            "description": "The hash of the dependency."
+          },
+          "minimumVersion": {
+            "type": "string",
+            "description": "The minimum required version of the dependency."
+          },
+          "maxVersion": {
+            "type": "string",
+            "description": "The maximum allowed version of the dependency."
+          }
         }
       }
     },
@@ -27,12 +83,23 @@
         "type": "object",
         "required": ["acronym", "version"],
         "properties": {
-          "acronym": { "type": "string" },
-          "version": { "type": "string" }
+          "acronym": {
+            "type": "string",
+            "description": "The acronym of the certified manifest."
+          },
+          "version": {
+            "type": "string",
+            "description": "The version of the certified manifest."
+          }
         }
       }
     },
-    "policyIntegrityThreshold": { "type": "number", "minimum": 0.0, "maximum": 1.0 }
+    "policyIntegrityThreshold": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "The threshold for policy integrity, representing the likelihood of policy violations."
+    }
   },
   "required": [
     "manifestId",
