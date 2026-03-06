@@ -1,10 +1,10 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Nexus Runtime Safety Policy V2.0.1",
+  "title": "Nexus Runtime Safety Policy V3.0.2",
   "description": "Decouples real-time operational limits from pre-deployment confidence metrics. Includes specific safeguards for AGI autonomous evolution cycles.",
   "type": "object",
-  "properties": {
-    "runtime_contexts": {
+  "policies": {
+    "runtime_safeties": {
       "type": "object",
       "properties": {
         "production": {
@@ -21,13 +21,98 @@
         "production",
         "stg",
         "dev"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "production": {
+                "allOf": [
+                  {
+                    "properties": {
+                      "latency_deviation_ms": {
+                        "minimum": {
+                          "$data": "#saturation.schema.version"
+                        }
+                      },
+                      "memory_spike_limit_pct": {
+                        "minimum": {
+                          "$data": "#saturation.schema.version"
+                        },
+                        "maximum": {
+                          "$data": "#saturation.schema.version"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "latency_deviation_ms": {
+                        "maximum": {
+                          "$data": "#saturation.schema.velocity_limits.max_structural_change"
+                        }
+                      },
+                      "memory_spike_limit_pct": {
+                        "maximum": {
+                          "$data": "#saturation.schema.velocity_limits.max_structural_change"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "then": {
+              "properties": {
+                "autonomous_cycle_time_increase_pct": {
+                  "minimum": {
+                    "$data": "#saturation.schema.velocity_limits.max_structural_change"
+                  }
+                },
+                "latency_deviation_ms": {
+                  "greaterThan": 10
+                },
+                "memory_spike_limit_pct": {
+                  "greaterThan": 5
+                }
+              }
+            }
+          }
+        }
       ]
     },
-    "autonomous_governance": {
-      "$ref": "#/definitions/agile_gov"
-    },
-    "safety_thresholds": {
-      "$ref": "#/definitions/safety_threshold"
+    "agile_governance": {
+      "type": "object",
+      "properties": {
+        "autonomous_cycle_time_increase_pct": {
+          "type": "number",
+          "default": 12,
+          "minimum": 0,
+          "maximum": 30
+        },
+        "novelty_integration_rollback_delay_s": {
+          "type": "integer",
+          "default": 60,
+          "minimum": 30,
+          "maximum": 300
+        },
+        "novelty_integration_threshold": {
+          "type": "number",
+          "default": 0.005,
+          "minimum": 0.001
+        },
+        "novelty_integration_frequency": {
+          "type": "number",
+          "default": 1,
+          "minimum": 1
+        }
+      },
+      "required": [
+        "autonomous_cycle_time_increase_pct",
+        "novelty_integration_rollback_delay_s",
+        "novelty_integration_threshold",
+        "novelty_integration_frequency"
+      ]
     }
   },
   "definitions": {
@@ -85,32 +170,23 @@
           "default": 60,
           "minimum": 30,
           "maximum": 300
+        },
+        "novelty_integration_threshold": {
+          "type": "number",
+          "default": 0.005,
+          "minimum": 0.001
+        },
+        "novelty_integration_frequency": {
+          "type": "number",
+          "default": 1,
+          "minimum": 1
         }
       },
       "required": [
         "autonomous_cycle_time_increase_pct",
-        "novelty_integration_rollback_delay_s"
-      ]
-    },
-    "safety_threshold": {
-      "type": "object",
-      "properties": {
-        "threshold1": {
-          "type": "number",
-          "default": 0.5,
-          "minimum": 0,
-          "maximum": 1
-        },
-        "threshold2": {
-          "type": "number",
-          "default": 0.3,
-          "minimum": 0,
-          "maximum": 1
-        }
-      },
-      "required": [
-        "threshold1",
-        "threshold2"
+        "novelty_integration_rollback_delay_s",
+        "novelty_integration_threshold",
+        "novelty_integration_frequency"
       ]
     }
   }
