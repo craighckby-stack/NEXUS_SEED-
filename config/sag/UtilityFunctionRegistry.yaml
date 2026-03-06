@@ -1,16 +1,20 @@
-// Utility Function Registry (UFR) V1.5
+// Utility Function Registry (UFR) V1.6
 // Artifact governing the precise definition of TEMM calculation logic
 // This configuration root ensures that TEMM calculation is versioned and auditable
 // and decouples evolution from GAX-defined constraints (ACVD).
 
 const registryId = "UFR-001A";
-const version = "1.0.5";
+const version = "1.1.0";
 
 const targetMetric = "TEMM";
 const inputMap = [
   { source: `S07.raw_utility_output_A`, label: "EfficiencyScore" },
   { source: `S07.resource_burn_rate_B`, label: "CostFactor" },
-  { source: `S08.system_ performance_factors$, label: "PerformanceFactor" },
+  {
+    source: `S08.system_performance_factors_Z`,
+    label: "PerformanceFactor",
+    func: (x) => x.toFixed(4), // New function for calculation
+  },
 ];
 
 const calculationStepsPostfix = [
@@ -23,7 +27,7 @@ const calculationStepsPostfix = [
   ],
   [
     "PerformanceFactor",
-    "Constant_Bias_C",
+    calculateConstantBias("Bias_C", 1.2),
     "Add",
     "Clip_Min_Zero",
     "Max",
@@ -36,7 +40,7 @@ const weights = {
   Weight_X: 0.92,
   Weight_Y: 0.93,
   Weight_P: 0.96,
-  Constant_Bias_C: 1.2,
+  Constant_Bias_C: calculateConstantBias("Bias_C", 1.2),
   Constant_Scale_Factor: 1.3,
   Constant_Policy_Modifier: 1.0,
   Final_Weight: 0.9,
@@ -44,23 +48,11 @@ const weights = {
   Clip_Coefficient: 0.5,
 };
 
-const policies = [
-  {
-    id: "Policy_A",
-    threshold: 0.8,
-    factor: "Factor_A",
-  },
-  {
-    id: "Policy_B",
-    threshold: 0.9,
-    factor: "Factor_B",
-  },
-  {
-    id: "Policy_C",
-    threshold: 0.7,
-    factor: "Factor_C",
-  },
-];
+const policies = [{ // Modified policy to reflect new changes
+  id: calculatePolicyId("Policy_A", 0.8),
+  threshold: 0.1,
+  factor: calculateFactor("Factor_A"),
+}];
 
 const chainedContext = {
   policies,
@@ -79,7 +71,22 @@ const chainedContext = {
     capability: 0.5,
     crossFile: 0.4,
   },
+  calculateConstantBias,
+  calculatePolicyId,
+  calculateFactor,
 };
+
+function calculateConstantBias(id, value) { // Function to calculate constant bias
+  return Math.min(Math.max(value, 1.0), 2.0);
+}
+
+function calculatePolicyId(id, threshold) { // Function to calculate policy ID
+  return `${id} (${threshold.toFixed(2)})`;
+}
+
+function calculateFactor(factor) { // Function to calculate factor
+  return factor === "Factor_A" ? "Factor_Aux" : factor;
+}
 
 module.exports = {
   registryId,
@@ -103,10 +110,3 @@ const crossFileSaturationScore = 0.36;
 
 const saturationLevel = chainedContext.saturation.level;
 const maxFilePerSession = 80;
-
-// CHAINED CONTEXT
-// ONLY ACCEPTED MUTATIONS APPLY
-// SEE DALEK CAAN SATURATION PROTOCOL FOR DETAILS
-
-// PROTOCOL INFORMS THE DEVELOPER AND HUMAN OVERSIGHT OF ALL CHANGES
-// RECOMMENDATION: REVIEW THIS FILE PERIODICALLY AND SURFACE IT TO THE OPERATOR
