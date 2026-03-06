@@ -20,6 +20,20 @@
           "if": {
             "not": ["$current_os"]
           }
+        },
+        "connection_uri": {
+          "if": {
+            "not": ["$asset_id"]
+          }
+        }
+      },
+      "validate": {
+        "type": "function",
+        "args": {
+          "$current_os": "string"
+        },
+        "body": {
+          "not": ["$current_os"]
         }
       }
     }
@@ -28,15 +42,23 @@
     "plan_id": {
       "type": "string",
       "format": "uuid",
-      "description": "Unique ID for this specific execution attempt."
+      "description": "Unique ID for this specific execution attempt.",
+      "minLength": 36
     },
     "playbook_reference": {
       "type": "string",
-      "description": "The ID of the Playbook from the catalog being executed."
+      "description": "The ID of the Playbook from the catalog being executed.",
+      "maxLength": 255
     },
     "target_instance": {
       "type": "Reference",
-      "$ref": "#/definitions/TargetInstance"
+      "$ref": "#/definitions/TargetInstance",
+      "validate": {
+        "type": "function",
+        "body": {
+          "$ref": "#/definitions/TargetInstance"
+        }
+      }
     },
     "runtime_inputs": {
       "type": "object",
@@ -44,6 +66,18 @@
         "dynamic_variables": {
           "if": {
             "not": ["$static_playbook"]
+          }
+        }
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "variable_name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["integer", "boolean", "string"]
           }
         }
       }
@@ -67,11 +101,23 @@
         "dependencies": {
           "dependency_stack": {
             "if": {
-              "not": ["$estimated_duration"]
+              "allOf": [
+                {
+                  "type": "boolean"
+                }
+              ]
             }
           }
         }
       }
+    },
+    "executor_service_id": {
+      "type": "string",
+      "description": "Unique identifier for the executor service."
+    },
+    "siphoning_agent_hash": {
+      "type": "string",
+      "description": "Hash value of the siphoning agent instance."
     }
   },
   "additionalProperties": false,
@@ -80,10 +126,37 @@
       "if": {
         "allOf": [
           {
+            "not": ["$static_playbook"]
+          },
+          {
             "type": "boolean"
           }
         ]
       }
+    },
+    "target_instance": {
+      "if": {
+        "allOf": [
+          {
+            "type": "Reference"
+          },
+          {
+            "$ref": "#/definitions/TargetInstance"
+          }
+        ]
+      }
     }
-  }
+  },
+  "links": [
+    {
+      "href": "/remediation_execution_plan_schema_v1",
+      "rel": "current",
+      "title": "Current remediation execution plan schema"
+    },
+    {
+      "href": "/remediation_execution_plan_schema_v2",
+      "rel": "previous",
+      "title": "Previous remediation execution plan schema"
+    }
+  ]
 }
