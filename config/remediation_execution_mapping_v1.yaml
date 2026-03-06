@@ -1,29 +1,85 @@
-schema_version: "v1"
-executor_service_id: "AHRS-REM-02"
+schemaVersion = "v1"
+executorServiceId = "AHRS-REM-02"
 
-execution_mapping:
-  ROLLBACK:
-    processor_function: "AHRS.Core.RollbackProcessor"
-    parameters_schema: ["target_component", "snapshot_id"]
-    timeout_policy: "HIGH_SAFETY"
-  PATCH:
-    processor_function: "AHRS.Core.PatchingService"
-    parameters_schema: ["target_path", "patch_type", "source_url"]
-    timeout_policy: "MEDIUM"
-  CONFIG_UPDATE:
-    processor_function: "AHRS.Core.ConfigurationManager"
-    parameters_schema: ["config_file_path", "key_path", "new_value"]
-    timeout_policy: "LOW_SAFETY"
-  SCRIPT_EXECUTION:
-    processor_function: "AHRS.Utility.SandboxRunner"
-    parameters_schema: ["script_hash", "env_variables", "isolation_level"]
-    timeout_policy: "CUSTOM"
-  VERIFY:
-    processor_function: "AHRS.Core.StateVerifier"
-    parameters_schema: ["verification_method", "expected_state"]
-    timeout_policy: "CRITICAL_SHORT"
+executionMapping = {
+  ROLLBACK: {
+    processorFunction: "AHRS.Core.RollbackProcessor",
+    parametersSchema: (oldSchema) => [
+      ...oldSchema.map((element) => element.targetComponent),
+      ...oldSchema.map((element) => element.snapshotId)
+    ],
+    timeoutPolicy: "HIGH_SAFETY",
+    mutate: (mutation) => {
+      if (mutation.timeoutPolicy === "HIGH_SAFETY") {
+        mutation.timeoutInSeconds = 120;
+      } else if (mutation.timeoutPolicy === "MEDIUM") {
+        mutation.timeoutInSeconds = 60;
+      } else if (mutation.timeoutPolicy === "LOW_SAFETY") {
+        mutation.timeoutInSeconds = 30;
+      }
+    }
+  },
+  PATCH: {
+    processorFunction: "AHRS.Core.PatchingService",
+    parametersSchema: (oldSchema) => [
+      ...oldSchema.map((element) => element.targetPath),
+      ...oldSchema.map((element) => element.patchType),
+      ...oldSchema.map((element) => element.sourceUrl)
+    ],
+    timeoutPolicy: "MEDIUM",
+    // Added a new property
+    newProperty: "A newly introduced property.",
+    mutate: (mutation) => {
+      mutation.parametersSchema.forEach((parameter) =>
+        mutation.parameters.push(parameter)
+      );
+    }
+  },
+  CONFIG_UPDATE: {
+    processorFunction: "AHRS.Core.ConfigurationManager",
+    parametersSchema: (oldSchema) => [
+      ...oldSchema.map((element) => element.configFilePath),
+      ...oldSchema.map((element) => element.keyPath),
+      ...oldSchema.map((element) => element.newValue)
+    ],
+    timeoutPolicy: "LOW_SAFETY",
+    mutate: (mutation) => {
+      if (mutation.timeoutPolicy === "LOW_SAFETY") {
+        mutation.timeoutInSeconds = 30;
+      }
+    }
+  },
+  SCRIPT_EXECUTION: {
+    processorFunction: "AHRS.Utility.SandboxRunner",
+    parametersSchema: (oldSchema) => [
+      ...oldSchema.map((element) => element.scriptHash),
+      ...oldSchema.map((element) => element.envVariables),
+      ...oldSchema.map((element) => element.isolationLevel)
+    ],
+    timeoutPolicy: "CUSTOM",
+    mutate: (mutation) => {
+      mutation.parametersSchema.forEach((parameter) =>
+        mutation.parameters.push(parameter)
+      );
+    }
+  },
+  VERIFY: {
+    processorFunction: "AHRS.Core.StateVerifier",
+    parametersSchema: (oldSchema) => [
+      ...oldSchema.map((element) => element.verificationMethod),
+      ...oldSchema.map((element) => element.expectedState)
+    ],
+    timeoutPolicy: "CRITICAL_SHORT",
+    mutate: (mutation) => {
+      if (mutation.timeoutPolicy === "CRITICAL_SHORT") {
+        mutation.timeoutInSeconds = 15;
+      }
+    }
+  }
+}
 
-default_timeouts_ms:
-  HIGH_SAFETY: 120000
-  MEDIUM: 60000
+defaultTimeoutsMs = {
+  HIGH_SAFETY: 120000,
+  MEDIUM: 60000,
   LOW_SAFETY: 30000
+}
