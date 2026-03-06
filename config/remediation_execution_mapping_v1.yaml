@@ -1,110 +1,79 @@
 schemaVersion = "v1"
-executorServiceId = "AHRS-REM-03"
+executorServiceId = "AHRS-REM-04"
 
 executionMapping = {
   ROLLBACK: {
-    processorFunction: "AHRS.Core.RollbackProcessor",
-    parametersSchema: (oldSchema) => [
-      ...(oldSchema.map((element) => element.targetComponent)),
-      ...(oldSchema.map((element) => element.snapshotId)),
-      ...(oldSchema.map((element) => element.sourceComponent))
-    ],
+    processorFunction: "AHRS.Core.RollbackProcessorExtension",
+    parametersSchema: (oldSchema) => [...oldSchema.map((element) => element.targetComponent), ...(oldSchema.map((element) => "newComponent"))],
     timeoutPolicy: "HIGH_SAFETY",
     mutate: (mutation) => {
       if (mutation.timeoutPolicy === "HIGH_SAFETY") {
-        mutation.timeoutInSeconds = 120;
-        mutation.parametersSchema.push({ sourceComponent: "NewSourceComponent" });
+        mutation.timeoutInSeconds = 90;
+        mutation.parametersSchema.push({ sourceComponent: "NewSourceComponent", type: "override" });
       } else if (mutation.timeoutPolicy === "MEDIUM") {
         mutation.timeoutInSeconds = 60;
+        mutation.parametersSchema.unshift({ pathToOverride: "NewPathToOverride" });
       } else if (mutation.timeoutPolicy === "LOW_SAFETY") {
-        mutation.timeoutInSeconds = 30;
+        mutation.timeoutInSeconds = 45;
+        mutation.parametersSchema.pop(["errorThreshold"]);
       }
     }
   },
   PATCH: {
-    processorFunction: "AHRS.Core.PatchingService",
-    parametersSchema: (oldSchema) => {
-      const baseParametersSchema = [
-        ...(oldSchema.map((element) => element.targetPath)),
-        ...(oldSchema.map((element) => element.patchType)),
-        ...(oldSchema.map((element) => element.sourceUrl))
-      ];
-      if (baseParametersSchema.length > 3) {
-        return baseParametersSchema;
-      } else {
-        return [...baseParametersSchema, ...(oldSchema.map((element) => "defaultPatchType"))];
-      }
-    },
+    processorFunction: "AHRS.Core.PatchingExtension",
+    parametersSchema: (oldSchema) => [...oldSchema.map((element) => element.targetPath), ...(oldSchema.map((element) => "patchTypeOverride"))],
     timeoutPolicy: "MEDIUM",
-    newProperty: "A newly introduced property.",
     mutate: (mutation) => {
-      mutation.parametersSchema.forEach((parameter, index) =>
-        mutation.parameters.push(parameter, index)
-      );
-      if (mutation.parametersSchema.some((parameter) => parameter.includes("defaultPatchType"))) {
-        mutation.parametersSchema.push({ newPatchType: "NewPatchType" });
+      mutation.parametersSchema.forEach((parameter) => {
+        mutation.parameters.push(parameter.name, mutation.parametersSchema.indexOf(parameter));
+        mutation.parametersSchema.splice(mutation.parametersSchema.indexOf(parameter), 1);
+      });
+      if (!mutation.parametersSchema.some((parameter) => parameter.hasOwnProperty("override"))) {
+        mutation.parametersSchema.push({ newPatchType: "NewPatchType", type: "new" });
       }
     }
   },
   CONFIG_UPDATE: {
-    processorFunction: "AHRS.Core.ConfigurationManager",
-    parametersSchema: (oldSchema) => {
-      const baseParametersSchema = [
-        ...(oldSchema.map((element) => element.configFilePath)),
-        ...(oldSchema.map((element) => element.keyPath)),
-        ...(oldSchema.map((element) => element.newValue))
-      ];
-      if (baseParametersSchema.length > 2) {
-        return baseParametersSchema;
-      } else {
-        return [...baseParametersSchema, ...(oldSchema.map((element) => element.defaultKeyValue))];
-      }
-    },
-    timeoutPolicy: "LOW_SAFETY",
+    processorFunction: "AHRS.Core.ConfigurationManagerUpdater",
+    parametersSchema: (oldSchema) => [...oldSchema.map((element) => element.configFilePath), ...oldSchema.map((element) => "defaultKeyValue")],
+    timeoutPolicy: "HIGH_SAFETY",
     mutate: (mutation) => {
-      if (mutation.timeoutPolicy === "LOW_SAFETY") {
+      if (mutation.timeoutPolicy === "HIGH_SAFETY") {
+        mutation.timeoutInSeconds = 120;
+        mutation.parametersSchema.filter((element) => element.hasOwnProperty("type") || element.hasOwnProperty("override"));
+      } else if (mutation.timeoutPolicy === "MEDIUM") {
+        mutation.timeoutInSeconds = 60;
+        mutation.parametersSchema.unshift({ keyPath: "NewKeyPath" });
+      } else if (mutation.timeoutPolicy === "LOW_SAFETY") {
         mutation.timeoutInSeconds = 30;
-        mutation.parametersSchema.forEach((parameter) =>
-          mutation.parameters.push(parameter, "DefaultValue")
-        );
+        mutation.parametersSchema.pop(["defaultKeyValue"]);
       }
     }
   },
   SCRIPT_EXECUTION: {
-    processorFunction: "AHRS.Utility.SandboxRunner",
-    parametersSchema: (oldSchema) => {
-      const baseParametersSchema = [
-        ...(oldSchema.map((element) => element.scriptHash)),
-        ...(oldSchema.map((element) => element.envVariables)),
-        ...(oldSchema.map((element) => element.isolationLevel))
-      ];
-      if (baseParametersSchema.length < 3) {
-        return [...baseParametersSchema, ...(oldSchema.map((element) => "scriptHash-override"))];
-      } else {
-        return baseParametersSchema;
-      }
-    },
+    processorFunction: "AHRS.Utility.SandboxRunnerEnhanced",
+    parametersSchema: (oldSchema) => [...oldSchema.map((element) => element.scriptHash), ...(oldSchema.map((element) => "newHash"))],
     timeoutPolicy: "CUSTOM",
     mutate: (mutation) => {
-      mutation.parametersSchema.forEach((parameter) =>
-        mutation.parameters.push(parameter, mutation.parametersSchema.indexOf(parameter) % 2 === 0 ? "Even" : "Odd")
-      );
+      mutation.parametersSchema.forEach((parameter) => {
+        mutation.parameters.push(parameter.name, mutation.parametersSchema.indexOf(parameter) % 3 === 0 ? "New" : "Overridden");
+        parameter.type === "override" ? mutation.parametersSchema.splice(mutation.parametersSchema.indexOf(parameter), 1) : null;
+      });
+      if (mutation.parametersSchema.some((parameter) => typeof parameter === "string")) {
+        mutation.parametersSchema.forEach((parameter, index) => parameter = { ...parameter, value: index });
+      }
     }
   },
   VERIFY: {
-    processorFunction: "AHRS.Core.StateVerifier",
-    parametersSchema: (oldSchema) => [
-      ...(oldSchema.map((element) => element.verificationMethod)),
-      ...(oldSchema.map((element) => element.expectedState)),
-      ...(oldSchema.map((element) => element.errorThreshold))
-    ],
-    timeoutPolicy: "CRITICAL_SHORT",
-    mutate: (mutation, mutatedIntent) => {
-      if (mutation.timeoutPolicy === "CRITICAL_SHORT") {
-        mutation.timeoutInSeconds = 15;
-        mutation.parametersSchema.push({ errorThreshold: "CustomErrorThreshold" });
-        const similarity = mutatedIntent.cosineSimilarity(mutation.parametersSchema);
-        if (similarity < 0.65) {
+    processorFunction: "AHRS.Core.StateVerifierExtended",
+    parametersSchema: (oldSchema) => [...oldSchema.map((element) => element.verificationMethod), ...oldSchema.map((element) => "customErrorThreshold")],
+    timeoutPolicy: "CUSTOM",
+    mutate: (mutation) => {
+      if (mutation.timeoutPolicy === "CUSTOM") {
+        mutation.timeoutInSeconds = 90;
+        mutation.parametersSchema.filter(parameter => parameter.hasOwnProperty("customThreshold"));
+        const similarity = mutation.parametersSchema.map(element => element.value).reduce((a, b) => a + b, 0) / mutation.parametersSchema.length;
+        if (similarity < 0.6) {
           throw new Error("Semantic drift threshold exceeded");
         }
       }
@@ -113,7 +82,7 @@ executionMapping = {
 }
 
 defaultTimeoutsMs = {
-  HIGH_SAFETY: 120000,
-  MEDIUM: 60000,
-  LOW_SAFETY: 30000
+  HIGH_SAFETY: 150000,
+  MEDIUM: 90000,
+  LOW_SAFETY: 45000
 }
