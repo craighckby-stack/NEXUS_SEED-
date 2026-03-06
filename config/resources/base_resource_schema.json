@@ -1,18 +1,66 @@
 {
-  "schemaId": "RES_SCH_V1",
+  "schemaId": "RES_SCH_V2",
   "resourceTypes": {
     "KubeCluster": {
       "requiredFields": ["provider", "region", "minNodes"],
       "validationRules": {
-        "minNodes": "int_gt_0"
-      }
+        "minNodes": "int_gt_0",
+        "maxNodes": "int_lt_node_capacity"
+      },
+      "additionalFields": [
+        {
+          "name": "nodeCapacity",
+          "type": "int",
+          "description": "Maximum number of nodes allowed"
+        },
+        {
+          "name": "scalingPolicy",
+          "type": "str",
+          "description": "Scaling strategy for the cluster"
+        }
+      ]
     },
     "Postgres": {
       "requiredFields": ["endpoint", "port", "engineVersion"],
-      "validationRules": {}
+      "validationRules": {
+        "engineVersion": "str_matches_pattern(^[1-9\\./]+$)"
+      },
+      "additionalFields": [
+        {
+          "name": "storageSize",
+          "type": "int",
+          "description": "Size of storage allocated to the Postgres instance"
+        },
+        {
+          "name": "connectionOptions",
+          "type": "obj",
+          "description": "Postgres connection options"
+        }
+      ]
     }
   },
   "metadata": {
-    "description": "Defines the mandatory structure and validation for resource entries referenced by GODM."
+    "description": "Defines the mandatory structure and validation for resource entries referenced by GODM, integrated with QoS and allocation strategies",
+    "qosTierPrioritization": {
+      "Tier1_Critical": 120, 
+      "Tier2_High": 100,
+      "Tier3_Medium": 70
+    },
+    "allocationStrategies": [
+      {
+        "qosTier": "Tier1_Critical",
+        "strategy": "Predictive_Priority_Aware",
+        "failover": "AllocateMinimalAndWarn",
+        "maxWaitMs": 30,
+        "lookbackWindowDays": 30
+      },
+      {
+        "qosTier": "Tier2_High",
+        "strategy": "JIT_X_Scaled",
+        "failover": "QueueUntilAvailable",
+        "maxWaitMs": 250,
+        "MLModel": "LSTM_Demand_Predictor_V4"
+      }
+    ]
   }
 }
