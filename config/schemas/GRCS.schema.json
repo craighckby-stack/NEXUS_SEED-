@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schemas.agi.system/GRCS/v2",
-  "title": "Governance, Risk, Compliance, and Security Configuration (v2)",
+  "$id": "https://schemas.agi.system/GRCS/v3",
+  "title": "Governance, Risk, Compliance, and Security Configuration (v3)",
   "description": "Defines global policies, standards, risks, controls, and audit configuration for the autonomous system.",
   "type": "object",
   "properties": {
@@ -27,33 +27,58 @@
       "type": "array",
       "description": "Configuration mapping controls against required regulatory frameworks.",
       "items": { "$ref": "#/$defs/ComplianceStandard" }
+    },
+    "governance": {
+      "type": "object",
+      "description": "Repository governance metadata.",
+      "properties": {
+        "repositoryOwner": { "type": "string" },
+        "repositoryName": { "type": "string" },
+        "commitHash": { "type": "string" }
+      },
+      "required": ["repositoryOwner", "repositoryName", "commitHash"]
     }
   },
-  "required": ["schemaVersion", "policies", "controls", "risks"],
+  "required": ["schemaVersion", "policies", "controls", "risks", "complianceStandards"],
+  "links": {
+    "aggregratedata": {
+      "href": "/v2/risk_aggregate",
+      "title": "Risk Aggregate Metrics",
+      "method": "GET"
+    },
+    "details": {
+      "href": "/v2/control/{controlId}",
+      "title": "Details of identified control",
+      "method": "GET"
+    }
+  },
   "$defs": {
     "Version": {
-        "type": "object",
-        "description": "Metadata about the dataset version.",
-        "properties": {
-            "version": { "type": "string", "description": "Semantic version of the GRCS data set." },
-            "updatedAt": { "type": "string", "format": "date-time", "description": "Timestamp of the last update." }
-        },
-        "required": ["version", "updatedAt"]
+      "type": "object",
+      "description": "Metadata about the dataset version.",
+      "properties": {
+        "version": { "type": "string", "description": "Semantic version of the GRCS data set." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Timestamp of the last update." }
+      },
+      "required": ["version", "updatedAt"]
     },
     "ControlStatus": {
       "type": "string",
       "enum": ["Implemented", "In Review", "Awaiting Policy Refinement", "Mitigated", "Planned", "Exempted"]
     },
     "Policy": {
-        "type": "object",
-        "description": "A top-level governance mandate.",
-        "properties": {
-            "policyId": { "type": "string", "format": "ulid", "description": "Unique identifier for the policy." },
-            "title": { "type": "string" },
-            "mandate": { "type": "string", "description": "Detailed description of the required governance mandate." },
-            "scope": { "type": "string", "enum": ["Global", "Development", "Runtime", "Data", "Security", "Financial"], "description": "The area or domain the policy covers." }
-        },
-        "required": ["policyId", "title", "mandate", "scope"]
+      "type": "object",
+      "description": "A top-level governance mandate.",
+      "properties": {
+        "policyId": { "type": "string", "format": "ulid", "description": "Unique identifier for the policy." },
+        "title": { "type": "string" },
+        "mandate": { "type": "string", "description": "Detailed description of the required governance mandate." },
+        "scope": {
+          "type": "string",
+          "enum": ["Global", "Development", "Runtime", "Data", "Security", "Financial"]
+        }
+      },
+      "required": ["policyId", "title", "mandate", "scope"]
     },
     "Control": {
       "type": "object",
@@ -65,10 +90,19 @@
         "description": { "type": "string" },
         "owner": { "type": "string" },
         "status": { "$ref": "#/$defs/ControlStatus" },
-        "verificationPolicyId": { "type": "string", "format": "ulid", "description": "Reference to the necessary Audit Policy (GRCS_AuditPolicy).", "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"  },
+        "verificationPolicyId": {
+          "type": "string",
+          "format": "ulid",
+          "description": "Reference to the necessary Audit Policy (GRCS_AuditPolicy).",
+          "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+        },
         "mitigates": {
           "type": "array",
-          "items": { "type": "string", "format": "ulid", "description": "References to RiskAssessment IDs mitigated by this control." }
+          "items": {
+            "type": "string",
+            "format": "ulid",
+            "description": "References to RiskAssessment IDs mitigated by this control."
+          }
         }
       },
       "required": ["controlId", "policyRef", "name", "status"]
@@ -81,12 +115,24 @@
         "vulnerabilityRef": { "type": "string", "description": "Reference to the underlying vulnerability, threat or asset affected." },
         "likelihood": { "type": "integer", "minimum": 1, "maximum": 5 },
         "impact": { "type": "integer", "minimum": 1, "maximum": 5 },
-        "inherentRiskScore": { "type": "integer", "description": "Risk score prior to control application (Likelihood * Impact).", "readOnly": true },
-        "residualRiskScore": { "type": "integer", "description": "Calculated score (after controls are applied).", "readOnly": true },
+        "inherentRiskScore": {
+          "type": "integer",
+          "description": "Risk score prior to control application (Likelihood * Impact).",
+          "readOnly": true
+        },
+        "residualRiskScore": {
+          "type": "integer",
+          "description": "Calculated score (after controls are applied).",
+          "readOnly": true
+        },
         "isCritical": { "type": "boolean", "default": false },
         "associatedControls": {
           "type": "array",
-          "items": { "type": "string", "format": "ulid", "description": "References to Control IDs applied for mitigation." }
+          "items": {
+            "type": "string",
+            "format": "ulid",
+            "description": "References to Control IDs applied for mitigation."
+          }
         }
       },
       "required": ["riskId", "name", "likelihood", "impact"]
@@ -103,10 +149,17 @@
           "items": {
             "type": "object",
             "properties": {
-              "requirementRef": { "type": "string", "description": "Specific regulatory requirement ID (e.g., A.12.1.2)." },
+              "requirementRef": {
+                "type": "string",
+                "description": "Specific regulatory requirement ID (e.g., A.12.1.2)."
+              },
               "controlMapping": {
                 "type": "array",
-                "items": { "type": "string", "format": "ulid", "description": "Mapped Control IDs addressing this requirement." }
+                "items": {
+                  "type": "string",
+                  "format": "ulid",
+                  "description": "Mapped Control IDs addressing this requirement."
+                }
               }
             },
             "required": ["requirementRef", "controlMapping"]
