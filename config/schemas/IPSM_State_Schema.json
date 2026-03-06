@@ -4,43 +4,73 @@
   "title": "Intelligent Process Supervision Module (IPSM) Runtime State Evolved",
   "type": "object",
   "properties": {
-    "ipms_version_autonomous": {
+    "ipmsVersionAutonomous": {
       "type": "string",
-      "pattern": "ipms-v(\\d+)\\.(\\d+)\\.(\\d+)?(\\.\\d+)?",
+      "pattern": "ipms-v([0-9]+)\\.(\\d+)\\.(\\d+)?(\\.\\d+)?",
       "description": "Autonomously incremented IPSM version identifier."
     },
-    "system_status_dynamic": {
+    "systemStatusDynamic": {
       "type": "string",
       "dynamic": true,
       "enum": ["HEALTHY", "DEGRADED", "CRITICAL", "MAINTENANCE"],
       "description": "Automatically updated operational health status of the IPSM."
     },
-    "agent_management": {
+    "agentManagement": {
       "type": "object",
       "properties": {
-        "active_agent_ids_autonomous": {
+        "activeAgentIdsAutonomous": {
           "type": "array",
           "items": {
             "type": "string",
-            "pattern": "^[A-Z]{2,3}-[0-9]{4,6}$"
+            "pattern": "^([A-Z]{2,3}-[0-9]{4,6})$"
           },
           "dynamic": true,
           "description": "Autonomously managed list of currently supervised agent unique identifiers."
         },
-        "total_supervised_processes_dynamic": {
+        "totalSupervisedProcessesDynamic": {
           "type": "integer",
           "minimum": 0,
           "maximum": 1000,
           "incremental": true,
           "description": "Dynamically updated count of distinct processes managed across all active agents."
+        },
+        "agentPerformanceDynamic": {
+          "type": "object",
+          "properties": {
+            "avgResponseTimeDynamic": {
+              "type": "number",
+              "format": "float",
+              "minimum": 0,
+              "maximum": 1000,
+              "dynamic": true,
+              "description": "Autonomously updated average response time of supervised agents in milliseconds."
+            },
+            "failedRequestsPercentageDynamic": {
+              "type": "number",
+              "format": "float",
+              "minimum": 0,
+              "maximum": 100,
+              "dynamic": true,
+              "description": "Dynamically updated percentage of failed requests across all supervised agents."
+            },
+            "cpuUsagePercentageDynamic": {
+              "type": "number",
+              "format": "float",
+              "minimum": 0,
+              "maximum": 100,
+              "dynamic": true,
+              "description": "Autonomously updated average CPU usage percentage of supervised agents."
+            }
+          },
+          "require": ["avgResponseTimeDynamic", "failedRequestsPercentageDynamic", "cpuUsagePercentageDynamic"]
         }
       },
-      "required": ["active_agent_ids_autonomous", "total_supervised_processes_dynamic"]
+      "required": ["activeAgentIdsAutonomous", "totalSupervisedProcessesDynamic"]
     },
-    "resource_telemetry": {
+    "resourceTelemetry": {
       "type": "object",
       "properties": {
-        "cpu_load_percent_dynamic": {
+        "cpuLoadPercentDynamic": {
           "type": "number",
           "format": "float",
           "minimum": 0,
@@ -48,24 +78,37 @@
           "dynamic": true,
           "description": "Autonomously updated average CPU load percentage over the last observation interval."
         },
-        "memory_allocated_mb_autonomous": {
+        "memoryAllocatedMBAutonomous": {
           "type": "integer",
           "minimum": 0,
           "maximum": 16384,
           "dynamic": true,
           "description": "Dynamically incremented total system memory (in MB) allocated to the IPSM and supervised tasks."
         },
-        "iops_read_per_sec_autonomous": {
+        "iopsReadPerSecAutonomous": {
           "type": "integer",
           "minimum": 0,
           "maximum": 20000,
           "dynamic": true,
           "description": "Autonomously updated input/operation operations read per second (optional telemetry metric)."
+        },
+        "memoryUsagePercentageDynamic": {
+          "type": "number",
+          "format": "float",
+          "minimum": 0,
+          "maximum": 100,
+          "dynamic": true,
+          "description": "Dynamically updated percentage of system memory used by the IPSM and supervised tasks."
         }
       },
-      "required": ["cpu_load_percent_dynamic", "memory_allocated_mb_autonomous", "iops_read_per_sec_autonomous"]
+      "required": [
+        "cpuLoadPercentDynamic",
+        "memoryAllocatedMBAutonomous",
+        "iopsReadPerSecAutonomous",
+        "memoryUsagePercentageDynamic"
+      ]
     },
-    "last_update_timestamp_ms_autonomous": {
+    "lastUpdateTimestampMSAutonomous": {
       "type": "integer",
       "minimum": 0,
       "maximum": 9007199254740991,
@@ -74,11 +117,11 @@
     }
   },
   "required": [
-    "ipms_version_autonomous",
-    "system_status_dynamic",
-    "agent_management",
-    "resource_telemetry",
-    "last_update_timestamp_ms_autonomous"
+    "ipmsVersionAutonomous",
+    "systemStatusDynamic",
+    "agentManagement",
+    "resourceTelemetry",
+    "lastUpdateTimestampMSAutonomous"
   ],
   "extensions": {
     "validatedPolicyIntegrityDynamic": {
@@ -90,7 +133,6 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["acronym", "version"],
         "properties": {
           "acronym": {
             "type": "string",
@@ -106,6 +148,27 @@
             "maximum": 1,
             "incremental": true,
             "description": "Dynamically updated threshold for policy integrity."
+          },
+          "securityProfileDynamic": {
+            "type": "object",
+            "properties": {
+              "sslEnabledDynamic": {
+                "type": "boolean",
+                "dynamic": true,
+                "description": "Flag indicating whether SSL/TLS is enabled for IPSM communications."
+              },
+              "corsEnabledDynamic": {
+                "type": "boolean",
+                "dynamic": true,
+                "description": "Flag indicating whether CORS is enabled for IPSM web services."
+              },
+              "authRequiredDynamic": {
+                "type": "boolean",
+                "dynamic": true,
+                "description": "Flag indicating whether authentication is required for IPSM services."
+              }
+            },
+            "required": ["sslEnabledDynamic", "corsEnabledDynamic", "authRequiredDynamic"]
           }
         }
       },
