@@ -1,123 +1,131 @@
-#!/bin/sh
+#!/usr/bin/env bash
+set -e
 
-# 配置项
+# --- NEXUS CONFIGURATION ---
 DIST_DIR="./mini-services-dist"
+TRACE_ID="${TRACE_ID:-$(date +%s%N | cut -b1-16)}"
+GENKIT_VERSION="1.2.0-siphon"
+PIDS=()
 
-# 存储所有子进程的 PID
-pids=""
+# --- OP: TELEMETRY_ENGINE ---
+genkit_telemetry_emit() {
+    local op=$1 status=$2 meta=$3
+    local timestamp; timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    printf '{"ts":"%s","op":"%s","status":"%s","traceId":"%s","meta":%s}\n' \
+        "$timestamp" "$op" "$status" "$TRACE_ID" "$meta"
+}
 
-# 清理函数：优雅关闭所有服务
-cleanup() {
-    echo ""
-    echo "🛑 正在关闭所有服务..."
-    
-    # 发送 SIGTERM 信号给所有子进程
-    for pid in $pids; do
+# --- OP: KERNEL_INVOKER ---
+genkit_invoke_op() {
+    local op_id=$1 op_fn=$2
+    genkit_telemetry_emit "$op_id" "START" "{}"
+    if $op_fn; then
+        genkit_telemetry_emit "$op_id" "COMPLETED" "{}"
+    else
+        genkit_telemetry_emit "$op_id" "FAILED" '{"error":"execution_interrupted"}'
+        return 1
+    fi
+}
+
+# --- OP: SIGNAL_RECEPTOR ---
+_terminate() {
+    genkit_telemetry_emit "nexus_shutdown" "INIT" '{"active_pids":['"$(IFS=,; echo "${PIDS[*]}")"']}'
+    for pid in "${PIDS[@]}"; do
         if kill -0 "$pid" 2>/dev/null; then
-            service_name=$(ps -p "$pid" -o comm= 2>/dev/null || echo "unknown")
-            echo "   关闭进程 $pid ($service_name)..."
             kill -TERM "$pid" 2>/dev/null
         fi
     done
     
-    # 等待所有进程退出（最多等待 5 秒）
-    sleep 1
-    for pid in $pids; do
-        if kill -0 "$pid" 2>/dev/null; then
-            # 如果还在运行，等待最多 4 秒
-            timeout=4
-            while [ $timeout -gt 0 ] && kill -0 "$pid" 2>/dev/null; do
-                sleep 1
-                timeout=$((timeout - 1))
-            done
-            # 如果仍然在运行，强制关闭
-            if kill -0 "$pid" 2>/dev/null; then
-                echo "   强制关闭进程 $pid..."
-                kill -KILL "$pid" 2>/dev/null
-            fi
-        fi
+    # Graceful wait with timeout logic
+    local timeout=5
+    while [ $timeout -gt 0 ] && [ ${#PIDS[@]} -gt 0 ]; do
+        local still_running=()
+        for pid in "${PIDS[@]}"; do
+            kill -0 "$pid" 2>/dev/null && still_running+=("$pid")
+        done
+        PIDS=("${still_running[@]}")
+        [[ ${#PIDS[@]} -eq 0 ]] && break
+        sleep 1
+        ((timeout--))
     done
-    
-    echo "✅ 所有服务已关闭"
+
+    # Force purge remaining entropy
+    for pid in "${PIDS[@]}"; do
+        kill -9 "$pid" 2>/dev/null || true
+    done
+
+    genkit_telemetry_emit "nexus_shutdown" "SUCCESS" "{}"
+    exit 0
 }
 
-main() {
-    echo "🚀 开始启动所有 mini services..."
-    
-    # 检查 dist 目录是否存在
-    if [ ! -d "$DIST_DIR" ]; then
-        echo "ℹ️  目录 $DIST_DIR 不存在"
-        return
+trap _terminate SIGINT SIGTERM
+
+# --- OP: RUNTIME_ASSERTION ---
+op_validate_environment() {
+    if [[ ! -d "$DIST_DIR" ]]; then
+        genkit_telemetry_emit "runtime_check" "CRITICAL" '{"missing":"'"$DIST_DIR"'"}'
+        return 1
     fi
-    
-    # 查找所有 mini-service-*.js 文件
-    service_files=""
-    for file in "$DIST_DIR"/mini-service-*.js; do
-        if [ -f "$file" ]; then
-            if [ -z "$service_files" ]; then
-                service_files="$file"
-            else
-                service_files="$service_files $file"
-            fi
-        fi
-    done
-    
-    # 计算服务文件数量
-    service_count=0
-    for file in $service_files; do
-        service_count=$((service_count + 1))
-    done
-    
-    if [ $service_count -eq 0 ]; then
-        echo "ℹ️  未找到任何 mini service 文件"
-        return
+    if ! command -v bun >/dev/null 2>&1; then
+        genkit_telemetry_emit "runtime_check" "CRITICAL" '{"missing":"bun"}'
+        return 1
     fi
-    
-    echo "📦 找到 $service_count 个服务，开始启动..."
-    echo ""
-    
-    # 启动每个服务
-    for file in $service_files; do
-        service_name=$(basename "$file" .js | sed 's/mini-service-//')
-        echo "▶️  启动服务: $service_name..."
-        
-        # 使用 bun 运行服务（后台运行）
-        bun "$file" &
-        pid=$!
-        if [ -z "$pids" ]; then
-            pids="$pid"
-        else
-            pids="$pids $pid"
-        fi
-        
-        # 等待一小段时间检查进程是否成功启动
-        sleep 0.5
-        if ! kill -0 "$pid" 2>/dev/null; then
-            echo "❌ $service_name 启动失败"
-            # 从字符串中移除失败的 PID
-            pids=$(echo "$pids" | sed "s/\b$pid\b//" | sed 's/  */ /g' | sed 's/^ *//' | sed 's/ *$//')
-        else
-            echo "✅ $service_name 已启动 (PID: $pid)"
-        fi
-    done
-    
-    # 计算运行中的服务数量
-    running_count=0
-    for pid in $pids; do
-        if kill -0 "$pid" 2>/dev/null; then
-            running_count=$((running_count + 1))
-        fi
-    done
-    
-    echo ""
-    echo "🎉 所有服务已启动！共 $running_count 个服务正在运行"
-    echo ""
-    echo "💡 按 Ctrl+C 停止所有服务"
-    echo ""
-    
-    # 等待所有后台进程
-    wait
 }
 
-main
+# --- OP: SERVICE_DISCOVERY ---
+op_discover_services() {
+    SERVICES=($(find "$DIST_DIR" -maxdepth 1 -name "mini-service-*.js"))
+    if [[ ${#SERVICES[@]} -eq 0 ]]; then
+        genkit_telemetry_emit "discovery" "IDLE" '{"count":0}'
+        return 1
+    fi
+}
 
+# --- OP: NEXUS_ACTIVATION ---
+op_activate_services() {
+    for svc in "${SERVICES[@]}"; do
+        local svc_id; svc_id=$(basename "$svc" .js | sed 's/mini-service-//')
+        
+        # Execute binary within restricted scope
+        bun "$svc" >> "service-${svc_id}.log" 2>&1 &
+        local pid=$!
+        
+        # Immediate health check
+        sleep 0.3
+        if kill -0 "$pid" 2>/dev/null; then
+            PIDS+=("$pid")
+            genkit_telemetry_emit "spawn" "SUCCESS" '{"id":"'"$svc_id"'","pid":'"$pid"'}'
+        else
+            genkit_telemetry_emit "spawn" "FAILED" '{"id":"'"$svc_id"'"}'
+        fi
+    done
+
+    if [[ ${#PIDS[@]} -gt 0 ]]; then
+        genkit_telemetry_emit "nexus_state" "ACTIVE" '{"nodes":'${#PIDS[@]}'}'
+        wait
+    else
+        genkit_telemetry_emit "nexus_state" "HALT" '{"error":"zero_active_nodes"}'
+        return 1
+    fi
+}
+
+# --- SIPHON ENGINE EXECUTION FLOW ---
+execute_genkit_pipeline() {
+    genkit_telemetry_emit "pipeline_init" "INIT" '{"dist":"'"$DIST_DIR"'"}'
+
+    local pipeline=(
+        "runtime:assert|op_validate_environment"
+        "svc:discovery|op_discover_services"
+        "nexus:activate|op_activate_services"
+    )
+
+    for stage in "${pipeline[@]}"; do
+        IFS="|" read -r sid fn <<< "$stage"
+        genkit_invoke_op "$sid" "$fn" || {
+            genkit_telemetry_emit "pipeline_crash" "FATAL" '{"stage":"'"$sid"'"}'
+            exit 1
+        }
+    done
+}
+
+execute_genkit_pipeline "$@"
