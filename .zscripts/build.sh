@@ -2,106 +2,99 @@
 
 # [DALEK_CAAN SIPHON ENGINE v3.1]
 # ARCHITECTURAL PRECISION: Google/Genkit Pattern Siphon
-# MODULE: BUILD_PIPELINE_ORCHESTRATOR
+# MODULE: GENKIT_FLOW_ORCHESTRATOR
+# EVOLUTION: ROUND 2/5
 
 set -euo pipefail
 
-# --- CONFIGURATION SCHEMA ---
+# --- GENKIT SCHEMA DEFINITIONS ---
 readonly PROJECT_ROOT="${NEXTJS_PROJECT_DIR:-/home/z/my-project}"
 readonly SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-readonly BUILD_ID="${BUILD_ID:-$(date +%s)}"
-readonly OUTPUT_DIR="/tmp/genkit_build_${BUILD_ID}"
-readonly NEXT_DIST="${OUTPUT_DIR}/next-service-dist"
+readonly TRACE_ID="build_$(date +%s)_$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 8 | head -n 1)"
+readonly OUTPUT_DIR="/tmp/genkit_artifacts/${TRACE_ID}"
+readonly ASSET_MANIFEST="${OUTPUT_DIR}/manifest.json"
 
-# --- TELEMETRY & LOGGING ---
-log_info() { echo -e "\033[0;34m[GENKIT:INFO]\033[0m $1"; }
-log_success() { echo -e "\033[0;32m[GENKIT:SUCCESS]\033[0m $1"; }
-log_error() { echo -e "\033[0;31m[GENKIT:ERROR]\033[0m $1" >&2; }
-
-cleanup() {
-    local exit_code=$?
-    if [ $exit_code -ne 0 ]; then
-        log_error "Pipeline fragmented at exit code $exit_code. Inspecting entropy..."
-    fi
-}
-trap cleanup EXIT
-
-# --- VALIDATION LAYER ---
-validate_environment() {
-    if [[ ! -d "$PROJECT_ROOT" ]]; then
-        log_error "Target workspace not found: $PROJECT_ROOT"
-        exit 1
-    fi
-    mkdir -p "$OUTPUT_DIR"
-    mkdir -p "$NEXT_DIST"
+# --- TELEMETRY SUBSYSTEM ---
+log_event() {
+    local level=$1
+    local message=$2
+    local timestamp
+    timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    printf '{"timestamp":"%s","level":"%s","traceId":"%s","message":"%s"}\n' \
+        "$timestamp" "$level" "$TRACE_ID" "$message"
 }
 
-# --- CORE ACTIONS ---
-action_build_next() {
-    log_info "Siphoning Next.js artifacts..."
+step_start() { log_event "INFO" "STEP_START: $1"; }
+step_done() { log_event "INFO" "STEP_COMPLETE: $1"; }
+step_fail() { log_event "ERROR" "STEP_FAILED: $1 - $2"; exit 1; }
+
+# --- FLOW ACTIONS ---
+action_initialize_context() {
+    step_start "context_init"
+    [[ ! -d "$PROJECT_ROOT" ]] && step_fail "context_init" "Missing PROJECT_ROOT"
+    mkdir -p "$OUTPUT_DIR/dist"
+    echo "{\"traceId\":\"$TRACE_ID\",\"createdAt\":\"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\"}" > "$ASSET_MANIFEST"
+    step_done "context_init"
+}
+
+action_compile_frontend() {
+    step_start "frontend_compilation"
+    cd "$PROJECT_ROOT"
     export NEXT_TELEMETRY_DISABLED=1
     
-    bun install
+    bun install --frozen-lockfile
     bun run build
 
-    # Standalone output resolution
     if [[ -d ".next/standalone" ]]; then
-        log_info "Mapping standalone distribution..."
-        cp -r .next/standalone/. "$NEXT_DIST/"
-        [[ -d ".next/static" ]] && mkdir -p "$NEXT_DIST/.next" && cp -r .next/static "$NEXT_DIST/.next/"
-        [[ -d "public" ]] && cp -r public "$NEXT_DIST/"
+        local target="$OUTPUT_DIR/dist/server"
+        mkdir -p "$target"
+        cp -r .next/standalone/. "$target/"
+        [[ -d ".next/static" ]] && mkdir -p "$target/.next" && cp -r .next/static "$target/.next/"
+        [[ -d "public" ]] && cp -r public "$target/"
     fi
+    step_done "frontend_compilation"
 }
 
-action_build_services() {
-    local service_src="$PROJECT_ROOT/mini-services"
-    if [[ -d "$service_src" ]]; then
-        log_info "Executing mini-service build sequence..."
-        sh "$SCRIPT_DIR/mini-services-install.sh"
-        sh "$SCRIPT_DIR/mini-services-build.sh"
-        
-        cp "$SCRIPT_DIR/mini-services-start.sh" "$OUTPUT_DIR/"
-        chmod +x "$OUTPUT_DIR/mini-services-start.sh"
-    else
-        log_info "No mini-services detected. Skipping module."
+action_siphon_services() {
+    step_start "service_siphon"
+    local service_path="$PROJECT_ROOT/mini-services"
+    if [[ -d "$service_path" ]]; then
+        /usr/bin/env bash "$SCRIPT_DIR/mini-services-install.sh"
+        /usr/bin/env bash "$SCRIPT_DIR/mini-services-build.sh"
+        cp "$SCRIPT_DIR/mini-services-start.sh" "$OUTPUT_DIR/dist/"
     fi
+    step_done "service_siphon"
 }
 
-action_database_sync() {
-    if [[ -d "./db" ]] && [[ "$(ls -A ./db 2>/dev/null)" ]]; then
-        log_info "Initializing database schema projection..."
-        mkdir -p "$OUTPUT_DIR/db"
-        DATABASE_URL="file:$OUTPUT_DIR/db/custom.db" bun run db:push
+action_schema_projection() {
+    step_start "database_projection"
+    if [[ -d "./db" ]]; then
+        DATABASE_URL="file:$OUTPUT_DIR/dist/genkit.db" bun run db:push
     fi
+    step_done "database_projection"
 }
 
-action_package() {
-    log_info "Packaging unified distribution..."
+action_finalize_bundle() {
+    step_start "bundle_finalization"
+    cp "$SCRIPT_DIR/start.sh" "$OUTPUT_DIR/dist/run.sh"
+    chmod +x "$OUTPUT_DIR/dist/run.sh"
     
-    [[ -f "Caddyfile" ]] && cp Caddyfile "$OUTPUT_DIR/"
-    cp "$SCRIPT_DIR/start.sh" "$OUTPUT_DIR/start.sh"
-    chmod +x "$OUTPUT_DIR/start.sh"
-
-    local package_file="${OUTPUT_DIR}.tar.gz"
-    tar -czf "$package_file" -C "$OUTPUT_DIR" .
-    
-    log_success "Deployment artifact generated: $package_file"
-    ls -lh "$package_file"
+    tar -czf "${OUTPUT_DIR}/deployment.tar.gz" -C "$OUTPUT_DIR/dist" .
+    log_event "SUCCESS" "Artifact generated at ${OUTPUT_DIR}/deployment.tar.gz"
+    step_done "bundle_finalization"
 }
 
-# --- MAIN EXECUTION FLOW ---
-main() {
-    log_info "Starting Architectural Build: Round 1/5"
-    validate_environment
+# --- MAIN FLOW EXECUTION ---
+main_flow() {
+    log_event "INFO" "Starting Genkit-Inspired Build Flow Round 2"
     
-    cd "$PROJECT_ROOT" || exit 1
-
-    action_build_next
-    action_build_services
-    action_database_sync
-    action_package
-
-    log_success "Siphon Complete. Precision achieved."
+    action_initialize_context
+    action_compile_frontend
+    action_siphon_services
+    action_schema_projection
+    action_finalize_bundle
+    
+    log_event "INFO" "Flow complete. Precision state: SATURATED"
 }
 
-main "$@"
+main_flow "$@"
