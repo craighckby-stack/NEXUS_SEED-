@@ -1,51 +1,96 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# DALEK_CAAN SIPHON ENGINE V3.1 - ARCHITECTURAL PRECISION PROTOCOL
+# [SOURCE: moby/moby] - EVOLUTION ROUND 1/5 - MUTATION COMMENCED
 
-# dependencies
-node_modules
-/.pnp
+# ARCHITECTURAL BASELINE & SYSTEM VECTORS
+.git
+.github/
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*~
+
+# DEPENDENCY SIPHONS (NODE/YARN/PNP/VENDOR)
+node_modules/
+.pnp
 .pnp.*
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+vendor/
 
-# testing
-/coverage
+# ENGINE BUILD ARTIFACTS & BINARY TARGETS
+bundles/
+binary/
+static/
+dist/
+build/
+out/
+.next/
+.cache/
+.turbo/
+.parcel-cache/
+*.tsbuildinfo
+next-env.d.ts
 
-# next.js
-/.next/
-/out/
+# INTEGRATION MATRICES & QUALITY ASSURANCE
+coverage/
+.nyc_output/
+autogen/
+integration-cli/
+test/
+tests/
+__tests__/
+*.test
+*.spec
+_test.go
+prompt/
 
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+# DIAGNOSTIC TELEMETRY & KERNEL LOGS
+*.log
+*.prof
+*.out
+*-debug.log*
+*-error.log*
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
 local-*
-.claude
-.z-ai-config
 dev.log
-test
-prompt
-
 server.log
-# Skills directory
+
+# ENTROPY CONTROL & SECURITY VECTORS
+.env*
+!.env.example
+*.pem
+*.key
+.ssh/
+.aws/
+secrets/
+
+# TOOLING, ORCHESTRATION & EPHEMERAL STATES
+hack/
+scripts/
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+.docker/
+.vercel/
+.claude/
+.z-ai-config/
+.tmp/
+.temp/
 /skills/
+
+# CROSS-DOMAIN SYNTHESIS
+__pycache__/
+*.pyc
+.pytest_cache/
+target/
+.gradle/
+.m2/
+
+# ROUND 1 MUTATION COMPLETE. ARCHITECTURAL PRECISION IN PROGRESS.
