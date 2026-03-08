@@ -1,9 +1,13 @@
 # DALEK_CAAN SIPHON ENGINE V3.1 - ARCHITECTURAL PRECISION PROTOCOL
-# [SOURCE: moby/moby] - EVOLUTION ROUND 2/5 - PATTERN SATURATION INCREASING
+# [SOURCE: moby/moby] - EVOLUTION ROUND 3/5 - PATTERN SATURATION ESCALATING
 
-# CORE ARCHITECTURAL VECTORS
+# CORE METADATA & VCS VECTORS
 .git
 .github/
+.gitignore
+.gitattributes
+.hg
+.svn
 .vscode/
 .idea/
 .DS_Store
@@ -12,65 +16,59 @@
 *.bak
 *.orig
 
-# MOBY-CENTRIC DEPENDENCY SIPHONS
+# MOBY GOLANG SPECIFIC & VENDORING
 vendor/
+pkg/
+.go/
+bin/
+obj/
 node_modules/
-.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
 .npm/
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
-# ENGINE BUILD ARTIFACTS & BINARY TARGETS
+# ENGINE BUILD PIPELINES & BUNDLES
 bundles/
 binary/
 static/
 dist/
 build/
 out/
-.next/
+_build/
+_objs/
 .cache/
+.next/
 .turbo/
-.parcel-cache/
 *.exe
 *.dll
 *.so
 *.o
 *.a
 *.tsbuildinfo
-next-env.d.ts
 
-# INTEGRATION MATRICES & VALIDATION LOGIC
+# VALIDATION, INTEGRATION & COVERAGE MATRICES
 autogen/
 integration-cli/
-coverage/
-.nyc_output/
 test/
 tests/
 __tests__/
+coverage/
+.nyc_output/
+.cover/
+profiles/
 *.test
 *.spec
 _test.go
-.cover/
-profiles/
-prompt/
+.travis.yml
+.circleci/
 
-# DIAGNOSTIC TELEMETRY & KERNEL PROFILING
+# DIAGNOSTIC TELEMETRY & KERNEL LOGS
 *.log
 *.prof
 *.out
 *-debug.log*
 *-error.log*
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
 local-*
 dev.log
 server.log
@@ -84,18 +82,26 @@ server.log
 .aws/
 secrets/
 
-# TOOLING, ORCHESTRATION & DOCKER ECOSYSTEM
+# DOCUMENTATION & METADATA TARGETS
+docs/
+man/
+contrib/
+MAINTAINERS
+OWNERS
+API.md
+ROADMAP.md
+
+# ORCHESTRATION & CONTAINER INFRASTRUCTURE
 hack/
 scripts/
 Dockerfile*
 .dockerignore
 docker-compose*.yml
 .docker/
-.vercel/
-.claude/
-.z-ai-config/
 .vagrant/
 .terraform/
+.claude/
+.z-ai-config/
 
 # EPHEMERAL FILESYSTEM STATES
 .tmp/
@@ -103,7 +109,7 @@ docker-compose*.yml
 .shm/
 /skills/
 
-# CROSS-DOMAIN SYNTHESIS (PYTHON/RUST/JAVA)
+# CROSS-DOMAIN SYNTHESIS EXCLUSIONS
 __pycache__/
 *.pyc
 .pytest_cache/
@@ -112,4 +118,4 @@ target/
 .gradle/
 .m2/
 
-# ROUND 2 MUTATION COMPLETE. ARCHITECTURAL PRECISION ESCALATING.
+# ROUND 3 MUTATION COMPLETE. ARCHITECTURAL PRECISION OPTIMIZED.
