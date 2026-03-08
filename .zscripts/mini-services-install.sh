@@ -1,65 +1,78 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# 配置项
-ROOT_DIR="/home/z/my-project/mini-services"
+PROJECT_ROOT="${PROJECT_ROOT:-$(pwd)}"
+TRACE_ID=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 12 ; echo '')
 
-main() {
-    echo "🚀 开始批量安装依赖..."
-    
-    # 检查 rootdir 是否存在
-    if [ ! -d "$ROOT_DIR" ]; then
-        echo "ℹ️  目录 $ROOT_DIR 不存在，跳过安装"
-        return
-    fi
-    
-    # 统计变量
-    success_count=0
-    fail_count=0
-    failed_projects=""
-    
-    # 遍历 mini-services 目录下的所有文件夹
-    for dir in "$ROOT_DIR"/*; do
-        # 检查是否是目录且包含 package.json
-        if [ -d "$dir" ] && [ -f "$dir/package.json" ]; then
-            project_name=$(basename "$dir")
-            echo ""
-            echo "📦 正在安装依赖: $project_name..."
-            
-            # 进入项目目录并执行 bun install
-            if (cd "$dir" && bun install); then
-                echo "✅ $project_name 依赖安装成功"
-                success_count=$((success_count + 1))
-            else
-                echo "❌ $project_name 依赖安装失败"
-                fail_count=$((fail_count + 1))
-                if [ -z "$failed_projects" ]; then
-                    failed_projects="$project_name"
-                else
-                    failed_projects="$failed_projects $project_name"
-                fi
-            fi
-        fi
-    done
-    
-    # 汇总结果
-    echo ""
-    echo "=================================================="
-    if [ $success_count -gt 0 ] || [ $fail_count -gt 0 ]; then
-        echo "🎉 安装完成！"
-        echo "✅ 成功: $success_count 个"
-        if [ $fail_count -gt 0 ]; then
-            echo "❌ 失败: $fail_count 个"
-            echo ""
-            echo "失败的项目:"
-            for project in $failed_projects; do
-                echo "  - $project"
-            done
-        fi
-    else
-        echo "ℹ️  未找到任何包含 package.json 的项目"
-    fi
-    echo "=================================================="
+log_telemetry() {
+    local event=$1 status=$2 data=$3
+    printf '{"ts":"%s","traceId":"%s","event":"%s","status":"%s","data":%s}\n' \
+        "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" "$TRACE_ID" "$event" "$status" "$data" >&2
 }
 
-main
+invoke_action() {
+    local id=$1 fn=$2
+    log_telemetry "action_exec" "PENDING" '{"action":"'"$id"'"}'
+    if $fn; then
+        log_telemetry "action_exec" "SUCCESS" '{"action":"'"$id"'"}'
+    else
+        log_telemetry "action_exec" "FAILURE" '{"action":"'"$id"'"}'
+        return 1
+    fi
+}
 
+action_preflight_check() {
+    local deps=("bun" "node")
+    for tool in "${deps[@]}"; do
+        if ! command -v "$tool" >/dev/null 2>&1; then
+            log_telemetry "runtime_error" "MISSING_DEP" '{"binary":"'"$tool"'"}'
+            return 1
+        fi
+    done
+}
+
+action_sync_dependencies() {
+    local success_list=()
+    local failure_list=()
+
+    while IFS= read -r -d '' pkg_json; do
+        local pkg_dir
+        pkg_dir=$(dirname "$pkg_json")
+        local pkg_name
+        pkg_name=$(basename "$pkg_dir")
+
+        log_telemetry "siphon_install" "PROCESSING" '{"pkg":"'"$pkg_name"'","path":"'"$pkg_dir"'"}'
+        
+        if (cd "$pkg_dir" && bun install --quiet --no-progress); then
+            success_list+=("\"$pkg_name\"")
+        else
+            failure_list+=("\"$pkg_name\"")
+        fi
+    done < <(find "$PROJECT_ROOT" -maxdepth 3 -name "package.json" -not -path "*/node_modules/*" -print0)
+
+    log_telemetry "batch_summary" "COMPLETE" \
+        '{"success":['"$(IFS=,; echo "${success_list[*]}")"'],"failed":['"$(IFS=,; echo "${failure_list[*]}")"']}'
+    
+    [[ ${#failure_list[@]} -eq 0 ]]
+}
+
+define_siphon_flow() {
+    log_telemetry "siphon_flow_init" "START" '{"root":"'"$PROJECT_ROOT"'"}'
+
+    local flow=(
+        "validate:runtime|action_preflight_check"
+        "sync:dependencies|action_sync_dependencies"
+    )
+
+    for step in "${flow[@]}"; do
+        IFS="|" read -r id fn <<< "$step"
+        invoke_action "$id" "$fn" || {
+            log_telemetry "siphon_flow_abort" "CRITICAL" '{"step":"'"$id"'"}'
+            exit 1
+        }
+    done
+
+    log_telemetry "siphon_flow_exit" "SUCCESS" '{"precision":"Nexus-grade"}'
+}
+
+define_siphon_flow "$@"
