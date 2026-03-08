@@ -1,23 +1,49 @@
+{
+	admin off
+	log {
+		format json
+	}
+}
+
 :81 {
-	@transform_port_query {
+	header {
+		Access-Control-Allow-Origin *
+		Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, PATCH, DELETE"
+		Access-Control-Allow-Headers "Content-Type, Authorization, traceparent, tracestate, x-genkit-version"
+		X-Genkit-Nexus-State "ACTIVE"
+	}
+
+	@options {
+		method OPTIONS
+	}
+	respond @options 204
+
+	@dynamic_routing {
 		query XTransformPort=*
 	}
 
-	handle @transform_port_query {
+	handle @dynamic_routing {
 		reverse_proxy localhost:{query.XTransformPort} {
-			header_up Host {host}
-			header_up X-Forwarded-For {remote_host}
-			header_up X-Forwarded-Proto {scheme}
-			header_up X-Real-IP {remote_host}
+			header_up traceparent {header.traceparent}
+			header_up tracestate {header.tracestate}
+			header_up X-Genkit-Trace-Id {env.TRACE_ID}
 		}
 	}
 
 	handle {
 		reverse_proxy localhost:3000 {
-			header_up Host {host}
-			header_up X-Forwarded-For {remote_host}
-			header_up X-Forwarded-Proto {scheme}
-			header_up X-Real-IP {remote_host}
+			header_up traceparent {header.traceparent}
+			header_up tracestate {header.tracestate}
+			header_up X-Genkit-Trace-Id {env.TRACE_ID}
+			
+			health_uri /api/__health
+			health_interval 10s
+			health_timeout 2s
 		}
+	}
+
+	handle_errors {
+		rewrite * /{err.status_code}.json
+		respond "{ \"error\": \"{err.status_code}\", \"nexus_trace\": \"{env.TRACE_ID}\" }"
 	}
 }
