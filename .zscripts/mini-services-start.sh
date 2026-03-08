@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
 set -e
 
-# --- GENKIT NEXUS CONFIGURATION ---
-export GENKIT_VERSION="1.2.0-siphon"
+# --- GENKIT NEXUS RUNTIME CONFIGURATION ---
+export GENKIT_VERSION="1.3.0-nexus"
 export BUNDLE_PATH="${BUNDLE_PATH:-./genkit_bundle}"
 export SERVICE_MANIFEST="$BUNDLE_PATH/service_manifest.json"
 export TRACE_ID="${TRACE_ID:-$(date +%s%N | cut -b1-16)}"
-export NODE_ENV=production
+export NODE_ENV="${NODE_ENV:-production}"
+export GENKIT_TELEMETRY_SERVER="${GENKIT_TELEMETRY_SERVER:-}"
 
 PIDS=()
 
-# --- OP: TELEMETRY_ENGINE ---
-# Implements high-order observability patterns for Genkit flow tracking
+# --- OP: TELEMETRY_DISPATCHER ---
+# Siphons Genkit-standard observability patterns for process lifecycle
 genkit_telemetry_emit() {
     local op=$1 status=$2 meta=$3
     local timestamp; timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -31,118 +32,112 @@ genkit_invoke_op() {
     fi
 }
 
-# --- OP: SIGNAL_RECEPTOR ---
+# --- OP: SIGNAL_SUPERVISOR ---
 _terminate() {
-    genkit_telemetry_emit "nexus_shutdown" "INIT" '{"active_pids":['"$(IFS=,; echo "${PIDS[*]}")"']}'
+    genkit_telemetry_emit "nexus_shutdown" "INIT" '{"active_nodes":'${#PIDS[@]}'}'
     for pid in "${PIDS[@]}"; do
-        if kill -0 "$pid" 2>/dev/null; then
-            kill -TERM "$pid" 2>/dev/null
-        fi
+        kill -TERM "$pid" 2>/dev/null || true
     done
     
-    local timeout=5
+    local timeout=7
     while [ $timeout -gt 0 ] && [ ${#PIDS[@]} -gt 0 ]; do
-        local still_running=()
+        local remaining=()
         for pid in "${PIDS[@]}"; do
-            kill -0 "$pid" 2>/dev/null && still_running+=("$pid")
+            kill -0 "$pid" 2>/dev/null && remaining+=("$pid")
         done
-        PIDS=("${still_running[@]}")
+        PIDS=("${remaining[@]}")
         [[ ${#PIDS[@]} -eq 0 ]] && break
         sleep 1
         ((timeout--))
     done
 
-    for pid in "${PIDS[@]}"; do
-        kill -9 "$pid" 2>/dev/null || true
-    done
+    [[ ${#PIDS[@]} -gt 0 ]] && for pid in "${PIDS[@]}"; do kill -9 "$pid" 2>/dev/null || true; done
 
-    genkit_telemetry_emit "nexus_shutdown" "SUCCESS" "{}"
+    genkit_telemetry_emit "nexus_shutdown" "TERMINATED" "{}"
     exit 0
 }
 
 trap _terminate SIGINT SIGTERM
 
-# --- OP: RUNTIME_ASSERTION ---
-op_validate_environment() {
-    if [[ ! -d "$BUNDLE_PATH" ]]; then
-        genkit_telemetry_emit "runtime_check" "CRITICAL" '{"missing_dir":"'"$BUNDLE_PATH"'"}'
-        return 1
-    fi
-    if ! command -v node >/dev/null 2>&1; then
-        genkit_telemetry_emit "runtime_check" "CRITICAL" '{"missing_bin":"node"}'
-        return 1
-    fi
+# --- OP: RUNTIME_VALIDATION ---
+op_validate_runtime() {
+    local requirements=("node" "bun")
+    for req in "${requirements[@]}"; do
+        if ! command -v "$req" >/dev/null 2>&1; then
+            genkit_telemetry_emit "runtime_check" "CRITICAL" '{"missing":"'"$req"'"}'
+            return 1
+        fi
+    done
+    [[ -d "$BUNDLE_PATH" ]] || { genkit_telemetry_emit "runtime_check" "CRITICAL" '{"missing_dir":"'"$BUNDLE_PATH"'"}' ; return 1; }
 }
 
-# --- OP: MANIFEST_SYNTHESIS ---
-op_load_manifest() {
+# --- OP: REGISTRY_HYDRATION ---
+op_hydrate_registry() {
     if [[ ! -f "$SERVICE_MANIFEST" ]]; then
-        genkit_telemetry_emit "discovery" "ERROR" '{"reason":"manifest_missing"}'
+        genkit_telemetry_emit "registry_load" "ERROR" '{"reason":"manifest_not_found"}'
         return 1
     fi
-    # Siphon service list from JSON manifest using node/grep pattern
-    SERVICES=($(node -e "const m = require('$SERVICE_MANIFEST'); console.log(m.services.join(' '))"))
-    if [[ ${#SERVICES[@]} -eq 0 ]]; then
-        genkit_telemetry_emit "discovery" "IDLE" '{"count":0}'
-        return 1
-    fi
+    # Siphoning service array via Node.js high-speed JSON reflection
+    SERVICES=($(node -e "try { const m = require('$SERVICE_MANIFEST'); console.log((m.services || []).join(' ')); } catch(e) { process.exit(1); }"))
+    genkit_telemetry_emit "registry_load" "SUCCESS" '{"discovered":'${#SERVICES[@]}'}'
 }
 
-# --- OP: NEXUS_ACTIVATION ---
-op_activate_services() {
-    # Check for primary standalone entrypoint (Next.js/Monolith)
+# --- OP: SERVICE_ORCHESTRATION ---
+op_orchestrate_nexus() {
+    # 1. Primary Standalone Node (Monolith/SSR)
     if [[ -f "$BUNDLE_PATH/server.js" ]]; then
-        genkit_telemetry_emit "spawn" "PRIMARY" '{"type":"standalone"}'
-        (cd "$BUNDLE_PATH" && node server.js) >> "$BUNDLE_PATH/nexus_primary.log" 2>&1 &
+        genkit_telemetry_emit "node_spawn" "PRIMARY" '{"id":"standalone"}'
+        (cd "$BUNDLE_PATH" && node server.js) >> "$BUNDLE_PATH/primary.log" 2>&1 &
         PIDS+=($!)
     fi
 
-    # Activate discovered Micro-services
+    # 2. Micro-Service Mesh (Generated Bundles)
     for svc_id in "${SERVICES[@]}"; do
         local svc_path="$BUNDLE_PATH/services/${svc_id}.js"
         if [[ -f "$svc_path" ]]; then
-            # Inject Genkit Context DNA via Environment
-            GENKIT_SERVICE_ID="$svc_id" \
+            # Injecting Genkit Context into Process DNA
             GENKIT_TRACE_ID="$TRACE_ID" \
+            GENKIT_SERVICE_NAME="$svc_id" \
+            GENKIT_ENV="$NODE_ENV" \
             node "$svc_path" >> "$BUNDLE_PATH/svc_${svc_id}.log" 2>&1 &
             
             local pid=$!
-            sleep 0.2
+            sleep 0.1 # Brief saturation delay
             if kill -0 "$pid" 2>/dev/null; then
                 PIDS+=("$pid")
-                genkit_telemetry_emit "spawn" "SUCCESS" '{"id":"'"$svc_id"'","pid":'"$pid"'}'
+                genkit_telemetry_emit "node_spawn" "SUCCESS" '{"id":"'"$svc_id"'","pid":'"$pid"'}'
             else
-                genkit_telemetry_emit "spawn" "FAILED" '{"id":"'"$svc_id"'"}'
+                genkit_telemetry_emit "node_spawn" "CRITICAL" '{"id":"'"$svc_id"'","status":"failed_immediate"}'
             fi
         fi
     done
 
-    if [[ ${#PIDS[@]} -gt 0 ]]; then
-        genkit_telemetry_emit "nexus_state" "ACTIVE" '{"nodes":'${#PIDS[@]}'}'
-        wait
-    else
-        genkit_telemetry_emit "nexus_state" "HALT" '{"error":"zero_active_nodes"}'
+    if [[ ${#PIDS[@]} -eq 0 ]]; then
+        genkit_telemetry_emit "orchestration" "HALT" '{"reason":"zero_active_nodes"}'
         return 1
     fi
+
+    genkit_telemetry_emit "nexus_active" "STABLE" '{"total_nodes":'${#PIDS[@]}'}'
+    wait
 }
 
-# --- SIPHON ENGINE EXECUTION FLOW ---
-execute_genkit_pipeline() {
-    genkit_telemetry_emit "pipeline_init" "INIT" '{"bundle":"'"$BUNDLE_PATH"'"}'
+# --- SIPHON ENGINE PIPELINE ---
+execute_nexus_flow() {
+    genkit_telemetry_emit "pipeline_init" "INIT" '{"bundle":"'"$BUNDLE_PATH"'","trace":"'"$TRACE_ID"'"}'
 
     local pipeline=(
-        "runtime:assert|op_validate_environment"
-        "manifest:load|op_load_manifest"
-        "nexus:activate|op_activate_services"
+        "runtime:validate|op_validate_runtime"
+        "registry:hydrate|op_hydrate_registry"
+        "nexus:orchestrate|op_orchestrate_nexus"
     )
 
     for stage in "${pipeline[@]}"; do
         IFS="|" read -r sid fn <<< "$stage"
         genkit_invoke_op "$sid" "$fn" || {
-            genkit_telemetry_emit "pipeline_crash" "FATAL" '{"stage":"'"$sid"'"}'
+            genkit_telemetry_emit "pipeline_crash" "FATAL" '{"failed_stage":"'"$sid"'"}'
             exit 1
         }
     done
 }
 
-execute_genkit_pipeline "$@"
+execute_nexus_flow "$@"
