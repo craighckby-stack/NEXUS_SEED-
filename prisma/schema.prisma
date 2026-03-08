@@ -1,0 +1,141 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// AGI Core Models
+model AGIAgent {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // analyzer, mutator, validator, orchestrator, learner
+  status      String   @default("idle") // idle, active, processing, error
+  capabilities String  // JSON array of capabilities
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tasks       AGITask[]
+  logs        AGILog[]
+}
+
+model AGITask {
+  id          String   @id @default(cuid())
+  agentId     String?
+  agent       AGIAgent? @relation(fields: [agentId], references: [id])
+  type        String   // analyze, mutate, learn, evolve, validate
+  status      String   @default("pending") // pending, running, completed, failed
+  priority    Int      @default(5)
+  input       String   // JSON input data
+  output      String?  // JSON output data
+  error       String?
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Repository {
+  id           String   @id @default(cuid())
+  name         String
+  url          String
+  description  String?
+  fileCount    Int      @default(0)
+  analysisStatus String @default("pending") // pending, analyzing, analyzed, error
+  lastAnalysis DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  patterns     Pattern[]
+  files        CodeFile[]
+}
+
+model CodeFile {
+  id           String   @id @default(cuid())
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id])
+  path         String
+  content      String?
+  language     String?
+  analyzed     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  patterns     Pattern[]
+}
+
+model Pattern {
+  id           String   @id @default(cuid())
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id])
+  fileId       String?
+  file         CodeFile? @relation(fields: [fileId], references: [id])
+  name         String
+  type         String   // architectural, structural, semantic, behavioral
+  description  String
+  code         String   // The pattern code/structure
+  confidence   Float    @default(0.0)
+  usage        Int      @default(0) // How many times this pattern has been used
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Mutation {
+  id           String   @id @default(cuid())
+  sourcePatternId String?
+  targetFileId String?
+  evolutionCycleId String?
+  evolutionCycle EvolutionCycle? @relation(fields: [evolutionCycleId], references: [id])
+  type         String   // insert, modify, delete, refactor
+  description  String
+  beforeCode   String?
+  afterCode    String?
+  status       String   @default("pending") // pending, applied, rolled_back
+  appliedAt    DateTime?
+  rolledBackAt DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model EvolutionCycle {
+  id           String   @id @default(cuid())
+  cycleNumber  Int      @unique
+  status       String   @default("pending") // pending, running, completed, failed
+  patternsExtracted Int @default(0)
+  mutationsApplied Int  @default(0)
+  fitnessScore Float?
+  startTime    DateTime?
+  endTime      DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  mutations    Mutation[]
+}
+
+model AGILog {
+  id        String   @id @default(cuid())
+  agentId   String?
+  agent     AGIAgent? @relation(fields: [agentId], references: [id])
+  level     String   // info, warning, error, debug
+  message   String
+  data      String?  // JSON additional data
+  createdAt DateTime @default(now())
+}
+
+model SystemState {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String   // JSON value
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  role      String   // user, assistant, system
+  content   String
+  sessionId String
+  createdAt DateTime @default(now())
+}
