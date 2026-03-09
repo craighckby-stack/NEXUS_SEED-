@@ -1,21 +1,84 @@
 {
   "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "new-york",
-  "rsc": true,
-  "tsx": true,
-  "tailwind": {
-    "config": "",
-    "css": "src/app/globals.css",
-    "baseColor": "neutral",
-    "cssVariables": true,
-    "prefix": ""
+  "pkg:manifest": {
+    "Default": [
+      { "extension": "tsx", "contentType": "application/vnd.openxmlformats-officedocument.shadcn-logic+xml" },
+      { "extension": "ts", "contentType": "application/vnd.openxmlformats-officedocument.shadcn-logic+xml" },
+      { "extension": "css", "contentType": "application/vnd.openxmlformats-officedocument.shadcn-styling+xml" },
+      { "extension": "json", "contentType": "application/vnd.openxmlformats-package.manifest+xml" }
+    ],
+    "Override": [
+      { "partName": "/src/app/globals.css", "contentType": "text/tailwindcss" },
+      { "partName": "/tailwind.config.js", "contentType": "application/javascript" }
+    ]
   },
-  "aliases": {
-    "components": "@/components",
-    "utils": "@/lib/utils",
-    "ui": "@/components/ui",
-    "lib": "@/lib",
-    "hooks": "@/hooks"
+  "pkg:rels": {
+    "relationships": [
+      { "rId": "rId1", "type": "http://schemas.shadcn.com/logic/ui", "target": "@/components/ui" },
+      { "rId": "rId2", "type": "http://schemas.shadcn.com/logic/utils", "target": "@/lib/utils" },
+      { "rId": "rId3", "type": "http://schemas.shadcn.com/logic/hooks", "target": "@/hooks" },
+      { "rId": "rId4", "type": "http://schemas.shadcn.com/logic/components", "target": "@/components" },
+      { "rId": "rId5", "type": "http://schemas.shadcn.com/logic/lib", "target": "@/lib" }
+    ]
   },
-  "iconLibrary": "lucide"
+  "pkg:document": {
+    "w:body": {
+      "context": "rsc",
+      "compiler": "typescript",
+      "syntax": "tsx",
+      "runtime": "nextjs"
+    }
+  },
+  "pkg:styles": {
+    "docDefaults": {
+      "rPr": {
+        "style": "new-york",
+        "iconLibrary": "lucide"
+      },
+      "pPr": {
+        "baseColor": "neutral",
+        "cssVariables": true
+      }
+    },
+    "definitions": [
+      {
+        "styleId": "shadcn-core-v1",
+        "type": "paragraph",
+        "name": "Global Baseline",
+        "pPr": {
+          "prefix": "",
+          "tailwindConfig": "tailwind.config.js"
+        }
+      },
+      {
+        "styleId": "component-instance",
+        "basedOn": "shadcn-core-v1",
+        "type": "character",
+        "name": "Local Override",
+        "rPr": {
+          "globals": "src/app/globals.css"
+        }
+      }
+    ]
+  },
+  "docProps": {
+    "core": {
+      "xmlns:cp": "http://schemas.openxmlformats.org/package/2006/metadata/core-properties",
+      "dc:creator": "shadcn-ui",
+      "cp:version": "1.1.0",
+      "cp:revision": "3",
+      "cp:lastModifiedBy": "DALEK_CAAN_V3.1",
+      "cp:template": "architectural-precision-v3.1"
+    },
+    "app": {
+      "Properties": {
+        "xmlns": "http://schemas.openxmlformats.org/officeDocument/2006/extended-properties",
+        "Application": "SiphonEngine v3.1",
+        "Framework": "nextjs",
+        "Template": "nexus-modular",
+        "StatComponentCount": "abstract-instance-logic",
+        "AuditTrail": "enabled"
+      }
+    }
+  }
 }
