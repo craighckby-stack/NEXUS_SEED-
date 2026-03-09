@@ -1,29 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 30 30" style="enable-background:new 0 0 30 30;" xml:space="preserve">
+<svg version="1.1" 
+     xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+     xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties"
+     viewBox="0 0 30 30" 
+     style="enable-background:new 0 0 30 30;" 
+     xml:space="preserve">
+<metadata>
+    <cp:coreProperties>
+        <cp:revision>3</cp:revision>
+        <cp:lastModifiedBy>DALEK_CAAN_v3.1</cp:lastModifiedBy>
+    </cp:coreProperties>
+</metadata>
 <defs>
-  <style type="text/css">
-    .st194{fill:#2D2D2D;stroke:#FFFFFF;stroke-width:0.6317;stroke-miterlimit:10;}
-    .st23{fill:#FFFFFF;}
-
-    .z-breathe {
-      animation: breathe 2.5s ease-in-out infinite;
-    }
-
-    @keyframes breathe {
-      0%, 100% { opacity: 0.7; }
-      50% { opacity: 1; }
-    }
-  </style>
+    <style type="text/css">
+        /* III. Styling Engine: Tiered Inheritance Logic */
+        .docDefaults { fill: #2D2D2D; stroke: #FFFFFF; stroke-miterlimit: 10; }
+        .style-Normal { stroke-width: 0.6317; }
+        .style-Heading { fill: #FFFFFF; }
+        
+        /* Property-State Pattern: Animation as a local override state */
+        .w-rPr-breathe {
+            animation: breathe 2.5s ease-in-out infinite;
+        }
+        @keyframes breathe {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
+        }
+    </style>
 </defs>
 
-<g>
-  <path class="st194" d="M24.51,28.51H5.49c-2.21,0-4-1.79-4-4V5.49c0-2.21,1.79-4,4-4h19.03c2.21,0,4,1.79,4,4v19.03
-    C28.51,26.72,26.72,28.51,24.51,28.51z"/>
-  <g class="z-breathe">
-    <path class="st23" d="M15.47,7.1l-1.3,1.85c-0.2,0.29-0.54,0.47-0.9,0.47h-7.1V7.09C6.16,7.1,15.47,7.1,15.47,7.1z"/>
-    <polygon class="st23" points="24.3,7.1 13.14,22.91 5.7,22.91 16.86,7.1"/>
-    <path class="st23" d="M14.53,22.91l1.31-1.86c0.2-0.29,0.54-0.47,0.9-0.47h7.09v2.33H14.53z"/>
-  </g>
+<!-- II. Logic DNA: w:body Container -->
+<g id="w-body" class="docDefaults">
+    <!-- w:p Paragraph Logic: Atomic unit of layout -->
+    <g id="rId1" class="w-p style-Normal">
+        <path id="w-pPr-frame" d="M24.51,28.51H5.49c-2.21,0-4-1.79-4-4V5.49c0-2.21,1.79-4,4-4h19.03c2.21,0,4,1.79,4,4v19.03
+            C28.51,26.72,26.72,28.51,24.51,28.51z"/>
+        
+        <!-- w:r Run Logic: Contiguous region of geometry-data -->
+        <g id="rId2" class="w-r style-Heading w-rPr-breathe" transform-origin="15 15">
+            <!-- w:t Literal Data Segments -->
+            <path id="w-t-1" d="M15.47,7.1l-1.3,1.85c-0.2,0.29-0.54,0.47-0.9,0.47h-7.1V7.09C6.16,7.1,15.47,7.1,15.47,7.1z"/>
+            <polygon id="w-t-2" points="24.3,7.1 13.14,22.91 5.7,22.91 16.86,7.1"/>
+            <path id="w-t-3" d="M14.53,22.91l1.31-1.86c0.2-0.29,0.54-0.47,0.9-0.47h7.09v2.33H14.53z"/>
+        </g>
+    </g>
 </g>
 </svg>
