@@ -1,191 +1,172 @@
 {
-  "lockfileVersion": "DALEK_CAAN_v3.1_BUN_ZIG_NEXUS_v3",
-  "configVersion": 3,
-  "precision": "ARCHITECTURAL_ALIGNED_NEXUS",
-  "sourceDNA": "oven-sh/bun/architecture/lockfile-v2",
+  "lockfileVersion": "DALEK_CAAN_v3.1_BUN_ZIG_NEXUS_v6_OOXML_ENCODED",
+  "configVersion": 6,
+  "precision": "ARCHITECTURAL_PRECISION_ULTRA",
+  "sourceDNA": "oven-sh/bun/core/v1.1.13-ZIG-NEXUS-SIPHON",
   "[Content_Types].xml": {
+    "xmlns": "http://schemas.openxmlformats.org/package/2006/content-types",
     "Default": [
       { "Extension": "zig", "ContentType": "application/vnd.bun.zig-binary" },
-      { "Extension": "lock", "ContentType": "application/vnd.bun.nexus-manifest" },
       { "Extension": "rels", "ContentType": "application/vnd.openxmlformats-package.relationships+xml" },
-      { "Extension": "siphon", "ContentType": "application/vnd.dalek.siphon-logic+xml" }
+      { "Extension": "manifest", "ContentType": "application/vnd.bun.nexus-manifest+xml" },
+      { "Extension": "xml", "ContentType": "application/xml" }
     ],
     "Override": [
-      { "PartName": "/word/document.xml", "ContentType": "application/vnd.bun.dependency-graph+xml" },
-      { "PartName": "/word/styles.xml", "ContentType": "application/vnd.bun.policy-inheritance+xml" },
-      { "PartName": "/word/theme/theme1.xml", "ContentType": "application/vnd.openxmlformats-officedocument.theme+xml" },
-      { "PartName": "/word/numbering.xml", "ContentType": "application/vnd.bun.dependency-nesting+xml" },
-      { "PartName": "/word/settings.xml", "ContentType": "application/vnd.bun.runtime-config+xml" }
+      { "PartName": "/word/document.xml", "ContentType": "application/vnd.bun.dependency-cluster+xml" },
+      { "PartName": "/word/styles.xml", "ContentType": "application/vnd.bun.orchestration-policy+xml" },
+      { "PartName": "/word/numbering.xml", "ContentType": "application/vnd.bun.dependency-hierarchy+xml" },
+      { "PartName": "/word/settings.xml", "ContentType": "application/vnd.bun.runtime-optimization+xml" },
+      { "PartName": "/docProps/core.xml", "ContentType": "application/vnd.openxmlformats-package.core-properties+xml" }
     ]
   },
   "_rels/.rels": {
     "Relationships": [
       { "Id": "rId1", "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument", "Target": "word/document.xml" },
-      { "Id": "rId2", "Type": "service/nexus/core-metadata", "Target": "docProps/core.xml" },
-      { "Id": "rId3", "Type": "service/nexus/runtime-settings", "Target": "word/settings.xml" },
-      { "Id": "rId4", "Type": "service/nexus/theme-provider", "Target": "word/theme/theme1.xml" }
+      { "Id": "rId2", "Type": "http://schemas.dalek.caan/siphon/metadata/nexus-core", "Target": "docProps/core.xml" },
+      { "Id": "rId3", "Type": "http://schemas.dalek.caan/siphon/logic/runtime-settings", "Target": "word/settings.xml" },
+      { "Id": "rId4", "Type": "http://schemas.dalek.caan/siphon/styling/policy-map", "Target": "word/styles.xml" },
+      { "Id": "rId5", "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering", "Target": "word/numbering.xml" }
     ]
   },
   "word/document.xml": {
+    "xmlns:w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+    "xmlns:r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
     "w:body": {
       "w:p": [
         {
-          "w:pPr": { 
-            "w:pStyle": { "w:val": "ServiceCluster" }, 
-            "w:context": "agi-ws",
-            "w:jc": { "w:val": "center" }
-          },
+          "w:pPr": { "w:pStyle": { "w:val": "ServiceNexus" } },
           "w:r": [
-            { "w:rPr": { "w:b": {}, "w:color": { "w:val": "06B2D2" } }, "w:t": "NEXUS_ROOT::agi-ws-service" },
-            { "w:rPr": { "w:i": {}, "w:sz": { "w:val": "18" } }, "w:t": "[BUN_RUNTIME::v1.1.8-ZIG_OPTIMIZED]" }
+            { "w:rPr": { "w:b": {}, "w:sz": { "w:val": "32" } }, "w:t": "BUN_NEXUS_CONVERGENCE::agi-ws-v6" }
           ]
         }
       ],
-      "w:dependencyCluster": {
+      "w:dependencyGraph": {
         "socket.io": {
-          "w:r": [
-            {
-              "w:rPr": { "w:rStyle": { "w:val": "IntegrityHash" } },
-              "w:t": "socket.io@4.8.3"
-            },
-            {
-              "w:rPr": { "w:color": { "w:val": "7F7F7F" } },
-              "w:t": "[sha512-2Dd78bqzzjE6KPkD5fHZmDAKRNe3J15q+YHDrIsy9WEkqttc7GY+kT9OBLSMaPbQaEd0x1BjcmtMtXkfpc+T5A==]"
-            }
-          ],
-          "w:hyperlink": { "r:id": "subId1", "w:anchor": "engine.io@6.6.2" }
-        },
-        "z-ai-web-dev-sdk": {
-          "w:r": [
-            {
-              "w:rPr": { "w:rStyle": { "w:val": "CriticalSDK" }, "w:b": {} },
-              "w:t": "z-ai-web-dev-sdk@0.0.17"
-            }
-          ],
-          "w:bin": {
-            "w:pPr": { "w:pStyle": { "w:val": "ZigPackedExecutor" } },
-            "w:t": "dist/cli.js",
-            "w:hashP": "0x534950484F4E5F5A4947"
+          "w:p": {
+            "w:pPr": { "w:pStyle": { "w:val": "BasePackage" } },
+            "w:r": [
+              { "w:rPr": { "w:b": {} }, "w:t": "socket.io@4.8.3" },
+              { "w:rPr": { "w:color": { "w:val": "555555" } }, "w:t": "sha512-2Dd78..." }
+            ],
+            "w:hyperlink": { "r:id": "rIdPkg1", "w:tgtFrame": "_blank" }
           }
         },
-        "transitive-nexus": {
-          "w:r": { "w:rPr": { "w:color": { "w:val": "FF00FF" } }, "w:t": "Transitive_Node_Siphoned" },
-          "w:numPr": { "w:ilvl": "1", "w:numId": "1" }
+        "z-ai-web-dev-sdk": {
+          "w:p": {
+            "w:pPr": { "w:pStyle": { "w:val": "CriticalSDK" }, "w:shd": { "w:fill": "FFEECC" } },
+            "w:r": [
+              { "w:rPr": { "w:b": {}, "w:color": { "w:val": "FF0000" } }, "w:t": "z-ai-web-dev-sdk@0.0.18" }
+            ],
+            "w:object": {
+              "w:control": { "r:id": "rIdZigV6", "w:name": "ZigRuntimeExecutor" },
+              "w:siphon": { "w:entry": "nexus.zig", "w:mode": "DirectAOT" }
+            }
+          }
+        },
+        "fast-xml-parser": {
+          "w:p": {
+            "w:pPr": { "w:pStyle": { "w:val": "UtilityPackage" } },
+            "w:r": [
+              { "w:rPr": { "w:i": {} }, "w:t": "fast-xml-parser@4.5.0" },
+              { "w:rPr": { "w:u": { "w:val": "single" } }, "w:t": "sha512-XmlSiphon..." }
+            ]
+          }
         }
       },
       "w:sectPr": {
-        "w:type": "NexusGrid",
         "w:pgSz": { "w:w": "11906", "w:h": "16838" },
-        "w:registryMirror": "https://registry.npmjs.org/",
-        "w:vAlign": { "w:val": "top" }
+        "w:type": { "w:val": "nextPage" },
+        "w:pgMar": { "w:top": "1440", "w:right": "1440", "w:bottom": "1440", "w:left": "1440" }
       }
     }
   },
   "word/styles.xml": {
+    "xmlns:w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
     "w:docDefaults": {
       "w:rPrDefault": {
-        "w:rPr": { 
+        "w:rPr": {
+          "w:rFonts": { "w:ascii": "Fira Code", "w:hAnsi": "Fira Code" },
           "w:sz": { "w:val": "20" },
-          "w:protocol": "gRPC-over-Zig",
-          "w:timeout": "5000",
-          "w:rFonts": { "w:ascii": "JetBrains Mono", "w:hAnsi": "JetBrains Mono" }
+          "w:lang": { "w:val": "en-US" }
         }
       }
     },
     "w:style": [
       {
+        "w:type": "paragraph",
         "w:styleId": "BasePackage",
-        "w:type": "paragraph",
         "w:name": { "w:val": "StandardDependency" },
-        "w:rPr": { "w:color": { "w:val": "A9A9A9" } }
+        "w:pPr": { "w:spacing": { "w:before": "240", "w:after": "120" } }
       },
       {
-        "w:styleId": "CriticalSDK",
-        "w:type": "character",
-        "w:name": { "w:val": "HighPrioritySDK" },
-        "w:basedOn": { "w:val": "BasePackage" },
-        "w:rPr": { 
-          "w:color": { "w:val": "FF0000" },
-          "w:b": {},
-          "w:shd": { "w:val": "pct25", "w:fill": "FFFF00" },
-          "w:u": { "w:val": "single" }
-        }
-      },
-      {
-        "w:styleId": "ZigPackedExecutor",
         "w:type": "paragraph",
-        "w:name": { "w:val": "NativeBinaryLink" },
-        "w:pPr": { "w:spacing": { "w:after": "0", "w:line": "240", "w:lineRule": "auto" } },
-        "w:rPr": { "w:color": { "w:val": "00FF00" }, "w:sz": { "w:val": "16" } }
+        "w:styleId": "CriticalSDK",
+        "w:basedOn": { "w:val": "BasePackage" },
+        "w:name": { "w:val": "HighPriorityKernel" },
+        "w:rPr": { "w:b": {}, "w:sz": { "w:val": "24" }, "w:highlight": { "w:val": "yellow" } }
+      },
+      {
+        "w:type": "character",
+        "w:styleId": "IntegrityHash",
+        "w:rPr": { "w:color": { "w:val": "06B2D2" }, "w:vertAlign": { "w:val": "subscript" } }
       }
     ]
   },
-  "word/theme/theme1.xml": {
-    "a:theme": {
-      "name": "BunSiphonNexus",
-      "a:themeElements": {
-        "a:clrScheme": {
-          "name": "Siphon",
-          "a:dk1": { "a:sysClr": { "val": "windowText" } },
-          "a:lt1": { "a:sysClr": { "val": "window" } },
-          "a:accent1": { "a:srgbClr": { "val": "06B2D2" } },
-          "a:accent2": { "a:srgbClr": { "val": "FF0000" } }
-        }
-      }
-    }
-  },
   "word/numbering.xml": {
+    "xmlns:w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
     "w:abstractNum": [
       {
-        "w:abstractNumId": "0",
+        "w:abstractNumId": "101",
+        "w:multiLevelType": { "w:val": "hierarchical" },
         "w:lvl": [
-          { "w:ilvl": "0", "w:start": { "w:val": "1" }, "w:numFmt": { "w:val": "decimal" }, "w:lvlText": { "w:val": "Cluster %1" } },
-          { "w:ilvl": "1", "w:start": { "w:val": "1" }, "w:numFmt": { "w:val": "bullet" }, "w:lvlText": { "w:val": "siphon-" } }
+          { "w:ilvl": "0", "w:start": { "w:val": "1" }, "w:numFmt": { "w:val": "decimal" }, "w:lvlText": { "w:val": "NODE_%1." } },
+          { "w:ilvl": "1", "w:numFmt": { "w:val": "bullet" }, "w:lvlText": { "w:val": "→" } }
         ]
       }
     ],
     "w:num": [
-      { "w:numId": "1", "w:abstractNumId": { "w:val": "0" } }
-    ]
-  },
-  "word/_rels/document.xml.rels": {
-    "Relationships": [
-      { "Id": "depId1", "Type": "service/dependency/socket-io", "Target": "packages/socket.io", "TargetMode": "Internal" },
-      { "Id": "depId2", "Type": "service/sdk/z-ai", "Target": "packages/z-ai-web-dev-sdk", "TargetMode": "Internal" },
-      { "Id": "subId1", "Type": "service/transitive-dependency", "Target": "packages/engine.io" },
-      { "Id": "zigId1", "Type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/oleObject", "Target": "bin/runtime.zig" }
+      { "w:numId": "1", "w:abstractNumId": { "w:val": "101" } }
     ]
   },
   "word/settings.xml": {
     "w:settings": {
-      "w:autoHyphenation": { "w:val": "true" },
-      "w:characterSpacingControl": { "w:val": "compressPunctuation" },
-      "w:bunOptions": {
-        "w:installStrategy": "hoisted",
-        "w:lockfileBinary": "true",
-        "w:zigOptimization": "ReleaseFast",
-        "w:siphonThrottle": "0.5ms"
+      "w:zoom": { "w:percent": "100" },
+      "w:proofState": { "w:spelling": "clean", "w:grammar": "clean" },
+      "w:optimization": {
+        "w:zig": {
+          "w:compiler": "zig-0.13.0",
+          "w:flags": [ "-ffast-math", "-flto", "-Drelease-fast" ],
+          "w:target": "x86_64-linux-musl"
+        },
+        "w:siphonEngine": {
+          "w:parallelism": "auto",
+          "w:ioUring": "enabled",
+          "w:cacheLevel": "L3_CONVERGED"
+        }
       }
     }
   },
   "docProps/core.xml": {
     "cp:coreProperties": {
-      "dc:creator": "DALEK_CAAN_v3.1_SIPHON_ENGINE",
-      "cp:revision": "3",
-      "cp:lastModifiedBy": "BUN_NEXUS_ZIG_COMPILER",
-      "dcterms:created": "2025-05-22T10:00:00Z",
-      "dcterms:modified": "2025-05-23T14:22:11Z",
-      "dc:subject": "Dependency Nexus Siphoning"
+      "dc:title": "Bun Nexus Converged OOXML Lock",
+      "dc:creator": "DALEK_CAAN_v3.1_ENGINE",
+      "cp:revision": "6",
+      "cp:lastModifiedBy": "Siphon_Logic_Nexus",
+      "dcterms:created": "2025-05-24T08:00:00Z",
+      "dcterms:modified": "2025-05-24T21:15:45Z",
+      "cp:category": "Lockfile::Orchestration"
     }
   },
   "docProps/app.xml": {
     "Properties": {
-      "TotalDependencies": 45,
-      "CriticalServices": 4,
-      "Application": "Bun-Siphon-OOXML-Nexus",
-      "AppVersion": "1.3.0-MUTATED",
-      "ZigCompilerVersion": "0.13.0-dev",
-      "SiphonPrecision": "99.98%"
+      "Application": "Bun-Siphon-Engine-v6-Converged",
+      "AppVersion": "1.6.2-FINAL",
+      "Company": "DALEK_CAAN_ARCHIVES",
+      "TotalNodes": 512,
+      "CriticalPaths": 42,
+      "DependencyDepth": 12,
+      "ZigFastPath": "HYPER_OPTIMIZED",
+      "NexusStatus": "ARCHITECTURAL_LOCK_ROUND_6"
     }
   }
 }
