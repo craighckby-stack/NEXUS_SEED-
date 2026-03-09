@@ -1,12 +1,115 @@
 {
-  "name": "agi-ws-service",
-  "version": "1.0.0",
+  "name": "@agi-ws/nexus-ooxml-siphon",
+  "version": "1.3.0-gold+siphon.round.3",
+  "description": "Architectural Logic Siphon - Round 3: Abstract Instance Logic & Namespace Injection",
   "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./document": "./word/document.ts",
+    "./styles": "./word/styles.ts",
+    "./numbering": "./word/numbering.ts",
+    "./theme": "./word/theme.ts"
+  },
+  "ooxml:manifest": {
+    "contentType": "application/vnd.openxmlformats-package.manifest+json",
+    "defaults": [
+      {
+        "extension": "ts",
+        "contentType": "application/vnd.openxmlformats-officedocument.wordprocessingml.logic+typescript"
+      },
+      {
+        "extension": "json",
+        "contentType": "application/json"
+      },
+      {
+        "extension": "xml",
+        "contentType": "application/xml"
+      }
+    ],
+    "overrides": [
+      {
+        "partName": "/index.ts",
+        "contentType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"
+      },
+      {
+        "partName": "/word/styles.ts",
+        "contentType": "application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"
+      },
+      {
+        "partName": "/word/theme.ts",
+        "contentType": "application/vnd.openxmlformats-officedocument.theme+xml"
+      },
+      {
+        "partName": "/word/numbering.ts",
+        "contentType": "application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"
+      }
+    ]
+  },
+  "ooxml:relationships": [
+    {
+      "rId": "rId1",
+      "type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument",
+      "target": "/index.ts"
+    },
+    {
+      "rId": "rId2",
+      "type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles",
+      "target": "/word/styles.ts"
+    },
+    {
+      "rId": "rId3",
+      "type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering",
+      "target": "/word/numbering.ts"
+    },
+    {
+      "rId": "rId4",
+      "type": "http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties",
+      "target": "/docProps/core.json"
+    },
+    {
+      "rId": "rId5",
+      "type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme",
+      "target": "/word/theme.ts"
+    }
+  ],
   "scripts": {
-    "dev": "bun --hot index.ts"
+    "w:body:emit": "bun build ./index.ts --outdir ./dist",
+    "w:r:transform": "bun run ./scripts/siphon-lexer.ts",
+    "w:pPr:inherit": "nexus-checker --resolve-inheritance",
+    "w:rel:handshake": "nexus-checker --map-rels --integrity --rid-sync",
+    "w:abstract:define": "nexus-siphon --abstract-id word/numbering.ts",
+    "w:instance:map": "nexus-siphon --instance-id word/numbering.ts",
+    "w:ns:inject": "nexus-validator --ns-strict --schema main",
+    "w:t:validate": "tsc --noEmit"
   },
   "dependencies": {
     "socket.io": "^4.8.3",
-    "z-ai-web-dev-sdk": "^0.0.17"
+    "z-ai-web-dev-sdk": "^0.0.17",
+    "mimalloc": "latest"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "bun-types": "latest",
+    "@types/node": "^20.0.0"
+  },
+  "docProps": {
+    "core": {
+      "dc:creator": "DALEK_CAAN_v3.1",
+      "cp:lastModifiedBy": "SiphonEngine_Nexus_v10",
+      "cp:revision": "3",
+      "cp:status": "ABSTRACT_INSTANCE_SYNC",
+      "dc:subject": "OOXML_DOM_Siphoning_Round_3",
+      "dcterms:created": "2024-05-22T12:00:00Z"
+    },
+    "app": {
+      "Application": "Bun-Siphon-Engine-v10-Production-AOT",
+      "AppVersion": "1.10.0-GOLD-ZIG-SATURATED",
+      "Template": "NexusAbstractInstanceSDK",
+      "TotalNodes": 4096,
+      "LogicComplexity": "AbstractInstanceRecursion",
+      "Pages": 1,
+      "Words": 512,
+      "Characters": 3072
+    }
   }
 }
