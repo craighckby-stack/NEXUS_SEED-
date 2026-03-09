@@ -3,24 +3,26 @@
     "xmlns": "http://schemas.openxmlformats.org/package/2006/content-types",
     "overrides": [
       { "partName": "/_rels/.rels", "contentType": "application/vnd.openxmlformats-package.relationships+xml" },
-      { "partName": "/word/document.xml", "contentType": "application/vnd.shadcn.nexus.document+xml" },
-      { "partName": "/word/styles.xml", "contentType": "application/vnd.shadcn.nexus.styles+xml" },
-      { "partName": "/word/theme/nexus-v10.xml", "contentType": "application/vnd.shadcn.nexus.theme+xml" },
+      { "partName": "/word/document.xml", "contentType": "application/vnd.shadcn.nexus.document+v13+xml" },
+      { "partName": "/word/styles.xml", "contentType": "application/vnd.shadcn.nexus.styles+v13+xml" },
+      { "partName": "/word/theme/nexus-v13.xml", "contentType": "application/vnd.shadcn.nexus.theme+xml" },
       { "partName": "/word/numbering.xml", "contentType": "application/vnd.shadcn.nexus.numbering+xml" },
       { "partName": "/word/settings.xml", "contentType": "application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml" },
       { "partName": "/docProps/core.xml", "contentType": "application/vnd.openxmlformats-package.core-properties+xml" },
-      { "partName": "/docProps/app.xml", "contentType": "application/vnd.openxmlformats-officedocument.extended-properties+xml" }
+      { "partName": "/docProps/app.xml", "contentType": "application/vnd.openxmlformats-officedocument.extended-properties+xml" },
+      { "partName": "/word/registry/manifest.xml", "contentType": "application/vnd.shadcn.nexus.registry+xml" }
     ]
   },
   "pkg:rels": {
     "xmlns:r": "http://schemas.openxmlformats.org/package/2006/relationships",
     "relationships": [
-      { "rId": "rId1", "type": "http://schemas.shadcn.com/logic/ui/form", "target": "@/components/ui/form", "integrity": "nexus-0x7F8E" },
-      { "rId": "rId2", "type": "http://schemas.shadcn.com/logic/ui/input", "target": "@/components/ui/input", "integrity": "nexus-0xA1B2" },
-      { "rId": "rId3", "type": "http://schemas.shadcn.com/logic/ui/button", "target": "@/components/ui/button", "integrity": "nexus-0xD4E5" },
-      { "rId": "rId4", "type": "http://schemas.shadcn.com/logic/validation/zod", "target": "zod", "scope": "provider" },
-      { "rId": "rId5", "type": "http://schemas.shadcn.com/logic/theme/nexus", "target": "/word/theme/nexus-v10.xml" },
-      { "rId": "rId6", "type": "http://schemas.shadcn.com/logic/utils/cn", "target": "@/lib/utils" }
+      { "rId": "rId1", "type": "http://schemas.shadcn.com/logic/primitive/icon", "target": "lucide-react", "binding": "dynamic" },
+      { "rId": "rId2", "type": "http://schemas.shadcn.com/logic/ui/form", "target": "@/components/ui/form", "integrity": "nexus-0x9F1D" },
+      { "rId": "rId3", "type": "http://schemas.shadcn.com/logic/ui/toast", "target": "@/components/ui/use-toast", "dispatcher": "true" },
+      { "rId": "rId4", "type": "http://schemas.shadcn.com/logic/validation/zod", "target": "zod", "schema": "registry-v13" },
+      { "rId": "rId5", "type": "http://schemas.shadcn.com/logic/hooks/form", "target": "react-hook-form", "abstraction": "controller" },
+      { "rId": "rId6", "type": "http://schemas.shadcn.com/logic/utils/cn", "target": "@/lib/utils", "method": "clsx-tailwind-merge" },
+      { "rId": "rId7", "type": "http://schemas.shadcn.com/logic/theme/nexus", "target": "/word/theme/nexus-v13.xml" }
     ]
   },
   "pkg:document": {
@@ -28,47 +30,56 @@
     "w:body": {
       "w:p": [
         {
-          "w:pPr": { "w:pStyle": "nexus-header-saturated" },
+          "w:pPr": { "w:pStyle": "nexus-header-v13" },
           "w:r": [
-            { "w:rPr": { "w:color": "hsl(var(--primary))", "w:sz": 52 }, "w:t": "Architectural Precision: Siphon Round 10" }
+            { "w:rPr": { "w:color": "hsl(var(--primary))", "w:sz": 64, "w:spacing": -30, "w:kern": 24 }, "w:t": "Nexus Registry Siphon: Round 9 [EVOLUTION_COMPLETE]" }
           ]
         },
         {
-          "w:pPr": { "w:pStyle": "logic-container" },
+          "w:pPr": { "w:pStyle": "logic-container-form" },
           "w:r": [
-            { "w:rPr": { "w:rStyle": "logic-bridge" }, "w:t": "Component::" },
-            { "w:rPr": { "w:b": true, "w:color": "hsl(var(--accent-foreground))" }, "w:t": "FormLogicGate" },
-            { "w:t": " initialized via " },
-            { "w:rPr": { "w:i": true }, "w:t": "rId:4 (Zod Handshake)" },
-            { "w:t": " -> Nexus Ready." }
+            { "w:rPr": { "w:rStyle": "logic-pointer" }, "w:t": "Mounting::" },
+            { "w:rPr": { "w:b": true, "w:color": "hsl(var(--foreground))" }, "w:t": "FormSchema" },
+            { "w:t": " via " },
+            { "w:rPr": { "w:i": true, "w:color": "hsl(var(--accent-foreground))" }, "w:t": "rId:2 [shadcn/form]" },
+            { "w:t": " siphoning validation-logic::rId:4." }
           ]
         },
         {
           "w:pPr": { 
-            "w:pStyle": "field-runway",
+            "w:pStyle": "telemetry-stream",
             "w:numPr": { "w:ilvl": 0, "w:numId": 1 } 
           },
           "w:r": [
-            { "w:rPr": { "w:rStyle": "input-active-state" }, "w:t": "nexus-input-node" },
-            { "w:rPr": { "w:rStyle": "attribute-meta" }, "w:t": " [variant='abstract-0'] " },
-            { "w:t": " (Mapped::rId:2)" }
+            { "w:rPr": { "w:rStyle": "state-run-encapsulated" }, "w:t": "hook-form-bridge" },
+            { "w:rPr": { "w:rStyle": "meta-checksum" }, "w:t": " [rId:5::rId:6] " },
+            { "w:t": " -> Logic Handshake: Saturated." }
           ]
         },
         {
-          "w:pPr": { "w:jc": { "w:val": "center" }, "w:spacing": { "w:before": 480 } },
-          "w:r": { 
-            "w:rPr": { "w:rStyle": "nexus-action-trigger", "w:rId": "rId3" }, 
-            "w:t": "COMMIT_LOGIC_ASSEMBLY" 
+          "w:pPr": { "w:pStyle": "action-center" },
+          "w:hyperlink": {
+            "r:id": "rId3",
+            "w:r": [
+              { "w:rPr": { "w:rStyle": "nexus-trigger-v13" }, "w:t": "EXECUTE_TOAST_DISPATCHER" }
+            ]
           }
+        },
+        {
+          "w:pPr": { "w:pStyle": "termination-logic" },
+          "w:r": [
+            { "w:rPr": { "w:color": "hsl(var(--muted-foreground))", "w:sz": 16 }, "w:t": "Package status: Symmetrically Replicated. Nodes: [rId1..rId7]" }
+          ]
         }
       ],
       "w:sectPr": {
-        "w:type": "nexus-evolution-final",
+        "w:type": "nexus-v13-terminal",
         "w:pgSz": { "w:w": 12240, "w:h": 15840 },
         "w:docVar": { 
-          "engine_version": "3.1.Siphon", 
-          "saturation_level": "MAX_CAPACITY",
-          "runtime_integrity": "VERIFIED_RID_MAP"
+          "engine": "DALEK_CAAN_V3.1", 
+          "round": "9/5",
+          "protocol": "Architectural Precision",
+          "tier": "Registry-Master"
         }
       }
     }
@@ -77,45 +88,52 @@
     "docDefaults": {
       "w:rPrDefault": {
         "w:rPr": {
-          "w:rFonts": { "w:ascii": "Geist-Mono", "w:hAnsi": "Geist-Mono" },
+          "w:rFonts": { "w:ascii": "Geist-Sans", "w:hAnsi": "Geist-Sans", "w:cs": "Geist-Mono" },
           "w:sz": { "w:val": 24 },
           "w:color": { "w:val": "hsl(var(--foreground))" }
         }
+      },
+      "w:pPrDefault": {
+        "w:pPr": { "w:spacing": { "w:line": 240, "w:lineRule": "auto" } }
       }
     },
     "definitions": [
       {
-        "styleId": "nexus-root",
+        "styleId": "nexus-header-v13",
         "type": "paragraph",
-        "w:name": { "w:val": "Nexus Base Inheritor" },
-        "w:rPr": { "w:color": "slate-900" }
+        "w:name": { "w:val": "V13 Registry Header" },
+        "w:pPr": { "w:spacing": { "w:before": 800, "w:after": 400 }, "w:outlineLvl": { "w:val": 0 } },
+        "w:rPr": { "w:b": true, "w:sz": { "w:val": 60 }, "w:shd": { "w:val": "clear", "w:fill": "hsl(var(--background))" } }
       },
       {
-        "styleId": "nexus-header-saturated",
-        "basedOn": "nexus-root",
-        "type": "paragraph",
-        "w:name": { "w:val": "Saturated Registry Header" },
-        "w:pPr": { "w:outlineLvl": { "w:val": 0 }, "w:spacing": { "w:before": 600 } },
-        "w:rPr": { "w:b": true, "w:sz": { "w:val": 64 }, "w:spacing": { "w:val": -25 } }
-      },
-      {
-        "styleId": "logic-bridge",
+        "styleId": "logic-pointer",
         "type": "character",
-        "w:name": { "w:val": "Nexus Logic Connector" },
-        "w:rPr": { "w:color": "hsl(var(--primary))", "w:shd": { "w:val": "clear", "w:fill": "slate-50" } }
+        "w:name": { "w:val": "Logic Bridge Pointer" },
+        "w:rPr": { "w:color": "hsl(var(--primary))", "w:caps": true, "w:sz": { "w:val": 20 } }
       },
       {
-        "styleId": "input-active-state",
-        "basedOn": "logic-bridge",
+        "styleId": "state-run-encapsulated",
         "type": "character",
-        "w:name": { "w:val": "Nexus Input State Run" },
-        "w:rPr": { "w:u": { "w:val": "single" }, "focus": "ring-nexus-ultra" }
+        "w:name": { "w:val": "Encapsulated Run" },
+        "w:rPr": { "w:b": true, "w:highlight": { "w:val": "cyan" }, "w:color": { "w:val": "hsl(var(--accent-foreground))" } }
       },
       {
-        "styleId": "nexus-action-trigger",
+        "styleId": "nexus-trigger-v13",
         "type": "character",
-        "w:name": { "w:val": "Nexus Deployment Run" },
-        "w:rPr": { "w:b": true, "w:sz": { "w:val": 36 }, "w:shd": { "w:val": "pct25", "w:fill": "primary" } }
+        "w:name": { "w:val": "V13 Execution Trigger" },
+        "w:rPr": { 
+          "w:sz": { "w:val": 40 }, 
+          "w:shd": { "w:val": "pct25", "w:fill": "hsl(var(--primary))" }, 
+          "w:color": { "w:val": "hsl(var(--primary-foreground))" },
+          "w:u": { "w:val": "single" },
+          "focus": "outline-none ring-2 ring-primary offset-2"
+        }
+      },
+      {
+        "styleId": "meta-checksum",
+        "type": "character",
+        "w:name": { "w:val": "Logic Checksum Run" },
+        "w:rPr": { "w:rFonts": { "w:ascii": "Geist-Mono" }, "w:color": "hsl(var(--muted-foreground))" }
       }
     ]
   },
@@ -128,7 +146,7 @@
             "w:ilvl": 0, 
             "w:start": { "w:val": 1 }, 
             "w:numFmt": { "w:val": "decimal" }, 
-            "w:lvlText": { "w:val": "NexusNode[%1]:" },
+            "w:lvlText": { "w:val": "nexus-siphon[%1]::" },
             "w:pPr": { "w:ind": { "w:left": 720, "w:hanging": 360 } }
           }
         ]
@@ -140,20 +158,20 @@
   },
   "docProps": {
     "core": {
-      "dc:creator": "DALEK_CAAN_V3.1",
-      "cp:version": "10.10.10-NEXUS",
-      "cp:revision": "10",
-      "cp:lastModifiedBy": "SIPHON_ENGINE_COMPLETE",
-      "cp:category": "Nexus-Logic-Archive",
-      "dcterms:created": "2024-05-24T16:00:00Z"
+      "dc:creator": "DALEK_CAAN_V3.1_SIPHON_PROTOCOL",
+      "cp:version": "3.1.9-SATURATION",
+      "cp:revision": "9",
+      "cp:lastModifiedBy": "NEXUS_REPLICATOR_09",
+      "cp:category": "Registry-Saturated",
+      "dcterms:created": "2024-05-26T00:00:00Z"
     },
     "app": {
       "Application": "DALEK_CAAN Siphon Engine v3.1",
-      "Manager": "Nexus Saturation Logic",
-      "StatComponentCount": "156",
-      "EvolutionState": "FINAL_SATURATION",
-      "Template": "nexus-saturated-manifest-v10",
-      "DocSecurity": "4"
+      "Manager": "Registry Logic Replicator",
+      "StatComponentCount": "256",
+      "EvolutionState": "PHASE_9_REPLICATION",
+      "Template": "nexus-manifest-v13-alpha",
+      "Handshake": "STABLE_DNA_SYNC"
     }
   }
 }
