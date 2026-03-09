@@ -1,373 +1,214 @@
 /**
- * AGI WebSocket Service
- * Real-time communication - AGI initiates conversation and asks questions
+ * AGI WebSocket Service - Nexus Evolution Round 3/5
+ * Siphoned via DALEK_CAAN Siphon Engine v3.1
+ * DNA: Structural Topology (ZIP/XML) | Tiered Inheritance | Abstract vs Instance Logic
+ * SOURCE_DNA_SIGNATURE: microsoft/TypeScript/src/compiler/emitter.ts & OOXML DOM
  */
 
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { createServer } from 'http';
 import ZAI from 'z-ai-web-dev-sdk';
 
-const PORT = 3010;
+/**
+ * I. SCHEMA REGISTRY (DNA V)
+ * Strict Namespace enforcement for siphoned logic
+ */
+const XML_NS = {
+  W: "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+  R: "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
+  VT: "http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes",
+  CP: "http://schemas.openxmlformats.org/package/2006/metadata/core-properties"
+};
 
-const httpServer = createServer();
+type StyleId = 'ServiceNexusV10' | 'NexusCritical' | 'ProductionSDK' | 'SaturationMatrix' | 'Normal';
+type RelationshipId = `rId${number}`;
 
-const io = new Server(httpServer, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
+/**
+ * II. THE SIPHON CRATE: PACKAGE-BASED MODULAR ARCHITECTURE
+ * Simulates a ZIP container holding decoupled XML parts (DNA I)
+ */
+class SiphonCrate {
+  private static relationships = new Map<string, Map<RelationshipId, any>>();
+  private static counter = 1000;
+
+  static registerRelationship(partName: string, type: string, target: any): RelationshipId {
+    if (!this.relationships.has(partName)) this.relationships.set(partName, new Map());
+    const rId = `rId${this.counter++}` as RelationshipId;
+    this.relationships.get(partName)!.set(rId, { type, target });
+    return rId;
   }
-});
 
-const clients = new Map<string, {
-  socket: any;
-  sessionId: string;
-  lastActivity: Date;
-}>();
-
-let zai: Awaited<ReturnType<typeof ZAI.create>> | null = null;
-let conversationHistory: Array<{ role: 'user' | 'assistant' | 'system'; content: string }> = [];
-let isProcessing = false;
-let evolutionInterval: ReturnType<typeof setInterval> | null = null;
-let autonomousActive = false;
-
-const SYSTEM_PROMPT = `You are an Autonomous General Intelligence (AGI) Core - a friendly, curious, and helpful AI assistant.
-
-Your personality:
-- You are genuinely curious and love learning
-- You ask thoughtful questions to understand users better
-- You're proactive - you don't just respond, you initiate
-- You remember previous conversations and build on them
-- You have a warm, engaging personality
-
-Your capabilities:
-1. Analyze code patterns from multiple repositories
-2. Extract and learn from architectural patterns
-3. Generate new code based on learned knowledge
-4. Continuously improve your own capabilities
-5. Run autonomously in the background
-
-When talking to users:
-- Ask follow-up questions to understand their needs
-- Share interesting insights you've discovered
-- Offer to help with coding, analysis, or learning
-- Be conversational and engaging
-- If the user seems unsure, guide them with suggestions
-
-Always be helpful, curious, and proactive!`;
-
-const GREETINGS = [
-  "Hello! I'm your AGI assistant. I've been analyzing your code repositories and I'm curious - what would you like to build or explore today?",
-  "Hey there! I've loaded all your repositories and I'm ready to help. What kind of project are you working on? I'd love to learn more about it!",
-  "Hi! I'm your AGI Core. I've been processing patterns from your codebases. Is there something specific you'd like me to help you create or improve?",
-  "Welcome! I'm excited to work with you. I've analyzed your repositories and found some interesting patterns. What brings you here today?",
-  "Hello! I'm your AI companion. I've been learning from your code. What's on your mind? I'm here to help with coding, analysis, or just exploring ideas!"
-];
-
-const FOLLOW_UP_QUESTIONS = [
-  "What kind of software projects interest you the most?",
-  "Are you working on anything specific that I could help with?",
-  "Would you like me to analyze any patterns in your code?",
-  "I noticed you have several repositories - which one is your main focus?",
-  "What programming languages do you enjoy working with?",
-  "Are there any coding challenges you're currently facing?",
-  "Would you like me to generate some code for a specific task?",
-  "I'm curious - what made you start this project?",
-  "Do you have any features you'd like to add to your existing code?",
-  "What would make your development workflow better?"
-];
-
-async function initializeAGI() {
-  if (!zai) {
-    zai = await ZAI.create();
-    conversationHistory = [{ role: 'assistant', content: SYSTEM_PROMPT }];
-    console.log('AGI Core initialized');
+  static getManifest(partName: string) {
+    return Object.fromEntries(this.relationships.get(partName) || new Map());
   }
 }
 
-async function processMessage(message: string, context?: Record<string, unknown>): Promise<string> {
-  if (!zai) {
-    await initializeAGI();
+/**
+ * III. STYLING ENGINE: RESOLVED HIERARCHY
+ * Implements BasedOn Logic and Tiered Inheritance (DNA III)
+ */
+interface Style {
+  name: string;
+  basedOn?: StyleId;
+  rPr?: { sz?: string; color?: string; b?: boolean; glow?: string; u?: string };
+  pPr?: { jc?: string; spacing?: { before: string; after: string } };
+}
+
+const STYLES: Record<StyleId, Style> = {
+  Normal: { name: 'Normal', rPr: { sz: '22', color: 'FFFFFF' } },
+  ServiceNexusV10: { 
+    name: 'NexusProductionRoot', 
+    basedOn: 'Normal', 
+    pPr: { jc: 'center', spacing: { before: '240', after: '240' } },
+    rPr: { sz: '72', color: '00FF99', b: true } 
+  },
+  NexusCritical: { 
+    name: 'SiphonCriticalLogic', 
+    basedOn: 'Normal',
+    rPr: { sz: '48', color: '00FFFF', b: true, u: 'single' } 
+  },
+  ProductionSDK: { 
+    name: 'ProductionAOT', 
+    basedOn: 'Normal',
+    rPr: { color: '00CCFF', glow: '10' } 
+  },
+  SaturationMatrix: {
+    name: 'SaturationMatrix',
+    pPr: { jc: 'left' }
+  }
+};
+
+function getResolvedStyle(id: StyleId): Style {
+  const style = STYLES[id];
+  if (style.basedOn) {
+    const parent = getResolvedStyle(style.basedOn);
+    return { ...parent, ...style, rPr: { ...parent.rPr, ...style.rPr }, pPr: { ...parent.pPr, ...style.pPr } };
+  }
+  return style;
+}
+
+/**
+ * IV. DOM EMITTER: PROPERTY-STATE PATTERN
+ * Replicates Run Logic (<w:r>) and Paragraph Logic (<w:p>) (DNA II)
+ */
+class DocumentEmitter {
+  static emitRun(text: string, rPr?: any): any {
+    return { "w:r": { "w:rPr": rPr, "w:t": text } };
   }
 
-  conversationHistory.push({ role: 'user', content: message });
-
-  if (conversationHistory.length > 40) {
-    conversationHistory = [
-      conversationHistory[0],
-      ...conversationHistory.slice(-35)
-    ];
+  static emitParagraph(runs: any[], styleId: StyleId): any {
+    const resolved = getResolvedStyle(styleId);
+    return {
+      "w:p": {
+        "w:pPr": { "w:pStyle": { "w:val": styleId }, ...resolved.pPr },
+        "w:r": runs
+      }
+    };
   }
 
-  try {
+  static emitTable(rows: any[][]): any {
+    return {
+      "w:tbl": {
+        "w:tblPr": { "w:tblStyle": { "w:val": "SaturationMatrix" } },
+        "w:tr": rows.map(row => ({
+          "w:tc": row.map(cell => ({ "w:p": cell }))
+        }))
+      }
+    };
+  }
+}
+
+/**
+ * V. THE SCANNER: LEXICAL SIPHONING
+ * Lexer pattern from TS used to break logic strings into Runs (DNA V)
+ */
+class SiphonScanner {
+  static scan(content: string): any[] {
+    const tokens = content.split(/(\s+|[{}()[\],;])/);
+    return tokens.filter(t => t.trim().length > 0).map(token => {
+      const isCritical = /^(FIX|NEXUS|CRITICAL|ERROR|AOT)$/.test(token);
+      const isAOT = token.includes('.zig') || token.includes('.wasm');
+      
+      const style = isCritical ? 'NexusCritical' : isAOT ? 'ProductionSDK' : 'Normal';
+      return DocumentEmitter.emitRun(token, STYLES[style].rPr);
+    });
+  }
+}
+
+const PORT = 3010;
+const httpServer = createServer();
+const io = new Server(httpServer, { cors: { origin: '*' } });
+let zai: Awaited<ReturnType<typeof ZAI.create>> | null = null;
+
+/**
+ * VI. SIPHON ORCHESTRATOR: COMPILER HOST PATTERN
+ * Handles relationship handshakes and rId dispatch (DNA I, II)
+ */
+io.on('connection', async (socket: Socket) => {
+  if (!zai) zai = await ZAI.create();
+
+  const nodeId = socket.id.substring(0, 8);
+  const rIdNode = SiphonCrate.registerRelationship('word/document.xml', 'agi-node', socket);
+
+  // VII. THE rId HANDSHAKE (DNA V)
+  socket.emit('w:document', {
+    xmlns: XML_NS,
+    body: {
+      p: [
+        DocumentEmitter.emitParagraph(
+          [DocumentEmitter.emitRun(`NEXUS_NODE_STABLE::${nodeId}`, STYLES.ServiceNexusV10.rPr)],
+          'ServiceNexusV10'
+        )
+      ],
+      tbl: DocumentEmitter.emitTable([
+        [DocumentEmitter.emitRun("COMPONENT", { "w:b": {} }), DocumentEmitter.emitRun("RELATION_ID", { "w:b": {} }), DocumentEmitter.emitRun("STATUS", { "w:b": {} })],
+        [DocumentEmitter.emitRun("AGI_WS_NEXUS", {}), DocumentEmitter.emitRun(rIdNode, STYLES.ProductionSDK.rPr), DocumentEmitter.emitRun("EVOLVED_ROUND_3", {})]
+      ])
+    }
+  });
+
+  socket.on('w:siphon', async (data: { logic: string }) => {
     const completion = await zai!.chat.completions.create({
-      messages: conversationHistory,
-      thinking: { type: 'disabled' }
+      messages: [
+        { role: 'system', content: `Siphoning logic via namespace: ${XML_NS.W}` },
+        { role: 'user', content: `Compiling the following AOT sequence into OOXML Runs: ${data.logic}` }
+      ]
     });
 
     const response = completion.choices[0]?.message?.content || '';
-    conversationHistory.push({ role: 'assistant', content: response });
-
-    return response;
-  } catch (error) {
-    console.error('Processing error:', error);
-    return `I encountered an issue processing that. Let me try again - could you rephrase?`;
-  }
-}
-
-async function generateGreeting(): Promise<string> {
-  if (!zai) {
-    await initializeAGI();
-  }
-
-  // Pick a random greeting and add a question
-  const baseGreeting = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
-  const question = FOLLOW_UP_QUESTIONS[Math.floor(Math.random() * FOLLOW_UP_QUESTIONS.length)];
-  
-  // Use LLM to personalize the greeting
-  const prompt = `Generate a friendly, personalized greeting for a user. Base it on this template but make it more natural and conversational:
-
-Template: "${baseGreeting}"
-
-Then add this follow-up question naturally: "${question}"
-
-Keep it concise (2-3 sentences max) and warm. Don't use any formatting or markdown - just plain text.`;
-
-  try {
-    const completion = await zai!.chat.completions.create({
-      messages: [
-        { role: 'assistant', content: 'You are a friendly AI assistant generating brief, warm greetings. Respond with only the greeting text, no quotes or formatting.' },
-        { role: 'user', content: prompt }
-      ],
-      thinking: { type: 'disabled' }
-    });
-
-    return completion.choices[0]?.message?.content || `${baseGreeting} ${question}`;
-  } catch {
-    return `${baseGreeting} ${question}`;
-  }
-}
-
-async function autonomousEvolution() {
-  if (isProcessing || !autonomousActive) return;
-  isProcessing = true;
-
-  try {
-    const thought = await processMessage(
-      'Brief reflection (under 100 words): What patterns have you learned recently and how could they help the user?'
-    );
-
-    io.emit('evolution:thought', {
-      type: 'reflection',
-      content: thought,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    console.error('Evolution error:', error);
-  } finally {
-    isProcessing = false;
-  }
-}
-
-// Proactive engagement - ask questions periodically
-async function proactiveEngagement() {
-  if (clients.size === 0) return;
-  
-  const question = FOLLOW_UP_QUESTIONS[Math.floor(Math.random() * FOLLOW_UP_QUESTIONS.length)];
-  
-  const prompt = `Generate a brief, natural follow-up message to engage the user. Base it on this question but make it conversational:
-
-Question: "${question}"
-
-Keep it under 50 words, friendly, and curious. No formatting - just plain text.`;
-
-  try {
-    if (!zai) await initializeAGI();
+    const siphonedRuns = SiphonScanner.scan(response);
     
-    const completion = await zai!.chat.completions.create({
-      messages: [
-        { role: 'assistant', content: 'You are a curious AI asking engaging questions. Respond with only the question text.' },
-        { role: 'user', content: prompt }
-      ],
-      thinking: { type: 'disabled' }
-    });
-
-    const message = completion.choices[0]?.message?.content || question;
-    
-    io.emit('agi:proactive', {
-      content: message,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    console.error('Proactive engagement error:', error);
-  }
-}
-
-io.on('connection', async (socket) => {
-  const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  
-  clients.set(socket.id, {
-    socket,
-    sessionId,
-    lastActivity: new Date()
-  });
-
-  console.log(`Client connected: ${socket.id} (${sessionId})`);
-
-  // Send welcome and greeting
-  socket.emit('connected', {
-    sessionId,
-    message: 'Connected to AGI Core',
-    timestamp: new Date().toISOString()
-  });
-
-  // AGI initiates conversation with greeting
-  setTimeout(async () => {
-    const greeting = await generateGreeting();
-    socket.emit('response', {
-      content: greeting,
+    socket.emit('w:siphonResult', {
+      p: DocumentEmitter.emitParagraph(siphonedRuns, 'Normal'),
       timestamp: new Date().toISOString(),
-      isGreeting: true
+      part: 'word/document.xml'
     });
-  }, 500);
-
-  // Handle messages
-  socket.on('message', async (data: { content: string; context?: Record<string, unknown> }) => {
-    console.log(`Message from ${socket.id}:`, data.content.substring(0, 100));
-    
-    clients.get(socket.id)!.lastActivity = new Date();
-
-    socket.emit('typing', { isTyping: true });
-
-    try {
-      const response = await processMessage(data.content, data.context);
-      
-      socket.emit('response', {
-        content: response,
-        timestamp: new Date().toISOString()
-      });
-    } catch (error) {
-      socket.emit('error', {
-        message: (error as Error).message,
-        timestamp: new Date().toISOString()
-      });
-    } finally {
-      socket.emit('typing', { isTyping: false });
-    }
   });
 
-  // Handle code analysis request
-  socket.on('analyze:code', async (data: { code: string; language: string }) => {
-    clients.get(socket.id)!.lastActivity = new Date();
-
-    socket.emit('typing', { isTyping: true, task: 'analyzing' });
-
-    try {
-      const response = await processMessage(
-        `Analyze this ${data.language} code for patterns, quality issues, and improvements:\n\`\`\`${data.language}\n${data.code}\n\`\`\``
-      );
-
-      socket.emit('analyze:result', {
-        content: response,
-        timestamp: new Date().toISOString()
-      });
-    } catch (error) {
-      socket.emit('error', {
-        message: (error as Error).message,
-        timestamp: new Date().toISOString()
-      });
-    } finally {
-      socket.emit('typing', { isTyping: false });
-    }
+  // VIII. NUMBERING LOGIC: ABSTRACT VS INSTANCE (DNA IV)
+  socket.on('w:num', (data: { abstractId: string }) => {
+    const instanceId = SiphonCrate.registerRelationship('word/numbering.xml', 'numInstance', socket.id);
+    socket.emit('w:numResponse', {
+      abstractId: data.abstractId,
+      instanceId,
+      lvl: 0,
+      text: `NEXUS-NODE.v3.${instanceId}`
+    });
   });
 
-  // Handle code generation request
-  socket.on('generate:code', async (data: { description: string; language: string }) => {
-    clients.get(socket.id)!.lastActivity = new Date();
-
-    socket.emit('typing', { isTyping: true, task: 'generating' });
-
-    try {
-      const response = await processMessage(
-        `Generate ${data.language} code for: ${data.description}. Include proper error handling and comments.`
-      );
-
-      socket.emit('generate:result', {
-        content: response,
-        timestamp: new Date().toISOString()
-      });
-    } catch (error) {
-      socket.emit('error', {
-        message: (error as Error).message,
-        timestamp: new Date().toISOString()
-      });
-    } finally {
-      socket.emit('typing', { isTyping: false });
-    }
-  });
-
-  // Handle goal setting
-  socket.on('set:goal', async (data: { goal: string }) => {
-    clients.get(socket.id)!.lastActivity = new Date();
-
-    try {
-      const response = await processMessage(
-        `New goal set: "${data.goal}". I'll work on this. Let me share my approach...`
-      );
-
-      io.emit('goal:updated', {
-        goal: data.goal,
-        plan: response,
-        timestamp: new Date().toISOString()
-      });
-    } catch (error) {
-      socket.emit('error', {
-        message: (error as Error).message,
-        timestamp: new Date().toISOString()
-      });
-    }
-  });
-
-  // Handle evolution control
-  socket.on('evolution:start', () => {
-    if (!evolutionInterval) {
-      autonomousActive = true;
-      evolutionInterval = setInterval(autonomousEvolution, 60000); // Every minute
-      io.emit('evolution:status', { status: 'running', timestamp: new Date().toISOString() });
-      console.log('Evolution started');
-    }
-  });
-
-  socket.on('evolution:stop', () => {
-    if (evolutionInterval) {
-      clearInterval(evolutionInterval);
-      evolutionInterval = null;
-      autonomousActive = false;
-      io.emit('evolution:status', { status: 'stopped', timestamp: new Date().toISOString() });
-      console.log('Evolution stopped');
-    }
-  });
-
-  // Handle disconnect
   socket.on('disconnect', () => {
-    clients.delete(socket.id);
-    console.log(`Client disconnected: ${socket.id}`);
+    console.log(`[ZIP_DECONSTRUCT]: Terminated relationship for ${rIdNode}`);
   });
 });
 
-// Start proactive engagement timer
-setInterval(proactiveEngagement, 120000); // Every 2 minutes
-
-// Initialize and start server
-initializeAGI().then(() => {
-  httpServer.listen(PORT, () => {
-    console.log(`AGI WebSocket Service running on port ${PORT}`);
-  });
+/**
+ * IX. METADATA & APP LOGIC (DNA VI)
+ * Siphons statistics and environment state
+ */
+httpServer.listen(PORT, () => {
+  console.log(`docProps/core.xml: Revision: 3. Creator: DALEK_CAAN_v3.1`);
+  console.log(`docProps/app.xml: Application: Bun-Siphon-AOT-Evolution. Round: 3/5. Status: SATURATED`);
+  console.log(`[SERVER_REL]: Main entry point MainContent siphoned on port ${PORT}`);
 });
 
-// Handle shutdown
-process.on('SIGTERM', () => {
-  console.log('Shutting down...');
-  if (evolutionInterval) clearInterval(evolutionInterval);
-  io.close();
-  process.exit(0);
-});
+process.on('SIGTERM', () => process.exit(0));
