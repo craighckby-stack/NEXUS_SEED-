@@ -1,54 +1,48 @@
-# DALEK_CAAN Project README
-==========================
-
+# DALEK_CAAN
 ## Project Overview
----------------
 
-DALEK_CAAN is a system for evolution of code by integrating patterns from external repositories.
+DALEK_CAAN is a system that integrates patterns from external repositories to evolve code. The system accepts input from local files and selectively applies architectural patterns from external sources (e.g., DeepMind, Google).
 
-## Siphoning Process
--------------------
+## Files Processed
 
-The DALEK_CAAN system selects architectural origins from external repositories, such as DeepMind's and Google's architectures. The system then applies patterns from these origins to local files. Specifically, this is implemented by:
+DALEK_CAAN currently processes files from local repositories, specified in the processed manual.
 
-* Selecting relevant patterns from external repositories
-* Merging these patterns with local files
-* Applying the merged patterns to evolve the local files
+## SIPHONING PROCESS
 
-## Chained Context
------------------
+1. **Pattern Selection**: The system identifies patterns from external repositories, such as those provided by DeepMind and Google.
+2. **File Analysis**: Local files are analyzed to determine suitability for pattern applications.
+3. **Pattern Application**: Relevant patterns are applied to local files, ensuring consistency with the selected architectural origins.
 
-A shared state/memory implementation ensures consistency across the evolved files. This is achieved by:
+## CHAINED CONTEXT
 
-* Maintaining a shared state/memory for all evolved files
-* Ensuring that updates to the shared state/memory are propagated to all related files
-* Implementing concurrency control to prevent inconsistencies
+DALEK_CAAN utilizes a shared state/memory to maintain consistency across evolved files. This implementation includes:
 
-## Current Status
-----------------
+1. **Shared State**: A centralized storage system ensures all evolved files are aware of each other and act accordingly.
+2. **Memory Synchronization**: All evolved files communicate and update the shared state in real-time, ensuring consistency across the system.
 
-As of the latest analysis, the following information is available:
+## CURRENT STATUS
 
-* **Files Processed**: 30 local files have been processed
-* **Latest File**: The latest file processed is `mini-services/agi-ws/package.json`
-* **DNA Signature**: The system is currently in an **Active** state
-* **Context Summary**:
-"@agi-ws/nexus-ooxml-siphon":
-  - "version": "1.3.0-gold+siphon.round.3"
-  - "type": "module"
-  - "exports": {
-    - ".": "./index.ts"
-    - "./document": "./word/document.ts"
-    - "./styles": "./word/styles.ts"
-    - "./numbering": "./word/numbering.ts"
-    - "./theme": "./word/theme.ts"
-  }
-  - "ooxml:manifest": {
-    - "contentType": "application/vnd.openxmlformats-package.manifest+json"
-  }
-* **Saturation Status**: The system is currently **Active**
+### LATEST FILE
 
-## References
-----------
+- Latest File: `postcss.config.mjs`
 
-For further information on the DALEK_CAAN system, please refer to the associated documentation.
+### CONTEXT SUMMARY
+
+{
+  "name": "nextjs_tailwind_shadcn_ts",
+  "version": "0.2.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000 2>&1 | tee dev.log",
+    "build": "next build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/",
+    "start": "NODE_ENV=production bun .next/standalone/server.js 2>&1 | tee server.log",
+    "lint": "eslint .",
+    "db:push": "prisma db push",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:reset": "prism
+
+### PROJECT STATUS
+
+- DNA SIGNATURE: Active
+- SATURATION STATUS: Active
