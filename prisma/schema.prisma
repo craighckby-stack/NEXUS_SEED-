@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,28 +7,65 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// AGI Core Models
+// I. Structural Topology: Content Registration Layer (mimics [Content_Types].xml)
+model ContentManifest {
+  id           String   @id @default(cuid())
+  partName     String   @unique // The file path or logical part
+  contentType  String   // MIME type equivalent (e.g. application/vnd.agi.agent+xml)
+  extension    String?  // Mapping file extension to logic
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Relationship Mapping Layer (mimics _rels/ pointer-based navigation)
+model RelationalLinkage {
+  id           String   @id @default(cuid())
+  rId          String   @unique // The Relationship ID used for logic siphoning
+  type         String   // The relationship schema type
+  sourceId     String
+  targetId     String
+  targetMode   String   @default("Internal") // Internal or External
+  createdAt    DateTime @default(now())
+}
+
+// II. Logic DNA: Document Object Model Hierarchy
 model AGIAgent {
-  id          String   @id @default(cuid())
-  name        String
-  type        String   // analyzer, mutator, validator, orchestrator, learner
-  status      String   @default("idle") // idle, active, processing, error
-  capabilities String  // JSON array of capabilities
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  tasks       AGITask[]
-  logs        AGILog[]
+  id           String   @id @default(cuid())
+  name         String
+  type         String   
+  status       String   @default("idle")
+  capabilities String  
+  styleId      String?
+  style        StyleDefinition? @relation(fields: [styleId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  tasks        AGITask[]
+  logs         AGILog[]
+}
+
+// III. The Styling Engine: Tiered Inheritance Logic (mimics styles.xml)
+model StyleDefinition {
+  id           String   @id @default(cuid())
+  name         String   @unique
+  type         String   // paragraph, character, table
+  styleId      String   @unique // Internal OOXML style reference
+  isDefault    Boolean  @default(false)
+  basedOnId    String?
+  basedOn      StyleDefinition? @relation("StyleInheritance", fields: [basedOnId], references: [id])
+  derivedStyles StyleDefinition[] @relation("StyleInheritance")
+  properties   String   // JSON blob of local overrides (pPr / rPr logic)
+  agents       AGIAgent[]
 }
 
 model AGITask {
   id          String   @id @default(cuid())
   agentId     String?
   agent       AGIAgent? @relation(fields: [agentId], references: [id])
-  type        String   // analyze, mutate, learn, evolve, validate
-  status      String   @default("pending") // pending, running, completed, failed
+  type        String   
+  status      String   @default("pending")
   priority    Int      @default(5)
-  input       String   // JSON input data
-  output      String?  // JSON output data
+  input       String   
+  output      String?  
   error       String?
   startedAt   DateTime?
   completedAt DateTime?
@@ -40,30 +74,56 @@ model AGITask {
 }
 
 model Repository {
-  id           String   @id @default(cuid())
-  name         String
-  url          String
-  description  String?
-  fileCount    Int      @default(0)
-  analysisStatus String @default("pending") // pending, analyzing, analyzed, error
-  lastAnalysis DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  patterns     Pattern[]
-  files        CodeFile[]
+  id             String   @id @default(cuid())
+  name           String
+  url            String
+  description    String?
+  fileCount      Int      @default(0)
+  analysisStatus String   @default("pending")
+  lastAnalysis   DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  patterns       Pattern[]
+  files          CodeFile[]
 }
 
+// IV. Hierarchy Logic: Atomic Units & Run Logic (mimics w:p -> w:r -> w:t)
 model CodeFile {
   id           String   @id @default(cuid())
   repositoryId String
   repository   Repository @relation(fields: [repositoryId], references: [id])
   path         String
-  content      String?
   language     String?
   analyzed     Boolean  @default(false)
+  body         DocumentBody?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   patterns     Pattern[]
+}
+
+model DocumentBody {
+  id         String   @id @default(cuid())
+  fileId     String   @unique
+  file       CodeFile @relation(fields: [fileId], references: [id])
+  paragraphs ParagraphLogic[]
+}
+
+model ParagraphLogic {
+  id         String   @id @default(cuid())
+  bodyId     String
+  body       DocumentBody @relation(fields: [bodyId], references: [id])
+  order      Int
+  properties String?  // Local w:pPr overrides
+  runs       RunLogic[]
+}
+
+model RunLogic {
+  id          String   @id @default(cuid())
+  paragraphId String
+  paragraph   ParagraphLogic @relation(fields: [paragraphId], references: [id])
+  order       Int
+  properties  String?  // Property-State Pattern (w:rPr)
+  data        String   // Raw Literal Data (w:t)
 }
 
 model Pattern {
@@ -73,60 +133,74 @@ model Pattern {
   fileId       String?
   file         CodeFile? @relation(fields: [fileId], references: [id])
   name         String
-  type         String   // architectural, structural, semantic, behavioral
+  type         String   
   description  String
-  code         String   // The pattern code/structure
+  code         String   
   confidence   Float    @default(0.0)
-  usage        Int      @default(0) // How many times this pattern has been used
+  usage        Int      @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
 
 model Mutation {
-  id           String   @id @default(cuid())
-  sourcePatternId String?
-  targetFileId String?
+  id               String   @id @default(cuid())
+  sourcePatternId  String?
+  targetFileId     String?
   evolutionCycleId String?
-  evolutionCycle EvolutionCycle? @relation(fields: [evolutionCycleId], references: [id])
-  type         String   // insert, modify, delete, refactor
-  description  String
-  beforeCode   String?
-  afterCode    String?
-  status       String   @default("pending") // pending, applied, rolled_back
-  appliedAt    DateTime?
-  rolledBackAt DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  evolutionCycle   EvolutionCycle? @relation(fields: [evolutionCycleId], references: [id])
+  type             String   
+  description      String
+  beforeCode       String?
+  afterCode        String?
+  status           String   @default("pending")
+  appliedAt        DateTime?
+  rolledBackAt     DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model EvolutionCycle {
-  id           String   @id @default(cuid())
-  cycleNumber  Int      @unique
-  status       String   @default("pending") // pending, running, completed, failed
-  patternsExtracted Int @default(0)
-  mutationsApplied Int  @default(0)
-  fitnessScore Float?
-  startTime    DateTime?
-  endTime      DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  mutations    Mutation[]
+  id                String   @id @default(cuid())
+  cycleNumber       Int      @unique
+  status            String   @default("pending")
+  patternsExtracted Int      @default(0)
+  mutationsApplied  Int      @default(0)
+  fitnessScore      Float?
+  startTime         DateTime?
+  endTime           DateTime?
+  statsId           String?  @unique
+  stats             ExtendedProperties? @relation(fields: [statsId], references: [id])
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  mutations         Mutation[]
+}
+
+// VI. Metadata and App Logic (mimics docProps/core.xml & app.xml)
+model ExtendedProperties {
+  id             String   @id @default(cuid())
+  application    String   @default("DALEK_CAAN Siphon Engine")
+  appVersion     String   @default("3.1")
+  totalLines     Int      @default(0)
+  totalWords     Int      @default(0)
+  evolutionTime  Int      @default(0) // Seconds
+  evolutionCycle EvolutionCycle?
+  createdAt      DateTime @default(now())
 }
 
 model AGILog {
   id        String   @id @default(cuid())
   agentId   String?
   agent     AGIAgent? @relation(fields: [agentId], references: [id])
-  level     String   // info, warning, error, debug
+  level     String   
   message   String
-  data      String?  // JSON additional data
+  data      String?  
   createdAt DateTime @default(now())
 }
 
 model SystemState {
   id          String   @id @default(cuid())
   key         String   @unique
-  value       String   // JSON value
+  value       String   
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -134,7 +208,7 @@ model SystemState {
 
 model ChatMessage {
   id        String   @id @default(cuid())
-  role      String   // user, assistant, system
+  role      String   
   content   String
   sessionId String
   createdAt DateTime @default(now())
