@@ -1,0 +1,2 @@
+NEXUS Generation 5
+Capabilities: {"language":0,"coding":0.13333333333333333,"execution":0,"learning":0,"overall":0.03333333333333333}
