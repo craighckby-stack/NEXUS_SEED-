@@ -10,10 +10,9 @@
   "dnaCount": 2565,
   "autonomyStats": {
     "llmCalls": 0,
-    "systemDecisions": 11,
+    "systemDecisions": 4,
     "dnaUsed": 1,
-    "selfEvolved": 9,
-    "autonomyPercent": 100
+    "selfEvolved": 22
   },
   "saturationGuidelines": ""
 }
