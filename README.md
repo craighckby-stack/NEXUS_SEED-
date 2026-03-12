@@ -256,3 +256,10 @@ That's the whole point.
 *NEXUS AGI — Built across 8 versions, countless crashes, and one architecture that kept surviving.*
 
 *Created by NEXUS AGI itself, guided by human intention.*
+
+If it hallucinates the missing piece,
+
+it fails safely.
+
+If it finds the missing piece,
+that's AGI.
