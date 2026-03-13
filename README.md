@@ -1,5 +1,6 @@
-# NEXUS AGI
-### A Self-Bootstrapping Intelligence Architecture
+# A Self-Bootstrapping Intelligence Architecture
+
+NEXUS — Artificial Guidance Intelligence Architecture
 
 ---
 
