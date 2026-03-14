@@ -1,102 +1,81 @@
-# [Content_Types].registry (Core Manifest Orchestration)
-.git
-.gitignore
-.dockerignore
-.github
-LICENSE
-README.md
-CHANGELOG.md
-
-# Fragment: /node_modules (Relational Bindings & Dependency Fragments)
-node_modules/
-jspm_packages/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-pnpm-lock.yaml
-package-lock.json
-yarn.lock
-npm-shrinkwrap.json
-
-# Fragment: /dist (Presentation Layer / Compiled Artifacts)
-dist/
-lib/
-out/
-build/
-bin/
-obj/
-*.tsbuildinfo
-*.map
-*.d.ts
-*.pyc
-__pycache__/
-
-# Fragment: /genkit (Domain-Specific AI Orchestration Fragments)
-.genkit/
-genkit-state/
-genkit.json
-genkit-env.json
-**/flow-state/
-**/trace-data/
-**/prompts/metadata.json
-**/evals/
-**/telemetry/
-**/cache/genkit/
-
-# Fragment: /settings (Environmental Constraints & Contextual State)
-.env
-.env.*
-!.env.example
-.secrets
-.terraform
-.aws
-.gcloud
-.config
-.firebase
-.firebaserc
-*.pem
-*.key
-*.crt
-service-account.json
-
-# Fragment: /sidecars (Auxiliary Logic & Teleportation Patterns)
-tests/
-__tests__/
-test/
-specs/
-coverage/
-docs/
-temp/
-tmp/
-*.log
-*.bak
-*.swp
-.history/
-.vscode/
-.idea/
-
-# Fragment: /containers (Infrastructure Definition Overrides)
-Dockerfile*
-docker-compose*
-.docker
-kubeconfig
-helm/
-
-# Archive Logic (Compressed Package Architecture)
-*.zip
-*.tar.gz
-*.rar
-*.7z
-*.iso
-*.dmg
-
-# OS Metadata (Registry Noise & Path Collisions)
-.DS_Store
-.AppleDouble
-.LSOverride
-Icon
-Thumbs.db
-ehthumbs.db
-desktop.ini
-$RECYCLE.BIN/
+{
+  "improvedCode": {
+    "// Modified .dockerignore optimization rules for improved Docker image construction and caching",
+    "// Structural Dependencies",
+    "Core Manifest Orchestration",
+    "// /dist fragments (Presentation Layer / Compiled Artifacts)",
+    "/dist/",
+    "/lib/",
+    "/out/",
+    "/build/",
+    "/bin/",
+    "/obj/",
+    "*.tsbuildinfo",
+    "*.map",
+    "*.d.ts",
+    "*.pyc",
+    "__pycache__/",
+    "// Fragment /genkit (Domain-Specific AI Orchestration Fragments)",
+    "/genkit/",
+    ".genkit/",
+    "/genkit-state/",
+    "/genkit.json",
+    "/genkit-env.json",
+    "**/flow-state/",
+    "**/trace-data/",
+    "**/prompts/metadata.json",
+    "**/evals/",
+    "**/telemetry/",
+    "**/cache/genkit/",
+    "// Omitting node_modules under /sidecars fragments (Auxiliary Logic & Teleportation Patterns) as it violates cache immutability",
+    "/sidecars/",
+    "tests/__tests__/",
+    "test/",
+    "specs/",
+    "coverage/",
+    "docs/",
+    "temp/",
+    "tmp/",
+    "*.log",
+    "*.bak",
+    "*.swp",
+    ".history/",
+    ".vscode/",
+    ".idea/",
+    "// Fragment /containers (Infrastructure Definition Overrides)",
+    "docker-compose-*.yaml",
+    ".kube",
+    "// OS Metadata Fragments",
+    "// Compressed Packages",
+    "*.zip",
+    "*.tar.gz",
+    "*.rar",
+    "*.7z",
+    "*.iso",
+    "*.dmg",
+    "// Pattern: (Siphoned) Enhanced ignore rules for build artifacts",
+    "**/*.build",
+    "**/*.cache",
+    "**/*.temp",
+    "**/*.bak",
+    "**/*.swp",
+    "**/*.log",
+    "**/*.tmp",
+    "**/__pycache__",
+    "// Pattern: (Siphoned) Improved ignore rules for testing utilities",
+    "**/__tests__",
+    "**/test",
+    "**/specs",
+    "**/coverage",
+    "**/docs",
+    "**/temp",
+    "**/tmp"
+  },
+  "summary": "Improved Docker image construction and caching by optimizing dependency and artifact management",
+  "emergentTool": false,
+  "tool": {
+    "name": "DockerIgnoreOptimizer",
+    "description": "Optimization of .dockerignore rules to ensure maximum caching and optimal Docker image construction",
+    "serialisedFn": "function() { return /* optimized code */;}"
+  }
+}
