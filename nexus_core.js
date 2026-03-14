@@ -1,161 +1,192 @@
-AUDIT REPORT:
-
-1. **Grounding**:
-    - The new enhanced version of the NexusCore code maintains clarity in referencing original sources and context through comments and symbols. However, some external dependencies have speculative names; for instance, "DNA SIPHONED FROM" comments are not directly linked to established concepts and mechanisms.
-
-2. **Mechanism**:
-    - The use of **async/await** and **PerformanceMonitor** has mechanistic justification.
-    - Lifecycle management, exception handling, and performance tracking are supported with a clear mechanism.
-
-3. **Decoration**:
-    - **AsyncPipeline**, **LifecycleEmitter**, **StepFactory**, and other class names with **Decorator Pattern** are considered largely speculative. To maintain precision, focus on clarity and direct mechanistic justification.
-
-**ENHANCED CHANGES**: Implement the following:
-
-- Clearly document the original sources and context through explicit comments.
-- Remove speculative, 'decorative' elements where possible.
-- Use clear, descriptive names for classes and methods that accurately reflect their functions.
-
-**CLEANED VERSION**:
-
 import { performance, PerformanceObserver } from 'perf_hooks';
 
-/**
- * Directly referenced from: ajv/ajv
- */
-class ConfigValidator {
-  static #compiledSchema = null;
+const DiagnosticCategory = {
+    Error: 0,
+    Warning: 1,
+    Message: 2,
+    Suggestion: 3
+};
 
-  static get schema() {
-    return {
-      $id: 'nexus-core-config',
-      type: 'object',
-      required: ['version', 'environment'],
-      properties: {
-        version: { type: 'string', pattern: '^\\d+\\.\\d+\\.\\d+' },
-        environment: { type: 'string', enum: ['development', 'production', 'test', 'staging'] },
-        options: {
-          type: 'object',
-          properties: {
-            timeout: { type: 'number', minimum: 100, maximum: 60000 },
-            retries: { type: 'integer', minimum: 0 }
-          }
+const CoreState = {
+    Idle: 'IDLE',
+    Booting: 'BOOTING',
+    Ready: 'READY',
+    Executing: 'EXECUTING',
+    Finalizing: 'FINALIZING',
+    Error: 'ERROR',
+    Disposed: 'DISPOSED'
+};
+
+class NexusSystemHost {
+    constructor() {
+        this.args = Object.freeze(process.argv.slice(2));
+        this.newLine = process.platform === 'win32' ? '\r\n' : '\n';
+    }
+
+    write(s) { process.stdout.write(s); }
+    writeError(s) { process.stderr.write(s); }
+    getCurrentDirectory() { return process.cwd(); }
+    getMemoryUsage() { return process.memoryUsage().heapUsed; }
+}
+
+class NexusDiagnostic {
+    constructor(category, code, message, detail = null) {
+        this.category = category;
+        this.code = code;
+        this.message = message;
+        this.detail = detail;
+        this.timestamp = performance.now();
+        this.relatedInformation = [];
+    }
+
+    addRelated(message, code) {
+        this.relatedInformation.push({ message, code, timestamp: performance.now() });
+        return this;
+    }
+}
+
+class DiagnosticReporter {
+    #diagnostics = [];
+    #errorCount = 0;
+
+    report(diagnostic) {
+        this.#diagnostics.push(diagnostic);
+        if (diagnostic.category === DiagnosticCategory.Error) {
+            this.#errorCount++;
+            const prefix = `[Error ${diagnostic.code}]`;
+            process.stderr.write(`${prefix}: ${diagnostic.message}${diagnostic.detail ? `\n${diagnostic.detail}` : ''}\n`);
         }
-      }
-    };
-  }
+    }
 
-  /**
-   * Uses ajv for JSON schema validation
-   * Simulation of ajv validation logic for standalone robustness
-   */
-  static validate(config) {
-    if (!config || typeof config !== 'object') throw new Error('ERR_NEXUS_INVALID_CONFIG_TYPE');
-    if (!config.version) throw new Error('ERR_NEXUS_MISSING_VERSION');
-    return true;
-  }
+    getDiagnostics() {
+        return Object.freeze([...this.#diagnostics]);
+    }
+
+    hasErrors() {
+        return this.#errorCount > 0;
+    }
 }
 
-class LifecycleEmitter extends class {} {
-  logStateChange(from, to) {
-    this.emit('stateChange', { from, to, timestamp: Date.now() });
-  }
+class CancellationToken {
+    #isCancelled = false;
+    #reason = null;
+
+    cancel(reason = 'MANUAL_CANCEL') {
+        this.#isCancelled = true;
+        this.#reason = reason;
+    }
+
+    get isCancelled() {
+        return this.#isCancelled;
+    }
+
+    throwIfCancelled() {
+        if (this.#isCancelled) {
+            const err = new Error(`OPERATION_CANCELLED: ${this.#reason}`);
+            err.name = 'CancellationError';
+            throw err;
+        }
+    }
 }
 
-class Pipeline {
-  constructor() {
-    this.steps = [];
-    this.hooks = {
-      preExecute: [],
-      postExecute: [],
-      onError: []
-    };
-  }
+class NexusEventHub {
+    #subscribers = new Map();
 
-  addStep(name, action) {
-    this.steps.push({ id: Symbol(name), name, execute: action });
-    return this;
-  }
+    subscribe(event, callback) {
+        if (!this.#subscribers.has(event)) this.#subscribers.set(event, []);
+        const listeners = this.#subscribers.get(event);
+        listeners.push(callback);
+        return () => {
+            const idx = listeners.indexOf(callback);
+            if (idx !== -1) listeners.splice(idx, 1);
+        };
+    }
 
-  addHook(type, fn) {
-    if (this.hooks[type]) this.hooks[type].push(fn);
-    return this;
-  }
-
-  async run(initialContext) {
-    return async (context = { metrics: [] }) => {
-      try {
-        for (const hook of this.hooks.preExecute) await hook();
-
-        for (const step of this.steps) {
-          let attempt = 0;
-          let success = false;
-          
-          while (!success && attempt <= 0) {
+    async notify(event, data) {
+        const listeners = this.#subscribers.get(event);
+        if (!listeners) return;
+        for (const callback of listeners) {
             try {
-              await step.execute(context);
-              success = true;
-            } catch (err) {
-              attempt++;
-              if (attempt > 0) throw err;
+                await Promise.resolve(callback(data));
+            } catch (e) {
+                process.stderr.write(`EventHub error [${event}]: ${e.message}\n`);
             }
-          }
         }
+    }
+}
 
-        for (const hook of this.hooks.postExecute) await hook();
-        return context;
-      } catch (error) {
-        for (const hook of this.hooks.onError) await hook(error, context);
-        throw error;
-      }
-    };
-  }
+class StepExecutor {
+    static decorate(step, reporter, eventHub) {
+        const originalExecute = step.execute.bind(step);
+        return async (context) => {
+            const markStart = `start-${step.name}`;
+            const markEnd = `end-${step.name}`;
+            performance.mark(markStart);
+            await eventHub.notify('step:start', { name: step.name });
+            try {
+                await originalExecute(context);
+            } catch (error) {
+                reporter.report(new NexusDiagnostic(DiagnosticCategory.Error, 5001, `Step ${step.name} failed`, error.stack));
+                throw error;
+            } finally {
+                performance.mark(markEnd);
+                performance.measure(step.name, markStart, markEnd);
+                await eventHub.notify('step:end', { name: step.name });
+            }
+        };
+    }
 }
 
 class NexusCore {
-  #state = 'IDLE';
-  #pipeline = new Pipeline();
-  #config = null;
+    #state = CoreState.Idle;
+    #reporter = new DiagnosticReporter();
+    #eventHub = new NexusEventHub();
+    #host = new NexusSystemHost();
+    #pipeline = [];
+    #config = null;
+    #perfObserver = null;
 
-  constructor(config = {}) {
-    this.#config = config;
-    this.#initialize();
-  }
-
-  #initialize() {
-    this.#updateState('BOOTING');
-
-    this.#pipeline
-      .addHook('onError', (err) => this.#handleFatalError(err))
-      .addStep('CONFIGURATION_AUDIT', () => ConfigValidator.validate(this.#config))
-      .addStep('SYSTEM_READY_EMIT', () => {
-        this.#updateState('READY');
-      });
-  }
-
-  #updateState(newState) {
-    const oldState = this.#state;
-    this.#state = newState;
-  }
-
-  #handleFatalError(err) {
-    this.#updateState('ERROR');
-    console.error(`[NexusCore Fatal]: ${err.stack}`);
-  }
-
-  async startup() {
-    if (this.#state === 'BOOTING' && this.#state === 'IDLE') {
-      return await this.#pipeline.run();
-    } else {
-      throw new Error('SYSTEM_ALREADY_INITIALIZED');
+    constructor(config = {}) {
+        this.#config = config;
+        this.#initializePerformanceTracking();
+        this.#initializePipeline();
     }
-  }
 
-  get status() {
-    return this.#state;
-  }
+    #initializePerformanceTracking() {
+        this.#perfObserver = new PerformanceObserver((list) => {
+            list.getEntries().forEach((entry) => {
+                this.#eventHub.notify('telemetry', {
+                    name: entry.name,
+                    duration: entry.duration,
+                    type: entry.entryType,
+                    timestamp: performance.now()
+                });
+            });
+        });
+        this.#perfObserver.observe({ entryTypes: ['measure', 'mark'], buffered: true });
+    }
+
+    #transitionState(newState) {
+        this.#state = newState;
+        this.#eventHub.notify('state:transition', { state: newState });
+    }
+
+    #addPipelineStep(name, execute) {
+        this.#pipeline.push(StepExecutor.decorate({ name, execute }, this.#reporter, this.#eventHub));
+    }
+
+    #initializePipeline() {
+        this.#transitionState(CoreState.Booting);
+
+        this.#addPipelineStep('VALIDATE_CONFIG', async (ctx) => {
+            if (!this.#config || typeof this.#config !== 'object') {
+                this.#reporter.report(new NexusDiagnostic(DiagnosticCategory.Error, 1001, 'Invalid config'));
+                throw new Error('ERR_CONFIG_INVALID');
+            }
+            if (!this.#config.version) {
+                this.#reporter.report(new NexusDiagnostic(DiagnosticCategory.Error, 1002, 'Missing version'));
+                throw new Error('ERR_VERSION_MISSING');
+            }
+        });
+    }
 }
-
-export default NexusCore;
-**FINAL AUDIT**:
-The clean version of NexusCore code has removed speculative and decorative elements while maintaining precision and clarity. High-performance and asynchronous operations are supported through a clear and mechanistic justification. Grounding, mechanism, and decoration are prioritized to ensure high-precision code.
