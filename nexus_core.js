@@ -1,11 +1,24 @@
 import { performance } from 'perf_hooks';
 
+const Lane = {
+  NoLanes: 0b0000000000000000000000000000000,
+  SyncLane: 0b0000000000000000000000000000001,
+  InputContinuousLane: 0b0000000000000000000000000000010,
+  DefaultLane: 0b0000000000000000000000000000100,
+  TransitionLanes: 0b0000000011111111111111111111000,
+  IdleLane: 0b0100000000000000000000000000000,
+};
+
 const WorkPriority = {
-  Immediate: 1,
-  UserBlocking: 2,
-  Normal: 4,
-  Low: 8,
-  Idle: 16
+  ImmediatePriority: 1,
+  UserBlockingPriority: 2,
+  NormalPriority: 3,
+  LowPriority: 4,
+  IdlePriority: 5,
+};
+
+const FiberFlags = {
+  NoFlags: 0b0000000000000000,
 };
 
 const DiagnosticCategory = {
@@ -13,7 +26,7 @@ const DiagnosticCategory = {
   Error: 1,
   Suggestion: 2,
   Message: 3,
-  Telemetry: 4
+  Telemetry: 4,
 };
 
 const DiagnosticMessages = {
@@ -25,8 +38,30 @@ const DiagnosticMessages = {
   SYSTEM_READY: { code: 5001, category: DiagnosticCategory.Message, message: "System ready. Version: {0}. Path: {1}" },
   METRIC_SUMMARY: { code: 6001, category: DiagnosticCategory.Suggestion, message: "Unit '{0}' processed in {1}ms." },
   SCHEDULER_YIELD: { code: 7001, category: DiagnosticCategory.Telemetry, message: "Scheduler yielding control. Execution time: {0}ms" },
-  WORK_COMMIT: { code: 8001, category: DiagnosticCategory.Message, message: "Work root committed. Total units: {0}" }
+  WORK_COMMIT: { code: 8001, category: DiagnosticCategory.Message, message: "Work root committed. Total units: {0}. Lanes: {1}" },
 };
+
+class LaneManager {
+  static getHighestPriorityLane(lanes) {
+    return lanes & -lanes;
+  }
+
+  static includesLane(set, subset) {
+    return (set & subset) !== Lane.NoLanes;
+  }
+
+  static mergeLanes(a, b) {
+    return a | b;
+  }
+
+  static removeLanes(set, subset) {
+    return set & ~subset;
+  }
+
+  static isSubsetOfLanes(set, subset) {
+    return (set & subset) === subset;
+  }
+}
 
 class NexusScheduler {
   #taskQueue = [];
@@ -39,28 +74,54 @@ class NexusScheduler {
     this.host = host;
   }
 
-  scheduleCallback(priority, callback) {
+  scheduleCallback(priority, callback, options = {}) {
     const currentTime = performance.now();
+    const timeout = this.#getTimeoutByPriority(priority);
+    
     const newTask = {
       id: Math.random().toString(36).substr(2, 9),
       callback,
       priority,
       startTime: currentTime,
-      expirationTime: currentTime + (priority === WorkPriority.Immediate ? -1 : priority * 100)
+      expirationTime: currentTime + timeout,
+      lane: options.lane || Lane.DefaultLane,
     };
 
     this.#taskQueue.push(newTask);
-    this.#taskQueue.sort((a, b) => a.expirationTime - b.expirationTime);
+    this.#sortTasks();
 
     if (!this.#isHostCallbackScheduled && !this.#isPerformingWork) {
       this.#isHostCallbackScheduled = true;
-      setImmediate(() => this.#workLoop());
+      this.#requestHostCallback();
     }
 
     return newTask;
   }
 
-  #shouldYield() {
+  #sortTasks() {
+    this.#taskQueue.sort((a, b) => a.expirationTime - b.expirationTime);
+  }
+
+  #getTimeoutByPriority(priority) {
+    switch (priority) {
+      case WorkPriority.ImmediatePriority: return -1;
+      case WorkPriority.UserBlockingPriority: return 250;
+      case WorkPriority.NormalPriority: return 5000;
+      case WorkPriority.LowPriority: return 10000;
+      case WorkPriority.IdlePriority: return 1073741823;
+      default: return 5000;
+    }
+  }
+
+  #requestHostCallback() {
+    if (typeof setImmediate !== 'undefined') {
+      setImmediate(() => this.#workLoop());
+    } else {
+      setTimeout(() => this.#workLoop(), 0);
+    }
+  }
+
+  shouldYield() {
     return performance.now() >= this.#deadline;
   }
 
@@ -70,19 +131,32 @@ class NexusScheduler {
     this.#deadline = performance.now() + this.#yieldInterval;
 
     try {
-      while (this.#taskQueue.length > 0 && !this.#shouldYield()) {
-        const currentTask = this.#taskQueue.shift();
-        const continuation = currentTask.callback(this.#shouldYield.bind(this));
+      while (this.#taskQueue.length > 0) {
+        if (this.shouldYield()) {
+          this.host.reportDiagnostic(
+            DiagnosticMessages.SCHEDULER_YIELD, 
+            Math.round(performance.now() - (this.#deadline - this.#yieldInterval))
+          );
+          break;
+        }
+
+        const currentTask = this.#taskQueue[0];
+        const didUserCallbackTimeout = currentTask.expirationTime <= performance.now();
+        const continuation = currentTask.callback(didUserCallbackTimeout);
 
         if (typeof continuation === 'function') {
           currentTask.callback = continuation;
-          this.#taskQueue.unshift(currentTask);
+        } else {
+          if (this.#taskQueue[0] === currentTask) {
+            this.#taskQueue.shift();
+          }
         }
+        this.#sortTasks();
       }
 
       if (this.#taskQueue.length > 0) {
         this.#isHostCallbackScheduled = true;
-        setImmediate(() => this.#workLoop());
+        this.#requestHostCallback();
       }
     } finally {
       this.#isPerformingWork = false;
@@ -91,219 +165,15 @@ class NexusScheduler {
 }
 
 class NexusFiber {
-  constructor(name, action, priority) {
+  constructor(name, action, priority, lane = Lane.DefaultLane) {
     this.name = name;
     this.action = action;
     this.priority = priority;
-    this.stateNode = null;
+    this.lanes = lane;
     this.return = null;
     this.child = null;
     this.sibling = null;
-    this.memoizedState = new Map();
-  }
-}
-
-class TelemetryRegistry {
-  #subscribers = new Set();
-
-  subscribe(callback) {
-    if (typeof callback !== 'function') return () => {};
-    this.#subscribers.add(callback);
-    return () => this.#subscribers.delete(callback);
-  }
-
-  notify(event, data) {
-    for (const sub of this.#subscribers) {
-      try { sub(event, data); } catch (e) {}
-    }
-  }
-}
-
-class CancellationToken {
-  #isCancelled = false;
-  #listeners = new Set();
-
-  get isCancellationRequested() { return this.#isCancelled; }
-
-  cancel() {
-    if (this.#isCancelled) return;
-    this.#isCancelled = true;
-    this.#listeners.forEach(fn => { try { fn(); } catch (e) {} });
-    this.#listeners.clear();
-  }
-
-  onCancellationRequested(fn) {
-    if (this.#isCancelled) { fn(); return () => {}; }
-    this.#listeners.add(fn);
-    return () => this.#listeners.delete(fn);
-  }
-
-  throwIfCancelled() {
-    if (this.#isCancelled) {
-      const error = new Error(DiagnosticMessages.PIPELINE_CANCELED.message);
-      error.code = DiagnosticMessages.PIPELINE_CANCELED.code;
-      error.isCancellation = true;
-      throw error;
-    }
-  }
-}
-
-class Host {
-  #config;
-  #perf = new Map();
-  #telemetry = new TelemetryRegistry();
-  #scheduler;
-
-  constructor(config) {
-    this.#config = config;
-    this.diagnostics = [];
-    this.#scheduler = new NexusScheduler(this);
-  }
-
-  get scheduler() { return this.#scheduler; }
-  get telemetry() { return this.#telemetry; }
-  
-  mark(name) { this.#perf.set(name, performance.now()); }
-  getDuration(name) { 
-    const start = this.#perf.get(name);
-    return start ? performance.now() - start : 0; 
-  }
-
-  reportDiagnostic(diagnostic, ...args) {
-    let formatted = diagnostic.message;
-    args.forEach((arg, i) => formatted = formatted.replace(`{${i}}`, String(arg)));
-
-    const entry = {
-      timestamp: Date.now(),
-      code: diagnostic.code,
-      category: diagnostic.category,
-      message: formatted,
-      id: Math.random().toString(36).substr(2, 9)
-    };
-    
-    this.diagnostics.push(entry);
-    this.#logToConsole(entry);
-    this.#telemetry.notify('DIAGNOSTIC_REPORTED', entry);
-  }
-
-  #logToConsole(entry) {
-    const categories = Object.keys(DiagnosticCategory);
-    const categoryName = categories[entry.category].toUpperCase();
-    const logString = `[${entry.id}] [${entry.code}] [${categoryName}] ${entry.message}`;
-    if (entry.category === DiagnosticCategory.Error) console.error(logString);
-    else if (entry.category === DiagnosticCategory.Warning) console.warn(logString);
-    else console.log(logString);
-  }
-}
-
-class NexusProgram {
-  #host;
-  #token;
-  #results = {};
-  #currentFiber = null;
-
-  constructor(host, token) {
-    this.#host = host;
-    this.#token = token;
-  }
-
-  get host() { return this.#host; }
-  get token() { return this.#token; }
-  get results() { return this.#results; }
-  set currentFiber(f) { this.#currentFiber = f; }
-  
-  setResult(key, value) { this.#results[key] = value; }
-  
-  usePersistence(key, initialValue) {
-    if (!this.#currentFiber.memoizedState.has(key)) {
-      this.#currentFiber.memoizedState.set(key, initialValue);
-    }
-    return [
-      this.#currentFiber.memoizedState.get(key),
-      (nextVal) => this.#currentFiber.memoizedState.set(key, nextVal)
-    ];
-  }
-}
-
-class NexusRuntime {
-  #root = null;
-  #workInProgress = null;
-  #fiberCount = 0;
-
-  constructor(host) {
-    this.host = host;
-  }
-
-  createWork(phaseName, steps) {
-    const phaseRoot = new NexusFiber(phaseName, null, WorkPriority.Normal);
-    let prevFiber = null;
-
-    steps.forEach((step, index) => {
-      const fiber = new NexusFiber(step.name, step.action, step.priority || WorkPriority.Normal);
-      fiber.return = phaseRoot;
-      if (index === 0) {
-        phaseRoot.child = fiber;
-      } else {
-        prevFiber.sibling = fiber;
-      }
-      prevFiber = fiber;
-      this.#fiberCount++;
-    });
-
-    this.#root = phaseRoot;
-    return this;
-  }
-
-  async execute(program) {
-    this.#workInProgress = this.#root;
-    
-    return new Promise((resolve, reject) => {
-      const performWork = (didYield) => {
-        try {
-          while (this.#workInProgress !== null && !didYield) {
-            program.token.throwIfCancelled();
-            this.#workInProgress = this.#performUnitOfWork(this.#workInProgress, program);
-          }
-
-          if (this.#workInProgress === null) {
-            this.host.reportDiagnostic(DiagnosticMessages.WORK_COMMIT, this.#fiberCount);
-            resolve(program.results);
-            return null;
-          }
-
-          return performWork;
-        } catch (e) {
-          reject(e);
-        }
-      };
-
-      this.host.scheduler.scheduleCallback(WorkPriority.Normal, performWork);
-    });
-  }
-
-  #performUnitOfWork(fiber, program) {
-    program.currentFiber = fiber;
-    
-    if (fiber.action) {
-      const start = performance.now();
-      try {
-        const result = fiber.action(program);
-        program.setResult(fiber.name, result);
-        const duration = performance.now() - start;
-        this.host.reportDiagnostic(DiagnosticMessages.METRIC_SUMMARY, fiber.name, duration.toFixed(4));
-      } catch (err) {
-        this.host.reportDiagnostic(DiagnosticMessages.PHASE_TRANSITION_ERROR, "Runtime", fiber.name, err.message);
-        throw err;
-      }
-    }
-
-    if (fiber.child) return fiber.child;
-    
-    let nextFiber = fiber;
-    while (nextFiber) {
-      if (nextFiber.sibling) return nextFiber.sibling;
-      nextFiber = nextFiber.return;
-    }
-    return null;
+    this.alternate = null;
+    this.flags = FiberFlags.NoFlags;
   }
 }
