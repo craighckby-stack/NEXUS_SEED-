@@ -1,26 +1,42 @@
-# DALEK_CAAN
+# DALEK_CAAN Project
+## Table of Contents
+1. [Project Overview](#project-overview)
+2. [Siphoning Process](#siphoning-process)
+3. [Chained Context](#chained-context)
+4. [Current Status](#current-status)
 
-## Project Overview
-DALEK_CAAN is a code evolution framework designed to programmatically refine and restructure local source code. The system operates by identifying, extracting, and integrating high-level architectural patterns from external repositories into a target codebase to enhance logic density and structural efficiency.
+### Project Overview
+DALEK_CAAN is a system that evolves code by integrating patterns from external repositories.
 
-## Siphoning Process
-The siphoning mechanism is the technical pipeline for architectural pattern ingestion. 
-1.  **Origin Selection:** The system identifies industry-standard architectural benchmarks from established organizations (e.g., DeepMind, Google).
-2.  **Pattern Extraction:** Structural configurations and algorithmic patterns are analyzed and abstracted from these external sources.
-3.  **Local Application:** The abstracted patterns are applied to local files, refactoring existing code to align with the selected architectural standards.
+### Siphoning Process
+The siphoning process selects architectural origins (e.g., DeepMind, Google) and applies their patterns to local files. This process is driven by the presence of an active DNA signature, which triggers the integration of external patterns into the code.
 
-## Chained Context
-To maintain system-wide integrity during the evolution process, DALEK_CAAN implements a **Chained Context** mechanism. This serves as a shared state and persistent memory layer across all processed files.
-*   **Consistency:** Ensures that modifications in one module are reflected and supported by the architectural changes in dependent modules.
-*   **State Persistence:** Maintains a record of evolved logic to prevent regressive code generation or structural conflicts during iterative updates.
+### Chained Context
+The chained context is a shared state/memory that ensures consistency across the evolved files. This is achieved through the implementation of a NexusEventBus class, which manages event broadcasting and custom filtering.
 
-## Current Status
-The project is currently in its primary setup phase.
+#### NexusEventBus Class
+class NexusEventBus {
+  #events = new Map();
+  #customFilters = new Map();
 
-| Metric | Value |
-| :--- | :--- |
-| **Files Processed** | Manual |
-| **Latest File** | `nexus_core.js` |
-| **Context Summary** | Initial State |
-| **DNA Signature** | None |
-| **Saturation Status** | None |
+  async broadcast(event) {
+    try {
+      if (this.#events.has(event.type)) {
+        const listeners = this.#events.get(event.type);
+        await Promise.all(
+          listeners.map((listener) => listener(event)).filter((result) => result !== null)
+        );
+      }
+    } catch (error) {
+      console.error('Error broadcasting event:', error);
+    }
+  }
+}
+
+### Current Status
+- **Files Processed:** Manual
+- **Latest File:** nexus_core.js
+- **DNA Signature:** Active
+- **Saturation Status:** Active
+
+The NexusEventBus class implementation has a saturation status of active, indicating that it is being used in the current system configuration. The latest file being processed is nexus_core.js, and an active DNA signature is driving the integration of external patterns into the code.
