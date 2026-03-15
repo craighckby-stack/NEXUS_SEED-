@@ -1,0 +1,321 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// DNA Knowledge Base - Persistent Memory
+model DnaChunk {
+  id         String   @id @default(cuid())
+  content    String   // The actual chunk content
+  tags       String?  // Comma-separated tags
+  source     String?  // Where this came from
+  hash       String   @unique // Hash of content for deduplication
+  chunkIndex Int      @default(0) // Position in original file
+  charStart  Int      @default(0) // Character position start
+  charEnd    Int      @default(0) // Character position end
+  wordCount  Int      @default(0) // Approximate word count
+  createdAt  DateTime @default(now())
+  
+  @@index([hash])
+}
+
+// DNA Keyword Index - For fast keyword lookups
+model DnaKeyword {
+  id        String   @id @default(cuid())
+  keyword   String   @unique
+  chunkIds  String   // JSON array of chunk hashes
+  count     Int      @default(0)
+  createdAt DateTime @default(now())
+  
+  @@index([keyword])
+}
+
+// AGI Evolution History
+model AgiGeneration {
+  id         String   @id @default(cuid())
+  sessionId  String?
+  round      Int      @default(1)
+  code       String   // The generated AGI code
+  delta      Float    @default(0) // Change from previous
+  source     String?  // What source was used
+  tokensUsed Int      @default(0)
+  patterns   String?  // JSON of patterns used
+  createdAt  DateTime @default(now())
+  
+  session    EvolutionSession? @relation(fields: [sessionId], references: [id])
+  
+  @@index([round])
+  @@index([sessionId])
+}
+
+// GitHub Repository tracking
+model Repo {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  fullName    String   // owner/repo
+  description String?
+  language    String?
+  size        Int      @default(0) // KB
+  url         String?
+  cloned      Boolean  @default(false)
+  fileCount   Int      @default(0)
+  chunkCount  Int      @default(0)
+  lastSync    DateTime?
+  createdAt   DateTime @default(now())
+  
+  files       RepoFile[]
+  
+  @@index([name])
+}
+
+// Repository Files tracking
+model RepoFile {
+  id           String   @id @default(cuid())
+  repoId       String
+  path         String   // File path in repo
+  content      String?  // File content (for smaller files)
+  language     String?  // File language/type
+  size         Int      @default(0) // bytes
+  chunkCount   Int      @default(0)
+  indexed      Boolean  @default(false)
+  error        String?
+  createdAt    DateTime @default(now())
+  
+  repo         Repo     @relation(fields: [repoId], references: [id], onDelete: Cascade)
+  
+  @@index([repoId])
+  @@index([path])
+}
+
+// Evolution Session - tracks a single evolution run
+model EvolutionSession {
+  id           String   @id @default(cuid())
+  status       String   @default("pending") // pending, running, completed, error
+  currentRound Int      @default(0)
+  maxRounds    Int      @default(5)
+  targetFile   String?  // What file we're evolving
+  sourceDna    String?  // What DNA chunks were used (JSON array)
+  result       String?  // Final evolved code
+  saturation   Float    @default(0) // Last delta, used for saturation detection
+  error        String?
+  startedAt    DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime @default(now())
+  
+  generations  AgiGeneration[]
+  
+  @@index([status])
+}
+
+// =============================================================================
+// NEXUS AGI v7.0 - Real Capability Testing & Learning
+// =============================================================================
+
+// Capability Test Cases - Actual tests for each capability domain
+model CapabilityTest {
+  id          String   @id @default(cuid())
+  category    String   // language, coding, execution, learning
+  name        String   // Test name
+  description String   // What this test evaluates
+  input       String   // Test input (JSON)
+  expected    String   // Expected output (JSON)
+  difficulty  Float    @default(0.5) // 0-1 difficulty
+  passed      Boolean  @default(false)
+  lastRun     DateTime?
+  createdAt   DateTime @default(now())
+  
+  @@index([category])
+}
+
+// Task Execution Results - Real results from executing tasks
+model TaskResult {
+  id           String   @id @default(cuid())
+  sessionId    String?  // Which evolution session
+  generation   Int      @default(0)
+  taskType     String   // understand, code, execute, learn
+  input        String   // Task input
+  output       String?  // Generated output
+  success      Boolean  @default(false)
+  error        String?
+  executionMs  Int      @default(0) // Execution time in ms
+  verified     Boolean  @default(false) // Was output verified correct?
+  createdAt    DateTime @default(now())
+  
+  @@index([taskType])
+  @@index([sessionId])
+}
+
+// AGI Learning Memory - What the AGI has learned
+model LearningMemory {
+  id          String   @id @default(cuid())
+  category    String   // Type of learning
+  pattern     String   // Pattern discovered
+  context     String?  // Context where it was learned
+  successRate Float    @default(0) // How often this learning helped
+  usageCount  Int      @default(0) // Times this learning was applied
+  lastUsed    DateTime?
+  createdAt   DateTime @default(now())
+  
+  @@index([category])
+}
+
+// AGI Core State - Persistent state of the AGI
+model AgiCoreState {
+  id           String   @id @default(cuid())
+  name         String   @unique
+  code         String   // Current AGI code
+  version      String   @default("1.0.0")
+  languageCap  Float    @default(0) // Language understanding capability
+  codingCap    Float    @default(0) // Code generation capability
+  executionCap Float    @default(0) // Code execution capability
+  learningCap  Float    @default(0) // Learning capability
+  overallCap   Float    @default(0) // Overall capability
+  generation   Int      @default(0) // Evolution generation
+  testsPassed  Int      @default(0) // Number of tests passed
+  testsTotal   Int      @default(0) // Total tests attempted
+  updatedAt    DateTime @updatedAt
+  createdAt    DateTime @default(now())
+}
+
+// Code Execution Sandbox - Track safe code executions
+model CodeExecution {
+  id           String   @id @default(cuid())
+  code         String   // Code that was executed
+  language     String   @default("javascript")
+  input        String?  // Input to the code
+  output       String?  // Output from execution
+  error        String?  // Error if any
+  success      Boolean  @default(false)
+  executionMs  Int      @default(0)
+  safe         Boolean  @default(true) // Was it safe to execute?
+  createdAt    DateTime @default(now())
+  
+  @@index([success])
+}
+
+// =============================================================================
+// NEXUS_SEED AGI v5.0 - GEDM Protocol & Chained Context
+// Repository: craighckby-stack/NEXUS_SEED-
+// =============================================================================
+
+// GEDM Integrity Hash - SHA-256 validation for DNA artifacts
+model IntegrityHash {
+  id           String   @id @default(cuid())
+  artifactPath String   // Path to the artifact
+  hashSha256   String   @unique // SHA-256 hash
+  hashType     String   @default("sha256") // Hash algorithm
+  verified     Boolean  @default(false) // Has integrity been verified?
+  verifiedAt   DateTime?
+  createdAt    DateTime @default(now())
+  
+  @@index([artifactPath])
+  @@index([hashSha256])
+}
+
+// GEDM Execution Stage - Tracks stage readiness
+model ExecutionStage {
+  id              String   @id @default(cuid())
+  stageIndex      Int      // Stage N
+  stageName       String   // Human readable name
+  status          String   @default("pending") // pending, R200, R417
+  gedmValidated   Boolean  @default(false) // GEDM gate passed?
+  constraintsJson String?  // JSON of GDECM constraints
+  cismReference   String?  // Certified Intermediate State Map reference
+  startedAt       DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime @default(now())
+  
+  @@index([stageIndex])
+  @@index([status])
+}
+
+// GEDM Protocol Halt Manifest - R417 failure records
+model ProtocolHaltManifest {
+  id              String   @id @default(cuid())
+  stageIndex      Int      // Which stage failed
+  failureType     String   // F_STATE_INCOHERENCE, etc.
+  violatingDep    String?  // Which dependency violated
+  cismReference   String?  // State map at time of failure
+  errorMessage    String?  // Human readable error
+  hashLocked      String?  // Hash lock for immutability
+  resolved        Boolean  @default(false) // Has this been resolved?
+  resolvedAt      DateTime?
+  createdAt       DateTime @default(now())
+  
+  @@index([stageIndex])
+  @@index([failureType])
+}
+
+// Chained Context - Shared State/Memory for DALEK_CAAN
+model ChainedContext {
+  id           String   @id @default(cuid())
+  contextKey   String   @unique // Unique key for this context
+  contextValue String   // JSON value
+  contextType  String   @default("shared") // shared, memory, sync
+  sourceFile   String?  // Which file created this
+  synced       Boolean  @default(true) // Is this synced across files?
+  version      Int      @default(1) // Context version
+  updatedAt    DateTime @updatedAt
+  createdAt    DateTime @default(now())
+  
+  @@index([contextKey])
+  @@index([contextType])
+}
+
+// Siphon Log - Track all siphoning operations
+model SiphonLog {
+  id           String   @id @default(cuid())
+  sourceRepo   String   // Where patterns came from
+  sourceBranch String?  // Branch siphoned
+  patternsFound Int     @default(0) // Patterns discovered
+  patternsStored Int    @default(0) // Patterns stored
+  category     String?  // Pattern category
+  durationMs   Int      @default(0) // How long it took
+  success      Boolean  @default(false)
+  error        String?
+  createdAt    DateTime @default(now())
+  
+  @@index([sourceRepo])
+  @@index([category])
+}
+
+// Pattern Application Log - Track pattern applications
+model PatternApplication {
+  id            String   @id @default(cuid())
+  patternId     String?  // Reference to DNA chunk
+  patternType   String   // class, function, interface, governance
+  targetFile    String   // Where pattern was applied
+  appliedBy     String?  // What triggered this
+  success       Boolean  @default(false)
+  deltaScore    Float    @default(0) // Improvement score
+  createdAt     DateTime @default(now())
+  
+  @@index([patternType])
+  @@index([targetFile])
+}
+
+// =============================================================================
+// COUNCIL SPEC — DNA Core (Q&A Pairs) + FTS5 Sync
+// =============================================================================
+
+// DNA Core — Q&A pairs with retrieval-first design
+model DnaCore {
+  id          Int      @id @default(autoincrement())
+  queryHash   String   @unique // SHA-256 of question, prevents duplicates
+  prompt      String   // The question
+  response    String   // The answer
+  source      String   // 'grok' | 'claude' | 'gemini' | 'syphon' | 'seed'
+  seedData    Boolean  @default(false) // Was this bootstrapped seed data?
+  score       Int      @default(0) // Retrieval quality score
+  createdAt   DateTime @default(now())
+  
+  @@index([queryHash])
+  @@index([source])
+}
