@@ -1,5 +1,4 @@
-{
-  "policy_id": "SBCM-941B",
+{ 
   "schema_version": "v5.0.0-AGI",
   "metadata": {
     "policy_name": "Sovereign AGI Baseline Modeling Policy",
