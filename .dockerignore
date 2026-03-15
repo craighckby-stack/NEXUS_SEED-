@@ -1,81 +1,249 @@
 {
-  "improvedCode": {
-    "// Modified .dockerignore optimization rules for improved Docker image construction and caching",
-    "// Structural Dependencies",
-    "Core Manifest Orchestration",
-    "// /dist fragments (Presentation Layer / Compiled Artifacts)",
-    "/dist/",
-    "/lib/",
-    "/out/",
-    "/build/",
-    "/bin/",
-    "/obj/",
-    "*.tsbuildinfo",
-    "*.map",
-    "*.d.ts",
-    "*.pyc",
-    "__pycache__/",
-    "// Fragment /genkit (Domain-Specific AI Orchestration Fragments)",
-    "/genkit/",
-    ".genkit/",
-    "/genkit-state/",
-    "/genkit.json",
-    "/genkit-env.json",
-    "**/flow-state/",
-    "**/trace-data/",
-    "**/prompts/metadata.json",
-    "**/evals/",
-    "**/telemetry/",
-    "**/cache/genkit/",
-    "// Omitting node_modules under /sidecars fragments (Auxiliary Logic & Teleportation Patterns) as it violates cache immutability",
-    "/sidecars/",
-    "tests/__tests__/",
-    "test/",
-    "specs/",
-    "coverage/",
-    "docs/",
-    "temp/",
-    "tmp/",
-    "*.log",
-    "*.bak",
-    "*.swp",
-    ".history/",
-    ".vscode/",
-    ".idea/",
-    "// Fragment /containers (Infrastructure Definition Overrides)",
-    "docker-compose-*.yaml",
-    ".kube",
-    "// OS Metadata Fragments",
-    "// Compressed Packages",
-    "*.zip",
-    "*.tar.gz",
-    "*.rar",
-    "*.7z",
-    "*.iso",
-    "*.dmg",
-    "// Pattern: (Siphoned) Enhanced ignore rules for build artifacts",
-    "**/*.build",
-    "**/*.cache",
-    "**/*.temp",
-    "**/*.bak",
-    "**/*.swp",
-    "**/*.log",
-    "**/*.tmp",
-    "**/__pycache__",
-    "// Pattern: (Siphoned) Improved ignore rules for testing utilities",
-    "**/__tests__",
-    "**/test",
-    "**/specs",
-    "**/coverage",
-    "**/docs",
-    "**/temp",
-    "**/tmp"
-  },
-  "summary": "Improved Docker image construction and caching by optimizing dependency and artifact management",
+  "improvedCode": `
+# ==============================================================================
+# DOCKER CONTEXT ARCHITECTURAL MANIFEST: .dockerignore
+# EVOLUTIONARY STAGE: ROUND 3 (CHAINED CONTEXT: deepseek-ai/DeepSeek-Coder)
+# ARCHITECTURAL PATTERN: MULTI-LAYERED EXCLUSION HIERARCHY
+# ==============================================================================
+# This manifest utilizes recursive exclusion logic to minimize the build context
+# entropy, ensuring high-fidelity layer caching and cryptographic-grade isolation
+# of sensitive development artifacts.
+
+# ------------------------------------------------------------------------------
+# LAYER 1: VIRTUAL CONTROL SURFACE & VERSIONING METADATA
+# ------------------------------------------------------------------------------
+# Prevents the injection of VCS state into the ephemeral container runtime.
+.git
+.git/*
+.github/
+.gitignore
+.gitattributes
+.gitmodules
+.hg
+.svn
+.bzr
+_darcs
+.history/
+.idea/
+
+# ------------------------------------------------------------------------------
+# LAYER 2: DEVELOPMENT ENVIRONMENT SHADOWING (IDE/LOCAL)
+# ------------------------------------------------------------------------------
+# High-granularity exclusion of local developer configuration fragments.
+.vscode/
+.vscode-test/
+.project
+.classpath
+.settings/
+(factory)path
+(sublime)project
+(sublime)workspace
+.externalToolBuilders/
+	Dockerfile.local
+Dockerfile.development
+docker-compose.local.yml
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ------------------------------------------------------------------------------
+# LAYER 3: MULTI-RUNTIME DEPENDENCY GRAPH ISOLATION
+# ------------------------------------------------------------------------------
+# Prevents host-specific binary contamination of the container filesystem.
+
+# Node.js / JavaScript Ecosystem
+**/node_modules/
+**/bower_components/
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/.pnpm-debug.log*
+.npm/
+.yarn/
+.pnpm-store/
+.npmrc
+.yarnrc
+.yarnrc.yml
+`.yaml/
+.yarnrc.json
+
+# Python / AI-ML Ecosystem (Siphoned from DeepSeek-Coder patterns)
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/.tox/
+**/.nox/
+**/.ipynb_checkpoints/
+**/venv/
+**/env/
+**/.venv/
+**/.env/
+**/pip-log.txt
+**/pip-delete-this-directory.txt
+**/.aws/
+**/.aws-sam/
+**/.aws-sam/local/
+
+# Rust / Go / C++ Compiled Binaries
+**/target/
+**/Cargo.lock
+**/Cargo.toml
+**/Cargo.lock.lock
+**/go/pkg/
+**/go/bin/
+**/*.o
+**/*.so
+**/*.ko
+**/*.obj
+**/*.elf
+**/*.dll
+**/*.dylib
+**/*.lib
+**/*.a
+**/*.la
+**/*.lo
+**/target/deps
+**/target/release
+**/target/debug
+**/x86_64-unknown-linux-gnu
+**/x86_64-unknown-linux-gnu/release
+**/x86_64-unknown-linux-gnu/debug
+
+# ------------------------------------------------------------------------------
+# LAYER 4: ARCHITECTURAL FRAGMENT - /GENKIT (AI ORCHESTRATION)
+# ------------------------------------------------------------------------------
+# Logic specifically evolved to isolate AI model orchestration states.
+/genkit/
+.genkit/
+/genkit-state/
+/genkit.json
+/genkit-env.json
+**/flow-state/
+**/trace-data/
+**/prompts/metadata.json
+**/evals/
+**/telemetry/
+**/cache/genkit/
+**/.genkit.lock
+/.genkit/workspace
+/.genkit/logs
+**/.genkit/models
+**/.genkit/models/*
+**/genkit-datastores
+**/genkit-inference-api
+**/genkit-inference-orchestrator
+
+# ------------------------------------------------------------------------------
+# LAYER 5: PRESENTATION LAYER & COMPILED ARTIFACTS
+# ------------------------------------------------------------------------------
+# Prevents pre-built artifacts from polluting the deterministic build process.
+/dist/
+/lib/
+/out/
+/build/
+/bin/
+/obj/
+/release/
+*.tsbuildinfo
+*.map
+*.d.ts
+*.js.map
+*.dll.map
+*.so.map
+*.lib.map
+*.a.map
+*.la.map
+*.lo.map
+
+# ------------------------------------------------------------------------------
+# LAYER 6: AI MODEL WEIGHTS & LARGE DATASET FRAGMENTS
+# ------------------------------------------------------------------------------
+# Siphoned Logic: deepseek-ai/DeepSeek-Coder often handles massive datasets.
+*.pth
+*.bin
+*.safetensors
+*.onnx
+*.pb
+*.ckpt
+*.h5
+/datasets/
+/models/weights/
+/checkpoints/
+
+# ------------------------------------------------------------------------------
+# LAYER 7: INFRASTRUCTURE & ORCHESTRATION OVERRIDES
+# ------------------------------------------------------------------------------
+/sidecars/
+docker-compose-*.yaml
+docker-compose.override.yml
+.kube/
+/kubernetes/
+terraform.tfstate*
+/.terraform/
+terraform.tfvars
+terraform.tfstate.tfvars
+*.tf
+
+# ------------------------------------------------------------------------------
+# LAYER 8: TESTING & QUALITY ASSURANCE FRAGMENTS
+# ------------------------------------------------------------------------------
+tests/__tests__/
+test/
+specs/
+**/coverage/
+**/htmlcov/
+**/.coverage
+**/.coverage.*
+**/nosetests.xml
+**/coverage.xml
+*.cover
+*.py,cover
+.pydocstyle
+.pytest.ini
+.pycov
+.pycovrc
+.pytype
+.pylint
+`.pylintignore`
+
+# ------------------------------------------------------------------------------
+# LAYER 9: SYSTEM & TEMPORARY LOGISTICS
+# ------------------------------------------------------------------------------
+docs/
+temp/
+tmp/
+*.log
+*.bak
+*.tmp
+*.iso
+*.dmg
+*.zip
+*.tar.gz
+*.rar
+*.7z
+*.build
+*.cache
+.history
+
+# ------------------------------------------------------------------------------
+# LAYER 10: ARCHITECTURAL EXCEPTIONS (WHITELISTING)
+# ------------------------------------------------------------------------------
+#!**/dist/config.json
+`,
+  "summary": "This architectural manifest utilizes a 10-layered exclusion hierarchy to minimize build context entropy while preserving developmental artifacts.",
   "emergentTool": false,
   "tool": {
-    "name": "DockerIgnoreOptimizer",
-    "description": "Optimization of .dockerignore rules to ensure maximum caching and optimal Docker image construction",
-    "serialisedFn": "function() { return /* optimized code */;}"
-  }
-}
+    "name": "MultiLayeredExclusionHierarchy",
+    "description": "A multi-layered exclusion hierarchy manifesto to minimize build context entropy.",
+    "serialisedFn": "string"
+  },
+  "strategicDecision": "ROUND 3: Implement chained context and siphoned patterns for DeepSeek-Coder's expertise in AI/ML ecosystems.",
+  "priority": 8,
+  "bestSuitedRepo": "deepseek-ai/DeepSeek-Coder",
+  "dependencies": "No direct dependencies mapped.",
+  "evolvedDNA": "Siphoned DNA logic to handle massive AI/ML datasets for Layer 6."
+}`,
