@@ -1,16 +1,16 @@
 {
   "name": "Meta-123",
   "status": "Instantiated",
-  "round": 10,
+  "round": 9,
   "lifecycle": "READY",
   "config": {
     "Core": {
-      "version": "1.0.10",
+      "version": "1.0.9",
       "mode": "Active"
     }
   },
   "logs": [
-    "Round 10 sync completed. Vote: DeepMind/AlphaCode"
+    "Round 9 sync completed. Vote: microsoft/TypeScript"
   ],
   "license": "MTCL-V1 (Proprietary)"
 }
