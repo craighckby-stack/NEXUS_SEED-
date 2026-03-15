@@ -1,77 +1,27 @@
-# ⚡ DALEK_CAAN
+# DALEK_CAAN
 
-[![Phase](https://img.shields.io/badge/Phase-INIT-blue.svg)](#) [![Status](https://img.shields.io/badge/Status-Active-success.svg)](#) [![Target](https://img.shields.io/badge/Repository-craighckby--stack/Test--1-lightgrey.svg)](#)
+## Project Overview
+DALEK_CAAN is a code evolution system designed to transform and optimize local source code by integrating structural and architectural patterns identified in external repositories. The system automates the refinement of software components by mapping high-level design paradigms to local implementations.
 
-**DALEK_CAAN** is an advanced, automated code-evolution framework. Designed to dynamically harvest, adapt, and integrate architectural patterns from industry-leading repositories (e.g., Google, DeepMind), this system systematically transforms local codebases while maintaining rigorous structural integrity.
+## Siphoning Process
+The siphoning mechanism identifies and extracts architectural patterns from established external origins (e.g., DeepMind, Google). This process involves:
+1.  **Pattern Selection:** Analyzing remote repositories to identify optimal architectural structures.
+2.  **Extraction:** Decoupling logic and design patterns from their original context.
+3.  **Application:** Mapping and implementing these patterns onto local target files to facilitate programmatic evolution.
 
----
+## Chained Context
+To ensure structural integrity and logical consistency across evolved files, the system utilizes a Chained Context implementation. This provides a shared state and memory layer that:
+*   Synchronizes modifications across multiple discrete files.
+*   Maintains a persistent record of architectural changes.
+*   Prevents logic conflicts during the integration of external patterns.
 
-## 🏗️ Architecture
+## Technical Specifications & Current Status
+The project is currently in its primary phase. The following data reflects the current state of the system:
 
-DALEK_CAAN is built on a highly decoupled **Flow** and **Plugin** architecture. This strict separation of concerns ensures that the ingestion of external structural patterns is securely isolated from the mutation of the host application.
-
-### Plugin Architecture (The Siphoning Process)
-The Plugin subsystem handles the secure ingestion and abstraction of remote code.
-* **Targeted Extraction:** Extensible plugins interface directly with external architectural origins to identify and extract high-value structural patterns.
-* **Normalization & Abstraction:** Transforms raw, untrusted code snippets into framework-agnostic Abstract Syntax Trees (AST). This sanitizes the input and prepares it for seamless, language-agnostic local integration.
-
-### Flow Architecture (Chained Context)
-The Flow subsystem serves as the core orchestration pipeline and shared memory state.
-* **Execution Pipeline:** Dictates the precise lifecycle of extracted patterns, routing them securely to mutate local target files (e.g., `nexus_core.js`).
-* **State Management (Chained Context):** Preserves deterministic contextual relationships between discrete patterns. This ensures the continuous evolution process maintains logical and architectural consistency across the entire codebase.
-
----
-
-## ⚙️ Getting Started
-
-### Environment Requirements & Portability
-To ensure deterministic behavior and prevent cross-platform anomalies, strict environmental parameters must be met:
-
-* **Runtime:** Node.js (v18+ recommended) is strictly required for executing `nexus_core.js` and performing high-overhead AST manipulations.
-* **Network Integrity:** Outbound TLS/SSL network access is required for the Siphoning Process to fetch remote repository data. Ensure internal firewalls permit outbound traffic to target origins.
-* **Cross-Platform Risks:** While architected to be OS-agnostic, Windows environments **must** configure Git and Node.js to strictly enforce `LF` line endings (e.g., `core.autocrlf false`). Failure to do so will introduce AST parsing anomalies, offset mismatches, and injection failures during pattern normalization.
-
-### Initialization Sequence
-The system is currently in the **Initial State (`INIT`)** and actively ready to accept manual input tasks.
-
-# 1. Clone the target repository
-git clone https://github.com/craighckby-stack/Test-1.git
-
-# 2. Navigate to the working directory
-cd Test-1
-
-# 3. Execute the latest processed entry point
-node nexus_core.js
-
----
-
-## 🛡️ Security & Severity Triage
-
-**Risk Mitigation Strategy**
-
-Dynamically siphoning and integrating external code patterns introduces severe supply-chain and execution risks. DALEK_CAAN employs a strict defense-in-depth model to mitigate these vectors:
-
-* **Untrusted Input Handling (AST Sanitization):** All siphoned code from external origins is treated as inherently malicious data. The Plugin Architecture evaluates structural patterns strictly via AST parsing, completely avoiding the execution of raw external source code.
-* **Execution Prohibitions:** The framework fundamentally prohibits dynamic code execution (e.g., `eval()`, `new Function()`) on external payloads at any point during the Flow lifecycle.
-* **AST Injection Defenses:** The normalization process actively scrubs anomalous or potentially malicious nodes from the parsed syntax tree before they can reach the mutation phase.
-* **Audit Mandate:** Code evolved by DALEK_CAAN is machine-generated. It **MUST** undergo mandatory manual security auditing and automated Static Application Security Testing (SAST) prior to deployment in staging or production environments.
-
----
-
-## 📊 System Status
-
-* **Target Repository:** `craighckby-stack/Test-1`
-* **Operational State:** Active (Processing manual input)
-* **Current Phase:** `INIT`
-* **Latest Processed Target:** `nexus_core.js`
-* **Chained Context:** *None initialized*
-* **DNA Signature:** *None defined*
-
----
-
-## 🤝 Contribution Guidelines
-
-This project enforces strict technical documentation and immutable coding standards to maintain a deterministic codebase. 
-
-* **Commit Conventions:** Refer to the contributing guidelines for required commit message formatting. CI/CD automation relies on strict parsing of these messages.
-* **Architectural Integrity:** All modifications to `nexus_core` or the underlying Flow/Plugin architecture must demonstrably preserve the integrity, statelessness of plugins, and statefulness of the Chained Context mechanism.
+| Metric | Status/Value |
+| :--- | :--- |
+| **Files Processed** | Manual |
+| **Latest File** | `nexus_core.js` |
+| **DNA Signature** | None |
+| **Context Summary** | Initial State |
+| **Saturation Status** | None |
