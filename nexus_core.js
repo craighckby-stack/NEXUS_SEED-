@@ -1,335 +1,306 @@
-NEXUS_CORE EVENT_BUS AND WORKER_SYSTEM
-VERSION: 1.4.0
-STATUS: AUDITED / STRIPPED
+/**
+ * @file nexus_core.js
+ * @description Event bus and task orchestrator with schema validation, diagnostic reporting, and hierarchical cancellation.
+ */
 
-const NexusConstants = {
-  DEFAULT_TIMEOUT: 5000,
-  MAX_RETRIES: 5,
-  CIRCUIT_THRESHOLD: 10,
-  RESET_TIMEOUT: 60000,
-  MAX_BACKOFF: 15000,
-  HEAP_INITIAL_CAPACITY: 1024,
-  STATE: { IDLE: 'IDLE', BUSY: 'BUSY', CRASHED: 'CRASHED' },
-  LEVEL: { TRACE: 0, DEBUG: 1, INFO: 2, WARN: 3, ERROR: 4, FATAL: 5 }
+import { z } from 'zod';
+
+/**
+ * @namespace NexusInternal
+ */
+const NexusInternal = {
+  Version: '2.1.0',
+  DefaultMaxHistory: 1000,
 };
 
-class NexusThread {
-  #id;
-  #state = NexusConstants.STATE.IDLE;
-  #lastActivity = Date.now();
-  #telemetry = { processed: 0, failures: 0 };
+/**
+ * @enum {number} NexusDiagnosticCategory
+ */
+export const NexusDiagnosticCategory = {
+  Error: 0,
+  Warning: 1,
+  Message: 2,
+  Suggestion: 3,
+  InternalError: 4,
+};
 
-  constructor(id) {
-    this.#id = id;
+/**
+ * @class NexusCancellationToken
+ * @description Controller for asynchronous interruption supporting hierarchical propagation and micro-task listener execution.
+ */
+class NexusCancellationToken {
+  #isCancelled = false;
+  #listeners = new Set();
+  #parentToken = null;
+  #reason = null;
+  #children = new Set();
+
+  constructor(parentToken = null) {
+    if (parentToken instanceof NexusCancellationToken) {
+      this.#parentToken = parentToken;
+      this.#parentToken.#registerChild(this);
+      this.#parentToken.onCancellationRequested((reason) => this.cancel(reason));
+    }
   }
 
-  get id() { return this.#id; }
-  get state() { return this.#state; }
-  get stats() { return { ...this.#telemetry, uptime: Date.now() - this.#lastActivity }; }
+  static None = Object.freeze(new NexusCancellationToken());
 
-  async handleEvent(event, handler) {
-    this.#state = NexusConstants.STATE.BUSY;
-    this.#lastActivity = Date.now();
-    try {
-      const result = await handler(event);
-      this.#telemetry.processed++;
-      return result;
-    } catch (error) {
-      this.#telemetry.failures++;
-      this.#state = NexusConstants.STATE.CRASHED;
+  get isCancelled() {
+    return this.#isCancelled || (this.#parentToken ? this.#parentToken.isCancelled : false);
+  }
+
+  get cancellationReason() {
+    return this.#reason || (this.#parentToken ? this.#parentToken.cancellationReason : null);
+  }
+
+  #registerChild(child) {
+    this.#children.add(child);
+  }
+
+  /**
+   * Links multiple tokens to this instance.
+   * @param {NexusCancellationToken[]} tokens 
+   */
+  link(tokens) {
+    if (!Array.isArray(tokens)) return;
+    tokens.forEach(t => {
+      if (t instanceof NexusCancellationToken && t !== this) {
+        t.onCancellationRequested(r => this.cancel(r));
+      }
+    });
+  }
+
+  cancel(reason = 'Operation cancelled') {
+    if (this.#isCancelled) return;
+    this.#isCancelled = true;
+    this.#reason = reason;
+    
+    queueMicrotask(() => {
+      for (const fn of this.#listeners) {
+        try { fn(this.#reason); } catch (e) {
+          /* Listener isolation */
+        }
+      }
+      this.#listeners.clear();
+      this.#children.clear();
+    });
+  }
+
+  onCancellationRequested(fn) {
+    if (this.isCancelled) {
+      fn(this.cancellationReason);
+      return () => {};
+    }
+    this.#listeners.add(fn);
+    return () => this.#listeners.delete(fn);
+  }
+
+  throwIfCancelled() {
+    if (this.isCancelled) {
+      const error = new Error(this.cancellationReason || 'Operation cancelled');
+      error.name = 'OperationCanceledException';
+      error.code = 'NX_CANCEL';
+      error.isNexusInternal = true;
       throw error;
-    } finally {
-      if (this.#state !== NexusConstants.STATE.CRASHED) {
-        this.#state = NexusConstants.STATE.IDLE;
-      }
     }
   }
 
-  async waitForEvent(name, timeoutMs = NexusConstants.DEFAULT_TIMEOUT) {
-    return new Promise((resolve) => {
-      const timer = setTimeout(() => resolve(false), timeoutMs);
-      queueMicrotask(() => {
-        clearTimeout(timer);
-        resolve(true);
-      });
-    });
-  }
-
-  reset() {
-    this.#state = NexusConstants.STATE.IDLE;
-    this.#telemetry.failures = 0;
+  dispose() {
+    this.#listeners.clear();
+    this.#children.clear();
+    this.#parentToken = null;
   }
 }
 
-class NexusThreadFactory {
-  #eventName;
-  #instanceCount = 0;
-  #activePool = new Set();
+/**
+ * @class NexusSchemaRegistry
+ * @description Map-based registry for Zod schemas with versioning and immutability locks.
+ */
+class NexusSchemaRegistry {
+  #schemas = new Map();
+  #metadata = new Map();
+  #locked = new Set();
 
-  constructor(eventName) {
-    this.#eventName = eventName;
+  register(name, schema, options = {}) {
+    if (this.#locked.has(name)) {
+      throw new Error(`ImmutableSchemaError: '${name}' is locked.`);
+    }
+    if (this.#schemas.has(name) && !options.allowOverwrite) {
+      throw new Error(`SchemaConflict: '${name}' already registered.`);
+    }
+    
+    this.#schemas.set(name, schema);
+    this.#metadata.set(name, {
+      version: (this.#metadata.get(name)?.version || 0) + 1,
+      timestamp: new Date().toISOString()
+    });
+
+    if (options.lock) this.#locked.add(name);
   }
 
-  createThread() {
-    this.#instanceCount++;
-    const thread = new NexusThread(`${this.#eventName}-thread-${this.#instanceCount}`);
-    this.#activePool.add(thread);
-    return thread;
+  getSchema(name) {
+    return this.#schemas.get(name);
   }
 
-  getPoolStats() {
-    return {
-      size: this.#activePool.size,
-      active: [...this.#activePool].filter(t => t.state === NexusConstants.STATE.BUSY).length
+  getMetadata(name) {
+    return this.#metadata.get(name);
+  }
+}
+
+/**
+ * @class NexusDiagnosticReporter
+ * @description Pipeline for system events with observer support and severity filtering.
+ */
+class NexusDiagnosticReporter {
+  #diagnostics = [];
+  #maxHistory = NexusInternal.DefaultMaxHistory;
+  #callbacks = new Set();
+  #filterLevel = NexusDiagnosticCategory.Message;
+
+  setFilter(category) {
+    this.#filterLevel = category;
+  }
+
+  onDiagnostic(cb) {
+    this.#callbacks.add(cb);
+    return () => this.#callbacks.delete(cb);
+  }
+
+  report(category, code, message, relatedInformation = null) {
+    const diagnostic = {
+      category,
+      code,
+      message,
+      relatedInformation,
+      timestamp: new Date().toISOString(),
+      id: `NX${code}-${Math.random().toString(36).substring(2, 9)}`,
+      trace: new Error().stack?.split('\n').slice(2, 5).join(' <- ')
     };
+
+    this.#diagnostics.push(diagnostic);
+    if (this.#diagnostics.length > this.#maxHistory) this.#diagnostics.shift();
+
+    if (category <= this.#filterLevel) {
+      this.#broadcast(diagnostic);
+    }
+    return diagnostic;
   }
 
-  recycle(thread) {
-    if (thread.state === NexusConstants.STATE.CRASHED) {
-      thread.reset();
+  #broadcast(diag) {
+    const catName = Object.keys(NexusDiagnosticCategory).find(k => NexusDiagnosticCategory[k] === diag.category);
+    const prefix = `[Nexus::${catName}] (NX${diag.code})`;
+    
+    if (diag.category === NexusDiagnosticCategory.Error || diag.category === NexusDiagnosticCategory.InternalError) {
+      console.error(`${prefix} ${diag.message}`, diag.relatedInformation || '');
+    }
+
+    for (const cb of this.#callbacks) {
+      try { cb(diag); } catch (e) { /* Callback isolation */ }
     }
   }
 
-  destroy() {
-    this.#activePool.clear();
-    this.#instanceCount = 0;
+  getDiagnostics() { return Object.freeze([...this.#diagnostics]); }
+  
+  clear() { this.#diagnostics = []; }
+}
+
+/**
+ * @class NexusTypeService
+ * @description Executes structural validation via NexusSchemaRegistry and reports diagnostics.
+ */
+class NexusTypeService {
+  #registry;
+  #reporter;
+
+  constructor(registry, reporter) {
+    this.#registry = registry;
+    this.#reporter = reporter;
+  }
+
+  validate(typeName, data, location = 'nexus://core') {
+    const schema = this.#registry.getSchema(typeName);
+    if (!schema) {
+      this.#reporter.report(NexusDiagnosticCategory.Warning, 2001, `No schema registered for: ${typeName}`);
+      return { success: true, data }; 
+    }
+
+    const result = schema.safeParse(data);
+    if (!result.success) {
+      this.#reporter.report(
+        NexusDiagnosticCategory.Error,
+        1001,
+        `TypeMismatch: '${typeName}' at ${location}`,
+        { zodError: result.error.format(), received: data }
+      );
+    }
+    return result;
   }
 }
 
-class NexusDiagnosticEmitter {
-  #observers = new Map();
-
-  subscribe(fn, minLevel = 'INFO') {
-    const id = Symbol('observer');
-    const numericLevel = NexusConstants.LEVEL[minLevel] ?? 2;
-    this.#observers.set(id, { fn, minLevel: numericLevel });
-    return () => this.#observers.delete(id);
-  }
-
-  emit(payload) {
-    const timestamp = new Date().toISOString();
-    const levelName = payload.level || 'INFO';
-    const numericLevel = NexusConstants.LEVEL[levelName] ?? 2;
-
-    this.#observers.forEach(config => {
-      if (numericLevel >= config.minLevel) {
-        config.fn({
-          ...payload,
-          timestamp,
-          severity: levelName,
-          pid: (typeof process !== 'undefined') ? process.pid : 0
-        });
-      }
-    });
-  }
-}
-
-class NexusCircuitBreaker {
-  #failureCount = 0;
-  #threshold = NexusConstants.CIRCUIT_THRESHOLD;
-  #state = 'CLOSED';
-  #resetTimeout = NexusConstants.RESET_TIMEOUT;
-
-  recordFailure() {
-    this.#failureCount++;
-    if (this.#failureCount >= this.#threshold) {
-      this.#state = 'OPEN';
-      setTimeout(() => {
-        this.#state = 'HALF_OPEN';
-      }, this.#resetTimeout);
-    }
-  }
-
-  recordSuccess() {
-    if (this.#state === 'HALF_OPEN') {
-      this.#failureCount = 0;
-      this.#state = 'CLOSED';
-    }
-    this.#failureCount = Math.max(0, this.#failureCount - 1);
-  }
-
-  isOpen() {
-    return this.#state === 'OPEN';
-  }
-
-  getStatus() {
-    return { state: this.#state, failures: this.#failureCount };
-  }
-}
-
-class NexusExecutionDecorator {
-  static async execute(task, config = {}, diagnosticEmitter) {
-    const maxRetries = config.maxRetries ?? NexusConstants.MAX_RETRIES;
-    const start = performance.now();
-    let attempts = 0;
-    let lastError = null;
-    const circuitBreaker = task.circuitBreaker || new NexusCircuitBreaker();
-
-    while (attempts < maxRetries) {
-      if (circuitBreaker.isOpen()) {
-        throw new Error(`Circuit Breaker Restricted: ${task.id}`);
-      }
-
-      try {
-        diagnosticEmitter.emit({ level: 'DEBUG', type: 'TASK_START', taskId: task.id, attempt: attempts + 1 });
-        
-        const result = await Promise.race([
-          task.execute(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Internal Task Timeout')), NexusConstants.DEFAULT_TIMEOUT * 2))
-        ]);
-
-        circuitBreaker.recordSuccess();
-        diagnosticEmitter.emit({
-          level: 'INFO', 
-          type: 'TASK_SUCCESS', 
-          taskId: task.id, 
-          duration: performance.now() - start 
-        });
-        return result;
-      } catch (error) {
-        attempts++;
-        lastError = error;
-        circuitBreaker.recordFailure();
-
-        diagnosticEmitter.emit({
-          level: 'WARN', 
-          type: 'TASK_RETRY', 
-          taskId: task.id, 
-          attempt: attempts, 
-          error: error.message 
-        });
-
-        if (attempts >= maxRetries) break;
-
-        const backoff = Math.min(NexusConstants.MAX_BACKOFF, Math.pow(2, attempts) * 100) + (Math.random() * 100);
-        await new Promise(r => setTimeout(r, backoff));
-      }
-    }
-
-    diagnosticEmitter.emit({ level: 'ERROR', type: 'TASK_FAILURE', taskId: task.id, error: lastError.message });
-    throw lastError;
-  }
-}
-
-class NexusTaskQueue {
-  #heap = [];
-  #capacity;
-
-  constructor(capacity = NexusConstants.HEAP_INITIAL_CAPACITY) {
-    this.#capacity = capacity;
-  }
-
-  async pushTask(task) {
-    if (this.#heap.length >= this.#capacity) {
-      throw new Error('Capacity Exhausted');
-    }
-    this.#heap.push(task);
-    this.#bubbleUp(this.#heap.length - 1);
-  }
-
-  popTask() {
-    if (this.size() === 0) return null;
-    const top = this.#heap[0];
-    const bottom = this.#heap.pop();
-    if (this.size() > 0) {
-      this.#heap[0] = bottom;
-      this.#sinkDown(0);
-    }
-    return top;
-  }
-
-  #bubbleUp(index) {
-    const element = this.#heap[index];
-    while (index > 0) {
-      let parentIdx = (index - 1) >> 1;
-      let parent = this.#heap[parentIdx];
-      if ((element.priority || 0) <= (parent.priority || 0)) break;
-      this.#heap[index] = parent;
-      index = parentIdx;
-    }
-    this.#heap[index] = element;
-  }
-
-  #sinkDown(index) {
-    const length = this.#heap.length;
-    const element = this.#heap[index];
-    const priority = element.priority || 0;
-
-    while (true) {
-      let leftIdx = (index << 1) + 1;
-      let rightIdx = (index << 1) + 2;
-      let swap = null;
-
-      if (leftIdx < length) {
-        if ((this.#heap[leftIdx].priority || 0) > priority) {
-          swap = leftIdx;
-        }
-      }
-
-      if (rightIdx < length) {
-        if (
-          (swap === null && (this.#heap[rightIdx].priority || 0) > priority) ||
-          (swap !== null && (this.#heap[rightIdx].priority || 0) > (this.#heap[leftIdx].priority || 0))
-        ) {
-          swap = rightIdx;
-        }
-      }
-
-      if (swap === null) break;
-      this.#heap[index] = this.#heap[swap];
-      index = swap;
-    }
-    this.#heap[index] = element;
-  }
-
-  size() {
-    return this.#heap.length;
-  }
-}
-
+/**
+ * @class NexusEventBus
+ * @description Async event mediator with middleware support and schema validation.
+ */
 class NexusEventBus {
-  #events = new Map();
-  #customFilters = new Map();
-  #threadPools = new Map();
+  #handlers = new Map();
   #middleware = [];
-  #diagnosticEmitter;
+  #typeService;
+  #reporter;
 
-  constructor(diagnosticEmitter) {
-    this.#diagnosticEmitter = diagnosticEmitter || new NexusDiagnosticEmitter();
+  constructor(typeService, reporter) {
+    this.#typeService = typeService;
+    this.#reporter = reporter;
   }
 
   use(fn) {
-    if (typeof fn !== 'function') throw new Error('Middleware must be a function');
     this.#middleware.push(fn);
+    return this;
   }
 
-  async broadcast(event) {
-    for (const hook of this.#middleware) {
-      await hook(event);
+  async publish(type, payload, options = {}) {
+    const validation = this.#typeService.validate(type, payload, `EventBus.publish/${type}`);
+    if (!validation.success && options.strict) {
+      this.#reporter.report(NexusDiagnosticCategory.Error, 3003, `Strict mode rejection: ${type}`);
+      return null;
     }
 
-    if (this.#events.has(event.type)) {
-      const listeners = this.#events.get(event.type);
-      const threadsMap = this.#threadPools.get(event.type);
-      
-      const tasks = Array.from(listeners).map(async (listener) => {
-        const filter = this.#customFilters.get(event.type);
-        if (filter && !filter(event)) return;
+    const traceId = options.traceId || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `tr-${Math.random().toString(36).substring(2)}`);
+    
+    let envelope = {
+      type,
+      data: validation.data || payload,
+      traceId,
+      timestamp: Date.now(),
+      meta: options.meta || {}
+    };
 
-        const thread = threadsMap.get(listener);
-        if (!thread) throw new Error(`Orphaned listener: ${event.type}`);
-        
-        return thread.handleEvent(event, listener);
+    try {
+      for (const mw of this.#middleware) {
+        envelope = await mw(envelope);
+        if (!envelope) return null;
+      }
+
+      const subscribers = this.#handlers.get(type) || [];
+      const tasks = Array.from(subscribers).map(async (sub) => {
+        try {
+          if (sub.predicate && !sub.predicate(envelope)) return;
+          return await sub.fn(envelope);
+        } catch (err) {
+          this.#reporter.report(NexusDiagnosticCategory.Error, 3001, `Handler failure: ${err.message}`, { traceId, type });
+        }
       });
 
-      return await Promise.allSettled(tasks);
+      return await Promise.all(tasks);
+    } catch (err) {
+      this.#reporter.report(NexusDiagnosticCategory.InternalError, 3002, `EventBus Fatal: ${err.message}`);
+      throw err;
     }
   }
 
-  async subscribe(eventName, listener, options = {}) {
-    const { customFilter = null, poolSize = 3 } = options;
-    if (!this.#events.has(eventName)) {
-      this.#events.set(eventName, new Set());
-    }
+  subscribe(type, fn, predicate = null) {
+    if (!this.#handlers.has(type)) this.#handlers.set(type, new Set());
+    const entry = { fn, predicate };
+    this.#handlers.get(type).add(entry);
+    return () => this.#handlers.get(type).delete(entry);
   }
 }
