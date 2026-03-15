@@ -1,0 +1,16 @@
+{
+  "name": "Meta-123",
+  "status": "Instantiated",
+  "round": 6,
+  "lifecycle": "READY",
+  "config": {
+    "Core": {
+      "version": "1.0.6",
+      "mode": "Active"
+    }
+  },
+  "logs": [
+    "Round 6 sync completed. Vote: kubernetes/kubernetes"
+  ],
+  "license": "MTCL-V1 (Proprietary)"
+}
