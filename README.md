@@ -1,78 +1,94 @@
 # 🌌 NEXUS_CORE
 
-**Target Repository:** `craighckby-stack/Test-1` | **Current Phase:** `INIT`
+> **Target Repository:** `craighckby-stack/Test-1` | **Current Phase:** `INIT`
 
-NEXUS_CORE is an advanced, automated code evolution framework designed to seamlessly siphon, adapt, and integrate high-level architectural patterns from world-class external repositories (such as those maintained by DeepMind and Google) directly into local codebases. 
+**NEXUS_CORE** is an advanced, automated code evolution framework. It systematically siphons, adapts, and integrates high-level architectural patterns from world-class external repositories (e.g., DeepMind, Google) directly into your local codebase. 
 
-By leveraging a persistent shared memory state, NEXUS_CORE ensures that code evolves systematically, maintaining architectural integrity across the entire repository.
+By leveraging a persistent shared memory state, NEXUS_CORE ensures that code evolves organically while maintaining strict architectural integrity and security boundaries across the entire repository.
 
 ---
 
 ## 🏗️ Architecture
 
-NEXUS_CORE is built on a highly extensible, two-tier architecture comprising the **Core Flow** and the **Plugin System**.
+NEXUS_CORE is built on a highly extensible, two-tier architecture designed for modularity and state consistency.
 
-### The Flow Architecture (Siphoning Process)
+### 1. The Flow Architecture (Siphoning Pipeline)
 The evolutionary pipeline operates through a strict, four-stage unidirectional flow:
-1. **Pattern Identification:** Scans external sources to recognize abstract architectural structures and algorithms.
-2. **Pattern Collection:** Extracts and normalizes identified patterns, storing them in a localized, structured library.
-3. **Pattern Matching:** Analyzes local ASTs (Abstract Syntax Trees) to find optimal insertion points and structural matches for the collected patterns.
-4. **Pattern Integration:** Safely mutates local files (e.g., `nexus_core.js`) to integrate the matched patterns, generating evolved code.
+* **🔍 Pattern Identification:** Scans targeted external sources to recognize abstract architectural structures, algorithms, and idiomatic paradigms.
+* **📥 Pattern Collection:** Extracts and normalizes the identified patterns, caching them in a localized, structured AST (Abstract Syntax Tree) library.
+* **🧩 Pattern Matching:** Analyzes local ASTs to compute optimal insertion points, ensuring structural compatibility with the existing codebase.
+* **⚡ Pattern Integration:** Safely mutates local files (e.g., `nexus_core.js`) to weave the matched patterns into the local domain, generating evolved code.
 
-### The Plugin Architecture
-To ensure adaptability, external source integrations are handled via **Plugins**. 
-* **Source Plugins:** Connect to specific repositories (e.g., DeepMind, Google) and define custom parsing rules.
-* **Evolution Plugins:** Define how specific design patterns (e.g., Singleton, Observer, Neural Network bootstrapping) are applied to the local domain.
+### 2. The Plugin Ecosystem
+External source integrations and domain-specific mutations are strictly decoupled via Plugins:
+* **Source Plugins:** Interface with specific external repositories, defining custom parsing rules and handling authentication (e.g., GitHub API, GitLab).
+* **Evolution Plugins:** Dictate how specific design patterns (e.g., Singleton, Observer, Neural Network bootstrapping) are translated into the local domain's syntax and context.
 
-### Chained Context & Shared Memory
-Consistency across multiple file mutations is maintained via the **Chained Context** engine:
-* **Shared Memory:** A centralized, in-memory state tree that tracks the global context of all evolved files.
-* **Context Updates:** As the Flow integrates new patterns, the shared memory is atomically updated.
-* **Context Retrieval:** Downstream files dynamically retrieve their state from shared memory, ensuring that mutations in file A are cleanly recognized by file B.
+### 3. Chained Context & Shared Memory
+Consistency across multiple, concurrent file mutations is guaranteed via the **Chained Context Engine**:
+* **Centralized State:** An in-memory state tree tracks the global context of all evolved files.
+* **Atomic Updates:** As the Flow integrates new patterns, the shared memory is atomically updated to prevent race conditions.
+* **Dynamic Retrieval:** Downstream files dynamically retrieve their state from shared memory, ensuring mutations in *File A* are cleanly recognized and respected by *File B*.
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-* **Node.js:** `v18.x` or higher (required for `nexus_core.js` execution).
-* **Memory:** Minimum 8GB RAM recommended (Chained Context shared memory is highly resource-intensive during deep repository siphoning).
+* **Runtime:** Node.js `v18.x` or higher.
+* **Hardware:** Minimum 8GB RAM recommended (The Chained Context engine is highly resource-intensive during deep AST traversal).
+* **Environment:** Docker (Recommended for sandboxed integration).
 
-### Installation
+### Installation & Setup
+
+# 1. Clone the target repository
 git clone https://github.com/craighckby-stack/Test-1.git
 cd Test-1
+
+# 2. Install core dependencies
 npm install
 
-### Basic Usage
-To initialize the NEXUS_CORE siphoning process on your local directory:
+# 3. Configure Environment Variables (Critical for API rate limits)
+cp .env.example .env
+# Edit .env to include your GitHub/GitLab API tokens
+
+# 4. Initialize the NEXUS_CORE siphoning process
 node nexus_core.js --phase init
 
 ---
 
 ## 🌍 Portability & Risks
 
-When deploying or running NEXUS_CORE, be aware of the following environment constraints:
-* **Cross-Platform File Paths:** The pattern matcher heavily relies on filesystem traversal. Ensure POSIX-compliant path handling if running on Windows (use WSL2 for optimal stability).
-* **Memory Exhaustion:** The Chained Context stores large AST representations in memory. Extremely large repositories may cause V8 out-of-memory (OOM) errors. You may need to allocate additional memory: `node --max-old-space-size=8192 nexus_core.js`.
-* **Network Rate Limiting:** The Pattern Collection phase fetches data from external repositories. Unauthenticated requests may result in IP bans. Configure your GitHub/GitLab API tokens in the `.env` file.
+When deploying or running NEXUS_CORE, operators must account for the following environmental constraints:
+
+> **[!WARNING]**
+> **Memory Exhaustion (OOM):** The Chained Context stores massive AST representations in memory. Deep repository siphoning may cause V8 Out-Of-Memory errors. 
+> *Mitigation:* Allocate additional memory during execution: `node --max-old-space-size=8192 nexus_core.js`.
+
+* **Cross-Platform Pathing:** The pattern matcher relies heavily on filesystem traversal. Windows users **must** use WSL2 to ensure POSIX-compliant path handling and prevent integration failures.
+* **Network Rate Limiting:** The Pattern Collection phase aggressively fetches external data. Unauthenticated requests will result in rapid IP bans. Always configure API tokens in your `.env` file prior to execution.
 
 ---
 
-## 🛡️ Security
+## 🛡️ Security & Auditing
 
-Automated code integration presents significant security risks. NEXUS_CORE mitigates these through strict auditing controls:
-* **Pattern Sanitization:** Siphoned patterns are stripped of executable payloads. Only abstract structural logic (AST nodes) is integrated, preventing the introduction of malicious execution paths.
-* **Sandboxing:** The Pattern Integration phase should be run in a containerized environment (Docker) to ensure that file system mutations do not escape the target repository scope.
-* **State Isolation:** The Shared Memory mechanism is strictly scoped to the current execution phase and purged upon completion to prevent context poisoning across different projects.
+Automated code ingestion introduces significant threat vectors. NEXUS_CORE enforces strict auditing controls to mitigate supply chain and remote code execution (RCE) risks:
+
+* **AST Sanitization (Payload Stripping):** Siphoned patterns are strictly parsed as AST nodes. All executable payloads, literals, and unverified imports are stripped. Only abstract structural logic is integrated, neutralizing malicious execution paths.
+* **Execution Sandboxing:** The Pattern Integration phase executes arbitrary code mutations. This process **must** be run within a containerized environment (e.g., Docker) with read-only mounts to the host system, ensuring mutations cannot escape the target repository scope.
+* **Ephemeral State Isolation:** The Shared Memory mechanism is strictly scoped to the current execution phase. State is cryptographically purged upon completion to prevent context poisoning or lateral movement across different projects.
 
 ---
 
 ## 📊 Current Status
 
-* **Current Phase:** `INIT`
-* **Latest File Mutated:** `nexus_core.js`
-* **Files Processed:** Manual processing mode active
-* **DNA Signature:** *None*
-* **Chained Context:** *None*
-* **Context Summary:** Initial State
-* **Saturation Status:** *None*
+| Metric | Status |
+| :--- | :--- |
+| **Current Phase** | `INIT` |
+| **Target Repository** | `craighckby-stack/Test-1` |
+| **Latest File Mutated** | `nexus_core.js` |
+| **Files Processed** | Manual processing mode active |
+| **DNA Signature** | *None* |
+| **Chained Context** | *None* |
+| **Context Summary** | Initial State |
+| **Saturation Status** | *None* |
