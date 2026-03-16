@@ -1,4 +1,16 @@
 /**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ * 
+ * DALEK_CAAN v3.1: Advanced Architectural Siphon Engine
+ * Copyright (c) 2026 craighckby-stack
+ * 
+ * This project incorporates architectural DNA siphoned from:
+ * - DeepMind/AlphaCode, Google/Genkit, Firebase/Lifecycle, Meta/React-Core,
+ *   OpenAI/Triton, Anthropic/Constitutional-AI, microsoft/TypeScript, etc.
+ */
+
+/**
  * @module SchemaValidator
  * @description Central utility for managing and executing type and schema validation 
  * against defined data primitives. This decouples schema enforcement from data handling logistics.
