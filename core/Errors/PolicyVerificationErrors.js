@@ -1,4 +1,16 @@
 /**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ * 
+ * DALEK_CAAN v3.1: Advanced Architectural Siphon Engine
+ * Copyright (c) 2026 craighckby-stack
+ * 
+ * This project incorporates architectural DNA siphoned from:
+ * - DeepMind/AlphaCode, Google/Genkit, Firebase/Lifecycle, Meta/React-Core,
+ *   OpenAI/Triton, Anthropic/Constitutional-AI, microsoft/TypeScript, etc.
+ */
+
+/**
  * PolicyVerificationErrors.js
  * Sovereign AGI v94.1 Structured Error Definitions
  * Provides custom error classes for robust error handling and categorization 
