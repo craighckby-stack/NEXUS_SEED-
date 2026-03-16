@@ -1,0 +1,40 @@
+MIT License
+
+Copyright (c) 2026 craighckby-stack
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+### SIPHONED DNA CREDITS & ARCHITECTURAL ORIGINS
+
+This project utilizes architectural patterns and logic structures siphoned from the following world-class repositories. We acknowledge the significant contributions of these projects to the global engineering community:
+
+- **DeepMind/AlphaCode**: Advanced algorithmic reasoning and code generation patterns.
+- **Google/Genkit**: AI-centric application framework structures.
+- **Firebase/Lifecycle**: Robust state management and lifecycle orchestration.
+- **Meta/React-Core**: Component-based UI architecture and reconciliation logic.
+- **OpenAI/Triton**: High-performance parallel processing and GPU-centric logic.
+- **Anthropic/Constitutional-AI**: Ethical alignment and safety-first logic patterns.
+- **firebase/firebase-android-sdk**: Mobile-first synchronization and offline-first patterns.
+- **deepseek-ai/DeepSeek-Coder**: Specialized code-specific LLM integration patterns.
+- **microsoft/TypeScript**: Strict type-safety and structural typing paradigms.
+- **spring-projects/spring-framework**: Enterprise-grade dependency injection and modularity.
+
+The use of these patterns is intended for educational and evolutionary purposes, adhering to the spirit of open-source collaboration and architectural innovation.
