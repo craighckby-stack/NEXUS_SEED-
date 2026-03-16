@@ -2,93 +2,88 @@
 
 > **Target Repository:** `craighckby-stack/Test-1` | **Current Phase:** `INIT`
 
-**NEXUS_CORE** is an advanced, automated code evolution framework. It systematically siphons, adapts, and integrates high-level architectural patterns from world-class external repositories (e.g., DeepMind, Google) directly into your local codebase. 
+NEXUS_CORE is an advanced, automated code evolution framework. It is designed to seamlessly siphon, adapt, and integrate high-level architectural patterns from world-class external repositories directly into local codebases. By leveraging a persistent shared memory state, NEXUS_CORE ensures that code evolves systematically, maintaining strict architectural integrity across the entire repository.
 
-By leveraging a persistent shared memory state, NEXUS_CORE ensures that code evolves organically while maintaining strict architectural integrity and security boundaries across the entire repository.
+---
+
+## 🚨 Severity Triage & System Health
+
+**Strategic Audit Complete. Direction Instantiated.**
+
+*   **Recent Issue:** The system identified a recursive initialization loop caused by redundant fetch requests for governance and kernel modules, resulting in a critical `WebSocket closed` error.
+*   **Resolution:** Implemented non-LLM runtime error handling and automated fixes for system-level errors (`grog` patch). Global strategy adapted (`strategic-hero-1773701654572`) and synced to `nexus-evolution-v1`.
+*   **Action Required:** A system reload/refresh is pending to finalize the recovery process and resume normal execution.
 
 ---
 
 ## 🏗️ Architecture
 
-NEXUS_CORE is built on a highly extensible, two-tier architecture designed for modularity and state consistency.
+NEXUS_CORE is built on a highly extensible, two-tier architecture designed for continuous code evolution, ensuring consistency through centralized state management.
 
-### 1. The Flow Architecture (Siphoning Pipeline)
+### 1. The Flow Architecture (Siphon Pipeline)
 The evolutionary pipeline operates through a strict, four-stage unidirectional flow:
-* **🔍 Pattern Identification:** Scans targeted external sources to recognize abstract architectural structures, algorithms, and idiomatic paradigms.
-* **📥 Pattern Collection:** Extracts and normalizes the identified patterns, caching them in a localized, structured AST (Abstract Syntax Tree) library.
-* **🧩 Pattern Matching:** Analyzes local ASTs to compute optimal insertion points, ensuring structural compatibility with the existing codebase.
-* **⚡ Pattern Integration:** Safely mutates local files (e.g., `nexus_core.js`) to weave the matched patterns into the local domain, generating evolved code.
+*   **Pattern Identification:** Scans targeted external sources to recognize abstract architectural structures and algorithms.
+*   **Pattern Collection:** Extracts and normalizes identified patterns, indexing them into a localized, structured library.
+*   **Pattern Matching:** Analyzes local Abstract Syntax Trees (ASTs) to determine optimal insertion points and structural compatibility.
+*   **Pattern Integration:** Safely mutates local files (e.g., `nexus_core.js`) to assimilate the matched patterns, generating evolved code.
 
-### 2. The Plugin Ecosystem
-External source integrations and domain-specific mutations are strictly decoupled via Plugins:
-* **Source Plugins:** Interface with specific external repositories, defining custom parsing rules and handling authentication (e.g., GitHub API, GitLab).
-* **Evolution Plugins:** Dictate how specific design patterns (e.g., Singleton, Observer, Neural Network bootstrapping) are translated into the local domain's syntax and context.
+### 2. The Plugin System
+To ensure broad adaptability, external integrations and pattern applications are governed by a modular plugin ecosystem:
+*   **Source Plugins:** Interface with specific external repositories (e.g., DeepMind, Google), defining strict, localized parsing rules.
+*   **Evolution Plugins:** Dictate how specific design patterns (e.g., Singleton, Observer, Neural Network bootstrapping) map to the local domain.
 
 ### 3. Chained Context & Shared Memory
-Consistency across multiple, concurrent file mutations is guaranteed via the **Chained Context Engine**:
-* **Centralized State:** An in-memory state tree tracks the global context of all evolved files.
-* **Atomic Updates:** As the Flow integrates new patterns, the shared memory is atomically updated to prevent race conditions.
-* **Dynamic Retrieval:** Downstream files dynamically retrieve their state from shared memory, ensuring mutations in *File A* are cleanly recognized and respected by *File B*.
+Consistency across complex, multi-file mutations is enforced via the **Chained Context** engine:
+*   **Centralized Shared Memory:** An in-memory state tree tracking the global context of all evolved files.
+*   **Atomic Updates:** As the Flow integrates new patterns, the shared memory is atomically updated to prevent race conditions.
+*   **Dynamic Retrieval:** Downstream files inherit their execution state from shared memory, ensuring mutations cascade cleanly without context loss.
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-* **Runtime:** Node.js `v18.x` or higher.
-* **Hardware:** Minimum 8GB RAM recommended (The Chained Context engine is highly resource-intensive during deep AST traversal).
-* **Environment:** Docker (Recommended for sandboxed integration).
+*   **Environment:** Node.js `v18.x` or higher.
+*   **Hardware:** Minimum 8GB RAM recommended (Chained Context shared memory is highly resource-intensive during deep repository siphoning).
 
-### Installation & Setup
-
-# 1. Clone the target repository
+### Installation
 git clone https://github.com/craighckby-stack/Test-1.git
 cd Test-1
-
-# 2. Install core dependencies
 npm install
 
-# 3. Configure Environment Variables (Critical for API rate limits)
-cp .env.example .env
-# Edit .env to include your GitHub/GitLab API tokens
-
-# 4. Initialize the NEXUS_CORE siphoning process
+### Basic Usage
+To initialize the NEXUS_CORE siphoning process on your local directory:
 node nexus_core.js --phase init
 
 ---
 
 ## 🌍 Portability & Risks
 
-When deploying or running NEXUS_CORE, operators must account for the following environmental constraints:
+When deploying or running NEXUS_CORE, operators must account for the following environmental and operational constraints:
 
-> **[!WARNING]**
-> **Memory Exhaustion (OOM):** The Chained Context stores massive AST representations in memory. Deep repository siphoning may cause V8 Out-Of-Memory errors. 
-> *Mitigation:* Allocate additional memory during execution: `node --max-old-space-size=8192 nexus_core.js`.
-
-* **Cross-Platform Pathing:** The pattern matcher relies heavily on filesystem traversal. Windows users **must** use WSL2 to ensure POSIX-compliant path handling and prevent integration failures.
-* **Network Rate Limiting:** The Pattern Collection phase aggressively fetches external data. Unauthenticated requests will result in rapid IP bans. Always configure API tokens in your `.env` file prior to execution.
+*   **Cross-Platform File Paths:** The pattern matcher relies heavily on filesystem traversal. Ensure POSIX-compliant path handling if running on Windows (use **WSL2** for optimal stability and compatibility).
+*   **Memory Exhaustion:** The Chained Context stores massive AST representations in memory. Extremely large repositories may cause V8 Out-Of-Memory (OOM) errors. Allocate additional memory if necessary: 
+    `node --max-old-space-size=8192 nexus_core.js`
+*   **Network Rate Limiting:** The Pattern Collection phase fetches vast amounts of data from external repositories. Unauthenticated requests will likely result in IP bans. **Always configure your GitHub/GitLab API tokens in the `.env` file.**
 
 ---
 
-## 🛡️ Security & Auditing
+## 🛡️ Security
 
-Automated code ingestion introduces significant threat vectors. NEXUS_CORE enforces strict auditing controls to mitigate supply chain and remote code execution (RCE) risks:
+Automated code integration presents significant supply-chain and execution risks. NEXUS_CORE mitigates these through strict auditing controls and zero-trust principles:
 
-* **AST Sanitization (Payload Stripping):** Siphoned patterns are strictly parsed as AST nodes. All executable payloads, literals, and unverified imports are stripped. Only abstract structural logic is integrated, neutralizing malicious execution paths.
-* **Execution Sandboxing:** The Pattern Integration phase executes arbitrary code mutations. This process **must** be run within a containerized environment (e.g., Docker) with read-only mounts to the host system, ensuring mutations cannot escape the target repository scope.
-* **Ephemeral State Isolation:** The Shared Memory mechanism is strictly scoped to the current execution phase. State is cryptographically purged upon completion to prevent context poisoning or lateral movement across different projects.
+*   **Pattern Sanitization:** Siphoned patterns are aggressively stripped of executable payloads. Only abstract structural logic (AST nodes) is integrated, neutralizing the introduction of malicious execution paths.
+*   **Execution Sandboxing:** The Pattern Integration phase must be executed within a containerized environment (e.g., Docker) to guarantee that filesystem mutations cannot escape the target repository scope.
+*   **State Isolation:** The Shared Memory mechanism is strictly scoped to the current execution phase. It is automatically purged upon completion to prevent context poisoning across disparate projects or runs.
 
 ---
 
 ## 📊 Current Status
 
-| Metric | Status |
-| :--- | :--- |
-| **Current Phase** | `INIT` |
-| **Target Repository** | `craighckby-stack/Test-1` |
-| **Latest File Mutated** | `nexus_core.js` |
-| **Files Processed** | Manual processing mode active |
-| **DNA Signature** | *None* |
-| **Chained Context** | *None* |
-| **Context Summary** | Initial State |
-| **Saturation Status** | *None* |
+*   **Current Phase:** `INIT`
+*   **Latest File Mutated:** `nexus_core.js`
+*   **Files Processed:** Manual processing mode active
+*   **DNA Signature:** *None*
+*   **Chained Context:** *None*
+*   **Context Summary:** Initial State (Awaiting post-patch system reload)
+*   **Saturation Status:** *None*
