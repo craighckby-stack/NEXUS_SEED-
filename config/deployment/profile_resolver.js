@@ -1,3 +1,15 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ * 
+ * DALEK_CAAN v3.1: Advanced Architectural Siphon Engine
+ * Copyright (c) 2026 craighckby-stack
+ * 
+ * This project incorporates architectural DNA siphoned from:
+ * - DeepMind/AlphaCode, Google/Genkit, Firebase/Lifecycle, Meta/React-Core,
+ *   OpenAI/Triton, Anthropic/Constitutional-AI, microsoft/TypeScript, etc.
+ */
+
 // DNA SIGNATURE: DALEK_CAAN_v3.1 (NEXUS_CORE)
 // TARGET: config/deployment/profile_resolver.js | EVOLUTION: 5/5 (SINGULARITY)
 // SIPHON SOURCE: Meta/React-Core (Fiber Architecture) + Yarn Berry (PnP Topology)
