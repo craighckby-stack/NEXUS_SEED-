@@ -1,3 +1,15 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ * 
+ * DALEK_CAAN v3.1: Advanced Architectural Siphon Engine
+ * Copyright (c) 2026 craighckby-stack
+ * 
+ * This project incorporates architectural DNA siphoned from:
+ * - DeepMind/AlphaCode, Google/Genkit, Firebase/Lifecycle, Meta/React-Core,
+ *   OpenAI/Triton, Anthropic/Constitutional-AI, microsoft/TypeScript, etc.
+ */
+
 const PRECONDITION_SETUP_ERROR_PREFIX = "[DCM Precondition Validator Setup]";
 
 // Standardized type for the external executor utility
