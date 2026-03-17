@@ -1,151 +1,93 @@
 {
-  "improvedCode": {
-    "MODULES": {
-      "Environment": "environment.js",
-      "Validation": "validation.js",
-      "Build": "build.js",
-      "Deployment": "deployment.js"
-    },
-    "DEPENDENCIES": [
-      "os",
-      "json"
-    ],
-    "Environment": {
-      "linkedToken": null,
-      "eventBus": null
-    },
-    "getLinkedTokens": function() {
-      var tokens = new Set();
-      if (this.linkedToken) {
-        tokens.add(this.linkedToken);
-        tokens.merge(getLinkedTokensOfLinkedToken());
-      }
-      return tokens;
-    },
-    "getLinkedTokensOfLinkedToken": function() {
-      return this.linkedToken.getLinkedTokens();
-    },
-    "cancel": function() {
-      if (this.linkedToken) {
-        callLinkedTokenCancel();
-        this.cancelled = true;
-      }
-    },
-    "callLinkedTokenCancel": function() {
-      this.linkedToken.cancel();
-    },
-    "getCancelled": function() {
-      return this.linkedToken && this.linkedToken.cancelled;
-    },
-    "disposalListeners": new Set(),
-    "disposeCount": 1,
-    "tokenAction": function(disposalListener) {
-      this.disposalListeners.add(disposalListener);
-    },
-    "validateDependencies": function() {
-      var npmInstalled = require('os').platform() === 'darwin' || require('os').platform() === 'linux';
-      var gulpInstalled = require('os').platform() === 'darwin' || require('os').platform() === 'linux';
-      var gitInstalled = require('os').platform() === 'darwin' || require('os').platform() === 'linux';
-      return npmInstalled && gulpInstalled && gitInstalled;
+  "improvedCode": "export class DisposableTokenService {
+    private _linkedToken: DisposableToken | null;
+    private _cancelled: boolean;
+    private readonly _disposedCount = 1;
+    private readonly _tokens = new Set<DisposableToken>();
+
+    constructor(public linkedToken: DisposableToken | null, private readonly eventBus: EventBus) {}
+
+    get disposedCount(): number {
+      return this._disposedCount;
     }
-  },
-  "summary": "Modularized service",
+
+    get cancelled(): boolean {
+      return this._cancelled || this._linkedToken?.cancelled;
+    }
+
+    get linkedTokens(): DisposableToken[] {
+      if (this.linkedToken) {
+        this._linkTokens(this.linkedToken);
+      }
+      return Array.from(this._tokens);
+    }
+
+    private _linkTokens(token: DisposableToken): void {
+      const tokens = new Set();
+      tokens.add(this._linkedToken);
+      token.getLinkedTokens().forEach((t) => tokens.add(t));
+      this._tokens = tokens;
+    }
+
+    async dispose(): Promise<void> {
+      if (this.linkedToken) {
+        await this._cancelLinkedToken('unknown reason');
+      }
+      this._cancelled = true;
+    }
+
+    private async _cancelLinkedToken(reason: string): Promise<void> {
+      if (this._linkedToken) {
+        await this._linkedToken.cancel(reason);
+      } else {
+        throw new Error('Linked token is null');
+      }
+    }
+
+    addListener(callback: (token: DisposableToken) => void, context: DisposableToken): void {
+      this._disposalListeners.add({ callback, context });
+      if (context.cancelled) {
+        callback(context);
+        this.removeListener(context);
+      }
+    }
+
+    removeListener(context: DisposableToken): void {
+      this._disposalListeners.delete({ callback: () => null, context });
+    }
+  }
+
+  export function _hasAnyListeners(): boolean {
+    return this.disposalListeners.size > 0;
+  }
+
+  export function _getAllListeners(): { callback: (token: DisposableToken) => void; context: DisposableToken }[] {
+    return Array.from(this.disposalListeners).map(({ callback, context }) => ({ callback, context }));
+  }
+
+  async _executeTokens() {
+    // Assuming linkedTokens is already obtained and ready to execute
+    return this.linkedTokens.map(async (token) => {
+      try {
+        await token.cancel('unknown reason'); // you may need to pass reason
+        console.log('Token successfully cancelled.');
+        await token.disposed?.then((_) => console.log('Listener executed'));
+        return true;
+      } catch (error) {
+        console.error(`Error cancelling token: ${error}`);
+        return false;
+      }
+    });
+  }
+",
+  "summary": "Implemented asynchronous token cancellation and disposal handlers, refactored getLinkedTokens, added token disposal listeners, and improved naming",
   "emergentTool": true,
   "tool": {
-    "name": "DisposableTokenService Reorganization",
-    "description": "Modularize DisposableTokenService",
-    "serialisedFn": "token service reorganization"
+    "name": "DisposableTokenService",
+    "description": "Manages and cancels disposable tokens, provides disposal listeners, and ensures concurrent cancellation",
+    "serializedFn": ""
   },
-  "strategicDecision": "Code organization and naming conventions",
+  "strategicDecision": "Minimize dependencies and coupling to provide thread-safety through asynchronous token cancellation",
   "priority": 8,
-  "bestSuitedRepo": "spring-projects/spring-framework",
-  "Environment": {
-    "load": function() {
-      var environment = require('os').platform();
-      var APP_DIR = null;
-      var DATA_DIR = null;
-      switch (environment) {
-        case 'darwin':
-          APP_DIR = '/Users/<USER>/Projects/';
-          DATA_DIR = '/Users/<USER>/Projects/data/';
-          break;
-        case 'linux':
-          APP_DIR = '/home/<USER>/Projects/';
-          DATA_DIR = '/home/<USER>/Projects/data/';
-          break;
-        default:
-          console.log('Invalid environment:', environment);
-          process.exit(1);
-      }
-      return {
-        'APP_DIR': APP_DIR,
-        'DATA_DIR': DATA_DIR
-      };
-    },
-    "validate": function() {
-      var environment = require('os').platform();
-      if (['darwin', 'linux'].indexOf(environment) === -1) {
-        console.log('Invalid environment:', environment);
-        process.exit(1);
-      }
-    },
-    "getDependencies": function() {
-      return [
-        'os',
-        'json'
-      ];
-    }
-  },
-  "Build": {
-    "buildApp": function() {
-      console.log('Building app...');
-      var buildDir = require('os').platform() === 'darwin' ? '/tmp/build/' : '/var/tmp/build/';
-      var appDistDir = `${buildDir}/dist`;
-      console.log('Running gulp task for compilation and optimization.');
-      require('gulp').run([
-        'gulp',
-        '--dest=' + appDistDir
-      ]);
-      console.log('Build successful.');
-      return true;
-    },
-    "validateDependencies": function() {
-      return this.dependenciesValid();
-    },
-    "dependenciesValid": function() {
-      return require('./Environment').validateDependencies();
-    }
-  },
-  "Deployment": {
-    "deployApp": function() {
-      console.log('Deploying app...');
-      var githubToken = require('os').platform() === 'darwin' ? 'GH_TOKEN' : 'GH_TOKEN';
-      var githubBranch = require('os').platform() === 'darwin' ? 'dev' : 'dev';
-      var githubReleaseUrl = 'https://api.github.com/repos/spark/spring-framework/';
-      var githubReleaseTitle = require('os').platform() === 'darwin' ? 'latest build' : 'latest build';
-      console.log('Uploading build artifacts to GitHub release.');
-      var curlCmd = `curl -X POST \
-        -H Authorization:Bearer ${githubToken} \
-        -H Content-Type:application/json \
-        -d {\${githubReleaseTitle},${githubReleaseUrl}}';`;
-      console.log(curlCmd);
-      console.log('Deployment successful.');
-    },
-    "validateDependencies": function() {
-      return this.dependenciesValid();
-    },
-    "dependenciesValid": function() {
-      return require('./Environment').validateDependencies();
-    }
-  },
-  "summary": "Modular build script utilizing environment detection, validation, and optimized execution of tasks.",
-  "emergentTool": true,
-  "tool": {
-    "name": "BuildOrbitalizer",
-    "description": "Efficient and environment-aware build manager for deployment to GitHub releases.",
-    "serialisedFn": "buildOrbitalizer"
-  },
-  "strategicDecision": "Separation of Concerns (SoC) based on environment-specific configurations.",
-  "priority": 8,
-  "bestSuitedRepo": "spring-projects/spring-framework (for spring-based architecture and modularization guidance)"
+  "bestSuitedRepo": "spring-projects/spring-framework"
 }
