@@ -1,86 +1,65 @@
-class DisposableToken {
-  constructor(id: string, reason: string) {
-    this.id = id;
-    this.reason = reason;
-    this.linkedToken = null;
-    this.disposalListeners = new Set();
-    this.cancelled = false;
+class DisposableTokenService {
+  constructor(public linkedToken: DisposableToken | null, private readonly eventBus: EventBus) {}
+
+  get linkedTokens(): DisposableToken[] {
+    const tokens = new Set([this.linkedToken]);
+    if (this.linkedToken) {
+      const linkedTokens = this.linkedToken.getLinkedTokens();
+      linkedTokens.forEach((token) => tokens.add(token));
+    }
+    return Array.from(tokens);
+  }
+
+  async cancel(reason: string): Promise<void> {
+    if (this.linkedToken) {
+      await this.cancelLinkedToken(reason);
+      this.cancelled = true;
+    }
+  }
+
+  get cancelled(): boolean {
+    return this.cancelled || this.linkedToken?.cancelled;
+  }
+
+  disposalListeners: Set<{ callback: (token: DisposableToken) => void; context: DisposableToken }> = new Set();
+  disposeCount: number;
+
+  constructor() {
     this.disposeCount = 1;
   }
 
-  id: string;
-  reason: string;
-  linkedToken: DisposableToken | null;
-  disposalListeners: Set<() => void>;
-  cancelled: boolean;
-  disposeCount: number;
+  async cancelToken(token: DisposableToken, reason: string): Promise<void> {
+    if (token === null) return Promise.resolve();
+    await token.cancel(reason);
+    this.disposalListeners.delete({ callback: token.cancel, context: token });
+  }
 
-  async cancel(reason: string): Promise<void> {
-    const cancelPromises: Promise<void>[] = [this.cancelToken(this.id, reason)];
-    if (this.linkedToken) {
-      cancelPromises.push(this.cancelToken(this.linkedToken.id, reason));
-      this.linkedToken.cancel(reason);
-    }
-    await Promise.all(cancelPromises);
-    if (this.cancelled) {
-      this.disposalListeners.add(() => cancelToken(this.id, reason));
+  async cancelLinkedToken(reason: string): Promise<void> {
+    for (const token of await this.getLinkedTokens()) {
+      if (token !== this.linkedToken) {
+        await token.cancel(reason);
+      }
     }
   }
 
-  private async cancelToken(tokenId: string, reason: string): Promise<void> {
-    if (disposableRegistry?.activeCount === 0) return;
-    disposableRegistry.cancel(tokenId, reason);
-    disposableRegistry.active(tokenId, this.linkedToken);
-  }
-
-  linkedTokens(): DisposableToken[] {
-    const tokens: DisposableToken[] = [];
-    if (this.linkedToken) {
-      tokens.push(this.linkedToken);
-      tokens.push(...this.linkedToken.linkedTokens());
-    }
-    return tokens;
+  async getLinkedTokens(): Promise<DisposableToken[]> {
+    return (await (this.linkedToken?.getLinkedTokens() ?? [])).concat(this.linkedToken ?? []);
   }
 
   dispose(): void {
-    EventBus.emit('Destroyed', this.reason);
-    this.linkedToken?.dispose();
+    this.eventBus.emit('Destroyed');
+    this.awaitingCancel();
+    this.disposalListeners.add({ callback: this.cancelToken, context: this });
     this.disposeCount--;
+  }
+
+  async awaitingCancel() {
     if (this.disposeCount === 0) {
-      Registry.decrementActiveDisposablesCount(() => {
-        this.cancelled = true;
-        if (disposableRegistry?.activeCount === 0) Registry.cancelRegistry();
-      });
+      if (this.linkedToken?.cancelled || this.cancelled) {
+        this.disposalListeners.add({ callback: this.cancelToken, context: this });
+      } else {
+        await this.cancelLinkedToken();
+      }
     }
-  }
-}
-
-class Factory {
-  constructor(private readonly eventBus: EventBus, private readonly disposableToken: DisposableToken) {
-  }
-
-  getSiphonGate(): EventSiphon {
-    const siphonGate = new EventSiphon();
-    const token = this.disposableToken;
-
-    token.disposalListeners.add(() => {
-      token.cancel();
-      siphonGate.siphonGate = false;
-    });
-    return siphonGate;
-  }
-
-  dispose(): void {
-    this.disposableToken.dispose();
-  }
-}
-
-Util function to cancel a token and optionally add a new token to the registry if a linked token is found
-function cancelToken(id: string, reason: string): void {
-  if (disposableRegistry?.activeCount === 0) return;
-  disposableRegistry.cancel(id, reason);
-  const linkedToken = disposableRegistry.getLinkedToken(id);
-  if (linkedToken) {
-    disposableRegistry.active(id, linkedToken.token);
   }
 }
