@@ -1,0 +1,11 @@
+{
+  "weight_id": "Default_v2_Initial",
+  "decision_factors": {
+    "resource_availability_score": 0.4,
+    "task_complexity_metric": 0.3,
+    "user_priority_level": 0.2,
+    "system_health_score": 0.1
+  },
+  "normalization_method": "Softmax",
+  "update_timestamp": "2024-05-16T12:00:00Z"
+}

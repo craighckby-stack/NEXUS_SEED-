@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "GVDM_V94.1.schema.json",
+  "title": "Governance/Veto/Dependency Manifest Schema V94.1",
+  "type": "object",
+  "properties": {
+    "manifestId": { "type": "string", "format": "uuid", "description": "A unique identifier for auditing purposes." },
+    "manifestVersion": { "type": "string", "pattern": "^GVDM-V[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "certifiedTime": { "type": "string", "format": "date-time" },
+    "validUntil": { "type": "string", "format": "date-time", "description": "The time this manifest should be considered deprecated or requires re-certification." },
+    "manifestSignatureKeyId": { "type": "string", "description": "Key identifier used for cryptographically signing this manifest." },
+    "dependencyIntegrityChecklist": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "hash", "minimumVersion"],
+        "properties": {
+          "name": { "type": "string" },
+          "hash": { "type": "string", "pattern": "^sha256:[a-fA-F0-9]{32,64}$" },
+          "minimumVersion": { "type": "string" }
+        }
+      }
+    },
+    "certifiedManifests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["acronym", "version"],
+        "properties": {
+          "acronym": { "type": "string" },
+          "version": { "type": "string" }
+        }
+      }
+    },
+    "policyIntegrityThreshold": { "type": "number", "minimum": 0.0, "maximum": 1.0 }
+  },
+  "required": [
+    "manifestId",
+    "manifestVersion",
+    "certifiedTime",
+    "dependencyIntegrityChecklist",
+    "policyIntegrityThreshold"
+  ],
+  "additionalProperties": false
+}

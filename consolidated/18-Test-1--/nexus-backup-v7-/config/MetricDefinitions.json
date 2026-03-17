@@ -1,0 +1,81 @@
+{
+  "EVOLUTION_CYCLES_COMPLETED": {
+    "description": "Total number of successful self-modification cycles committed.",
+    "type": "COUNTER",
+    "unit": "COUNT",
+    "aggregation_strategy": "SUM",
+    "criticality": "P1",
+    "tags": [
+      "evolution",
+      "progress"
+    ]
+  },
+  "LATENCY_INFERENCE_MS": {
+    "description": "P95 latency of the core decision/inference loop.",
+    "type": "GAUGE",
+    "unit": "MS",
+    "aggregation_strategy": "MAX",
+    "criticality": "P0",
+    "tags": [
+      "performance",
+      "latency"
+    ]
+  },
+  "FILE_PARSING_FAILURES": {
+    "description": "Count of parsing errors encountered during code context scanning.",
+    "type": "COUNTER",
+    "unit": "COUNT",
+    "aggregation_strategy": "SUM",
+    "criticality": "P2",
+    "tags": [
+      "stability",
+      "i/o"
+    ]
+  },
+  "RESOURCE_MEMORY_USED_PCT": {
+    "description": "Percentage of allocated memory currently utilized.",
+    "type": "GAUGE",
+    "unit": "PERCENT",
+    "aggregation_strategy": "LAST",
+    "criticality": "P1",
+    "tags": [
+      "resource",
+      "system"
+    ]
+  },
+  "TASK_SUCCESS_RATE_PCT": {
+    "description": "The percentage of primary mission objectives completed successfully (e.g., successful refactors/scaffolds that pass self-testing).",
+    "type": "GAUGE",
+    "unit": "PERCENT",
+    "aggregation_strategy": "LAST",
+    "criticality": "P1",
+    "tags": [
+      "evolution",
+      "mission",
+      "quality"
+    ]
+  },
+  "TOKEN_USAGE_CYCLE_TOTAL": {
+    "description": "Total token consumption (input + output) incurred during the last complete evolutionary planning cycle.",
+    "type": "COUNTER",
+    "unit": "COUNT",
+    "aggregation_strategy": "LAST",
+    "criticality": "P3",
+    "tags": [
+      "resource",
+      "cost",
+      "llm"
+    ]
+  },
+  "PROPOSAL_REJECTION_COUNT": {
+    "description": "Count of generated code/plan proposals that were rejected by internal self-validation (e.g., failing compilation or context tests).",
+    "type": "COUNTER",
+    "unit": "COUNT",
+    "aggregation_strategy": "SUM",
+    "criticality": "P1",
+    "tags": [
+      "evolution",
+      "quality"
+    ]
+  }
+}

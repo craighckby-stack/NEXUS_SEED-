@@ -1,0 +1,44 @@
+{
+  "description": "Configuration defining buffer management, aggregation logic, and secure transport protocols for the Certified Telemetry Aggregation Service (CTAS).",
+  "system_status": {
+    "enabled": true,
+    "environment": "production"
+  },
+  "buffer_management": {
+    "time_trigger_ms": 5000,
+    "size_trigger_count": 500,
+    "max_buffer_capacity_items": 50000,
+    "backpressure_policy": "DROP_OLDEST",
+    "flush_timeout_ms": 10000
+  },
+  "aggregation_protocols": {
+    "compression_algorithm": "ZSTD",
+    "signature_algorithm": "SHA256_HMAC",
+    "required_cert_ref": "CTAS_AGGREGATOR_V1"
+  },
+  "observability": {
+    "telemetry_enabled": true,
+    "sampling_rate_percent": 100,
+    "latency_tracking": {
+      "enabled": true,
+      "percentiles": [50, 90, 99.9]
+    }
+  },
+  "governance_policies": {
+    "exceedance_rules": [
+      {
+        "metric_ref": "operational_metrics.resources.latency_ms",
+        "threshold": 1000,
+        "unit": "ms",
+        "policy_id": "P_CRITICAL_LATENCY_IMMEDIATE"
+      },
+      {
+        "metric_ref": "operational_metrics.data_layer.peak_queue_depth",
+        "threshold": 50,
+        "unit": "count",
+        "policy_id": "P_BUFFER_OVERFLOW_HIGH"
+      }
+    ],
+    "persistence_retention_days": 365
+  }
+}

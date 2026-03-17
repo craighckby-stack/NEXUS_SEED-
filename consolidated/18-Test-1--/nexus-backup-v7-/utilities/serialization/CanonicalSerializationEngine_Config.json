@@ -1,0 +1,27 @@
+{
+  "utility_id": "CanonicalSerializationEngine_V1",
+  "purpose": "Defines strict rules for Canonical JSON serialization required prior to cryptographic signing to ensure deterministic hashing across implementations.",
+  "rules": [
+    {
+      "id": "R001",
+      "description": "Key sorting must be lexicographically ordered based on byte representation (UTF-8)."
+    },
+    {
+      "id": "R002",
+      "description": "Whitespace, indentation, and trailing commas are strictly prohibited."
+    },
+    {
+      "id": "R003",
+      "description": "All strings must be encoded in strict UTF-8."
+    },
+    {
+      "id": "R004",
+      "description": "Numbers must be serialized without exponential notation or leading/trailing zeros not necessary for value accuracy."
+    },
+    {
+      "id": "R005",
+      "description": "Null, true, and false must use standard lowercase representation."
+    }
+  ],
+  "reference": "JCS (JSON Canonicalization Scheme) equivalent implementation approach."
+}

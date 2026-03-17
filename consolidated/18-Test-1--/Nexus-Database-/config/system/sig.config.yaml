@@ -1,0 +1,24 @@
+## Sovereign Interface Gateway (SIG) Configuration V94.2
+# Manages attested ingress requests and secure egress of commitment states.
+
+sig_id: SIG_P01_A001
+version: 94.2.0
+
+# 1. ATTESTATION REQUIREMENTS
+attestation_proof_level: CRoT_L2
+max_unattested_requests: 3
+
+# 2. INGRESS HANDLING (Pre-S1)
+ingress_endpoint: /v94/commit/transition
+input_schema_ref: GACR/SDVM
+ingress_protocol: HTTPS/MTLS
+input_max_size_kb: 512
+
+# 3. EGRESS/QUERY HANDLING (Post-S11)
+egress_endpoint: /v94/status/commitment
+query_timeout_ms: 1000
+commitment_manifest_source: CSTL_QUERY
+
+# 4. EXTERNAL INTERLOCKS
+max_qps_throttle: 50
+external_rate_limit_policy: CRITICAL_FAILURE

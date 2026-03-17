@@ -1,0 +1,9 @@
+{
+  "description": "Maps Manifest IDs to their $ref pointers within the GACR Schema Repository Definition (GACR-SRD). Used by the Policy Enforcement and Schema Management (PESM) service for fast validation lookups.",
+  "schema_source": "policy/GACR-SRD.json",
+  "validation_map": {
+    "PVLM": "#/definitions/PVLM",
+    "CFTM": "#/definitions/CFTM",
+    "GATM": "#/definitions/GATM"
+  }
+}

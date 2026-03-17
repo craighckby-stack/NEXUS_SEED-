@@ -1,0 +1,81 @@
+{
+  "schema_version": "2.0",
+  "description": "Standardized metric definitions for AGI resource utilization, performance profiling, and financial tracking. Includes structural elements for type safety, standardized units, and policy linkage.",
+  "metric_definitions": {
+    "tokens_consumed": {
+      "type": "RESOURCE_USAGE",
+      "source": "InferenceCore",
+      "unit": "TOKEN",
+      "data_type": "INTEGER",
+      "aggregation": "SUM",
+      "storage_policy": "HOT_30D",
+      "is_critical": true
+    },
+    "gpu_seconds": {
+      "type": "RESOURCE_USAGE",
+      "source": "HardwareMonitor",
+      "unit": "SECONDS",
+      "data_type": "FLOAT",
+      "aggregation": "SUM",
+      "storage_policy": "HOT_30D",
+      "is_critical": true
+    },
+    "data_read_count": {
+      "type": "IO",
+      "source": "DataService",
+      "unit": "COUNT",
+      "data_type": "INTEGER",
+      "aggregation": "SUM",
+      "storage_policy": "HOT_30D"
+    },
+    "data_write_count": {
+      "type": "IO",
+      "source": "DataService",
+      "unit": "COUNT",
+      "data_type": "INTEGER",
+      "aggregation": "SUM",
+      "storage_policy": "HOT_30D"
+    },
+    "tool_execution_time_ms": {
+      "type": "PERFORMANCE",
+      "source": "ToolOrchestrator",
+      "unit": "MILLISECONDS",
+      "data_type": "FLOAT",
+      "aggregation": "AVERAGE",
+      "storage_policy": "HOT_30D",
+      "optimize_goal": "MINIMIZE"
+    },
+    "external_api_cost": {
+      "type": "FINANCIAL",
+      "source": "ToolOrchestrator/ExternalAPI",
+      "unit": "USD",
+      "data_type": "FLOAT",
+      "aggregation": "SUM",
+      "storage_policy": "PERMANENT",
+      "critical_threshold": 0.05
+    },
+    "current_budget_utilization_percent": {
+      "type": "POLICY_STATE",
+      "source": "RCM_PolicyEngine",
+      "unit": "PERCENTAGE",
+      "data_type": "FLOAT",
+      "aggregation": "MAX",
+      "storage_policy": "HOT_30D"
+    },
+    "system_cpu_utilization_percent": {
+      "type": "PERFORMANCE",
+      "source": "Kernel",
+      "unit": "PERCENTAGE",
+      "data_type": "FLOAT",
+      "aggregation": "AVERAGE",
+      "storage_policy": "HOT_30D",
+      "optimize_goal": "STABILIZE"
+    }
+  },
+  "metadata_dictionary": {
+    "storage_policies": {
+      "HOT_30D": "Data retained in high-speed storage for 30 days before archival.",
+      "PERMANENT": "Data retained indefinitely for financial and audit trails."
+    }
+  }
+}

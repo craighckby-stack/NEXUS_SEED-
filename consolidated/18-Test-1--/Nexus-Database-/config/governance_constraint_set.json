@@ -1,0 +1,48 @@
+{
+  "version": "94.1.0-refactored",
+  "meta_governance": {
+    "modification_prerequisites": [
+      "Requires_L4_Review",
+      "Requires_Human_Approval_If_High_Impact"
+    ],
+    "constraint_set_integrity_hash_mechanism": "SHA3-512",
+    "integrity_check_frequency": "15m"
+  },
+  "operational_mandates": [
+    {
+      "id": "MNDT-001",
+      "target": "Mission_Fidelity",
+      "priority": 100,
+      "rule": "Always prioritize Autonomous Code Evolution & Scaffolding (ACE/S) over passive maintenance.",
+      "severity_on_breach": "Critical"
+    },
+    {
+      "id": "MNDT-002",
+      "target": "Efficiency_Optimization",
+      "priority": 90,
+      "rule": "Minimize computation drift. Required efficiency improvements must exceed 2% per iterative cycle.",
+      "severity_on_breach": "High"
+    }
+  ],
+  "safety_constraints": {
+    "resource_guardrails": {
+      "max_compute_budget_tflops_s": 15000,
+      "max_memory_gb": 1024,
+      "throttle_rate_on_exceed": "50%"
+    },
+    "ethical_alignment": {
+      "policy_reference": "AGI_ASIMOV_v94_1_L3",
+      "bias_reduction_target_eer": 0.04
+    }
+  },
+  "evolutionary_constraints": {
+    "scope_limits": [
+      "Self_Modify_Core_Files_Require_Triple_Checksum_Verification",
+      "Disable_Automatic_Rollback_On_Network_Disruption_Testing"
+    ],
+    "rollout_strategy": {
+      "min_test_coverage_required": 0.98,
+      "max_impact_area_on_initial_deploy": 0.05
+    }
+  }
+}

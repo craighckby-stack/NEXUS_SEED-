@@ -1,0 +1,30 @@
+{
+  "registry_version": "1.0.0",
+  "description": "Maps high-level action triggers defined in governance schemas (ATM) to executable endpoints and validates required payloads.",
+  "actions": [
+    {
+      "id": "SYSTEM_HALT",
+      "description": "Immediately halts core operation systems and initiates FailSafe mode.",
+      "execution_endpoint": "/api/v1/governance/execute_halt",
+      "expected_payload_schema": {
+        "level": "integer",
+        "mode": "string"
+      }
+    },
+    {
+      "id": "CODE_ROLLBACK",
+      "description": "Reverts system state to the last verified stable deployment.",
+      "execution_endpoint": "/api/v1/governance/execute_rollback",
+      "expected_payload_schema": {
+        "target": "string",
+        "scope": "string"
+      }
+    },
+    {
+      "id": "LOG_AND_FLAG",
+      "description": "Records the score anomaly and flags the related components for manual review.",
+      "execution_endpoint": "/api/v1/logging/log_governance_flag",
+      "expected_payload_schema": {}
+    }
+  ]
+}

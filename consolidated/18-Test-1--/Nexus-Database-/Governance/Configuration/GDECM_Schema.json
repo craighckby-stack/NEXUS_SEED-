@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "properties": {
+    "stages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "stage_id": { "type": "string", "description": "e.g., S1, S2" },
+          "dependencies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "artifact_key": { "type": "string", "description": "Key referencing CISM entry (e.g., 'Proposal.Voted')" },
+                "required": { "type": "boolean", "default": true },
+                "attestation_check": {
+                  "type": "object",
+                  "properties": {
+                    "method": { "type": "string", "enum": ["HASH_SHA256", "CRYPTO_SIGNATURE", "TIMELOCK", "SCHEMA_VALIDATION"], "description": "Method of integrity assurance." },
+                    "target_hash": { "type": ["string", "null"] },
+                    "required_signer": { "type": ["string", "null"], "description": "Specific authority required for signature validation." }
+                  },
+                  "required": ["method"]
+                },
+                "schema_pointer": { "type": ["string", "null"], "description": "Optional reference to internal schema definition for structure compliance." }
+              },
+              "required": ["artifact_key", "attestation_check"]
+            }
+          },
+          "execution_constraints": {
+            "type": "object",
+            "description": "Runtime limitations (e.g., resource caps, time limits)"
+          }
+        },
+        "required": ["stage_id", "dependencies"]
+      }
+    }
+  },
+  "required": ["stages"],
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

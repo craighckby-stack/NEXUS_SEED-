@@ -1,0 +1,115 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Governance Fallback Mechanism (GFRM) Definition Schema",
+  "description": "JSON schema defining the structural requirements and conditional constraints for all GFRM actions.",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "actions": {
+      "type": "object",
+      "patternProperties": {
+        "^GFRM:[A-Z_]+$": {
+          "type": "object",
+          "required": [
+            "actionType",
+            "logSeverity",
+            "description",
+            "executionParams"
+          ],
+          "properties": {
+            "actionType": {
+              "type": "string",
+              "enum": [
+                "HALT",
+                "ROLLBACK",
+                "RETRY",
+                "TRANSITION"
+              ]
+            },
+            "logSeverity": {
+              "type": "string",
+              "enum": [
+                "INFO",
+                "WARNING",
+                "ERROR",
+                "CRITICAL"
+              ]
+            },
+            "description": {
+              "type": "string"
+            },
+            "errorCode": {
+              "type": "integer",
+              "minimum": 50000
+            },
+            "executionParams": {
+              "type": "object"
+            }
+          },
+          "if": {
+            "properties": {
+              "actionType": {
+                "const": "RETRY"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "executionParams": {
+                "required": [
+                  "targetStageId",
+                  "retryLimit"
+                ]
+              }
+            }
+          },
+          "else": {
+            "if": {
+              "properties": {
+                "actionType": {
+                  "const": "ROLLBACK"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "executionParams": {
+                  "required": [
+                    "targetState"
+                  ]
+                }
+              }
+            },
+            "else": {
+              "if": {
+                "properties": {
+                  "actionType": {
+                    "const": "TRANSITION"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "executionParams": {
+                    "required": [
+                      "targetStageId"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "version",
+    "actions"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "IntegrityPolicySchema.json",
+  "title": "Sovereign AGI Integrity Policy Schema",
+  "description": "Schema for validating the governance/config/IntegrityPolicy.json file, ensuring its structural integrity before system enforcement.",
+  "type": "object",
+  "properties": {
+    "SSVR": {
+      "type": "object",
+      "description": "Policies specific to the Sovereign Schema Version Registry check.",
+      "properties": {
+        "hash_algorithm": {
+          "type": "string",
+          "enum": ["SHA-256", "SHA-384", "SHA3-512", "Blake3"],
+          "default": "SHA-256",
+          "description": "The cryptographic hashing algorithm used for SSVR self-integrity verification."
+        },
+        "required_attestations": {
+          "type": "array",
+          "description": "List of required signers/authorities that must attest to the SSVR.",
+          "items": {
+            "type": "object",
+            "required": ["signer_id"],
+            "properties": {
+              "signer_id": { "type": "string" },
+              "strict_version": { "type": "string", "description": "Mandates an exact version match." },
+              "minimum_version": { "type": "string", "description": "Mandates a minimum version floor (semver/float comparison)." }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["hash_algorithm"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["SSVR"],
+  "additionalProperties": false
+}

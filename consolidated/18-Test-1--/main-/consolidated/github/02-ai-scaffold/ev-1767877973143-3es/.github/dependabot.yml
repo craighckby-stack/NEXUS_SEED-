@@ -1,0 +1,32 @@
+version: 2
+updates:
+  # Enable version updates for GitHub Actions.
+  # Optimization Focus: Reducing PR noise and improving visibility/workflow integration.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      # Weekly checks are a good balance between freshness and noise.
+      interval: "weekly"
+    
+    # Optimization 1: Group minor and patch updates together to reduce PR volume.
+    groups:
+      minor-patch-actions:
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
+          - "minor"
+    
+    # Optimization 2: Add specific labels for filtering and automation.
+    labels:
+      - "dependabot"
+      - "github-actions"
+      - "dependencies"
+
+    # Optimization 3: Standardize commit message prefix for cleaner history.
+    commit-message:
+      prefix: "chore(deps-actions)"
+      include: "scope"
+      
+    # Maintain a reasonable limit for major versions/critical updates that bypass grouping.
+    open-pull-requests-limit: 5

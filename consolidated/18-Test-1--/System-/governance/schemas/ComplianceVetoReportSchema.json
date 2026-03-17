@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.agi/schemas/governance/ComplianceVetoReportSchema.json",
+  "title": "Decisional Metric Compliance Veto Report",
+  "description": "Defines the structured report generated when S03_Compliance_Veto_Status evaluates to TRUE, forcing an immediate halt to decisional calculus and requiring formal governance review.",
+  "type": "object",
+  "required": [
+    "Veto_Timestamp_UTC",
+    "Veto_Trigger_Source",
+    "Veto_Policy_ID",
+    "Severity_Level",
+    "Origin_Source_Artifact"
+  ],
+  "properties": {
+    "Veto_Timestamp_UTC": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The exact time the veto condition was met."
+    },
+    "Veto_Trigger_Source": {
+      "type": "string",
+      "enum": ["RSAM", "CIL", "DSC_Engine"],
+      "description": "The source system or component that mandated the compliance veto."
+    },
+    "Veto_Policy_ID": {
+      "type": "string",
+      "description": "Identifier of the specific governance or compliance policy that was violated."
+    },
+    "Severity_Level": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "The classified severity of the policy violation (1=Minor, 5=Catastrophic)."
+    },
+    "Origin_Source_Artifact": {
+      "type": "string",
+      "description": "Reference hash or ID of the L3 Proof Manifest (PMH-V1) artifact tied to the vetoed metric attempt."
+    },
+    "Detailed_Reasoning": {
+      "type": "string",
+      "description": "Structured, human-readable explanation of the veto event and necessary corrective action."
+    }
+  }
+}

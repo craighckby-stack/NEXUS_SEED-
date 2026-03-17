@@ -1,0 +1,119 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Axiom Constraint Verification Matrix (ACVM) Configuration",
+  "description": "Validated configuration settings for the ACVM governance system. Refined to enhance traceability and modular constraint management, supporting structured constraints and dynamic severity levels.",
+  "type": "object",
+  "required": [
+    "system_metadata",
+    "performance_constraints",
+    "security_constraints",
+    "compliance_limits"
+  ],
+  "properties": {
+    "system_metadata": {
+      "type": "object",
+      "description": "System-level governance metadata, versioning, and constraint profile identification.",
+      "required": ["schema_version", "acvm_profile_id", "last_updated_timestamp"],
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$",
+          "default": "v2.0.0",
+          "description": "Semantic Version identifier for the ACVM schema structure itself."
+        },
+        "acvm_profile_id": {
+          "type": "string",
+          "description": "Identifier linking to the official ACVM profile registry (e.g., P-M02).",
+          "pattern": "^[A-Z]-[A-Z0-9]+$"
+        },
+        "last_updated_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of the last governance configuration modification."
+        }
+      },
+      "additionalProperties": false
+    },
+    "performance_constraints": {
+      "type": "object",
+      "description": "GAX I Constraints: Operational throughput and efficiency thresholds (Soft/Hard constraints).",
+      "required": ["min_throughput"],
+      "properties": {
+        "min_throughput": {
+          "description": "Minimum required operational throughput constraint configuration.",
+          "type": "object",
+          "required": ["ops_sec", "severity"],
+          "properties": {
+            "ops_sec": {
+              "type": "number",
+              "minimum": 1.0,
+              "default": 750.0,
+              "description": "Minimum required operational throughput, measured in operations per second."
+            },
+            "severity": {
+              "type": "string",
+              "enum": ["SOFT_FAIL", "HARD_FAIL"],
+              "default": "SOFT_FAIL",
+              "description": "Determines if violation halts execution or merely logs a telemetry event."
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "security_constraints": {
+      "type": "object",
+      "description": "GAX II Constraints: Integrity and environmental boundary checks.",
+      "required": ["environmental_boundary"],
+      "properties": {
+        "environmental_boundary": {
+          "type": "object",
+          "description": "Configuration for enforcement of the environmental boundary policy.",
+          "required": ["policy_hash", "source_uri"],
+          "properties": {
+            "policy_hash": {
+              "description": "Cryptographic hash (SHA-256 required) of the current enforced boundary policy.",
+              "type": "string",
+              "pattern": "^[0-9a-fA-F]{64}$",
+              "minLength": 64
+            },
+            "source_uri": {
+              "description": "URI from which the canonical boundary policy document is retrieved for auditing.",
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "compliance_limits": {
+      "type": "object",
+      "description": "GAX III Constraints: Structural compliance and violation tolerance limits.",
+      "required": ["structural_violation_tolerance"],
+      "properties": {
+        "structural_violation_tolerance": {
+          "type": "object",
+          "required": ["max_count", "enforcement_mode"],
+          "properties": {
+            "max_count": {
+              "description": "Maximum tolerable integer threshold for structural policy violations.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10,
+              "default": 0
+            },
+            "enforcement_mode": {
+              "description": "Operational mode for handling compliance failures (e.g., silent logging vs. hard shutdown).",
+              "type": "string",
+              "enum": ["AUDIT", "ENFORCE_CRITICAL", "SILENT"],
+              "default": "ENFORCE_CRITICAL"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

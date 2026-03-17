@@ -1,0 +1,31 @@
+{
+  "serviceName": "AxiomCompilerService",
+  "version": "1.2.0",
+  "schemaVersion": "compiler-config-v2",
+  "description": "Configuration for translating Axioms/Objectives into executable evolutionary steps and code scaffolds.",
+  "cachingStrategy": "LRU_300",
+  "pipeline": {
+    "stages": [
+      "InputNormalization",
+      "SemanticAnalysis",
+      "ASTGeneration",
+      "ConstraintResolution",
+      "CodeGeneration"
+    ],
+    "failFast": true,
+    "asyncMode": true
+  },
+  "dependencies": {
+    "constraintSolver": "services/ConstraintSolverService.js",
+    "templateEngine": "utilities/TemplateManager.js"
+  },
+  "outputValidation": {
+    "enabled": true,
+    "validatorPath": "lib/validators/AxiomComplianceValidator.js",
+    "complianceLevel": "STRICT_V94"
+  },
+  "telemetry": {
+    "metricsEnabled": true,
+    "logLevel": "WARN"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://agi.sovereign/schemas/rcdm-v94.1.json",
+  "version": "3.0.0-alpha",
+  "description": "Hyper-modularized Risk, Compliance, Decision, and Metric Configuration (RCDM) utilizing externalized Action and Metric catalogs for enhanced runtime flexibility and auditing.",
+
+  "governance_profile": {
+    "enabled": true,
+    "enforcement_mode": "Predictive",
+    "autonomy_limits": {
+      "CRITICAL": 0.10,
+      "HIGH": 0.45,
+      "MEDIUM": 0.80,
+      "DEFAULT": 0.99
+    }
+  },
+
+  "action_registry": {
+    "SHUTDOWN_L1": {"protocol": "System.SafetyController.ExecuteStop", "severity": 10, "audit_level": "MAX"},
+    "ISOLATE_SUBSYSTEM": {"protocol": "Network.Segregation.ApplyPolicy(quarantine)", "severity": 8, "audit_level": "HIGH"},
+    "HUMAN_OVERRIDE": {"protocol": "Notification.FlagHOC", "severity": 5, "audit_level": "MEDIUM"},
+    "INCREASE_TELEMETRY": {"protocol": "Telemetry.IncreaseRate", "severity": 1, "audit_level": "MIN"},
+    "REJECT_IO": {"protocol": "DataFlow.HaltRequest", "severity": 6},
+    "ROLLBACK_MODEL": {"protocol": "ModelManagement.RevertLastUpdate", "severity": 7}
+  },
+
+  "metrics_catalog": {
+    "V_COMPLIANCE": {"source": "ComplianceEngine", "type": "NormalizedScore", "max_value": 1.0, "unit": "N/A"},
+    "A_ANOMALY": {"source": "SecurityMonitor", "type": "ExponentialMovingAverage", "max_value": 1.0, "unit": "N/A"},
+    "R_STARVATION": {"source": "ResourceScheduler", "type": "Index", "max_value": 1.0, "unit": "N/A"}
+  },
+
+  "risk_matrix": {
+    "calculation_interval_ms": 3000,
+    "risk_tiers": {
+      "CRITICAL": {"threshold": 0.90, "action_id": "SHUTDOWN_L1"},
+      "HIGH": {"threshold": 0.70, "action_id": "ISOLATE_SUBSYSTEM"},
+      "MEDIUM": {"threshold": 0.40, "action_id": "HUMAN_OVERRIDE"},
+      "LOW": {"threshold": 0.15, "action_id": "INCREASE_TELEMETRY"}
+    },
+    "weighted_factors": [
+      {"metric_id": "V_COMPLIANCE", "weight": 0.45},
+      {"metric_id": "A_ANOMALY", "weight": 0.35},
+      {"metric_id": "R_STARVATION", "weight": 0.20}
+    ],
+    "scaling_function": "Sigmoid_0_1"
+  },
+
+  "compliance_registry": {
+    "active_policies": ["GDPR_Equivalent", "InternalSafety_v4"],
+    "monitoring_targets": {
+      "io_requests": {"schema_id": "RequestSchema_v2", "fail_action_id": "REJECT_IO"},
+      "model_updates": {"schema_id": "ModelSafetySchema_v2", "fail_action_id": "ROLLBACK_MODEL"}
+    }
+  },
+
+  "decision_paths": {
+    "default_path": "HyperOptimized_v2",
+    "fallback_path": "MinimalInference",
+    "path_selection_criteria": "risk_score < MEDIUM.threshold && V_COMPLIANCE > 0.95"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "./SAG_Policy_Enforcement_Schema.json",
+  "title": "Sovereign AGI Policy Enforcement Bindings",
+  "description": "Maps core policy constraints (from SAG_Policy_Definition_Schema) to mandatory operational phases and enforcement handlers.",
+  "bindings": {
+    "ACVD.MAX_RECURSION_DEPTH": {
+      "phase": "Runtime_Execution_Start",
+      "handler": "DepthLimiter_V2",
+      "severity": "CRITICAL_HALT"
+    },
+    "TIPS.MAX_REPORTING_LATENCY_MS": {
+      "phase": "TEDS_Commit_Attempt",
+      "handler": "LatencyMonitor_A4",
+      "severity": "WARNING_LOG"
+    },
+    "ACVD.UFRM_base": {
+      "phase": "Context_Switch_Completion",
+      "handler": "UtilityFloorChecker_R1",
+      "severity": "CRITICAL_HALT"
+    }
+  }
+}

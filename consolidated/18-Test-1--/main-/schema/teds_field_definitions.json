@@ -1,0 +1,60 @@
+{
+  "schema_version": "v1.1",
+  "meta": {
+    "description": "Canonical and versioned definitions for all TEDS (Travel & Expense Data Structure) fields.",
+    "last_updated": "2024-05-15T10:30:00Z",
+    "standard": "AGI/FieldDefinition/v2"
+  },
+  "config": {
+    "enforcement_mode": "STRICT",
+    "default_locale": "en-US"
+  },
+  "shared_types": {
+    "TEDS_UUID": {
+      "type": "string",
+      "format": "uuid",
+      "description": "A globally unique identifier specific to this system."
+    },
+    "ISO_4217_CODE": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$",
+      "length": 3,
+      "description": "3-letter standard currency code."
+    }
+  },
+  "domains": {
+    "core_transaction": {
+      "TEDS_ID": {
+        "type": "TEDS_UUID",
+        "required": true,
+        "is_primary": true,
+        "description": "System-assigned unique transaction ID."
+      },
+      "transaction_date": {
+        "type": "string",
+        "format": "date-time",
+        "required": true,
+        "normalization": ["standardize_timezone"]
+      },
+      "amount": {
+        "type": "number",
+        "required": true,
+        "constraints": {"min": 0},
+        "normalization": ["round_to_2_decimals"]
+      },
+      "currency_code": {
+        "type": "ISO_4217_CODE",
+        "required": true,
+        "default": "USD"
+      }
+    },
+    "vendor": {
+      "vendor_name": {
+        "type": "string",
+        "required": true,
+        "constraints": {"max_length": 255},
+        "normalization": ["trim", "capitalize_words"]
+      }
+    }
+  }
+}

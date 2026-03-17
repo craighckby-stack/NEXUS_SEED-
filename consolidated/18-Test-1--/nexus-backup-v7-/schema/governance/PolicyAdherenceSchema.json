@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "PolicyAdherenceSchema_v1.0",
+  "title": "Standard Schema for Policy Adherence Proofs",
+  "type": "object",
+  "properties": {
+    "check_id": {"type": "string", "description": "ID corresponding to the compliance target (e.g., CT_DATA_PRIVACY_001)"},
+    "service_affected": {"type": "string"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "adherence_status": {"type": "string", "enum": ["COMPLIANT", "NON_COMPLIANT", "PENDING"]},
+    "severity": {"type": "string", "enum": ["P1_Critical", "P2_High", "P3_Medium", "P4_Low"]},
+    "evidence_uri": {"type": "string", "format": "uri", "description": "URI pointing to detailed audit logs or proof"},
+    "violation_count": {"type": "integer", "minimum": 0}
+  },
+  "required": ["check_id", "service_affected", "timestamp", "adherence_status", "severity"]
+}

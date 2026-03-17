@@ -1,0 +1,23 @@
+{
+  "description": "Defines actionable governance policies referenced by CTAS configuration.",
+  "policies": [
+    {
+      "policy_id": "P_CRITICAL_LATENCY_IMMEDIATE",
+      "priority": "CRITICAL",
+      "trigger_mode": "IMMEDIATE_ON_EXCEEDANCE",
+      "actions": [
+        {"type": "LOG", "level": "ERROR", "throttle_seconds": 30},
+        {"type": "NOTIFICATION_SYSTEM", "target": "SentinelAlerts", "payload_template": "LatencyCritical"}
+      ]
+    },
+    {
+      "policy_id": "P_BUFFER_OVERFLOW_HIGH",
+      "priority": "HIGH",
+      "trigger_mode": "SUSTAINED_OVER_30S",
+      "actions": [
+        {"type": "EMIT_INTERNAL_METRIC", "metric_name": "ctas.backpressure_active", "value": 1},
+        {"type": "RATE_LIMIT_INGRESS", "service_ref": "Telemetry_In", "reduction_percent": 15}
+      ]
+    }
+  ]
+}

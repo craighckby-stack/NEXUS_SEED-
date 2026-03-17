@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.agi/schemas/CAC_Payload_v1.json",
+  "title": "Certified Access Credential Payload (Claims) Schema v1",
+  "description": "Defines the standard set of claims expected within the core credential_payload, promoting interoperability and time-bound access control.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "iss": {
+      "type": "string",
+      "format": "uri",
+      "description": "Issuer Identifier URI."
+    },
+    "sub": {
+      "type": "string",
+      "description": "Subject Identifier (entity to which the credential pertains)."
+    },
+    "aud": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Audience/Recipient(s) for whom the credential is intended."
+    },
+    "exp": {
+      "type": "integer",
+      "description": "Expiration time (Unix timestamp) after which the credential must not be accepted."
+    },
+    "nbf": {
+      "type": "integer",
+      "description": "Not Before time (Unix timestamp) before which the credential must not be accepted."
+    },
+    "iat": {
+      "type": "integer",
+      "description": "Issued At time (Unix timestamp)."
+    },
+    "scope": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Array of access scope identifiers or permissions granted."
+    },
+    "nonce": {
+        "type": "string",
+        "description": "Cryptographic nonce or transaction identifier."
+    },
+    "claims": {
+      "type": "object",
+      "description": "Container for custom, non-standard, or extended system claims."
+    }
+  },
+  "required": ["iss", "sub", "exp", "iat"]
+}

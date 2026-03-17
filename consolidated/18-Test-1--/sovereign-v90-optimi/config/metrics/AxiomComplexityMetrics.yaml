@@ -1,0 +1,23 @@
+# config/metrics/AxiomComplexityMetrics.yaml
+# Configuration for the Axiom Complexity Engine (ACE).
+
+complexityEngine:
+  enabled: true
+  cacheLifetimeHours: 24
+  updatePolicy: "OnDefinitionChange, ScheduledRecalculate"
+  languages:
+    LISP_FSA:
+      algorithm: "SymbolCountWeightedDepth"
+      weights: { function: 5, variable: 1, recursion: 10 }
+    Prolog_DL:
+      algorithm: "HornClauseLength"
+      weights: { rule: 2, predicate: 1 }
+    Formal_QL:
+      algorithm: "QuantumGateDepth"
+      weights: { q_op: 5, measurement: 8 }
+    Z3_SCL:
+      algorithm: "ConstraintDensity"
+      weights: { assert: 3, solve_call: 7 }
+  thresholds:
+    highComplexityScore: 50
+    alertChannel: "OPS_ENGINE_ALARMS"

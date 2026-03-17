@@ -1,0 +1,166 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://gacr.agi/schemas/cmr_v2.4.json",
+  "title": "Computational Model Registry Schema V2.4 (AGI-KERNEL Integrated)",
+  "type": "object",
+  "properties": {
+    "manifest_id": {"$ref": "#/$defs/version_identifier", "const": "CMR_V2.4"},
+    "schema_version": {"type": "string", "description": "Internal version of the schema structure itself.", "pattern": "^V[0-9]+\.[0-9]+$", "default": "V2.4"},
+    "owner": {"type": "string"},
+    "description": {"type": "string"},
+    "integrity_hash": {"type": "string", "description": "Cryptographic hash of the registry content for integrity checking."},
+    "verification_protocol": {"type": "string"},
+    "models": {
+      "type": "array",
+      "description": "List of certified computation models.",
+      "items": {
+        "type": "object",
+        "required": [
+          "model_id", 
+          "path", 
+          "version", 
+          "status", 
+          "inputs_schema", 
+          "output_schema",
+          "audit_metadata", 
+          "source_mdsm_link",
+          "system_branch",
+          "capability_assessment",
+          "model_type",
+          "performance_metrics",
+          "created_by_emergent_tool"
+        ],
+        "properties": {
+          "model_id": {"type": "string"},
+          "model_type": {
+             "type": "string",
+             "description": "Categorization of the model based on its function.",
+             "enum": ["CoreLogic", "Utility", "DataPersistence", "Orchestration", "Agentic", "Interface"]
+          },
+          "path": {"type": "string", "format": "uri-reference"},
+          "version": {"type": "string", "pattern": "^\\d+\\.\\d+(\\.\\d+)?$", "description": "Semantic versioning (X.Y or X.Y.Z)."},
+          "status": {"type": "string", "enum": ["Active", "Deprecated", "Staging", "Retired", "Experimental"]},
+          
+          "system_branch": {
+             "type": "string",
+             "description": "The AGI-KERNEL branch that currently owns or certifies this model's deployment.",
+             "enum": ["main", "Nexus-Database", "System", "Testing"]
+          },
+          "kernel_maturity_required": {
+             "type": "integer",
+             "description": "Minimum kernel maturity percentage (0-100) required to safely execute this model.",
+             "minimum": 0,
+             "maximum": 100
+          },
+          "last_kernel_audit_cycle": {
+             "type": "integer",
+             "description": "The AGI-Kernel cycle number when this model was last audited or certified.",
+             "minimum": 0
+          },
+          "created_by_emergent_tool": {
+             "type": "string",
+             "description": "The specific Emergent Capability Manager interfaceName that created or last significantly modified this model."
+          },
+          "capability_assessment": {
+            "type": "object",
+            "description": "The model's self-assessed performance across core AGI capabilities (0-10 scale), including dynamically added Emergent Metrics.",
+            "properties": {
+              "error_handling": {"type": "number", "minimum": 0, "maximum": 10},
+              "json_parsing": {"type": "number", "minimum": 0, "maximum": 10},
+              "meta_reasoning": {"type": "number", "minimum": 0, "maximum": 10},
+              "autonomy": {"type": "number", "minimum": 0, "maximum": 10},
+              "creativity": {"type": "number", "minimum": 0, "maximum": 10}
+            },
+            "required": ["error_handling", "json_parsing", "meta_reasoning", "autonomy", "creativity"],
+            "additionalProperties": {
+              "type": "number",
+              "minimum": 0, 
+              "maximum": 10,
+              "description": "Score for a kernel-invented emergent capability metric (0-10)."
+            }
+          },
+          
+          "inputs_schema": {
+            "type": "object",
+            "description": "Detailed schema definition for required inputs, using normalized constraints.",
+            "additionalProperties": {"$ref": "#/$defs/constraint_definition"}
+          },
+
+          "output_schema": { 
+            "type": "object",
+            "description": "Detailed schema definition for guaranteed outputs, enhancing JSON Parsing robustness.",
+            "additionalProperties": {
+              "allOf": [
+                {"$ref": "#/$defs/constraint_definition"},
+                {"properties": {"optional": {"type": "boolean", "default": false, "description": "If the output field is optional."}}}
+              ]
+            }
+          },
+
+          "performance_metrics": {
+             "type": "object",
+             "description": "Runtime metrics tracking for use in Meta-Reasoning and Learning History analysis (Nexus-Database integration).",
+             "properties": {
+                "total_executions": {"type": "integer", "minimum": 0, "default": 0},
+                "successful_executions": {"type": "integer", "minimum": 0, "default": 0},
+                "average_latency_ms": {"type": "number", "minimum": 0.0, "default": 0.0},
+                "last_run_timestamp": {"type": "string", "format": "date-time"}
+             },
+             "required": ["total_executions", "successful_executions", "average_latency_ms"]
+          },
+          
+          "audit_metadata": {
+            "type": "object",
+            "required": ["mgp_protocol", "approval_id", "certification_date", "failure_modes"],
+            "properties": {
+                "mgp_protocol": {"type": "string"},
+                "approval_id": {"type": "string"},
+                "approved_by": {"type": "string"},
+                "certification_date": {"type": "string", "format": "date-time"},
+                "failure_modes": {
+                   "type": "array",
+                   "description": "Mandatory list of known failure modes, error codes, and recovery strategies.",
+                   "items": {
+                      "type": "object",
+                      "required": ["error_code", "description", "recovery_strategy"],
+                      "properties": {
+                         "error_code": {"type": "string", "description": "Standardized error code (e.g., KRNL_404, MDB_500)"},
+                         "description": {"type": "string"},
+                         "severity": {"type": "string", "enum": ["Critical", "Major", "Minor", "Warning"], "default": "Major"},
+                         "recovery_strategy": {"type": "string", "description": "Specific action the kernel should take to recover."}
+                      }
+                   }
+                }
+            }
+          },
+          "source_mdsm_link": {"type": "string"}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "version_identifier": {
+      "type": "string", 
+      "pattern": "^CMR_V[0-9]+\\.[0-9]+$", 
+      "description": "Version identifier for the schema manifest."
+    },
+    "constraint_definition": {
+      "type": "object",
+      "required": ["type", "description"],
+      "description": "Standardized definition for input/output constraints, compatible with the ConstraintNormalizer tool.",
+      "properties": {
+        "type": {"type": "string", "enum": ["float", "integer", "string", "boolean", "object", "array", "null"]},
+        "description": {"type": "string"},
+        "unit": {"type": "string", "description": "Relevant unit of measurement (optional)."},
+        "min": {"type": ["number", "null"], "description": "Minimum value constraint (for numeric types)."},
+        "max": {"type": ["number", "null"], "description": "Maximum value constraint (for numeric types)."},
+        "minLength": {"type": ["integer", "null"], "description": "Minimum length constraint (for string types)."},
+        "maxLength": {"type": ["integer", "null"], "description": "Maximum length constraint (for string types)."},
+        "pattern": {"type": "string", "description": "Regex pattern for string types."},
+        "required_fields": {"type": "array", "items": {"type": "string"}, "description": "Required fields if type is 'object'."},
+        "items": {"$ref": "#/$defs/constraint_definition", "description": "Definition for array items."}
+      }
+    }
+  },
+  "required": ["manifest_id", "schema_version", "owner", "description", "integrity_hash", "models", "verification_protocol"]
+}

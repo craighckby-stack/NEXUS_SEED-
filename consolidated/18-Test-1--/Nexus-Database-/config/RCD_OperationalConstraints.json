@@ -1,0 +1,27 @@
+{
+  "description": "Configuration for the Realtime Compliance Daemon (RCD), defining live D-02 monitoring thresholds for continuous post-deployment integrity checking.",
+  "schema_version": "RCD-V1.0",
+  "constraints": [
+    {
+      "metric_id": "Resource_Utilization_Ceiling",
+      "source": "RACM",
+      "d02_key": "cpu_utilization_max",
+      "critical_threshold": 0.95,
+      "action": "SOFT_ALERT"
+    },
+    {
+      "metric_id": "Latency_Violation_Floor",
+      "source": "ATM/PSR",
+      "d02_key": "p99_response_ms",
+      "critical_threshold": 500,
+      "action": "HARD_HALT_TRIGGER"
+    },
+    {
+      "metric_id": "Security_Policy_Deviation",
+      "source": "PSIM/C15",
+      "d02_key": "security_violation_count",
+      "critical_threshold": 3,
+      "action": "HARD_HALT_TRIGGER"
+    }
+  ]
+}

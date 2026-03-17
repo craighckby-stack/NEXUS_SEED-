@@ -1,0 +1,31 @@
+# Deterministic Timeline Sequencer (DTS) Definition
+
+## Purpose
+The DTS centralizes the enforcement and attestation of all temporal constraints (P-M01 Linearity/Temporal Violations) and manages the gated progression through the GSEP-C pipeline.
+
+## 1.0. Configuration Sources
+
+- ACVM (Axiom Constraint Verification Matrix): Defines Stage Duration Maxima (SDM) for S01 through S14.
+- CHS Spec: Defines sequencing requirements for ISB generation (S01-S06).
+
+## 2.0. Operational Modes
+
+2.1. SEQUENCING MODE
+    Description: Ensures strict, ordered progression through S01-S14. Only proceeds upon explicit 'STAGE_COMPLETE' signal verified against expected sequencing.
+    Failure Result: P-M01 Hard or Soft classification based on `seq_tolerance`.
+
+2.2. TEMPORAL ENFORCEMENT MODE
+    Description: Actively tracks elapsed time per stage (t_current) against SDM(t_max) derived from ACVM.
+    Failure Result: Immediate P-M01 Hard classification and triggering of IH if t_current > t_max.
+
+## 3.0. Gate Synchronization
+
+The DTS maintains the authoritative 'Gate Lock' state.
+
+| Gate | Function | Release Condition (DTS Signal) |
+|:---:|:---|:---:|
+| G0 | Pre-Flight Lock | EMSU Manifest Signature Verified. |
+| G1 | Boundary Check | DRO ECVM Snapshot Accepted. |
+| G2 | Commitment Gate | DTS confirms S08-S10 linearity prior to atomic transition. |
+| G3 | Finality Seal | AASS Signature Acceptance. |
+

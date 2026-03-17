@@ -1,0 +1,39 @@
+{
+  "version": "v94.1",
+  "active": true,
+  "gsep_gates": {
+    "L1_Vetting_Constraint": {
+      "metric_id": "S-03",
+      "target_value": "FALSE",
+      "enforcement_logic": "Veto_Flag_Check",
+      "fallback_on_fail": "GFRM"
+    },
+    "L3_Proving_Constraint": {
+      "metric_id": "S-01",
+      "comparison": "GREATER_THAN",
+      "threshold_type": "SCR_Dynamic_Min",
+      "fallback_on_fail": "GFRM"
+    },
+    "L4_Adjudication_Constraint": {
+      "metric_id": "P-01",
+      "formula_key": "P-01_PASS",
+      "required_result": "PASS",
+      "fallback_on_fail": "GFRM_CRITICAL",
+      "immutable": true
+    }
+  },
+  "s_metric_definitions": {
+    "S-01": {
+      "optimization": "MAXIMIZE",
+      "description": "Efficacy Projection (Trust)"
+    },
+    "S-02": {
+      "optimization": "MINIMIZE",
+      "description": "Risk Synthesis (Floor)"
+    },
+    "S-03": {
+      "optimization": "MANDATORY_FALSE",
+      "description": "Compliance State (Veto)"
+    }
+  }
+}

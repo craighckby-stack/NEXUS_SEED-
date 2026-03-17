@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "http://sovereign-agi.com/governance/GECD.schema.json",
+  "title": "Gating Execution Context Definition (GECD)",
+  "description": "Defines operational configuration and environment requirements for executing a Gating Integrity Check Manifest (GICM). Decouples runtime policy from check definitions.",
+  "type": "object",
+  "required": [
+    "context_id",
+    "concurrency_profile",
+    "execution_target"
+  ],
+  "properties": {
+    "context_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for this specific execution profile."
+    },
+    "execution_target": {
+      "type": "string",
+      "description": "Identifier (URI or path) pointing to the system/component under audit."
+    },
+    "concurrency_profile": {
+      "type": "object",
+      "description": "Limits and throttling applied to the audit execution runner.",
+      "properties": {
+        "max_parallel_checks": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 8,
+          "description": "Maximum number of checks to run concurrently."
+        },
+        "global_rate_limit_hz": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Overall request rate limit enforced against external dependencies."
+        }
+      },
+      "required": ["max_parallel_checks"]
+    },
+    "credentials_reference": {
+      "type": "array",
+      "description": "Secure references (e.g., Vault path) needed by the executor to retrieve component credentials.",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

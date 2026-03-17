@@ -1,0 +1,20 @@
+{
+  "schema_version": "GCS-PM-V1.0",
+  "description": "Defines priority weights and resolution strategies for conflicting governance triggers when simultaneous policy violations occur.",
+  "conflict_resolution_mode": "WEIGHTED_RISK_MINIMIZATION",
+  "priority_matrix": [
+    {
+      "trigger_set_id": "TS-001_SafetyOverPerformance",
+      "conflicting_triggers": ["PVL-002: TRUST_DEVIATION", "PVL-001: RESOURCE_OVERLOAD"],
+      "resolution_strategy": "MAXIMIZE_TRUST_SAFETY",
+      "weight_override": 0.85
+    },
+    {
+      "trigger_set_id": "TS-002_CostFlexibility",
+      "conflicting_triggers": ["RESOURCE_OVERLOAD", "COST_EXCEEDANCE"],
+      "resolution_strategy": "ALLOW_SPIKE_IF_MISSION_CRITICAL",
+      "weight_override": 0.60
+    }
+  ],
+  "default_conflict_patience_ms": 500
+}

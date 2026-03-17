@@ -1,0 +1,22 @@
+{
+  "policy_id": "SEC-POL-MAK-001",
+  "title": "MEE Attestation Key (MAK) Rotation Policy",
+  "governance_level": "L5",
+  "key_alias": "MAK",
+  "rotation_schedule": {
+    "type": "TimeBound_or_UsageBound",
+    "interval_days": 90,
+    "max_signature_count": 1000000,
+    "trigger_precedence": "Whichever_comes_first"
+  },
+  "compromise_response": {
+    "action": "Immediate Revocation and System-Wide Notification",
+    "logging_level": "CRITICAL",
+    "notification_target": ["Security_Audit_Layer", "Governance_Layer"]
+  },
+  "implementation_requirements": [
+    "Keys must be managed within a FIPS 140-2 Level 3 validated Hardware Security Module (HSM).",
+    "The rotation procedure must be traceable and verified via 3-party audit logs.",
+    "Archived keys must be retained for forensic purposes for T+10 years."
+  ]
+}

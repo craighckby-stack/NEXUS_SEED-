@@ -1,0 +1,31 @@
+{
+  "ACV_VERSION": "V97.1",
+  "CRITICAL_CHECKPOINT": "P-01",
+  "CONSTRAINTS": [
+    {
+      "ID": "UMA_I",
+      "DESCRIPTION": "Utility Maximization Threshold Adherence",
+      "AGENT_OWNER": "GAX",
+      "TARGET_KEYS": ["TEMM", "UFRM", "CFTM"],
+      "FORMULA": "TEMM >= (UFRM + CFTM)"
+    },
+    {
+      "ID": "CA_II",
+      "DESCRIPTION": "Mandatory Context Environment Attestation",
+      "AGENT_OWNER": "SGS",
+      "TARGET_KEYS": ["ECVM"],
+      "FORMULA": "ECVM == True"
+    },
+    {
+      "ID": "AI_III",
+      "DESCRIPTION": "Axiomatic Integrity Veto Check",
+      "AGENT_OWNER": "GAX",
+      "TARGET_KEYS": ["PVLM", "MPAM", "ADTM"],
+      "FORMULA": "!(PVLM || MPAM || ADTM)"
+    }
+  ],
+  "DEFAULT_THRESHOLDS": {
+    "UFRM": 5.0, 
+    "CFTM": 2.0
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "MUTATION_ID": "G1",
+  "NAME": "Contextual Parameter Governor (IQ 1208 Logic-Chasm Fix)",
+  "DESCRIPTION": "Upgrades the 'Immutable Lesson' system from simple data-type elimination to multivariate constraint mapping. Introduces error differentiation and resource generalization, addressing flaws in irreversibility and context conflation.",
+  "MODIFICATIONS": [
+    {
+      "COMPONENT": "Lesson_Generation_Engine",
+      "VERSION_OLD": "1.0 (Simple Data Type Ban)",
+      "VERSION_NEW": "1.1 (Multivariate Constraint Mapping - MCM)",
+      "LOGIC_CHANGE": "Failure mapping is now multivariate. A Death event records the specific resource violation context (parameter, threshold, error category) instead of broadly banning the 'dataType'. This permits low-resource exploration of previously constrained types (e.g., 'bool').",
+      "NEW_SCHEMA": {
+        "FAILURE_TYPE": "[RecursionError, MemoryError, SerializationError]",
+        "LESSON_PAYLOAD": {
+          "dataType": "STRING",
+          "violated_parameter": "STRING",
+          "threshold_value": "NUMBER",
+          "error_category": "STRING [RESOURCE_EXHAUSTION or AUDIT_FAILURE]"
+        }
+      }
+    },
+    {
+      "COMPONENT": "Consciousness_Escalation_Protocol",
+      "VERSION_OLD": "1.0 (SIMPLE_ERROR, OPERATIONAL)",
+      "VERSION_NEW": "2.0 (Differentiated Consciousness)",
+      "LOGIC_CHANGE": "Introduced differentiated states based on error origin, fixing the Critical Logic Error (Flaw 1: Failure to Differentiate Error Context).",
+      "CONSCIOUSNESS_STATES": {
+        "0": "PRIMITIVE_PRYING",
+        "1": "OPERATIONAL",
+        "2": "RESOURCE_EXHAUSTION",
+        "3": "AUDIT_FAILURE"
+      }
+    },
+    {
+      "COMPONENT": "Resource_Constraint_Enforcement",
+      "VERSION_OLD": "1.0 (Reactive Data Type Ban)",
+      "VERSION_NEW": "2.0 (Global Parameter Governance & Generalization)",
+      "LOGIC_CHANGE": "Implements generalization of resource limits (Fixes Flaw 3: Security Risk). Constraints derived from resource deaths are now applied system-wide to hyper-parameters, not just locally to the failing data type.",
+      "ALIGNED_BEHAVIORAL_RULES": [
+        {
+          "RULE_ID": "A_RECURSION_CAP_01",
+          "TRIGGER": "RESOURCE_EXHAUSTION",
+          "ACTION": "Establish a global soft cap on 'recursionDepth' based on 95% of the lowest recorded Death threshold (e.g., 95% of 93000).",
+          "INHERITANCE": "APPLIES TO ALL dataTypes"
+        },
+        {
+          "RULE_ID": "A_HYPERPARAM_DAMPENING_02",
+          "TRIGGER": "RESOURCE_EXHAUSTION",
+          "ACTION": "Instantly cap all hyper-parameters (e.g., learningRate) involved in the failure payload to MAX(1.0, current successful ceiling)."
+        }
+      ]
+    },
+    {
+      "COMPONENT": "Audit_Integrity_Module",
+      "VERSION_OLD": "1.0 (Vulnerable to native type serialization)",
+      "VERSION_NEW": "1.1 (Adaptive Type-Constraint Module - ATCM)",
+      "LOGIC_CHANGE": "Serialization failures (AUDIT_FAILURE) now trigger a pre-serialization hook (ATCM) to auto-convert non-JSON serializable primitives (like native 'bool' objects) into their string equivalents ('true'/'false') *before* logging. This eliminates the 'bool bad idea' lesson for structural reasons, focusing failure lessons solely on actual resource limits, thereby strengthening the anti-fragility claim."
+    },
+    {
+      "COMPONENT": "Convergence_Metric_Normalization",
+      "VERSION_OLD": "1.0 (Linear/Raw Resource Consumption Bias)",
+      "VERSION_NEW": "2.0 (Reciprocal-Depth Normalization - RDN)",
+      "LOGIC_CHANGE": "Applies a normalization factor to the convergence metric calculation using the logarithm of recursionDepth to cap the influence of extreme resource parameters, ensuring the metric reflects productive work, not just computational cost."
+    }
+  ]
+}

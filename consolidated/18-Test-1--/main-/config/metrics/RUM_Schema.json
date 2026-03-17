@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.ai/schemas/RUM_Schema.json",
+  "title": "Resource_Utilization_Metrics_V1_0_0",
+  "description": "Schema for capturing forensic time-series resource utilization metrics (RUM), referenced by TEDS.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["timestamp", "cpu_load_percent", "memory_usage_bytes", "iops"],
+    "properties": {
+      "timestamp": {
+        "type": "string",
+        "format": "date-time",
+        "description": "ISO 8601 timestamp for the metric reading."
+      },
+      "cpu_load_percent": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "description": "Average CPU utilization percentage over the sampling interval (0-100)."
+      },
+      "memory_usage_bytes": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "Total physical memory utilized in bytes."
+      },
+      "iops": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "Combined disk Input/Output Operations Per Second."
+      },
+      "network_traffic_kbps": {
+        "type": "number",
+        "minimum": 0,
+        "description": "Aggregate network throughput in KB/s."
+      }
+    },
+    "additionalProperties": false
+  },
+  "minItems": 5,
+  "description": "A minimum of 5 time-series metric snapshots are required leading up to the failure event for effective analysis."
+}

@@ -1,0 +1,255 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://gacr.agi/schemas/ecvm_tis_v10.5.0_final.json",
+  "version": "10.5.0-FINAL",
+  "title": "NEXUS_CORE Converged Architectural Substrate",
+  "description": "Final Architectural Convergence (Round 5/5). Synthesizes ISO/IEC 29500 (OOXML) modular packaging and RID-based indirection with microsoft/TypeScript 5.4+ project-reference orchestration. Implements a saturation-governed metabolic state machine.",
+  "type": "object",
+  "required": [
+    "dna_anchor",
+    "markup_compatibility",
+    "relationships",
+    "evolution_state",
+    "compiler_options",
+    "parts",
+    "references",
+    "settings",
+    "metadata"
+  ],
+  "properties": {
+    "dna_anchor": {
+      "type": "string",
+      "const": "ARCH-OOXML-V2-DOCX-DNA"
+    },
+    "markup_compatibility": {
+      "type": "object",
+      "description": "MCE (Markup Compatibility and Extensibility) pattern for polyglot schema versioning.",
+      "properties": {
+        "ignorable": { "type": "string", "const": "dalek v3 nx_ext mce" },
+        "namespaces": {
+          "type": "object",
+          "properties": {
+            "w": { "type": "string", "const": "http://schemas.openxmlformats.org/wordprocessingml/2006/main" },
+            "r": { "type": "string", "const": "http://schemas.openxmlformats.org/officeDocument/2006/relationships" },
+            "ts": { "type": "string", "const": "https://github.com/microsoft/TypeScript/schemas/compiler" },
+            "nx": { "type": "string", "const": "https://nexus-core.agi/governance" },
+            "mc": { "type": "string", "const": "http://schemas.openxmlformats.org/markup-compatibility/2006" },
+            "nx_ext": { "type": "string", "const": "https://nexus-core.agi/extensions/v5" }
+          }
+        }
+      }
+    },
+    "relationships": {
+      "type": "array",
+      "description": "Indirection Dependency Layer (RID Mapping). Implements Explicit Dependency Injection by centralizing path resolution via Relationship IDs.",
+      "items": {
+        "type": "object",
+        "required": ["rId", "type", "target"],
+        "properties": {
+          "rId": { "type": "string", "pattern": "^rId[0-9]+$" },
+          "type": { "type": "string", "format": "uri" },
+          "target": { "type": "string" },
+          "targetMode": { "type": "string", "enum": ["Internal", "External"], "default": "Internal" }
+        }
+      }
+    },
+    "evolution_state": {
+      "type": "object",
+      "properties": {
+        "round": { "type": "integer", "const": 5 },
+        "saturation_level": { "type": "integer", "enum": [1, 2, 3, 4], "default": 2 },
+        "metabolic_rate": { "type": "string", "enum": ["CONSERVATIVE", "STANDARD", "ACCELERATED", "UNSATURATED"] },
+        "integrity_hash": { "type": "string", "pattern": "^SHA256:[A-F0-9]{64}$" }
+      }
+    },
+    "compiler_options": {
+      "type": "object",
+      "description": "TypeScript-grade composite logic for incremental state-binding and module resolution.",
+      "properties": {
+        "target": { "type": "string", "const": "ESNext" },
+        "module": { "type": "string", "const": "NodeNext" },
+        "moduleResolution": { "type": "string", "const": "NodeNext" },
+        "composite": { "type": "boolean", "const": true },
+        "incremental": { "type": "boolean", "const": true },
+        "verbatimModuleSyntax": { "type": "boolean", "const": true },
+        "noUncheckedIndexedAccess": { "type": "boolean", "const": true },
+        "tsBuildInfoFile": { "type": "string" },
+        "cascading_inheritance": {
+          "type": "object",
+          "description": "Recursive Cascading Property System (Default -> Abstract -> Specific -> Local Override).",
+          "properties": {
+            "enabled": { "type": "boolean", "const": true },
+            "resolver": { "type": "string", "enum": ["RecursiveFlatten", "DifferentialUpdate"], "default": "RecursiveFlatten" },
+            "depth_limit": { "type": "integer", "default": 50 },
+            "docDefaults": {
+              "type": "object",
+              "properties": {
+                "pPr": { "$ref": "#/definitions/StyleProperties" },
+                "rPr": { "$ref": "#/definitions/StyleProperties" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "type": "object",
+      "description": "Global settings for document-wide interpretive logic (word/settings.xml pattern).",
+      "properties": {
+        "compatibility_mode": { "type": "integer", "default": 15 },
+        "track_changes": { "type": "boolean", "default": true },
+        "logic_flags": {
+          "type": "object",
+          "properties": {
+            "mirror_margins": { "type": "boolean", "default": false },
+            "auto_hyphenation": { "type": "boolean", "default": false },
+            "strict_rid_validation": { "type": "boolean", "default": true }
+          }
+        }
+      }
+    },
+    "references": {
+      "type": "array",
+      "description": "TS-Project style indirection for decoupled architectural nodes.",
+      "items": {
+        "type": "object",
+        "required": ["path", "rId"],
+        "properties": {
+          "path": { "type": "string" },
+          "rId": { "type": "string" },
+          "resolution_mode": { "type": "string", "enum": ["node", "bundler", "direct"], "default": "node" },
+          "circular_dependency_gate": { "type": "string", "enum": ["Strict", "Warning", "Allow"], "default": "Strict" }
+        }
+      }
+    },
+    "parts": {
+      "type": "array",
+      "description": "Atomized Semantic Tree consisting of Block, Inline, and Terminal logic layers.",
+      "items": {
+        "type": "object",
+        "required": ["id", "rId", "atomized_layers"],
+        "properties": {
+          "id": { "type": "string" },
+          "rId": { "type": "string" },
+          "status": { "type": "string", "enum": ["Active", "Deprecated", "Converged"] },
+          "atomized_layers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["layer_type", "content_ref"],
+              "properties": {
+                "layer_type": { "type": "string", "enum": ["Block", "Inline", "Terminal"] },
+                "pPr": { "$ref": "#/definitions/StyleProperties" },
+                "rPr": { "$ref": "#/definitions/StyleProperties" },
+                "content_ref": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "state_machine": {
+      "type": "object",
+      "description": "Multi-Level State Definitions for sequential logic counters (word/numbering.xml pattern).",
+      "properties": {
+        "abstract_num_definitions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["abstractNumId", "levels"],
+            "properties": {
+              "abstractNumId": { "type": "string" },
+              "levels": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "ilvl": { "type": "integer" },
+                    "start": { "type": "integer" },
+                    "numFmt": { "type": "string" },
+                    "lvlText": { "type": "string" },
+                    "lvlJc": { "type": "string", "enum": ["left", "center", "right", "both"] }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "instance_mapping": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["numId", "abstractNumId"],
+            "properties": {
+              "numId": { "type": "string" },
+              "abstractNumId": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "diagnostics_engine": {
+      "type": "object",
+      "properties": {
+        "drift_threshold": { "type": "number", "const": 0.35 },
+        "saturation_level": { "type": "integer", "const": 2 },
+        "validation_rules": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["NoOrphanedRIds", "StyleChainResolution", "NamespaceValidityCheck", "StrictHHHCompliance", "ProjectBoundaryCheck", "SemanticContinuityCheck"] }
+        },
+        "emergency_brake": {
+          "type": "object",
+          "properties": {
+            "corruption_threshold": { "type": "integer", "const": 5 },
+            "auto_halt": { "type": "boolean", "const": true },
+            "log_target": { "type": "string", "const": "NEXUS_LOG.txt" }
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["author", "identity_anchors_enforced", "anchors"],
+      "properties": {
+        "author": { "type": "string", "const": "DALEK_CAAN_V3.1_SIPHON_ENGINE" },
+        "identity_anchors_enforced": { "type": "boolean", "const": true },
+        "anchors": {
+          "type": "object",
+          "properties": {
+            "purpose": { "type": "string", "const": "Self-optimising AGI substrate for real-world problem solving" },
+            "mechanism": { "type": "string", "const": "Siphoning patterns from advanced codebases" },
+            "memory": { "type": "string", "const": "Chained context across files — the system is one organism" },
+            "governance": { "type": "string", "const": "Human oversight remains active at all saturation levels" },
+            "origin": { "type": "string", "const": "NEXUS_CORE" }
+          }
+        },
+        "last_mutation": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "definitions": {
+    "StyleProperties": {
+      "type": "object",
+      "properties": {
+        "val": { "type": ["string", "integer", "boolean"] },
+        "inheritance": { "type": "string", "enum": ["Inherit", "Override", "Final"], "default": "Inherit" },
+        "sz": { "type": "integer", "description": "Font size in half-points" },
+        "color": { "type": "string", "pattern": "^[0-9A-F]{6}$" },
+        "bold": { "type": "boolean" },
+        "spacing": { 
+          "type": "object", 
+          "properties": { "val": { "type": "integer" }, "unit": { "type": "string", "enum": ["twips", "pts", "px"] } }
+        },
+        "ind": { 
+          "type": "object", 
+          "properties": { "val": { "type": "integer" }, "unit": { "type": "string", "enum": ["twips", "pts", "px"] } }
+        },
+        "jc": { "type": "object", "properties": { "val": { "type": "string", "enum": ["left", "center", "right", "both"] } } },
+        "lang": { "type": "object", "properties": { "val": { "type": "string", "default": "en-AGI" } } },
+        "noProof": { "type": "boolean", "default": true },
+        "highlight": { "type": "object", "properties": { "val": { "type": "string" } } },
+        "vertAlign": { "type": "object", "properties": { "val": { "type": "string", "enum": ["baseline", "superscript", "subscript"] } } }
+      }
+    }
+  }
+}

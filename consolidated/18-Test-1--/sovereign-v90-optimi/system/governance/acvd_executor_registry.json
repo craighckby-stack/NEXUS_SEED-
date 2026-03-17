@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "description": "Registry mapping ACVD constraint functions to their implementation modules, ensuring modular execution of governance checks.",
+    "version": "1.0"
+  },
+  "executors": [
+    {
+      "type": "METADATA_CHECK",
+      "functions": [
+        { "name": "require_agi_header", "module": "acvd/checkers/MetadataVerifier.js", "class": "HeaderChecker" }
+      ]
+    },
+    {
+      "type": "SIZE_CHECK",
+      "functions": [
+        { "name": "max_file_size", "module": "acvd/checkers/FilesystemVerifier.js", "class": "FileSizeChecker" }
+      ]
+    },
+    {
+      "type": "STATIC_ANALYSIS",
+      "functions": [
+        { "name": "prohibited_regex_match", "module": "acvd/checkers/StaticAnalyzer.js", "class": "RegexPatternMatcher" }
+      ]
+    },
+    {
+      "type": "METRICS_ANALYSIS",
+      "functions": [
+        { "name": "cyclomatic_limit", "module": "acvd/checkers/MetricsAnalyzer.js", "class": "ComplexityChecker" }
+      ]
+    },
+    {
+      "type": "GOVERNANCE_CHECK",
+      "functions": [
+        { "name": "min_entropy_threshold", "module": "acvd/checkers/SovereignGovernance.js", "class": "EntropyGuard" }
+      ]
+    }
+  ]
+}

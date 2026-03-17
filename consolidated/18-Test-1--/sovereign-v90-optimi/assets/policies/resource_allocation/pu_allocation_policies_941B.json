@@ -1,0 +1,23 @@
+{
+  "policy_id": "RAPD-941B-STANDARD",
+  "schema_version": "v1.0",
+  "description": "Defines the prioritized strategy for allocating tasks to Processing Units based on required security and type.",
+  "priority_tiers": {
+    "P0_CRITICAL": {
+      "security_minimum": 4,
+      "utilization_threshold_max": 0.85,
+      "unit_type_preference": ["GENERAL_COMPUTE", "SPECIALIZED_NPU"],
+      "failure_mode": "WAIT"
+    },
+    "P1_NORMAL": {
+      "security_minimum": 3,
+      "utilization_threshold_max": 0.95,
+      "unit_type_preference": ["GENERAL_COMPUTE", "DATA_IO_OPTIMIZED"],
+      "failure_mode": "FALLBACK_P2"
+    }
+  },
+  "default_fallback": {
+    "strategy": "LEAST_UTILIZED_ANY_TYPE",
+    "min_security": 2
+  }
+}

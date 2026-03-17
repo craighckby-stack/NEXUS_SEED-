@@ -1,0 +1,26 @@
+{
+  "TargetEvolutionMandateManifest.json": {
+    "schemaKey": "TEMM",
+    "path": "config/SGS/TargetEvolutionMandateManifest.json",
+    "required": true,
+    "description": "Defines the mandated high-level evolution target state."
+  },
+  "AtomicDeploymentManifest.json": {
+    "schemaKey": "ADMS",
+    "path": "config/SGS/AtomicDeploymentManifest.json",
+    "required": false,
+    "description": "Defines elemental changes for atomic application, typically optional if TEMM covers low-level actions."
+  },
+  "ProjectedVectorLoadManifest.json": {
+    "schemaKey": "PVLM",
+    "path": "config/VFS/ProjectedVectorLoadManifest.json",
+    "required": false,
+    "description": "Artifact listing system load changes based on TEMM."
+  },
+  "TransitionSecurityContext.yaml": {
+    "schemaKey": "TSC",
+    "path": "config/security/TransitionSecurityContext.yaml",
+    "required": true,
+    "description": "Security context required for GSEP execution, must be YAML."
+  }
+}

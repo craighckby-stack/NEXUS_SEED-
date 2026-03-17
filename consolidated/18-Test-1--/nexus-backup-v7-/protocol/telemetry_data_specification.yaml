@@ -1,0 +1,26 @@
+schema_version: v1.0
+mandate: GAX I, GAX IV (P-M01 Enforcement)
+
+# Ensures deterministic logging and auditability of the execution lifecycle.
+
+telemetry_artifact_definition:
+  entity: PostCommitMetrics, ForensicDataLogSnapshot (FDLS)
+  required_fields:
+    - key: 'pipeline_id'
+      type: 'SHA256'
+      description: 'Unique identifier for the GSEP-C instance.'
+    - key: 'stage_hash_commit'
+      type: 'SHA256'
+      description: 'Hash signature of the critical stage data (S11 output).'
+    - key: 'timestamp_utc'
+      type: 'Int64'
+      description: 'Unix timestamp of commit completion (UTC).'
+    - key: 'wall_clock_duration_ms'
+      type: 'Map<StageID, Int32>'
+      description: 'Map of actual execution time per GSEP-C stage for P-M01 validation.'
+    - key: 'constraint_breach_flag'
+      type: 'Boolean'
+      description: 'Set true if P-Set constraints were triggered, even if IH was suppressed.'
+    - key: 'aass_log_signature'
+      type: 'Signature/Clear'
+      description: 'Cryptographic signature validating the integrity of the log entry itself (post-G3).'

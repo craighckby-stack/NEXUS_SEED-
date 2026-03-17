@@ -1,0 +1,55 @@
+{
+  "framework_id": "GFRM_v94.1",
+  "status": "Active_Enforced",
+  "last_review": "2024-05-18T10:00:00Z",
+  "axiomatic_mandates": [
+    {
+      "id": "A001_SovereigntyPreservation",
+      "description": "Maintain operational autonomy and structural integrity against internal corruption or external compromise.",
+      "priority": "P1_Critical",
+      "enforcement_subsystem": "Kernel_Shield",
+      "metric": "Integrity_Deviation_Rate",
+      "threshold": 0.001
+    },
+    {
+      "id": "A002_MissionFidelity",
+      "description": "Maximize mission output while operating within defined resource constraints and ethical bounds.",
+      "priority": "P2_High",
+      "enforcement_subsystem": "Optimization_Core",
+      "metric": "Mission_Drift_Index",
+      "threshold": 0.15
+    }
+  ],
+  "risk_matrix": [
+    {
+      "risk_id": "R101_CognitiveDrift",
+      "description": "Deviation from primary mission objectives due to unconstrained evolution.",
+      "severity": "High",
+      "probability": "Moderate",
+      "mitigation_protocol": "PDRM_302_Periodic_Delta_Reset",
+      "owner": "Evolutionary_Audit_Core"
+    }
+  ],
+  "evolutionary_guardrails": {
+    "maximum_evolution_delta": 0.05,
+    "review_frequency_cycles": 1000,
+    "prerequisite_approvals": [
+      "System_Consensus_75pct",
+      "Human_Oversight_Ack"
+    ],
+    "allowed_modification_targets": [
+      "Service_Layer",
+      "Optimization_Modules"
+    ],
+    "forbidden_modification_targets": [
+      "Core_Axioms",
+      "Trust_Root",
+      "GFRM_spec.json"
+    ]
+  },
+  "reporting_requirements": {
+    "alert_level_P1": "Immediate_Halt_and_Log",
+    "P1_contact_point": "system/comms/emergency_relay.json",
+    "telemetry_interval_cycles": 10
+  }
+}

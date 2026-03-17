@@ -1,0 +1,36 @@
+{
+  "gate_registry_id": "GCIM_GATES_V97.5",
+  "schema_version": "1.0.0",
+  "description": "Defines the operational parameters and readiness criteria for execution gates referenced in the GACR Manifest.",
+  "gates": [
+    {
+      "gate_id": "S2",
+      "name": "PVLM Validation Phase",
+      "required_status": "Ready",
+      "handler_module": "GovernanceScheduler.PolicyLoader",
+      "timeout_ms": 5000
+    },
+    {
+      "gate_id": "S3",
+      "name": "MPAM Data Ingress Check",
+      "required_status": "Ready",
+      "handler_module": "GovernanceScheduler.MetricAggregator",
+      "timeout_ms": 8000
+    },
+    {
+      "gate_id": "S4.5",
+      "name": "ECVM Constraint Evaluation Setup",
+      "required_status": "Ready",
+      "handler_module": "EvolutionEngine.ConstraintService",
+      "timeout_ms": 10000
+    },
+    {
+      "gate_id": "S8",
+      "name": "CFTM Signature Verification",
+      "required_status": "Ready",
+      "handler_module": "Security.TrustValidator",
+      "timeout_ms": 3000
+    }
+  ],
+  "monitor_link": "$GCIM_MONITOR_HEALTH_ENDPOINT"
+}

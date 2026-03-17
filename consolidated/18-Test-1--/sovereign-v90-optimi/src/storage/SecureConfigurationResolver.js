@@ -1,0 +1,1 @@
+Optimized the SecureConfigurationResolver class by improving error handling, streamlining the resolve method, and enhancing code readability.

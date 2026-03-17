@@ -1,0 +1,22 @@
+{
+  "description": "Configuration for monitoring temporal boundary proximity (Hysteresis) and defining acceptable drift parameters to prevent critical failure due to prolonged instability.",
+  "metrics_sensitivity": [
+    {
+      "metric_id": "S01",
+      "time_at_soft_limit_sec": 300, 
+      "action_soft_limit_exceeded": "Log_Warning_Trigger_Adaptive_SCR_Recalculation",
+      "time_near_hard_limit_sec": 60, 
+      "proximity_range": 0.05,
+      "action_hard_limit_proximity": "Raise_Priority_L2_Alert"
+    },
+    {
+      "metric_id": "S02",
+      "time_at_soft_limit_sec": 180,
+      "action_soft_limit_exceeded": "Queue_Immediate_Data_Sanity_Check",
+      "time_near_hard_limit_sec": 45,
+      "proximity_range": 0.02,
+      "action_hard_limit_proximity": "Initiate_Emergency_Cooldown"
+    }
+  ],
+  "hysteresis_window_sec": 900
+}

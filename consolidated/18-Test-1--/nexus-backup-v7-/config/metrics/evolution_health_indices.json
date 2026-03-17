@@ -1,0 +1,21 @@
+{
+  "metrics_engine_version": "94.1",
+  "data_sources": [
+    {
+      "index_name": "cognitive_load_index",
+      "provider": "static_analysis_tool_v3",
+      "granularity": "function"
+    },
+    {
+      "index_name": "technical_debt_score",
+      "provider": "sonar_analyzer",
+      "aggregation": "module"
+    },
+    {
+      "index_name": "security_risk_score",
+      "provider": "dependency_auditor",
+      "aggregation": "project"
+    }
+  ],
+  "collection_frequency_seconds": 300
+}

@@ -1,0 +1,9 @@
+{
+  "policy_id": "Standard-KMS-V1",
+  "enabled": true,
+  "default_algorithm": "RSA-PSS",
+  "minimum_bit_length": 4096,
+  "key_storage_location": "HSM-RegionA/Slot01",
+  "key_usage": ["SIGNING", "ENCRYPTION"],
+  "enforcement_level": "CRITICAL"
+}

@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign-agi.com/governance/M02_Payload_Schema.json",
+  "title": "M-02 Change Payload Schema",
+  "description": "Defines the mandatory structure for the executable M-02 Change Payload, containing the actual code changes linked by an M-01 Intent. This ensures structural validation before execution stage (Stage 3).",
+  "type": "object",
+  "required": [
+    "intent_id_reference",
+    "payload_timestamp",
+    "evolutionary_operations"
+  ],
+  "properties": {
+    "intent_id_reference": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUID referencing the primary M-01 Intent mandate."
+    },
+    "payload_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of payload generation."
+    },
+    "evolutionary_operations": {
+      "type": "array",
+      "minItems": 1,
+      "description": "List of atomic file operations (Add, Modify, Delete).",
+      "items": {
+        "type": "object",
+        "required": ["file_path", "operation_type", "content_data"],
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "pattern": "^(src|config|tests|docs)/.*$",
+            "description": "The path of the file being modified."
+          },
+          "operation_type": {
+            "type": "string",
+            "enum": ["ADD", "MODIFY", "DELETE"],
+            "description": "Type of file operation."
+          },
+          "content_data": {
+            "type": ["string", "null"],
+            "description": "Base64 encoded new content or diff (null for DELETE operation)."
+          },
+          "complexity_score": {
+            "type": "number",
+            "description": "Pre-calculated metric representing the complexity (e.g., lines changed, token delta)."
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

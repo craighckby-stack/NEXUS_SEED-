@@ -1,0 +1,109 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.agi/governance/schemas/RTPCSchema_v1.0.json",
+  "title": "Real-Time Policy Calculus (RTPC) Configuration",
+  "description": "Defines the structured parameters for the autonomous Risk/Trust Policy Calculus engine (P-01/GRCM). All derived scores are normalized [0.0, 1.0].",
+  "type": "object",
+  "required": [
+    "policyVersion",
+    "temporalSettings",
+    "riskMetrics",
+    "trustThresholds"
+  ],
+  "properties": {
+    "policyVersion": {
+      "type": "string",
+      "description": "Semantic versioning identifier for the configuration.",
+      "pattern": "^v[0-9]+\.[0-9]+\.[0-9]+$"
+    },
+    "temporalSettings": {
+      "type": "object",
+      "description": "Parameters governing time-dependent metrics.",
+      "required": [
+        "trustDecayFactor"
+      ],
+      "properties": {
+        "trustDecayFactor": {
+          "type": "number",
+          "description": "The rate at which accrued trust decays (must be between 0.5 and 1.0). High values mean slower decay.",
+          "minimum": 0.5,
+          "maximum": 0.999
+        }
+      },
+      "additionalProperties": false
+    },
+    "riskMetrics": {
+      "type": "object",
+      "description": "Weights and configuration for integrating external risk assessments and services.",
+      "required": [
+        "riskMitigationWeight",
+        "serviceWeights"
+      ],
+      "properties": {
+        "riskMitigationWeight": {
+          "type": "number",
+          "description": "Normalization weight applied to aggregate risk mitigation scores.",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "serviceWeights": {
+          "type": "array",
+          "description": "List of contributory services and their relative influence weights. Total weights should sum near 1.0 for true normalization.",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "serviceId",
+              "weight"
+            ],
+            "properties": {
+              "serviceId": {
+                "type": "string",
+                "description": "Unique system ID of the contributing service (e.g., 'NETWORK_HEALTH').",
+                "pattern": "^[A-Z_]{3,32}$"
+              },
+              "weight": {
+                "type": "number",
+                "minimum": 0.0,
+                "maximum": 1.0
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "trustThresholds": {
+      "type": "object",
+      "description": "Normalized boundary values [0.0, 1.0] defining mandatory operational states (Critical < Alert < Operational).",
+      "required": [
+        "criticalScore",
+        "alertScore",
+        "operationalMinimum"
+      ],
+      "properties": {
+        "criticalScore": {
+          "type": "number",
+          "description": "Trust score below which execution must terminate or quarantine immediately (0.0 - 0.2).",
+          "minimum": 0.0,
+          "exclusiveMaximum": 0.2
+        },
+        "alertScore": {
+          "type": "number",
+          "description": "Trust score triggering high-priority review and limited operations (0.1 - 0.5).",
+          "minimum": 0.1,
+          "maximum": 0.5
+        },
+        "operationalMinimum": {
+          "type": "number",
+          "description": "Minimum score required for standard, unconstrained execution (0.6 - 1.0).",
+          "minimum": 0.6,
+          "maximum": 1.0
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

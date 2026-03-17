@@ -1,0 +1,26 @@
+{
+  "ACVD_MAP_VERSION": "V1.0",
+  "REMEDIATION_STRATEGIES": {
+    "P01_FAIL_AXIOM_I_DEBT": {
+      "MATCH_CODE": "P01-I-ADTM-101",
+      "TRIGGER_LEVEL": "WARNING",
+      "ACTION": "FUNCTION_CALL",
+      "FUNCTION_ID": "FNC_ADTM_DEBT_MITIGATION_SCA1",
+      "DESCRIPTION": "Non-critical utility debt exceeded; initiates Self-Correction Attempt 1 (SCA1) before resorting to IH."
+    },
+    "P01_FAIL_AXIOM_II_TIMEOUT": {
+      "MATCH_CODE": "P01-II-ECVM-202",
+      "TRIGGER_LEVEL": "CRITICAL",
+      "ACTION": "FUNCTION_CALL",
+      "FUNCTION_ID": "FNC_ECVM_STATE_RESET_REINIT",
+      "DESCRIPTION": "ECVM validation timeout detected; requires immediate soft state reset and P-01 re-evaluation cycle."
+    },
+    "IH_DEFAULT": {
+      "MATCH_CODE": "IH-CORE-900",
+      "TRIGGER_LEVEL": "INTEGRITY_HALT",
+      "ACTION": "PROTOCOL_CALL",
+      "PROTOCOL_ID": "RRP_PRIMARY_V1",
+      "DESCRIPTION": "Default mapping for unhandled IH condition."
+    }
+  }
+}

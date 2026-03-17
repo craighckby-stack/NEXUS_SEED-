@@ -1,0 +1,13 @@
+api_keys:
+  OPENAI_API_KEY: ${env:OPENAI_API_KEY}
+  ANTHROPIC_API_KEY: ${env:ANTHROPIC_API_KEY}
+
+governance_model:
+  version: v1.0.0
+  temperature: 0.1
+  max_tokens: 4096
+  model_name: sovereign-agi/v94.1
+
+runtime:
+  max_iterations: 100
+  log_level: info

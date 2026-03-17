@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.agi/governance/v99.0/simulation.result.schema.json",
+  "title": "Proposal Simulation Result Contract (PSRC)",
+  "description": "Defines the mandatory output structure for the L2 Proposal Simulation Engine (PSE), referenced by Governance Chain anchors.",
+  "type": "object",
+  "required": [
+    "proposal_id",
+    "simulation_hash",
+    "status",
+    "metrics"
+  ],
+  "properties": {
+    "proposal_id": {
+      "type": "string",
+      "description": "Reference to the executed proposal ID."
+    },
+    "simulation_hash": {
+      "type": "string",
+      "format": "sha256",
+      "description": "Unique hash of the complete simulation state artifact."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["SUCCESS", "FAILURE_RUNTIME", "FAILURE_INTEGRITY", "VETO_PREDICTED"],
+      "description": "Final outcome of the simulation run."
+    },
+    "metrics": {
+      "type": "object",
+      "description": "Quantifiable outputs of the simulation.",
+      "required": ["impact_score", "cycle_consumed"],
+      "properties": {
+        "impact_score": {
+          "type": "number",
+          "minimum": -100,
+          "maximum": 100,
+          "description": "A normalized score indicating predicted architectural impact (positive is favorable)."
+        },
+        "cycle_consumed": {
+          "type": "integer",
+          "description": "Actual computational cycles used by the PSE run."
+        },
+        "log_summary_hash": {
+          "type": "string",
+          "format": "sha256",
+          "description": "Hash of the condensed simulation log file."
+        }
+      }
+    },
+    "veto_reason": {
+      "type": "string",
+      "description": "Mandatory field if status is VETO_PREDICTED."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "VETO_PREDICTED" } } },
+      "then": { "required": ["veto_reason"] }
+    }
+  ]
+}

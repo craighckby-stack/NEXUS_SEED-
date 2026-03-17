@@ -1,0 +1,22 @@
+[
+  {
+    "artifactType": "TaskDefinition",
+    "status": "ACTIVE",
+    "policyInheritance": "OVERRIDE",
+    "enforcementModeOverride": "CRITICAL_PATH_STRICT",
+    "versioningPolicyOverride": {
+      "allowMinorVersionMismatch": false,
+      "forceLatestPatch": true,
+      "strictModeCheckOnMajorBump": true
+    }
+  },
+  {
+    "artifactType": "ObservationReport",
+    "status": "ACTIVE",
+    "policyInheritance": "INHERIT_VERSIONING",
+    "reportingOverride": {
+      "reportingEndpoint": "http://audit-log/v2/observations",
+      "failureRateThresholdPercent": 75
+    }
+  }
+]

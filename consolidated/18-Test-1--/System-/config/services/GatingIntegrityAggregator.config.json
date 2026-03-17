@@ -1,0 +1,25 @@
+{
+  "serviceName": "GatingIntegrityAggregatorService",
+  "purpose": "Centralizes, indexes, and analyzes all GatingIntegrityAuditReport data streams.",
+  "endpoints": {
+    "ingest": "/v1/ingest/audit_report",
+    "query": "/v1/query/risk_trends"
+  },
+  "dataStorage": {
+    "type": "TimeSeriesDatabase",
+    "retentionDays": 365,
+    "indexedFields": ["reportId", "metadata.targetScope", "overallStatus", "riskScore", "auditResults.severity"]
+  },
+  "alertingRules": [
+    {
+      "id": "R001_CRITICAL_FAILURE",
+      "trigger": "overallStatus == 'CRITICAL_FAILURE'",
+      "severity": "P0"
+    },
+    {
+      "id": "R002_RISK_SPIKE",
+      "trigger": "riskScore > 75 AND riskScore > rolling_average(30d) * 1.5",
+      "severity": "P1"
+    }
+  ]
+}

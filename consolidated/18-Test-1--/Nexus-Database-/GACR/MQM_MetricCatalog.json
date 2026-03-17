@@ -1,0 +1,30 @@
+{
+  "$schema": "http://sgs-v97.5/schema/mqm_metrics",
+  "metadata": {
+    "version": "1.0",
+    "last_updated": "SovereignAGI_v94.1"
+  },
+  "metric_definitions": [
+    {
+      "metric_id": "MQM_S03_STORAGE_LATENCY",
+      "source": "StorageService_S3",
+      "data_key": "p99_read_ms",
+      "description": "99th percentile storage read latency (converted to % of SLO violation).",
+      "unit": "Percentage Violation"
+    },
+    {
+      "metric_id": "MQM_S04_MODEL_DRIFT_COUNT",
+      "source": "ModelMonitoringService_DriftEngine",
+      "data_key": "drift_alarm_count",
+      "description": "Number of confirmed severe statistical model drift alarms detected within the reporting window.",
+      "unit": "Absolute Count"
+    },
+    {
+      "metric_id": "MQM_P01_PREDICTION_BIAS",
+      "source": "FairnessMonitoringEngine",
+      "data_key": "bias_deviation_score",
+      "description": "Deviation from acceptable demographic parity tolerance.",
+      "unit": "Ratio"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "rates": {
+    "currency": "USD",
+    "model_api_cost": {
+      "GP-94.1": {
+        "input_cost_per_million_tokens": 5.00,
+        "output_cost_per_million_tokens": 15.00
+      },
+      "ReflexAgent-1": {
+        "input_cost_per_million_tokens": 1.50,
+        "output_cost_per_million_tokens": 3.00
+      }
+    },
+    "infrastructure_cost": {
+      "cpu_cost_per_ms": 0.00000001,
+      "accelerator_cost_per_ms": 0.0000005,
+      "memory_peak_cost_per_gb_us": 0.0000000001
+    }
+  },
+  "description": "Configuration file defining the monetary rates used by the telemetry subsystem to derive RCM V3's financial_metrics. Ensures reproducible cost reporting based on underlying resource usage."
+}

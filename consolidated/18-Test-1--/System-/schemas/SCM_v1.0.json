@@ -1,0 +1,43 @@
+{
+  "$id": "https://agi.sovereign/schemas/SCM_v1.0.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "System Configuration Manifest (SCM)",
+  "description": "The definitive, cryptographically-bound state snapshot following a GSEP evolution.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "generationTimestamp",
+    "scmRootHash",
+    "coreArtifacts",
+    "systemStateIndex",
+    "integritySignature"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0" },
+    "generationTimestamp": { "type": "string", "format": "date-time" },
+    "scmRootHash": {
+      "type": "string",
+      "description": "SHA3-512^2 hash of the complete SCM payload."
+    },
+    "coreArtifacts": {
+      "type": "object",
+      "description": "The integrity artifacts ingested by SSP-01.",
+      "required": ["GSH_Hash", "DSCM_Payload", "D01_LogRef", "ActivationManifest_Hash"],
+      "properties": {
+        "GSH_Hash": { "type": "string", "format": "byte" },
+        "DSCM_Payload": { "type": "object" },
+        "D01_LogRef": { "type": "string", "description": "Pointer or cryptographic identifier to the immutable AIA Ledger entry." },
+        "ActivationManifest_Hash": { "type": "string", "format": "byte" }
+      }
+    },
+    "systemStateIndex": {
+      "type": "object",
+      "description": "A detailed, verifiable index of all deployed subordinate module configurations and state hashes."
+    },
+    "integritySignature": {
+      "type": "string",
+      "description": "The cryptographic signature applied by the Sovereign Core Signing Key (SCSK)."
+    }
+  },
+  "additionalProperties": false
+}

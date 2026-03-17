@@ -1,0 +1,29 @@
+# AOC Evolution Trigger Interface (AETI) Manifest V1.0
+# Defines allowed mechanisms and associated policies for initiating the GSEP lifecycle (M-01 input).
+
+entry_points:
+  - id: 'INTENT_HUMAN_OVERSIGHT'
+    source_schema: 'M-01/HumanVetted.schema'
+    constraints:
+      # Must be signed by Governance Keys K-01 and K-02.
+      min_signatures: 2
+      # Automatically triggers GSEP Stage 0 (GIRAM) upon input.
+      trigger_stage: 0
+    policy:
+      # Ensures human intent aligns with current GRS scope limitations.
+      rule_set: 'GRS/Policy_H-01.yaml'
+
+  - id: 'INTENT_SYSTEM_AUTOGENY'
+    source_schema: 'M-01/SystemAutonomous.schema'
+    constraints:
+      # Limit self-initiated cycles per operational hour.
+      rate_limit_ph: 3
+      trigger_stage: 0
+    policy:
+      # Strict risk tolerance for internal triggers.
+      rule_set: 'GRS/Policy_S-04.yaml'
+      risk_floor_override: 'MINIMAL_THRESHOLD'
+
+integrity_checks:
+  input_serialization_type: 'JSON/CBOR'
+  validation_module: 'RSAM'

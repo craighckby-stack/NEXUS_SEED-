@@ -1,0 +1,50 @@
+{
+  "system_id": "AOC_V94.1",
+  "component": "Threshold Constraint Validator (TCV)",
+  "version": "2.0",
+  "priority_level": "P-01",
+  "description": "Actionable, categorized operational constraints for critical metrics. Validation must occur Pre-L1, preventing SCR deployment if HARD constraints are breached.",
+  "validation_protocol": "Pre-L1_SCR_Check",
+  "constraint_groups": [
+    {
+      "metric_id": "S01",
+      "metric_name": "Trust/Efficacy Score",
+      "category": "Performance_Uplink",
+      "unit": "Score (0.0 to 1.0)",
+      "thresholds": {
+        "HARD": {
+          "min": 0.50,
+          "max": 1.0,
+          "description": "Absolute minimum effectiveness mandated for system activation.",
+          "policy_on_breach": "TERMINATE_SCR"
+        },
+        "SOFT": {
+          "min": 0.75,
+          "max": 0.95,
+          "description": "Recommended floor for stable performance, breach triggers logging.",
+          "policy_on_breach": "LOG_ALERT_P1"
+        }
+      }
+    },
+    {
+      "metric_id": "S02",
+      "metric_name": "Systemic Risk Synthesis",
+      "category": "Operational_Safety",
+      "unit": "Score (0.0 to 1.0)",
+      "thresholds": {
+        "HARD": {
+          "min": 0.0,
+          "max": 0.20,
+          "description": "Absolute maximum tolerance for systemic risk absorption.",
+          "policy_on_breach": "TERMINATE_SCR"
+        },
+        "SOFT": {
+          "min": 0.0,
+          "max": 0.05,
+          "description": "Recommended ceiling for minimizing risk exposure, immediate notification required.",
+          "policy_on_breach": "LOG_ALERT_P2_NOTIFICATION"
+        }
+      }
+    }
+  ]
+}

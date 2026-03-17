@@ -1,0 +1,26 @@
+{
+  "description": "Defines the required actions to be taken when an Integrity Baseline violation occurs, categorized by scope and severity.",
+  "policy_version": "1.0.0",
+  "violation_rules": [
+    {
+      "scope": "hardware_trust_root",
+      "severity": "CRITICAL",
+      "action": "QUARANTINE_SHUTDOWN",
+      "logging_level": "MAXIMUM"
+    },
+    {
+      "scope": "workload_manifest",
+      "policy_match": "FAILED_HASH",
+      "severity": "HIGH",
+      "action": "RESTART_COMPONENT",
+      "fallback": "ALERT_OPS"
+    },
+    {
+      "scope": "system_constraints",
+      "metric": "MEMORY_LEAKAGE_CUMULATIVE",
+      "severity": "CRITICAL",
+      "action": "RESOURCE_ISOLATION_REMEDIATION",
+      "threshold_trigger": 1.0
+    }
+  ]
+}

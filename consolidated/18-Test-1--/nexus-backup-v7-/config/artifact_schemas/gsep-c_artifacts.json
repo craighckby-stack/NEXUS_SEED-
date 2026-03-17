@@ -1,0 +1,20 @@
+{
+  "description": "Defines immutable data contracts (JSON Schema) for artifacts exchanged between GSEP-C State Machine stages, crucial for validating constraints.",
+  "contracts": {
+    "GSEP-C-A01": {
+      "name": "S00_START_TOKEN",
+      "version": "1.0",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "token_id": {"type": "string", "description": "Unique UUID for the execution instance.", "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-..."},
+          "timestamp_utc": {"type": "string", "format": "date-time"},
+          "initial_vector_hash": {"type": "string", "description": "SHA256 hash of the initial state vector.", "minLength": 64, "maxLength": 64}
+        },
+        "required": ["token_id", "timestamp_utc", "initial_vector_hash"]
+      },
+      "immutability_enforced": true
+    }
+    // Placeholder for GSEP-C-A02 through GSEP-C-A22 artifacts...
+  }
+}

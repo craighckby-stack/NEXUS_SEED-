@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "PVLM_Schema_V2.0",
+  "title": "Policy Veto Locus Metric Configuration Schema",
+  "type": "object",
+  "properties": {
+    "manifest": { "type": "object" },
+    "runtime_defaults": {
+      "type": "object",
+      "properties": {
+        "global_enforcement_level": { "type": "string", "enum": ["L0_ADVISORY", "L1_STRICT_EVAL", "L2_FULL_GOVERNANCE"] },
+        "default_policy_status": { "type": "string", "enum": ["Active", "Dormant", "Audit"] }
+      }
+    },
+    "policy_definitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["policy_id", "description", "status", "action", "target_locus"],
+        "properties": {
+          "action": {
+            "type": "object",
+            "properties": {
+              "level": { "type": "string", "enum": ["VETO_HIGH_PRIORITY", "HALT_AUDIT", "IMMEDIATE_SHUTDOWN", "LOG_WARNING"] },
+              "severity_score": { "type": "integer", "minimum": 1, "maximum": 100 }
+            }
+          }
+        }
+      }
+    }
+  },
+  "required": ["manifest", "runtime_defaults", "policy_definitions"]
+}

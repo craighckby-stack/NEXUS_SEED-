@@ -1,0 +1,21 @@
+manager_id: EntropyFailoverManagerV1
+trigger_mechanism:
+  type: LatencyOrHealthFailure
+  latency_threshold_ms: 75
+  health_check_failures_allowed: 3
+failover_steps:
+  - action: SwitchToInternalCSPRNG
+    target: "OS_Kernel_EntropyPool"
+    reseed_source: "Last_Known_Good_QNG_Output"
+    reseed_size_bits: 512
+  - action: DegradeEntropyQualityWarning
+    threshold: 0.8 # Warn if entropy rate drops below 80% of required standard
+    severity: HIGH
+failback_steps:
+  - action: MonitorQNGRestoration
+    interval_ms: 10000
+    consecutive_successes_required: 5
+  - action: ReSeedCSPRNG
+    target: "Internal"
+    source: "Restored_QNG_Source"
+  - action: SwitchToPrimaryQNG

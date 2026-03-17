@@ -1,0 +1,27 @@
+{
+  "schema_version": "v1.0",
+  "description": "Defines standard schemas, range constraints, and normalization methods for quantitative factors used in RCDM evaluations.",
+  "metrics": [
+    {
+      "id": "Utility_Gain",
+      "definition": "Projected positive change in system capability or output efficiency.",
+      "scale": "Normalized [0.0, 1.0]",
+      "unit": "Score",
+      "validation": "score_must_be_non_negative"
+    },
+    {
+      "id": "Resource_Cost",
+      "definition": "Normalized estimation of compute, memory, and operational expense impact.",
+      "scale": "Inverse Normalized [-1.0, 0.0]",
+      "unit": "Score",
+      "validation": "score_must_be_non_positive"
+    },
+    {
+      "id": "Security_Impact",
+      "definition": "Assessment of new attack surface or vulnerability introduction risk.",
+      "scale": "Inverse Normalized [-1.0, 0.0]",
+      "unit": "RiskDelta",
+      "validation": "score_must_be_non_positive"
+    }
+  ]
+}

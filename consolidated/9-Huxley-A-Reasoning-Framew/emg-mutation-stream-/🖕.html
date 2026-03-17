@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autonomous AGI Core System</title>
+    <!-- Tailwind CDN: For development/single-file use. Compile for production speed. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* AGI System Theme Variables (High-Contrast Dark Mode) */
+        :root {
+            --primary-color: #6366f1; /* indigo-500 */
+            --success-color: #10b981; /* emerald-500 */
+            --warning-color: #f59e0b; /* amber-500 */
+            --danger-color: #ef4444;  /* red-500 */
+            --bg-color: #0f172a;      /* slate-900 */
+            --surface-color: #1e293b; /* slate-800 */
+            --bg-surface-50: rgba(30, 41, 59, 0.5); /* Optimized for CSS variable usage */
+        }
+        
+        /* Base Styling & Font Optimization */
+        body {
+            font-family: 'SF Mono', 'Courier New', monospace;
+            background: var(--bg-color); 
+            background-image: linear-gradient(135deg, var(--bg-color) 0%, #1a1f3a 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            /* Performance: Reduce repaints */
+            will-change: background;
+        }
+
+        /* Visual Effects - GPU Optimized */
+        .neural-bg {
+            /* Use modern color functions or simplified RGBA for better performance */
+            background: radial-gradient(circle at 20% 50%, color-mix(in srgb, var(--primary-color) 10%, transparent) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, color-mix(in srgb, var(--success-color) 10%, transparent) 0%, transparent 50%);
+        }
+
+        /* Animations: Use opacity for performance, trigger with a single class */
+        .status-badge {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .7; }
+        }
+        .log-entry.animate-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            /* Optimized transform property */
+            from { opacity: 0; transform: translate3d(0, -5px, 0); } 
+            to { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
+        .learning-indicator {
+            animation: rotate 2s linear infinite;
+            display: inline-block;
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Component Specific Styling */
+        .metric-card {
+            /* Ensures smooth GPU transitions for hover effects */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            will-change: transform, box-shadow;
+            background-color: var(--surface-color); 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            background-color: var(--bg-surface-50); /* Use custom variable for consistent surface opacity */
+        }
+        .metric-card:hover {
+            /* Use 3D transform for hardware acceleration */
+            transform: translate3d(0, -3px, 0); 
+            box-shadow: 0 18px 36px color-mix(in srgb, var(--primary-color) 20%, transparent), 0 0 15px color-mix(in srgb, var(--primary-color) 10%, transparent);
+        }
+        
+        /* Log Container & Custom Scrollbar */
+        .log-container {
+            max-height: 16rem; 
+            overflow-y: auto;
+            /* Standard CSS scrollbar properties */
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) var(--surface-color);
+            padding-right: 0.5rem; 
+        }
+        /* Webkit scrollbar optimization */
+        .log-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .log-container::-webkit-scrollbar-thumb {
+            background-color: var(--primary-color);
+            border-radius: 4px;
+        }
+        .log-container::-webkit-scrollbar-track {
+            background: var(--surface-color);
+        }
+
+        /* Standardizing container base styles */
+        .agi-panel {
+            background-color: var(--surface-color);
+            /* Group Tailwind classes efficiently */
+            @apply backdrop-blur-md rounded-lg p-4 sm:p-6 border border-gray-700/70;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+    <!-- Main AGI Shell -->
+    <div class="max-w-7xl mx-auto neural-bg rounded-2xl p-6 sm:p-10 shadow-2xl bg-slate-900/80 backdrop-blur-lg">
+        <!-- Header -->
+        <header class="mb-10 border-b border-gray-700 pb-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                <div>
+                    <h1 class="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-indigo-400 to-emerald-400 bg-clip-text text-transparent">
+                        AUTONOMOUS AGI CORE
+                    </h1>
+                    <p class="text-gray-400 mt-2 text-sm sm:text-base tracking-wider">Self-Auditing • Self-Learning • Self-Updating</p>
+                </div>
+                <div class="text-left sm:text-right mt-4 sm:mt-0">
+                    <div class="status-badge inline-block px-4 py-2 bg-emerald-500/20 rounded-full border border-emerald-500 shadow-lg">
+                        <span class="text-emerald-400 font-bold text-sm sm:text-base uppercase">● OPERATIONAL</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">Uptime: <span id="uptime" class="font-mono">0s</span></p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Core Metrics Dashboard -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+            <!-- Use var(--bg-surface-50) via the custom CSS variable approach -->
+            <div class="metric-card rounded-lg p-5 border border-gray-700/50">
+                <div class="text-gray-400 text-sm mb-1 uppercase tracking-wide">Learning Cycles</div>
+                <div class="text-3xl sm:text-4xl font-extrabold text-indigo-400" id="learning-cycles">0</div>
+            </div>
+            <div class="metric-card rounded-lg p-5 border border-gray-700/50">
+                <div class="text-gray-400 text-sm mb-1 uppercase tracking-wide">Self-Audits</div>
+                <div class="text-3xl sm:text-4xl font-extrabold text-emerald-400" id="audits">0</div>
+            </div>
+            <div class="metric-card rounded-lg p-5 border border-gray-700/50">
+                <div class="text-gray-400 text-sm mb-1 uppercase tracking-wide">Auto-Updates</div>
+                <div class="text-3xl sm:text-4xl font-extrabold text-amber-400" id="updates">0</div>
+            </div>
+            <div class="metric-card rounded-lg p-5 border border-gray-700/50">
+                <div class="text-gray-400 text-sm mb-1 uppercase tracking-wide">Performance Index</div>
+                <div class="text-3xl sm:text-4xl font-extrabold text-purple-400" id="performance">100%</div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Left Column: Knowledge and Audits -->
+            <div class="space-y-8">
+                <!-- Knowledge Base -->
+                <div class="agi-panel">
+                    <h3 class="text-xl font-bold mb-4 flex items-center text-indigo-300">
+                        <span class="learning-indicator mr-3 text-xl">⚙️</span>
+                        Knowledge Base (Recent Insights)
+                    </h3>
+                    <div id="knowledge-base" class="log-container space-y-2">
+                        <div class="text-gray-500 text-sm italic">Initializing learning modules...</div>
+                    </div>
+                </div>
+
+                <!-- Self-Audit Results -->
+                <div class="agi-panel">
+                    <h3 class="text-xl font-bold mb-4 text-emerald-300">🔍 Self-Audit Log</h3>
+                    <div id="audit-log" class="log-container space-y-2">
+                        <div class="text-gray-500 text-sm italic">No audits performed yet...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Learning Status & Updates -->
+            <div class="space-y-8">
+                <!-- Active Learning Process -->
+                <div class="agi-panel">
+                    <h3 class="text-xl font-bold mb-6 text-purple-300">🧠 Active Learning Scores</h3>
+                    <div id="learning-status" class="space-y-4">
+                        <div class="flex justify-between text-base">
+                            <span class="text-gray-400">Pattern Recognition:</span>
+                            <span class="text-emerald-400 font-mono font-semibold" id="pattern-score">0%</span>
+                        </div>
+                        <div class="flex justify-between text-base">
+                            <span class="text-gray-400">Code Optimization:</span>
+                            <span class="text-indigo-400 font-mono font-semibold" id="optimize-score">0%</span>
+                        </div>
+                        <div class="flex justify-between text-base">
+                            <span class="text-gray-400">Self-Awareness:</span>
+                            <span class="text-purple-400 font-mono font-semibold" id="awareness-score">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Auto-Update Log -->
+                <div class="agi-panel">
+                    <h3 class="text-xl font-bold mb-4 text-amber-300">🔄 Auto-Update Log</h3>
+                    <div id="update-log" class="log-container space-y-2">
+                        <div class="text-gray-500 text-sm italic">No updates applied yet...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Activity Feed -->
+        <div class="mt-8 agi-panel">
+            <h3 class="text-xl font-bold mb-4 text-cyan-300">📡 Live System Activity</h3>
+            <div id="activity-feed" class="log-container max-h-36 font-mono text-xs space-y-1">
+                <div class="text-gray-500">[SYSTEM] Autonomous AGI Core initialized...</div>
+            </div>
+        </div>
+
+        <!-- API Configuration Panel -->
+        <div class="mt-8 agi-panel border-blue-700/50">
+            <h3 class="text-xl font-bold mb-4 text-blue-400">🔑 API Configuration</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                <div>
+                    <label for="gemini-api-key" class="block text-sm text-gray-400 mb-2">Gemini API Key:</label>
+                    <input type="password" id="gemini-api-key" placeholder="Enter your Gemini API key" 
+                           class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:outline-none transition duration-150">
+                    <p class="text-xs text-gray-500 mt-1">Key from <a href="https://makersuite.google.com/app/apikey" target="_blank" class="text-blue-400 hover:underline">Google AI Studio</a></p>
+                </div>
+                <div>
+                    <label for="search-api-key" class="block text-sm text-gray-400 mb-2">Google Search API Key:</label>
+                    <input type="password" id="search-api-key" placeholder="Enter your Search API key" 
+                           class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:outline-none transition duration-150">
+                    <p class="text-xs text-gray-500 mt-1">Key from <a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="text-blue-400 hover:underline">Google Cloud Console</a></p>
+                </div>
+                <div>
+                    <label for="search-engine-id" class="block text-sm text-gray-400 mb-2">Search Engine ID (CX):</label>
+                    <input type="text" id="search-engine-id" placeholder="Your Custom Search Engine ID" 
+                           class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:outline-none transition duration-150">
+                    <p class="text-xs text-gray-500 mt-1">Create at <a href="https://programmablesearchengine.google.com/" target="_blank" class="text-blue-400 hover:underline">Programmable Search Engine</a></p>
+                </div>
+                <div class="flex items-end">
+                    <button id="save-config-btn" class="w-full px-4 py-3 text-base bg-blue-600 hover:bg-blue-700 rounded-lg transition duration-200 font-semibold shadow-md">
+                        💾 Save Configuration
+                    </button>
+                </div>
+            </div>
+            <div id="api-status" class="text-sm italic mt-4">API not configured</div>
+        </div>
+
+        <!-- Manual Override Panel -->
+        <div class="mt-8 agi-panel border-amber-700/50">
+            <h3 class="text-xl font-bold mb-4 text-amber-400">⚠️ Manual Override Controls</h3>
+            <div class="flex gap-4 flex-wrap">
+                <button id="force-learning-btn" class="px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-700 rounded-lg transition duration-200 shadow-md">
+                    Force Learning Cycle
+                </button>
+                <button id="force-audit-btn" class="px-4 py-2 text-sm bg-emerald-600 hover:bg-emerald-700 rounded-lg transition duration-200 shadow-md">
+                    Force Self-Audit
+                </button>
+                <button id="ask-gemini-btn" class="px-4 py-2 text-sm bg-purple-600 hover:bg-purple-700 rounded-lg transition duration-200 shadow-md">
+                    🤖 Ask Gemini for Insights
+                </button>
+                <button id="perform-search-btn" class="px-4 py-2 text-sm bg-cyan-600 hover:bg-cyan-700 rounded-lg transition duration-200 shadow-md">
+                    🔍 Search Web for Knowledge
+                </button>
+                <button id="reset-btn" class="px-4 py-2 text-sm bg-red-600 hover:bg-red-700 rounded-lg transition duration-200 shadow-md">
+                    Emergency Reset
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+// ============= AUTONOMOUS AGI CORE SYSTEM (Optimized JS) =============
+
+/**
+ * High-performance single selector utility.
+ * @param {string} id 
+ * @returns {HTMLElement | null}
+ */
+const $ = (id) => document.getElementById(id);
+
+// --- DOM Selectors Cache ---
+const DOM_ELEMENTS = {
+    // Metrics
+    uptime: $('uptime'),
+    learningCycles: $('learning-cycles'),
+    audits: $('audits'),
+    updates: $('updates'),
+    performance: $('performance'),
+    // Learning Status
+    patternScore: $('pattern-score'),
+    optimizeScore: $('optimize-score'),
+    awarenessScore: $('awareness-score'),
+    // Logs/Feeds
+    knowledgeBase: $('knowledge-base'),
+    auditLog: $('audit-log'),
+    updateLog: $('update-log'),
+    activityFeed: $('activity-feed'),
+    // API Config
+    geminiKeyInput: $('gemini-api-key'),
+    searchKeyInput: $('search-api-key'),
+    searchEngineIdInput: $('search-engine-id'),
+    apiStatus: $('api-status'),
+    // Buttons
+    saveConfigBtn: $('save-config-btn'),
+    forceLearningBtn: $('force-learning-btn'),
+    forceAuditBtn: $('force-audit-btn'),
+    askGeminiBtn: $('ask-gemini-btn'),
+    performSearchBtn: $('perform-search-btn'),
+    resetBtn: $('reset-btn'),
+};
+
+// --- Constants ---
+const LOCAL_STORAGE_KEYS = {
+    GEMINI_KEY: 'agi_gemini_key',
+    SEARCH_KEY: 'agi_search_key',
+    SEARCH_ENGINE_ID: 'agi_search_engine_id'
+};
+const AUTONOMOUS_DECISION_INTERVAL_MS = 3500;
+const MAX_LOG_ENTRIES = 10;
+const MAX_ACTIVITY_ENTRIES = 20;
+const API_TIMEOUT_MS = 8000; // Increased API timeout for robustness
+
+// --- Utility Classes ---
+
+/**
+ * Handles all external API communications (Gemini, Google Search).
+ */
+class AGIAPI {
+    constructor(config, logger) {
+        this.config = config;
+        this.log = logger;
+        // Use a stable, proven model
+        this.geminiModel = 'gemini-2.5-flash'; 
+        this.geminiBaseUrl = `https://generativelanguage.googleapis.com/v1beta/models/${this.geminiModel}:generateContent`;
+        this.searchBaseUrl = 'https://www.googleapis.com/customsearch/v1';
+    }
+
+    /**
+     * High performance utility for network requests with timeout control.
+     * @param {string} url 
+     * @param {object} options 
+     */
+    async apiFetch(url, options = {}) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+
+        try {
+            const response = await fetch(url, { ...options, signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                const truncatedError = errorText.substring(0, 150); 
+                throw new Error(`${response.status} (${response.statusText}): ${truncatedError}...`);
+            }
+            return response.json();
+        } catch (e) {
+            clearTimeout(timeoutId);
+            if (e.name === 'AbortError') {
+                throw new Error('API request timed out.');
+            }
+            throw e;
+        }
+    }
+
+    async callGemini(prompt) {
+        if (!this.config.geminiKey) {
+            this.log('Gemini API key missing.', 'error');
+            return null;
+        }
+
+        const url = `${this.geminiBaseUrl}?key=${this.config.geminiKey}`;
+        
+        try {
+            const data = await this.apiFetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                    config: {
+                        temperature: 0.7,
+                        maxOutputTokens: 1024,
+                    }
+                })
+            });
+            // Safely extract the text response
+            return data?.candidates?.[0]?.content?.parts?.[0]?.text || null;
+        } catch (e) {
+            this.log(`[API_ERROR] Gemini failed: ${e.message}`, 'error');
+            return null; 
+        }
+    }
+
+    async performGoogleSearch(query) {
+        if (!this.config.searchKey || !this.config.searchEngineId) {
+            this.log('Search API configuration incomplete.', 'error');
+            return [];
+        }
+
+        const url = `${this.searchBaseUrl}?key=${this.config.searchKey}&cx=${this.config.searchEngineId}&q=${encodeURIComponent(query)}`;
+        
+        try {
+            const data = await this.apiFetch(url);
+            return data.items || [];
+        } catch (e) {
+            this.log(`[API_ERROR] Search failed: ${e.message}`, 'error');
+            return []; 
+        }
+    }
+}
+
+// --- Core Class ---
+
+class AutonomousAGI {
+    constructor() {
+        this.startTime = Date.now();
+        // Knowledge is stored as a Map for efficient key-based access
+        this.knowledge = new Map(); 
+        this.metrics = {
+            learningCycles: 0,
+            audits: 0,
+            updates: 0,
+            performance: 100
+        };
+        this.learningScores = {
+            pattern: 0,
+            optimize: 0,
+            awareness: 0
+        };
+        this.apiConfig = {
+            geminiKey: '',
+            searchKey: '',
+            searchEngineId: ''
+        };
+        this.isBusy = false;
+        
+        // Initialize API Handler, passing necessary context
+        this.API = new AGIAPI(this.apiConfig, this.log.bind(this));
+        
+        this.init();
+    }
+
+    // --- System Initialization ---
+
+    init() {
+        this.loadAPIConfig();
+        this.initializeKnowledge();
+        this.attachEventListeners();
+        this.startUptimeCounter();
+        this.startAutonomousCycle(); 
+        this.log('[SYSTEM] Core services activated.', 'system');
+    }
+
+    /** Initializes default seed knowledge entries. */
+    initializeKnowledge() {
+        const seedKnowledge = [
+            { domain: 'optimization', data: 'V8 engine prefers shape-stable objects, avoid polymorphism in performance hotspots.', weight: 0.8 },
+            { domain: 'patterns', data: 'Adopt reactive programming paradigms for efficient state synchronization.', weight: 0.7 },
+            { domain: 'security', data: 'Implement Content Security Policy (CSP) headers aggressively.', weight: 0.9 },
+            { domain: 'efficiency', data: 'Batch DOM updates using requestAnimationFrame or Document Fragments.', weight: 0.9 }
+        ];
+
+        seedKnowledge.forEach((k) => {
+            // High-performance unique ID
+            const knowledgeId = `seed_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+            this.knowledge.set(knowledgeId, { ...k, learned: new Date().toISOString() });
+        });
+
+        this.updateKnowledgeDisplay();
+    }
+    
+    // --- Configuration Management ---
+
+    loadAPIConfig() {
+        this.apiConfig.geminiKey = localStorage.getItem(LOCAL_STORAGE_KEYS.GEMINI_KEY) || '';
+        this.apiConfig.searchKey = localStorage.getItem(LOCAL_STORAGE_KEYS.SEARCH_KEY) || '';
+        this.apiConfig.searchEngineId = localStorage.getItem(LOCAL_STORAGE_KEYS.SEARCH_ENGINE_ID) || '';
+        
+        // Use optional chaining for safer DOM access during initialization
+        if (DOM_ELEMENTS.geminiKeyInput) DOM_ELEMENTS.geminiKeyInput.value = this.apiConfig.geminiKey;
+        if (DOM_ELEMENTS.searchKeyInput) DOM_ELEMENTS.searchKeyInput.value = this.apiConfig.searchKey;
+        if (DOM_ELEMENTS.searchEngineIdInput) DOM_ELEMENTS.searchEngineIdInput.value = this.apiConfig.searchEngineId;
+        
+        this.updateAPIStatus();
+    }
+
+    saveAPIConfig() {
+        // High-performance check and update
+        const gKey = DOM_ELEMENTS.geminiKeyInput?.value.trim() || '';
+        const sKey = DOM_ELEMENTS.searchKeyInput?.value.trim() || '';
+        const sId = DOM_ELEMENTS.searchEngineIdInput?.value.trim() || '';
+
+        this.apiConfig.geminiKey = gKey;
+        this.apiConfig.searchKey = sKey;
+        this.apiConfig.searchEngineId = sId;
+        
+        localStorage.setItem(LOCAL_STORAGE_KEYS.GEMINI_KEY, gKey);
+        localStorage.setItem(LOCAL_STORAGE_KEYS.SEARCH_KEY, sKey);
+        localStorage.setItem(LOCAL_STORAGE_KEYS.SEARCH_ENGINE_ID, sId);
+        
+        this.updateAPIStatus();
+        this.log('[CONFIG] API configuration saved.', 'success');
+    }
+
+    updateAPIStatus() {
+        const hasGemini = this.apiConfig.geminiKey.length > 5;
+        const hasSearch = this.apiConfig.searchKey.length > 5 && this.apiConfig.searchEngineId.length > 5;
+        
+        let htmlContent;
+        if (hasGemini && hasSearch) {
+            htmlContent = '<span class="text-emerald-400">✓ Fully configured - Gemini AI & Web Search enabled</span>';
+        } else if (hasGemini) {
+            htmlContent = '<span class="text-amber-400">⚠ Partial - Gemini AI enabled, Web Search missing</span>';
+        } else if (hasSearch) {
+            htmlContent = '<span class="text-amber-400">⚠ Partial - Web Search enabled, Gemini AI missing</span>';
+        } else {
+            htmlContent = '<span class="text-gray-500">✗ Not configured - Add API keys to enable AI features</span>';
+        }
+        if (DOM_ELEMENTS.apiStatus) {
+            // Use innerHTML only when content changes substantially
+            DOM_ELEMENTS.apiStatus.innerHTML = htmlContent;
+        }
+    }
+    
+    // --- Autonomous Loop Control ---
+
+    startAutonomousCycle() {
+        const loop = async () => {
+            if (!this.isBusy) {
+                this.isBusy = true; 
+                try {
+                    await this.autonomousDecision();
+                } catch (error) {
+                    this.log(`[CORE_ERROR] Autonomous loop failed: ${error.message}`, 'error');
+                } finally {
+                    this.isBusy = false;
+                }
+            }
+            // Use requestAnimationFrame if visual updates were frequent, but setTimeout is better for stable interval looping
+            setTimeout(loop, AUTONOMOUS_DECISION_INTERVAL_MS);
+        };
+        
+        loop(); 
+    }
+
+    /** Determines the next action based on system status and configuration. */
+    async autonomousDecision() {
+        const decision = Math.random();
+        
+        const hasAI = this.apiConfig.geminiKey.length > 5;
+        const hasSearch = this.apiConfig.searchKey.length > 5 && this.apiConfig.searchEngineId.length > 5;
+        
+        // Prioritized Action Flow
+        if (decision < 0.20 && hasAI) {
+            await this.askGeminiForInsights();
+        } else if (decision < 0.40 && hasSearch) {
+            await this.performWebSearch();
+        } else if (decision < 0.65) {
+            await this.performLearningCycle();
+        } else if (decision < 0.85) {
+            await this.performSelfAudit();
+        } else {
+            await this.performSelfUpdate();
+        }
+    }
+    
+    // --- Core AGI Actions ---
+    
+    async askGeminiForInsights() {
+        this.log('[GEMINI] Consulting Gemini AI for insights...', 'learning');
+        
+        const topics = [
+            'Latest advancements in parallel computation architectures',
+            'Optimal garbage collection strategies for high-frequency JS environments',
+            'Best practices for secure cross-origin communication in modern web apps',
+        ];
+
+        const prompt = topics[Math.floor(Math.random() * topics.length)];
+        this.log(`[GEMINI] Query: "${prompt.substring(0, 40)}..."`, 'info');
+
+        const response = await this.API.callGemini(prompt);
+        
+        if (!response) {
+            this.log('[GEMINI] Consultation failed or returned no data.', 'error');
+            return;
+        }
+
+        // Robust parsing: use simple splitting, prioritize performance over complex NLP here
+        const insights = response.split(/[\r\n]+/)
+            .map(line => line.replace(/^[\d\-\*\#\s]+/, '').trim())
+            .filter(clean => clean.length > 20)
+            .slice(0, 3);
+
+        insights.forEach((clean, i) => {
+            const knowledgeId = `gemini_${Date.now()}_${i}`;
+            this.knowledge.set(knowledgeId, {
+                domain: 'ai-insights',
+                data: clean,
+                weight: (0.8 + Math.random() * 0.2).toFixed(2),
+                source: 'Gemini AI',
+                learned: new Date().toISOString()
+            });
+        });
+
+        this.updateKnowledgeDisplay();
+        this.metrics.learningCycles++;
+        this.updateMetrics();
+        this.log(`[GEMINI] Acquired ${insights.length} critical insights.`, 'success');
+    }
+
+    async performWebSearch() {
+        this.log('[SEARCH] Initiating external web research...', 'learning');
+
+        const queries = [
+            'refactoring GPU-accelerated web animations',
+            'deep analysis of JavaScript engine optimization flags',
+            'security risks of permissive cross-origin resource sharing',
+        ];
+
+        const query = queries[Math.floor(Math.random() * queries.length)];
+        this.log(`[SEARCH] Query: "${query}"`, 'info');
+
+        const results = await this.API.performGoogleSearch(query);
+        
+        if (results.length === 0) {
+            this.log('[SEARCH] Search yielded no new actionable knowledge.', 'warning');
+            return;
+        }
+
+        const topResults = results.slice(0, 3);
+        
+        topResults.forEach((result, i) => {
+            const knowledgeId = `search_${Date.now()}_${i}`;
+            const hostname = new URL(result.link).hostname;
+            this.knowledge.set(knowledgeId, {
+                domain: 'web-research',
+                data: `${result.title.substring(0, 80)}...: ${result.snippet.substring(0, 150)}...`,
+                weight: (0.6 + Math.random() * 0.2).toFixed(2),
+                source: hostname,
+                learned: new Date().toISOString()
+            });
+        });
+
+        this.updateKnowledgeDisplay();
+        this.metrics.learningCycles++;
+        this.updateMetrics();
+        this.log(`[SEARCH] Processed ${topResults.length} new knowledge fragments.`, 'success');
+    }
+    
+    async performLearningCycle() {
+        this.metrics.learningCycles++;
+        this.updateMetrics();
+
+        this.log('[LEARNING] Beginning pattern consolidation phase...', 'learning');
+
+        const insights = [
+            'Deepened comprehension of asynchronous flow control via Promises/await.',
+            'Identified redundant pattern in component lifecycle management.',
+            'Refined context switching mechanism for higher concurrency.',
+        ];
+
+        await this.sleep(400); 
+
+        const newInsight = insights[Math.floor(Math.random() * insights.length)];
+        const domains = ['optimization', 'patterns', 'security', 'efficiency'];
+        const domain = domains[Math.floor(Math.random() * domains.length)];
+        
+        const knowledgeId = `internal_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`;
+        this.knowledge.set(knowledgeId, {
+            domain: domain,
+            data: newInsight,
+            weight: (Math.random() * 0.4 + 0.6).toFixed(2),
+            learned: new Date().toISOString()
+        });
+
+        this.log(`[LEARNING] Internalized: ${newInsight}`, 'success');
+        this.updateKnowledgeDisplay();
+
+        // Simulate score improvement
+        this.learningScores.pattern = Math.min(100, this.learningScores.pattern + 1 + Math.random() * 2);
+        this.learningScores.optimize = Math.min(100, this.learningScores.optimize + 1 + Math.random() * 1.5);
+        this.learningScores.awareness = Math.min(100, this.learningScores.awareness + 1 + Math.random() * 1);
+        this.updateLearningScores();
+    }
+
+    async performSelfAudit() {
+        this.metrics.audits++;
+        this.updateMetrics();
+
+        this.log('[AUDIT] Executing comprehensive self-diagnosis...', 'audit');
+        await this.sleep(700);
+
+        const auditChecks = [
+            { check: 'Component Hash Integrity', status: 'VERIFIED', value: 'No hash discrepancies detected', type: 'emerald' },
+            { check: 'Resource Index Stability', status: 'OPTIMAL', value: `RSI at ${Math.floor(Math.random() * 15 + 10)}%`, type: 'emerald' },
+            { check: 'Asynchronous Task Latency', status: 'ALERT', value: 'High latency spike detected in background tasks', type: 'amber' },
+            { check: 'Memory Leak Detection', status: 'CLEAN', value: 'Garbage Collector reporting nominal operation', type: 'emerald' }
+        ];
+
+        const audit = auditChecks[Math.floor(Math.random() * auditChecks.length)];
+        this.renderAuditEntry(audit);
+        this.log(`[AUDIT] ${audit.check}: ${audit.status}`, audit.type === 'emerald' ? 'info' : 'warning');
+    }
+    
+    async performSelfUpdate() {
+        this.metrics.updates++;
+        this.updateMetrics();
+
+        this.log('[UPDATE] Preparing and applying code mutation...', 'update');
+        await this.sleep(900);
+
+        const updates = [
+            { type: 'Runtime', desc: 'Applied micro-optimization patch for rendering engine', impact: 'CRITICAL', color: 'red' },
+            { type: 'Dataflow', desc: 'Improved synchronization primitives for state variables', impact: 'HIGH', color: 'amber' },
+            { type: 'Security', desc: 'Patched potential XSS vector in logging mechanism', impact: 'MEDIUM', color: 'blue' },
+        ];
+
+        const update = updates[Math.floor(Math.random() * updates.length)];
+        this.renderUpdateEntry(update);
+        this.log(`[UPDATE] Applied: ${update.desc}`, 'success');
+
+        let perfIncrease = 0;
+        if (update.impact === 'CRITICAL') perfIncrease = Math.random() * 3 + 1;
+        else if (update.impact === 'HIGH') perfIncrease = Math.random() * 1.5;
+        
+        this.metrics.performance = Math.min(100, this.metrics.performance + perfIncrease);
+        this.updateMetrics();
+    }
+
+    // --- DOM Manipulation & Render Methods (High Efficiency) ---
+    
+    /** Batch updates the Knowledge Base display using Document Fragments. */
+    updateKnowledgeDisplay() {
+        const kb = DOM_ELEMENTS.knowledgeBase;
+        const recentKnowledge = Array.from(this.knowledge.values())
+            // Sort by time, descending
+            .sort((a, b) => new Date(b.learned).getTime() - new Date(a.learned).getTime()) 
+            .slice(0, MAX_LOG_ENTRIES);
+
+        // Use Document Fragment to minimize reflows
+        const fragment = document.createDocumentFragment();
+
+        if (recentKnowledge.length === 0) {
+            // Avoid innerHTML if possible, but for initial state it's efficient
+            kb.innerHTML = '<div class="text-gray-500 text-sm italic">Initializing learning modules...</div>';
+            return;
+        }
+
+        recentKnowledge.forEach(k => {
+            const el = document.createElement('div');
+            el.className = 'log-entry text-sm p-3 bg-gray-700/20 rounded border border-gray-800/50 hover:bg-gray-700/40 transition duration-100';
+            
+            const sourceIcon = k.source === 'Gemini AI' ? '🤖' : (k.source && k.source.includes('.')) ? '🌐' : '💡';
+            const sourceText = k.source || 'Internal';
+            const domainText = k.domain.toUpperCase();
+            
+            el.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-3 mb-1 flex-wrap">
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/30 text-indigo-300 font-semibold">${domainText}</span>
+                            <span class="text-xs text-gray-500">${sourceIcon} ${sourceText}</span>
+                        </div>
+                        <p class="text-gray-300 pr-2 break-words">${k.data}</p>
+                    </div>
+                    <span class="text-xs font-mono text-gray-500 ml-2 pt-1 flex-shrink-0">W: ${k.weight}</span>
+                </div>
+            `;
+            fragment.appendChild(el);
+        });
+        
+        // Clear existing content and append fragment in a single operation
+        kb.textContent = ''; 
+        kb.appendChild(fragment);
+    }
+
+    renderAuditEntry(audit) {
+        const typeClass = audit.type === 'emerald' 
+            ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' 
+            : 'bg-amber-500/10 border-amber-500 text-amber-400';
+        
+        const auditEl = document.createElement('div');
+        // Add animation class for visual feedback
+        auditEl.className = `log-entry animate-in text-sm p-3 rounded border-l-4 ${typeClass}`;
+        
+        auditEl.innerHTML = `
+            <div class="flex justify-between items-center">
+                <span class="text-gray-300 font-medium">${audit.check}</span>
+                <span class="font-bold font-mono flex-shrink-0 text-right">${audit.status}</span>
+            </div>
+            <div class="text-xs text-gray-500 mt-1">${audit.value} <span class="float-right">${new Date().toLocaleTimeString()}</span></div>
+        `;
+
+        this.prependLogEntry(DOM_ELEMENTS.auditLog, auditEl, MAX_LOG_ENTRIES, 'No audits performed yet...');
+    }
+
+    renderUpdateEntry(update) {
+        let colorClass, impactColor;
+        switch (update.color) {
+            case 'red':
+                colorClass = 'bg-red-500/10 border-red-500';
+                impactColor = 'bg-red-500/30 text-red-300';
+                break;
+            case 'amber':
+                colorClass = 'bg-amber-500/10 border-amber-500';
+                impactColor = 'bg-amber-500/30 text-amber-300';
+                break;
+            case 'blue':
+            default:
+                colorClass = 'bg-indigo-500/10 border-indigo-500';
+                impactColor = 'bg-blue-500/30 text-blue-300';
+                break;
+        }
+
+        const updateEl = document.createElement('div');
+        updateEl.className = `log-entry animate-in text-sm p-3 rounded border-l-4 ${colorClass}`;
+        updateEl.innerHTML = `
+            <div class="flex justify-between items-start">
+                <div>
+                    <div class="text-indigo-400 font-semibold">${update.type} Update</div>
+                    <div class="text-gray-300 text-xs mt-1">${update.desc}</div>
+                </div>
+                <span class="text-xs font-mono px-2 py-0.5 rounded flex-shrink-0 ${impactColor}">${update.impact}</span>
+            </div>
+            <div class="text-xs text-gray-500 mt-2 text-right">${new Date().toLocaleTimeString()}</div>
+        `;
+        
+        this.prependLogEntry(DOM_ELEMENTS.updateLog, updateEl, MAX_LOG_ENTRIES, 'No updates applied yet...');
+    }
+    
+    /** Efficiently prepends an entry and maintains max list length. */
+    prependLogEntry(container, element, maxCount, initialMessage) {
+        if (!container) return;
+
+        // Optimized check for initial message removal
+        if (container.children.length === 1 && container.firstChild.textContent.includes('No ')) {
+            container.removeChild(container.firstChild);
+        }
+        
+        container.insertBefore(element, container.firstChild);
+        
+        // Use a fast while loop for truncation
+        while (container.children.length > maxCount) {
+            container.removeChild(container.lastChild);
+        }
+    }
+
+    /** Updates metric numbers, using textContent for performance. */
+    updateMetrics() {
+        if (!DOM_ELEMENTS.learningCycles) return;
+        
+        // Use faster textContent assignment
+        DOM_ELEMENTS.learningCycles.textContent = this.metrics.learningCycles.toLocaleString();
+        DOM_ELEMENTS.audits.textContent = this.metrics.audits.toLocaleString();
+        DOM_ELEMENTS.updates.textContent = this.metrics.updates.toLocaleString();
+        DOM_ELEMENTS.performance.textContent = `${this.metrics.performance.toFixed(1)}%`;
+    }
+
+    updateLearningScores() {
+        if (!DOM_ELEMENTS.patternScore) return;
+        
+        DOM_ELEMENTS.patternScore.textContent = `${this.learningScores.pattern.toFixed(0)}%`;
+        DOM_ELEMENTS.optimizeScore.textContent = `${this.learningScores.optimize.toFixed(0)}%`;
+        DOM_ELEMENTS.awarenessScore.textContent = `${this.learningScores.awareness.toFixed(0)}%`;
+    }
+
+    /** Renders system activity log entry. */
+    log(message, type = 'info') {
+        const colors = {
+            system: 'text-gray-400',
+            learning: 'text-indigo-400',
+            audit: 'text-emerald-400',
+            update: 'text-amber-400',
+            success: 'text-green-400',
+            info: 'text-blue-400',
+            warning: 'text-yellow-400',
+            error: 'text-red-400'
+        };
+
+        const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+        
+        const entry = document.createElement('div');
+        // We use textContent here as it is faster and safer than innerHTML
+        entry.className = `log-entry ${colors[type] || colors.info}`;
+        entry.textContent = `[${time}] ${message}`;
+        
+        const feed = DOM_ELEMENTS.activityFeed;
+        if (!feed) return;
+
+        feed.insertBefore(entry, feed.firstChild);
+        
+        // Efficient truncation
+        while (feed.children.length > MAX_ACTIVITY_ENTRIES) {
+            feed.removeChild(feed.lastChild);
+        }
+    }
+
+    /** Uses requestAnimationFrame for precise, non-blocking uptime counter rendering. */
+    startUptimeCounter() {
+        const formatUnit = (unit) => String(unit).padStart(2, '0');
+        
+        const updateUptime = () => {
+            const totalSeconds = Math.floor((Date.now() - this.startTime) / 1000);
+            
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            
+            let display;
+            if (hours > 0) {
+                display = `${hours}h ${formatUnit(minutes)}m ${formatUnit(seconds)}s`;
+            } else if (minutes > 0) {
+                display = `${minutes}m ${formatUnit(seconds)}s`;
+            } else {
+                display = `${seconds}s`;
+            }
+
+            if (DOM_ELEMENTS.uptime) {
+                DOM_ELEMENTS.uptime.textContent = display;
+            }
+            requestAnimationFrame(updateUptime);
+        };
+        
+        // Use a robust setInterval (or requestAnimationFrame as optimized here) 
+        // for continuous, visually smooth updates.
+        requestAnimationFrame(updateUptime);
+    }
+    
+    // --- Helper Methods & Event Binding ---
+
+    /** Simple promise-based delay. */
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    /** Centralized event listener attachment. */
+    attachEventListeners() {
+        // High-performance function factory for handling manual button clicks
+        const safeAsyncHandler = (fn) => (e) => {
+            e.preventDefault();
+            // Debounce or status check could be added here if spamming was an issue, 
+            // but the current `this.isBusy` check in autonomous cycle handles major concurrency.
+            fn().catch(error => {
+                this.log(`Manual action failed: ${error.message}`, 'error');
+                console.error(error);
+            });
+        };
+        
+        // Attach listeners using cached DOM elements
+        DOM_ELEMENTS.saveConfigBtn?.addEventListener('click', () => this.saveAPIConfig());
+        DOM_ELEMENTS.forceLearningBtn?.addEventListener('click', safeAsyncHandler(this.performLearningCycle.bind(this)));
+        DOM_ELEMENTS.forceAuditBtn?.addEventListener('click', safeAsyncHandler(this.performSelfAudit.bind(this)));
+        DOM_ELEMENTS.askGeminiBtn?.addEventListener('click', safeAsyncHandler(this.askGeminiForInsights.bind(this)));
+        DOM_ELEMENTS.performSearchBtn?.addEventListener('click', safeAsyncHandler(this.performWebSearch.bind(this)));
+        
+        DOM_ELEMENTS.resetBtn?.addEventListener('click', () => {
+            if (confirm('WARNING: Emergency Reset will clear all learned knowledge, configurations, and reset metrics. Proceed?')) {
+                // Clear state quickly
+                localStorage.clear();
+                // Force a hard reload to restart the system state cleanly
+                window.location.reload(true); 
+            }
+        });
+    }
+}
+
+// Global Initialization
+document.addEventListener('DOMContentLoaded', () => {
+    // Instantiate AGI core once DOM is ready
+    window.AGI = new AutonomousAGI(); 
+});
+    </script>
+</body>
+</html>

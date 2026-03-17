@@ -1,0 +1,30 @@
+{
+  "schema_version": "wflow.v1.0",
+  "purpose": "Defines structured, multi-step workflows composed of atomic Policy Remediation Actions, including conditional branching and cost optimization strategies.",
+  "workflows": {
+    "CriticalResourceViolation": {
+      "description": "Standard workflow for critical security violations on high-value resources.",
+      "optimization_strategy": "MINIMIZE_LATENCY",
+      "steps": [
+        {
+          "step_id": 1,
+          "action_ref": "VRRM.TriageSnapshotRollback",
+          "on_failure": "HALT_AND_ALERT"
+        },
+        {
+          "step_id": 2,
+          "action_ref": "PCSS.LinkageRequired",
+          "condition": "STEP_1.status == SUCCESS",
+          "parameters_override": {
+            "mode": "FORCE_INJECTION"
+          }
+        },
+        {
+          "step_id": 3,
+          "action_ref": "AUDIT.GenerateComplianceReport",
+          "asynchronous": true
+        }
+      ]
+    }
+  }
+}

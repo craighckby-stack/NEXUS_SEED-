@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GatingIntegrityAuditReport",
+  "type": "object",
+  "description": "Report detailing the integrity check results for governance gating mechanisms, crucial for the LogIntegrityService.",
+  "properties": {
+    "auditTimestamp": { "type": "string", "format": "date-time" },
+    "integrityScore": { "type": "number", "minimum": 0, "maximum": 100 },
+    "status": { "type": "string", "enum": ["COMPLIANT", "NON_COMPLIANT", "WARNING"] },
+    "violations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ruleId": { "type": "string", "description": "Reference to the violated rule (e.g., G0_Rules.js identifier)." },
+          "description": { "type": "string" },
+          "severity": { "type": "string", "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"] }
+        },
+        "required": ["ruleId", "description", "severity"]
+      }
+    }
+  },
+  "required": ["auditTimestamp", "integrityScore", "status"]
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Sovereign Delta Patch V1",
+  "description": "Standardizes the structure for providing differential updates (PATCH operations) on JSON or textual resources, adhering to RFC 6902 (JSON Patch) or unified diff standards.",
+  "type": "object",
+  "required": ["type", "payload"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["JSON_PATCH_RFC6902", "UNIFIED_DIFF", "CUE_DIFF"],
+      "description": "The standard used for describing the differential change."
+    },
+    "target_version_hash": {
+      "type": "string",
+      "description": "The hash of the resource state *before* the patch is applied. Crucial for concurrency control."
+    },
+    "payload": {
+      "type": ["array", "string"],
+      "description": "The actual diff content, structured as a JSON array (for JSON_PATCH) or a string (for UNIFIED_DIFF/CUE_DIFF)."
+    }
+  },
+  "additionalProperties": false
+}

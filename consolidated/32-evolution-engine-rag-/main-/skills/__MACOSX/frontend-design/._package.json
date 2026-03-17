@@ -1,0 +1,54 @@
+/**
+ * Package JSON configuration for frontend-design.
+ */
+const packageJson = {
+  /**
+   * Package name.
+   */
+  name: 'frontend-design',
+  /**
+   * Package version.
+   */
+  version: '1.0.0',
+  /**
+   * Package description.
+   */
+  description: 'Frontend design package',
+  /**
+   * Main entry point of the package.
+   */
+  main: 'index.js',
+  /**
+   * Scripts to run for development and testing.
+   */
+  scripts: {
+    /**
+     * Start the development server.
+     */
+    start: 'node index.js',
+    /**
+     * Run tests using Jest.
+     */
+    test: 'jest',
+  },
+  /**
+   * Keywords for the package.
+   */
+  keywords: [],
+  /**
+   * Author of the package.
+   */
+  author: '',
+  /**
+   * License under which the package is released.
+   */
+  license: 'ISC',
+  /**
+   * Dependencies required by the package.
+   */
+  dependencies: {},
+  /**
+   * Dev dependencies required by the package.
+   */
+  devDependencies: {},
+};

@@ -1,0 +1,20 @@
+{
+  "version": "v94.1",
+  "description": "Configuration for determining P01_PASS based on criterion outputs.",
+  "rules": {
+    "P01_PASS_condition": "ALL",
+    "criteria_I_UMA": {
+      "check": "criteria_I_UMA.status == true",
+      "weight": 1.0
+    },
+    "criteria_II_CA": {
+      "check": "criteria_II_CA.status == true",
+      "weight": 1.0
+    },
+    "criteria_III_AI": {
+      "check": "criteria_III_AI.status == true",
+      "weight": 1.0
+    }
+  },
+  "logic_gate": "(UMA && CA) && (AI.Veto_PVLM == false && AI.Veto_MPAM == false && AI.Veto_ADTM == false)"
+}

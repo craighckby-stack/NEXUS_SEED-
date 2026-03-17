@@ -1,0 +1,31 @@
+{
+  "policy_map_version": "1.0.0",
+  "description": "Maps GATM symbolic failure policies to concrete operational procedures and parameters.",
+  "policies": {
+    "REPORT_AND_HALT_PROPAGATION": {
+      "type": "SystemIntegrityFailure",
+      "actions": ["LOG:CRITICAL", "API:HALT_EXECUTION_ENGINE", "ALERT:GOVERNOR_L1"],
+      "escalation_timeout_ms": 300
+    },
+    "REPORT_AND_DEGRADE": {
+      "type": "PerformanceViolation",
+      "actions": ["LOG:WARNING", "SYSTEM:SWITCH_TO_SLOW_PATH"],
+      "degrade_strategy": "RATE_LIMIT:0.8"
+    },
+    "ROLLBACK_AND_ALERT": {
+      "type": "CommitViolation",
+      "actions": ["DB:ROLLBACK_TRANSACTION", "ALERT:OPS_L2"],
+      "rollback_depth": 1
+    },
+    "RATE_LIMIT_QUEUE": {
+      "type": "CadenceViolation",
+      "actions": ["SYSTEM:QUEUE_INPUT", "LOG:INFO_CADENCE"],
+      "queue_strategy": "FIFO_WITH_PRIORITY_BOOST"
+    },
+    "TIMEOUT_AND_REVERT": {
+      "type": "StateFailure",
+      "actions": ["SYSTEM:REVERT_STATE", "ALERT:HEALTH_MONITOR"],
+      "revert_attempt_max": 3
+    }
+  }
+}

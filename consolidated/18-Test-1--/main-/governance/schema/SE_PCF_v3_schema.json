@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://agi.sovereign/governance/policy/SE_PCF_v3",
+  "title": "Sovereign Policy Compliance Filter v3 Schema",
+  "type": "object",
+  "required": ["metadata", "filter_groups"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "configId": {"type": "string", "pattern": "^SE_PCF_v3$"},
+        "version": {"type": "string"}
+      },
+      "required": ["configId", "version", "enabled"]
+    },
+    "filter_groups": {
+      "type": "object",
+      "patternProperties": {
+        "^[A-Z][a-zA-Z0-9]+$": {
+          "type": "object",
+          "properties": {
+            "executionMode": {"type": "string", "enum": ["CRITICAL_PATH", "BUFFER_PROCESSING"]},
+            "targetType": {"type": "string", "enum": ["INPUT_CONTEXT", "LOG_DATA", "OUTPUT_GENERATION"]},
+            "rules": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["ruleId", "name", "targetScope", "action", "regex"],
+                "properties": {
+                  "action": {"type": "string", "enum": ["BLOCK_HARD", "DENY", "LOG", "MASK_TRANSFORM", "WARN"]}
+                }
+              }
+            }
+          },
+          "required": ["executionMode", "priority", "targetType", "rules"]
+        }
+      }
+    }
+  }
+}

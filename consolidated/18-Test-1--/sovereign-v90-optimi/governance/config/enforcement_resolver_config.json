@@ -1,0 +1,16 @@
+{
+  "serviceName": "GSIM_Enforcement_Resolver",
+  "metricsIngestionEndpoint": "http://localhost:8080/api/v94/metrics/ingest",
+  "defaultPollingIntervalSeconds": 5,
+  "criticalHaltToleranceSeconds": 600,
+  "telemetryLoggingLevel": "HIGH_FIDELITY",
+  "structuralCheckConcurrencyLimit": 5,
+  "resourceUtilizationThresholds": {
+    "warningPercentage": 75,
+    "errorPercentage": 90
+  },
+  "ruleSetsToLoad": [
+    "./governance/schema/gsim_enforcement_schema.json",
+    "./governance/policies/v94_core_integrity_policies.json"
+  ]
+}

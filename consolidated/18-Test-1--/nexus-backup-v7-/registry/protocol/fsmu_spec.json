@@ -1,0 +1,13 @@
+{
+  "description": "Specification for the Failure State Management Utility (FSMU) defining the isolated, mandatory steps during an Integrity Halt (IH) trigger.",
+  "triggers": ["P-M01_FAILURE", "P-M02_FAILURE", "P-R03_FAILURE"],
+  "isolation_level": "L4_HARD_CONTEXT_SWAP",
+  "pre_purge_sequence": [
+    "ISOLATE_MEMORY_STATE",
+    "FDLS_TRACE_GENERATION",
+    "AASS_P-R03_SEALING",
+    "AUDIT_LOG_TRANSMISSION"
+  ],
+  "time_threshold_ms": 500, 
+  "failure_handling": "SYSTEM_PURGE_BLIND_EXECUTION"
+}

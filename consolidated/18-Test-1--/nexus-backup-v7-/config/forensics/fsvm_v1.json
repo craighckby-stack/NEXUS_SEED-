@@ -1,0 +1,21 @@
+{
+  "description": "Defines the state invariants, diagnostic criteria, required cryptographic checksums, and mandated logging rules used during forensic analysis following RRP or SIH activation.",
+  "invariants": [
+    {
+      "id": "INV-001",
+      "target": "StateDatabaseChecksum",
+      "check_type": "SHA3_256",
+      "criteria": "Must match value logged in NRALS L8 prior to failure state."
+    },
+    {
+      "id": "INV-002",
+      "target": "CriticalAssetRegisters",
+      "check_type": "StructuralIntegrity",
+      "criteria": "Register state must adhere to last certified structure defined in SDVM."
+    }
+  ],
+  "diagnostic_log_retention": {
+    "minimum_period_days": 90,
+    "targets": ["PipelineStageSnapshots", "MemoryAccessTrace"]
+  }
+}

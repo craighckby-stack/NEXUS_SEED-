@@ -1,0 +1,12 @@
+{
+  "proposal_id_type": "KSUID/ULID",
+  "hash_algorithm_standard": "SHA384",
+  "hash_length_hex": 96,
+  "signature_algorithm_standard": "ECC_P256/Ed25519",
+  "metrics_units": {
+    "S01_efficacy": "Efficiency_Units_v9",
+    "S02_risk": "Normalized_Deviation_Factor"
+  },
+  "logging_level_GSC_PRE": "AUDIT_HIGH",
+  "governance_contact_address": "0xAGI_CORE_RTA"
+}

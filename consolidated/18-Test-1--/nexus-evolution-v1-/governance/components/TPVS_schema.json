@@ -1,0 +1,46 @@
+{
+  "name": "Temporal Policy Versioning Schema (TPVS)",
+  "version": "1.0",
+  "description": "Defines the required mapping schema for critical governance assets, enabling atomic and temporal switching during GSEP-C activation.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "asset_type": {
+        "type": "string",
+        "description": "The governance asset identifier (e.g., PVLM, CFTM, ADTM, MPAM)."
+      },
+      "active_history": {
+        "type": "array",
+        "description": "Ordered log of state transitions (hashes) and their associated activation windows.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "asset_hash_v95": {
+              "type": "string",
+              "format": "hex",
+              "description": "The immutable, ACAL-committed hash of the attested asset ($A_{next}$)."
+            },
+            "activation_timestamp": {
+              "type": "integer",
+              "description": "Epoch timestamp of successful S0 activation."
+            },
+            "deactivation_timestamp": {
+              "type": "integer",
+              "description": "Epoch timestamp when this hash was superseded, or NULL if currently active."
+            },
+            "acm_reference": {
+              "type": "string",
+              "description": "Reference identifier for the full ACM in the ACAL."
+            },
+            "validated_integrity": {
+              "type": "boolean",
+              "description": "True if the Post-S0 GVDM check passed upon activation."
+            }
+          },
+          "required": ["asset_hash_v95", "activation_timestamp", "acm_reference", "validated_integrity"]
+        }
+      }
+    },
+    "required": ["asset_type", "active_history"]
+  }
+}

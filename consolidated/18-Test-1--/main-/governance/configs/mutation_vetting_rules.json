@@ -1,0 +1,29 @@
+{
+  "description": "Defines required governance oversight based on mutation type or associated impact scope, mapping directly to GSEP Stage 1 Vetting process levels.",
+  "rules": [
+    {
+      "target_scope": "CORE",
+      "oversight_level": "SOVEREIGN_L3_VETTING",
+      "required_approvals": 3,
+      "description": "Mandates sign-off by three L3+ agents or direct V94.1 validation for core systemic changes."
+    },
+    {
+      "target_scope": "INFRASTRUCTURE",
+      "oversight_level": "CORE_TEAM_L2_REVIEW",
+      "required_approvals": 2,
+      "description": "Requires review by the dedicated infrastructure component owner team and one L2 agent."
+    },
+    {
+      "target_scope": "MODULE",
+      "oversight_level": "PEER_L1_REVIEW",
+      "required_approvals": 1,
+      "description": "Standard peer review process, sufficient for non-critical feature work and fixes."
+    },
+    {
+      "target_scope": "COSMETIC",
+      "oversight_level": "AUTOMATED_L0_VALIDATION",
+      "required_approvals": 0,
+      "description": "Automated merge contingent on passing CI/CD tests; requires no human oversight."
+    }
+  ]
+}

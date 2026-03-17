@@ -1,0 +1,26 @@
+{
+  "context_id": "DCM_L8_Evaluation",
+  "description": "Defines the security and scope context for executing dynamic drift trigger formulas.",
+  "allowed_functions": [
+    "ABS",
+    "MIN",
+    "MAX",
+    "AVG",
+    "STDDEV"
+  ],
+  "allowed_variables": [
+    "S-*",
+    "T-*"
+  ],
+  "reserved_keywords": [
+    "ACTUAL",
+    "PREDICTIVE",
+    "DELTA",
+    "thresholds"
+  ],
+  "safety_policy": {
+    "recursion_limit": 5,
+    "timeout_ms": 100
+  },
+  "dependency": "L8_DCM_Runtime_Engine"
+}

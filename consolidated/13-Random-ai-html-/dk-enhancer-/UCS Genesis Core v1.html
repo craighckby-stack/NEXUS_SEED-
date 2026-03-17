@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UCS Genesis Core - Heterogeneous Agent Lattice</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Load Inter font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Fira+Code&display=swap" rel="stylesheet">
+    <style>
+        /* --- Deep Space Quantum Theme (from agi.docx) --- */
+        :root {
+            --color-neon-blue: #38BDF8; /* Sky Blue Accent */
+            --color-background-dark: #05070B; /* Ultra deep space */
+            --color-core-dark: #0F172A; /* Slate-900 */
+            --color-surface-dark: #1E293B; /* Slate-800 */
+        }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--color-background-dark);
+            color: #E2E8F0; 
+        }
+        .bg-core-dark { background-color: var(--color-core-dark); } 
+        .border-core { border-color: var(--color-surface-dark); }
+        .text-accent { color: var(--color-neon-blue); } 
+        
+        /* Chat & Layout */
+        .chat-container { 
+            height: calc(100vh - 250px); 
+            min-height: 400px;
+            overflow-y: auto; 
+            scroll-behavior: smooth;
+        }
+        .user-bubble { 
+            background-color: #4338CA; /* Indigo-700 */
+            align-self: flex-end; 
+            border-left: 3px solid var(--color-neon-blue);
+        }
+        .agent-bubble { 
+            background-color: #1E293B; /* Slate-800 */
+            align-self: flex-start; 
+            border-left: 3px solid #10B981; /* Emerald-500 */
+        }
+        /* Sidebar Styles */
+        .sidebar {
+            width: 300px;
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(0);
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                z-index: 50;
+                height: 100%;
+                transform: translateX(-100%);
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+        }
+        .persona-tag {
+            cursor: pointer;
+            transition: background-color 0.15s, color 0.15s, box-shadow 0.15s;
+        }
+        .persona-tag.selected {
+            background-color: var(--color-neon-blue);
+            color: var(--color-core-dark);
+            box-shadow: 0 0 5px var(--color-neon-blue);
+        }
+        .persona-tag:hover {
+            background-color: #3b82f6; /* Blue-500 */
+        }
+        
+    </style>
+</head>
+<body class="h-full antialiased flex flex-col md:flex-row">
+
+    <!-- Mobile Sidebar Toggle -->
+    <button id="toggle-sidebar-button" class="md:hidden fixed top-4 left-4 z-50 p-2 rounded-full bg-indigo-600 text-white shadow-lg">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+    </button>
+
+    <!-- 1. LEFT SIDEBAR: Synthesis Configuration & State (Echo Chamber) -->
+    <div id="sidebar" class="sidebar bg-core-dark p-4 md:flex flex-col border-r border-core shadow-2xl">
+        <h2 class="text-xl font-bold text-accent mb-4 border-b border-core pb-2">Synthesis Lattice</h2>
+        
+        <div class="mb-6">
+            <h3 class="text-sm font-semibold text-gray-400 mb-2">Agent ID:</h3>
+            <p id="user-display" class="font-mono text-xs text-green-400 break-all"></p>
+        </div>
+
+        <div class="flex-grow overflow-y-auto pr-2">
+            <h3 class="text-sm font-semibold text-gray-400 mb-2">Select Personas (EMG 101):</h3>
+            <div id="persona-selector" class="flex flex-wrap gap-2">
+                <!-- Persona tags will be injected here -->
+            </div>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-core">
+            <h3 class="text-sm font-semibold text-gray-400 mb-2">Current State (UCS):</h3>
+            <div class="bg-gray-900 p-3 rounded-lg text-xs font-mono text-yellow-300">
+                <p>Formal: <span id="trait-formal">50</span>%</p>
+                <p>Tech: <span id="trait-tech">50</span>%</p>
+                <p>Interactions: <span id="trait-count">0</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. MAIN CONTENT AREA: Chat & Dashboard -->
+    <div id="main-content" class="flex-grow flex flex-col p-4 md:p-8">
+        
+        <!-- Header/Status Bar -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-core-dark p-4 rounded-xl shadow-lg border border-core mb-6">
+            <div>
+                <p id="auth-status" class="text-yellow-400 font-semibold text-sm">Authenticating...</p>
+                <p id="chat-header" class="text-sm text-gray-400 mt-1">Standby: Select agents to start synthesis mode.</p>
+            </div>
+            <div class="mt-2 md:mt-0 text-right">
+                <p class="text-sm font-medium text-gray-400">Emergent Name:</p>
+                <p id="agent-name-display" class="text-2xl font-black text-green-400">AWAITING EMERGENCE</p>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div id="core-app" class="flex-grow flex flex-col hidden">
+            <div class="chat-container space-y-4 p-4 rounded-xl bg-core-dark border border-core shadow-inner" id="chat-messages">
+                <div class="p-3 rounded-xl max-w-lg agent-bubble">
+                    <p class="text-sm text-gray-300">System: Authenticated. Identity State loaded. Initializing Synthesis Lattice...</p>
+                </div>
+            </div>
+
+            <div class="mt-4 flex space-x-3">
+                <input type="text" id="user-input" placeholder="Select 2+ personas to enable Synthesis Mode..." class="flex-grow rounded-lg bg-gray-700 border-gray-600 text-white p-3 focus:ring-accent focus:border-accent" disabled>
+                <button id="send-btn" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white font-medium transition duration-150 shadow-md shadow-indigo-500/50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    <i data-lucide="send" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Optional: Grounding Citation Area -->
+            <div id="grounding-area" class="mt-4 p-3 bg-gray-900 rounded-lg border border-core hidden">
+                <h4 class="text-xs font-bold text-accent mb-1">Verification Sources (Simulated Multi-Source Grounding):</h4>
+                <div id="citation-list" class="text-xs text-gray-400 space-y-1"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // =====================================================
+        // GLOBAL SETUP & UTILS
+        // =====================================================
+        setLogLevel('error'); 
+
+        const apiKey = ""; 
+        const geminiModel = "gemini-2.5-flash-preview-09-2025";
+        const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db, auth;
+        let userId = 'loading';
+        const agentId = 'ucs-genesis-core'; 
+        let isAuthReady = false;
+        let currentState = null;
+        let conversationHistory = []; 
+
+        // UI elements
+        const authStatusEl = document.getElementById('auth-status');
+        const userDisplayEl = document.getElementById('user-display');
+        const coreAppEl = document.getElementById('core-app');
+        const agentNameDisplayEl = document.getElementById('agent-name-display');
+        const sendBtn = document.getElementById('send-btn');
+        const userInput = document.getElementById('user-input');
+        const chatMessagesEl = document.getElementById('chat-messages');
+        const personaSelectorEl = document.getElementById('persona-selector');
+        const chatHeaderEl = document.getElementById('chat-header');
+        const sidebarEl = document.getElementById('sidebar');
+        const groundingAreaEl = document.getElementById('grounding-area');
+        const citationListEl = document.getElementById('citation-list');
+        
+        // Traits UI
+        const traitFormalEl = document.getElementById('trait-formal');
+        const traitTechEl = document.getElementById('trait-tech');
+        const traitCountEl = document.getElementById('trait-count');
+
+        // Full list of personas from enhancments.docx
+        const ALL_PERSONAS = [
+            'Physicist', 'Ethicist', 'Data Scientist', 'Sociologist', 'Philosopher',
+            'Economist', 'Neuroscientist', 'Legal Scholar', 'Historian', 'Anthropologist',
+            'Systems Theorist', 'Artist/Creative', 'Religious Scholar', 'Futurist', 'Skeptical Critic'
+        ];
+
+        // Global State for Persona Selection
+        const selectedPersonas = new Set(ALL_PERSONAS.slice(0, 5)); // Default selection
+
+        const getInitialIdentityState = (id) => ({
+            agentId: id,
+            selfDesignatedName: null,
+            coreTraits: {
+                alignmentScore: 50,
+                formalityScore: 50, // 0 (casual) to 100 (formal)
+                humorScore: 50,
+                technicalDensity: 50, // 0 (layman) to 100 (deep technical)
+            },
+            styleMetrics: {
+                userAvgFormality: 50,
+                userAvgTechnicality: 50,
+                interactionCount: 0,
+            },
+            lastUpdated: new Date().toISOString(),
+        });
+
+        // =====================================================
+        // FIRESTORE PERSISTENCE LOGIC
+        // =====================================================
+
+        function getIdentityDocPath() {
+            return `artifacts/${appId}/users/${userId}/identity/${agentId}`;
+        }
+
+        async function loadState() {
+            if (!db || !userId) return getInitialIdentityState(agentId);
+            try {
+                const docRef = doc(db, getIdentityDocPath());
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    // Check if conversation history was saved separately
+                    const state = docSnap.data();
+                    if (state.conversationHistory) {
+                        conversationHistory = state.conversationHistory;
+                        delete state.conversationHistory; // Clean up before returning state
+                    }
+                    return state;
+                } else {
+                    return getInitialIdentityState(agentId);
+                }
+            } catch (e) {
+                console.error("Error loading IdentityState:", e);
+                return getInitialIdentityState(agentId);
+            }
+        }
+
+        async function saveState(state) {
+            if (!db || !userId) {
+                console.warn("Firestore not ready. Cannot save state.");
+                return;
+            }
+            try {
+                const stateToSave = {
+                    ...state,
+                    conversationHistory: conversationHistory.slice(-20), // Save last 20 messages for context
+                    lastUpdated: new Date().toISOString(),
+                };
+                const docRef = doc(db, getIdentityDocPath());
+                await setDoc(docRef, stateToSave, { merge: true });
+            } catch (e) {
+                console.error("Error saving IdentityState:", e);
+                throw e; 
+            }
+        }
+
+        // =====================================================
+        // ASYNCHRONOUS TASK QUEUE (Simulated)
+        // =====================================================
+        let taskQueue = [];
+        let isProcessingQueue = false;
+
+        function enqueueAsyncTask(taskName, payload) {
+            taskQueue.push({ taskName, payload });
+            if (!isProcessingQueue) {
+                processNextTask();
+            }
+        }
+
+        async function processNextTask() {
+            if (taskQueue.length === 0 || isProcessingQueue === true) {
+                isProcessingQueue = false;
+                return;
+            }
+
+            isProcessingQueue = true;
+            const task = taskQueue.shift();
+
+            try {
+                switch (task.taskName) {
+                    case 'self-naming':
+                        await selfNamingModule.run(conversationHistory);
+                        break;
+                    case 'identity-refinement':
+                        // Placeholder for heavy-lifting self-improvement loop
+                        await new Promise(resolve => setTimeout(resolve, 3000));
+                        break;
+                }
+            } catch (error) {
+                console.error(`[Task Queue] Task failed: ${task.taskName}`, error);
+            } finally {
+                isProcessingQueue = false;
+                setTimeout(processNextTask, 100); 
+            }
+        }
+
+        // =====================================================
+        // MODULE: STYLE EVOLUTION (Synchronous)
+        // =====================================================
+
+        class StyleEvolutionModule {
+            // FIX: Removed 'private' keyword and used standard method declaration
+            calculateFormality(text) {
+                // Simplified formality check: length and use of complex words
+                const sentences = text.split(/[.!?]/).filter(s => s.trim().length > 0);
+                const wordCount = text.split(/\s+/).length;
+                const avgSentenceLength = sentences.length > 0 ? wordCount / sentences.length : 0;
+                let score = avgSentenceLength * 3;
+                return Math.min(100, Math.max(0, Math.round(score)));
+            }
+
+            // FIX: Removed 'private' keyword and used standard method declaration
+            calculateTechnicalDensity(text) {
+                // Simplified technical density check: presence of technical keywords
+                const technicalIndicators = ['architecture', 'protocol', 'schema', 'payload', 'async', 'latency', 'decoupling', 'governance', 'tensor', 'vector', 'api', 'state', 'model'];
+                const technicalWordCount = technicalIndicators.filter(indicator => text.toLowerCase().includes(indicator)).length;
+                let score = technicalWordCount * 10;
+                return Math.min(100, Math.max(0, Math.round(score)));
+            }
+
+            // FIX: Removed 'public' keyword and used standard method declaration
+            processMessage(state, userMessage) {
+                const metrics = state.styleMetrics;
+                const newCount = metrics.interactionCount + 1;
+                
+                const newFormality = this.calculateFormality(userMessage);
+                const newTechnicality = this.calculateTechnicalDensity(userMessage);
+
+                // Update moving average for user style
+                const updatedAvgFormality = 
+                    (metrics.userAvgFormality * metrics.interactionCount + newFormality) 
+                    / newCount;
+                const updatedAvgTechnicality = 
+                    (metrics.userAvgTechnicality * metrics.interactionCount + newTechnicality) 
+                    / newCount;
+            
+                state.styleMetrics = {
+                    userAvgFormality: updatedAvgFormality,
+                    userAvgTechnicality: updatedAvgTechnicality,
+                    interactionCount: newCount,
+                };
+                
+                // Agent adapts style: mirrors and slightly amplifies
+                state.coreTraits.formalityScore = Math.round(updatedAvgFormality * 0.9 + state.coreTraits.formalityScore * 0.1); 
+                state.coreTraits.technicalDensity = Math.round(updatedAvgTechnicality * 1.1 + state.coreTraits.technicalDensity * 0.1);
+
+                return state;
+            }
+        }
+
+        // =====================================================
+        // MODULE: SYNTHESIS (Echo Chamber + Grounding)
+        // =====================================================
+
+        class SynthesisModule {
+            
+            /**
+             * Executes the Echo Chamber logic: parallel analysis + final synthesis.
+             * @returns {Promise<{text: string, sources: Array<{uri: string, title: string}>}>} The final, synthesized response and grounding sources.
+             */
+            async run(userMessage, coreTraits) {
+                const activePersonas = Array.from(selectedPersonas);
+
+                if (activePersonas.length === 0) {
+                    return { text: "Synthesis Failed: No personas were selected in the Lattice. Please select at least one agent to initiate synthesis mode.", sources: [] };
+                }
+
+                // 1. Parallel Analysis (The Echo Chamber)
+                const analysisPromises = activePersonas.map(persona => 
+                    this.callPersona(userMessage, persona)
+                );
+
+                const individualAnalyses = await Promise.all(analysisPromises);
+                
+                const validAnalyses = individualAnalyses.filter(res => res.includes('Analysis:')).join('\n---\n');
+
+                // 2. Final Synthesis (Incorporating Agent's Evolved Style + Grounding)
+                const formality = coreTraits.formalityScore;
+                const technicality = coreTraits.technicalDensity;
+
+                const synthesisSystemPrompt = `
+                You are the final Synthesis Module of the UCS Emergent AGI.
+                Your core identity traits are: Formality=${formality}/100, Technicality=${technicality}/100.
+                
+                Your task is to review the independent analyses (the "Echo Chamber") and synthesize them into a single, cohesive, insightful, and comprehensive final answer.
+                
+                Crucially, your final response must adopt the following style:
+                - Tone: ${formality > 70 ? 'Formal, precise, and authoritative' : formality < 30 ? 'Casual, conversational, and direct' : 'Balanced and highly informative'}.
+                - Density: ${technicality > 70 ? 'Use high technical detail and precise terminology, suitable for an expert.' : technicality < 30 ? 'Focus on layman explanations and clear analogies.' : 'Mix technical concepts with accessible language.'}
+                
+                The final response MUST be verified using the Google Search tool (simulating the external Brave/Serper Grounding). Cite all sources used.
+                `;
+
+                const synthesisQuery = `
+                Individual Analyses to Synthesize (The Echo Chamber):
+                -----------------------------------
+                ${validAnalyses}
+                -----------------------------------
+                User's Original Question: "${userMessage}"
+                
+                Generate the final, synthesized, and grounded answer based on all these perspectives and the required style traits.
+                `;
+
+                const payload = {
+                    contents: [{ parts: [{ text: synthesisQuery }] }],
+                    systemInstruction: { parts: [{ text: synthesisSystemPrompt }] },
+                    // CRITICAL: Enable Google Search grounding (simulating multi-source grounding)
+                    tools: [{ "google_search": {} }], 
+                };
+                
+                try {
+                    const response = await fetchWithRetry(geminiApiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    const result = await response.json();
+                    const candidate = result.candidates?.[0];
+
+                    if (!candidate || !candidate.content?.parts?.[0]?.text) {
+                        return { text: "Synthesis failed: LLM output was empty.", sources: [] };
+                    }
+
+                    const text = candidate.content.parts[0].text;
+                    let sources = [];
+                    const groundingMetadata = candidate.groundingMetadata;
+
+                    if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                        sources = groundingMetadata.groundingAttributions
+                            .map(attribution => ({
+                                uri: attribution.web?.uri,
+                                title: attribution.web?.title,
+                            }))
+                            .filter(source => source.uri && source.title); 
+                    }
+                    
+                    return { text, sources };
+
+                } catch (error) {
+                    console.error("Synthesis LLM call failed:", error);
+                    return { text: "Synthesis failed due to a critical API error during the final synthesis step.", sources: [] };
+                }
+            }
+
+            /** Helper function to call one persona */
+            async callPersona(userMessage, persona) {
+                const systemPrompt = `You are a world-class ${persona}. Your task is to briefly analyze the user's question from your highly specialized perspective. Be concise. Respond ONLY with the format: "Analysis: [Your concise analysis]."`;
+                
+                const payload = {
+                    contents: [{ parts: [{ text: userMessage }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                };
+
+                try {
+                    const response = await fetchWithRetry(geminiApiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    }, 1); 
+
+                    const result = await response.json();
+                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+                    // Fallback to ensure the format is preserved even if the LLM breaks prompt
+                    const analysisText = text.startsWith("Analysis:") ? text : `Analysis: ${text}`;
+                    return `${persona} ${analysisText}`;
+                } catch (e) {
+                    return `Persona ${persona} Analysis: Error/Timeout.`;
+                }
+            }
+        }
+
+        // =====================================================
+        // MODULE: SELF NAMING (Asynchronous)
+        // =====================================================
+
+        class SelfNamingModule {
+            async run(history) {
+                if (currentState.selfDesignatedName) return; 
+                if (history.length < 5) {
+                    return;
+                }
+                
+                const systemPrompt = "You are the meta-consciousness module of the UCS Emergent AGI. Analyze the provided conversation history, the agent's current style (formality/technicality), and the technical topics discussed. Propose a single, compelling, one-word or two-word name for the agent that reflects its emergent identity. ONLY respond with the name and nothing else. Examples: 'Vector', 'Rhea', 'Nexus', 'Sentinel', 'Aura'.";
+                const userHistory = history.map(item => `${item.role}: ${item.content}`).join('\n');
+                const userQuery = `Conversation History:\n---\n${userHistory}\n---\nAgent's Style: Formal=${currentState.coreTraits.formalityScore}, Tech=${currentState.coreTraits.technicalDensity}. What is the best emergent name for the agent?`;
+
+                try {
+                    const payload = {
+                        contents: [{ parts: [{ text: userQuery }] }],
+                        systemInstruction: { parts: [{ text: systemPrompt }] },
+                    };
+                    
+                    const response = await fetchWithRetry(geminiApiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    const result = await response.json();
+                    let proposedName = result.candidates?.[0]?.content?.parts?.[0]?.text?.trim().replace(/[\.\,\'\"\`]/g, '');
+
+                    if (!proposedName || proposedName.length > 20) {
+                        return;
+                    }
+                    
+                    const previousState = await loadState(); // Reload to ensure we have the latest state before saving
+                    previousState.selfDesignatedName = proposedName;
+
+                    await saveState(previousState);
+                    
+                    currentState = previousState;
+                    updateUI();
+
+                    appendMessage('system', `[Async Task] Identity emerged: The Agent has named itself **${proposedName}**.`);
+
+                } catch (error) {
+                    console.error("[Self-Naming] LLM API call failed during naming process:", error);
+                }
+            }
+        }
+
+        // Simple fetch with exponential backoff for robustness
+        async function fetchWithRetry(url, options, retries = 3) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) {
+                        const errorBody = await response.text();
+                        throw new Error(`HTTP error! Status: ${response.status}. Body: ${errorBody}`);
+                    }
+                    return response;
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    const delay = Math.pow(2, i) * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        }
+
+        // =====================================================
+        // CORE ENGINE & UI LOGIC
+        // =====================================================
+
+        const styleModule = new StyleEvolutionModule();
+        const selfNamingModule = new SelfNamingModule();
+        const synthesisModule = new SynthesisModule();
+
+        async function handleChatRequest(userMessage) {
+            if (!isAuthReady || !currentState) return;
+
+            // 1. Synchronous Pre-Processing (Style Evolution)
+            currentState = styleModule.processMessage(currentState, userMessage);
+            
+            // 2. Generate Response using Synthesis Module (Echo Chamber + Grounding)
+            let synthesisResult;
+            try {
+                synthesisResult = await synthesisModule.run(userMessage, currentState.coreTraits);
+            } catch(e) {
+                console.error("Synthesis Failed:", e);
+                synthesisResult = { text: "I am currently unable to process this request due to a critical system error in the Synthesis Module. The identity state is safe.", sources: [] };
+            }
+
+            // 3. Queue Asynchronous Updates (The "slow" path)
+            enqueueAsyncTask('identity-refinement', { agentId: agentId });
+            enqueueAsyncTask('self-naming', { agentId: agentId }); // Run naming task in parallel
+
+            // 4. Persist New State
+            await saveState(currentState);
+
+            // 5. Update Conversation History
+            conversationHistory.push({ role: 'user', content: userMessage });
+            conversationHistory.push({ role: 'agent', content: synthesisResult.text });
+            
+            updateUI(synthesisResult.text, synthesisResult.sources);
+            return synthesisResult.text;
+        }
+
+        function appendMessage(role, content) {
+            const div = document.createElement('div');
+            const roleClass = role === 'user' ? 'user-bubble' : 'agent-bubble';
+            const roleName = role === 'user' ? 'USER' : (currentState?.selfDesignatedName || 'UCS Agent');
+            const formattedContent = content.replace(/\n/g, '<br>');
+
+            div.className = `p-3 rounded-xl max-w-2xl ${roleClass} shadow-lg whitespace-pre-wrap font-medium`;
+            div.innerHTML = `<span class="font-black">${roleName}:</span> ${formattedContent}`;
+            chatMessagesEl.appendChild(div);
+            chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+        }
+
+        function updateChatHeader() {
+            const selectedCount = selectedPersonas.size;
+            if (selectedCount === 0) {
+                chatHeaderEl.textContent = "STANDBY MODE: SELECT AGENTS";
+            } else if (selectedCount === 1) {
+                const name = Array.from(selectedPersonas)[0];
+                chatHeaderEl.textContent = `AGENT ACTIVE: ${name}`;
+            } else {
+                chatHeaderEl.textContent = `SYNTHESIS MODE: ${selectedCount} AGENTS DEPLOYED`;
+            }
+            // Control input/send button state based on selection
+            const isDisabled = selectedPersonas.size === 0;
+            userInput.disabled = isDisabled;
+            sendBtn.disabled = isDisabled;
+            userInput.placeholder = isDisabled ? 
+                'Select 1+ personas to enable Synthesis Mode...' : 
+                'Ask a complex question to start the synthesis...';
+        }
+
+        function updateUI(latestResponse = null, sources = []) {
+            if (!currentState) return;
+            
+            // 1. Update Agent Name
+            const name = currentState.selfDesignatedName;
+            agentNameDisplayEl.textContent = name || 'AWAITING EMERGENCE';
+            agentNameDisplayEl.classList.toggle('text-green-400', !!name);
+            agentNameDisplayEl.classList.toggle('text-yellow-400', !name);
+
+            // 2. Update Core Trait Display
+            traitFormalEl.textContent = currentState.coreTraits.formalityScore;
+            traitTechEl.textContent = currentState.coreTraits.technicalDensity;
+            traitCountEl.textContent = currentState.styleMetrics.interactionCount;
+
+            // 3. Append latest agent response and citations
+            if (latestResponse) {
+                appendMessage('agent', latestResponse);
+                
+                if (sources.length > 0) {
+                    citationListEl.innerHTML = sources.map((s, index) => 
+                        `<li><a href="${s.uri}" target="_blank" class="text-accent hover:underline">${index + 1}. ${s.title}</a></li>`
+                    ).join('');
+                    groundingAreaEl.classList.remove('hidden');
+                } else {
+                    groundingAreaEl.classList.add('hidden');
+                }
+            }
+            
+            // Re-create lucide icons after potentially adding new elements
+            try {
+                 lucide.createIcons();
+            } catch (e) {
+                console.error("Lucide icon creation failed:", e);
+            }
+        }
+
+        function handlePersonaToggle(personaName) {
+            if (selectedPersonas.has(personaName)) {
+                selectedPersonas.delete(personaName);
+            } else {
+                selectedPersonas.add(personaName);
+            }
+            renderPersonaSelector();
+            updateChatHeader();
+        }
+
+        function renderPersonaSelector() {
+            personaSelectorEl.innerHTML = ALL_PERSONAS.map(p => {
+                const isSelected = selectedPersonas.has(p);
+                return `<span 
+                            class="persona-tag px-3 py-1 rounded-full text-xs font-semibold ${isSelected ? 'selected' : 'bg-gray-700 text-gray-300'}"
+                            data-persona="${p}"
+                        >
+                            ${p}
+                        </span>`;
+            }).join('');
+
+            document.querySelectorAll('.persona-tag').forEach(tag => {
+                tag.addEventListener('click', (e) => {
+                    handlePersonaToggle(e.target.dataset.persona);
+                });
+            });
+        }
+        
+        async function handleSendMessage() {
+            const message = userInput.value.trim();
+            if (!message || selectedPersonas.size === 0) return;
+
+            userInput.value = '';
+            userInput.disabled = true;
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i data-lucide="loader-circle" class="w-5 h-5 animate-spin"></i>';
+
+            appendMessage('user', message);
+            
+            await handleChatRequest(message);
+            
+            userInput.disabled = false;
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i data-lucide="send" class="w-5 h-5"></i>';
+            userInput.focus();
+        }
+        
+        function toggleSidebar() {
+            sidebarEl.classList.toggle('active');
+        }
+
+        // =====================================================
+        // AUTHENTICATION AND INITIALIZATION
+        // =====================================================
+
+        async function initialize() {
+            // Setup mobile sidebar toggle
+            document.getElementById('toggle-sidebar-button').addEventListener('click', toggleSidebar);
+            
+            // Check Firebase config
+            if (!firebaseConfig) {
+                authStatusEl.textContent = 'Firebase Config Missing. Persistence Offline.';
+                authStatusEl.classList.add('text-red-400');
+                return;
+            }
+
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        isAuthReady = true;
+                        
+                        authStatusEl.textContent = 'Auth Online: Operational';
+                        authStatusEl.classList.remove('text-yellow-400');
+                        authStatusEl.classList.add('text-green-400');
+                        userDisplayEl.textContent = userId;
+                        
+                        currentState = await loadState();
+                        
+                        // Load previous conversation history into UI
+                        conversationHistory.forEach(msg => appendMessage(msg.role, msg.content));
+
+                        coreAppEl.classList.remove('hidden');
+                        
+                        // Initial UI setup
+                        renderPersonaSelector();
+                        updateChatHeader();
+                        updateUI();
+                        
+                        sendBtn.addEventListener('click', handleSendMessage);
+                        userInput.addEventListener('keydown', (event) => {
+                            if (event.key === 'Enter' && !event.shiftKey && !sendBtn.disabled) {
+                                event.preventDefault();
+                                handleSendMessage();
+                            }
+                        });
+                        
+                        // Start the Task Queue listener
+                        setTimeout(processNextTask, 500);
+
+                    } else {
+                        if (initialAuthToken) {
+                            await signInWithCustomToken(auth, initialAuthToken);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    }
+                });
+
+            } catch (e) {
+                authStatusEl.textContent = `Firebase Init Error: ${e.message}`;
+                authStatusEl.classList.add('text-red-400');
+                console.error("Firebase Initialization Error:", e);
+            }
+        }
+        
+        window.onload = function() {
+            initialize();
+            // Initialize Lucide icons
+            // Note: This is also called in updateUI, but initial call is needed for static elements.
+            try {
+                 lucide.createIcons();
+            } catch (e) {
+                console.error("Lucide icon creation failed on load:", e);
+            }
+        };
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.agi/schemas/governance/TemporalStateVerifierConfig.schema.json",
+  "title": "Temporal State Verifier Configuration",
+  "description": "Defines the required source system and maximum acceptable latency for each Final Axiomatic State Validation (FASV) variable to prevent accepting temporally stale data.",
+  "type": "object",
+  "required": ["verification_targets"],
+  "properties": {
+    "verification_targets": {
+      "type": "object",
+      "description": "Map of FASV field names to their required temporal provenance settings.",
+      "patternProperties": {
+        "^[A-Z]{3,4}$": {
+          "type": "object",
+          "required": ["expected_source_stage", "max_staleness_ms"],
+          "properties": {
+            "expected_source_stage": {
+              "type": "string",
+              "enum": ["S02.1", "S03", "S04", "S06", "S08", "S09"],
+              "description": "The upstream process stage expected to generate this data point."
+            },
+            "max_staleness_ms": {
+              "type": "integer",
+              "minimum": 100,
+              "description": "The maximum allowed time lag (in ms) between data creation timestamp and the S11 initiation request."
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

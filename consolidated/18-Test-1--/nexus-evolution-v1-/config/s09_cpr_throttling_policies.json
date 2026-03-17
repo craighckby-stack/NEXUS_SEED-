@@ -1,0 +1,41 @@
+{
+  "policies": [
+    {
+      "policy_name": "Mission_Critical",
+      "multiplier": 5.0,
+      "threshold_percentage": 0.95,
+      "reaction": {
+        "type": "Shed_Less_Priority",
+        "threshold": 0.05,
+        "window": 10
+      }
+    },
+    {
+      "policy_name": "Standard_Query",
+      "multiplier": 1.0,
+      "trigger_load_avg": 0.80,
+      "reaction": {
+        "type": "Exponential_Backoff",
+        "interval": 500,
+        "max_attempts": 5
+      }
+    },
+    {
+      "policy_name": "CPR_Throttling",
+      "multiplier": 2.5,
+      "trigger_load_avg": 0.60,
+      "reaction": {
+        "type": "Rate_ Limiting",
+        "interval": 2000,
+        "max_requests": 10
+      }
+    }
+  ],
+  "default_reaction": "Queue_Request",
+  "metrics_source": "/api/v2/system/load_metrics",
+  "throttling_tier": {
+    "max_quota_per_second": 100,
+    "window_size": 10,
+    "refill_rate": 50
+  }
+}

@@ -1,0 +1,4 @@
+This is a placeholder for background.png
+Recommended size: 1920x1080 pixels or larger
+Format: PNG or JPG
+Purpose: Page background

@@ -1,0 +1,19 @@
+{
+  "description": "Defines the mandatory structure for all compilation artifacts ingested or produced by the AGI evolution engine.",
+  "requiredKeys": [
+    "contractName",
+    "sourcePath",
+    "abi",
+    "bytecode"
+  ],
+  "schema": {
+    "contractName": "string",
+    "sourcePath": "string",
+    "abi": "array_of_objects",
+    "bytecode": "hex_string",
+    "deployedBytecode": "hex_string",
+    "linkReferences": "object",
+    "metadata": "object"
+  },
+  "enforcementPolicy": "STRICT_PARSE_REQUIRED_BEFORE_REFLECTIVE_ANALYSIS"
+}

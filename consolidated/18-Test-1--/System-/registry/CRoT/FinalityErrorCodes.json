@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "FinalityErrorCodes.json",
+  "title": "CRoT Finality Error Code Dictionary",
+  "description": "Defines codified error modes (RRP/IH) referenced by the Finality Metric Registry for triage and automated resolution.",
+  "type": "object",
+  "properties": {
+    "code_version": {
+      "type": "string",
+      "description": "Version of the error code dictionary."
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^(RRP|IH)-\\d{3}$",
+            "description": "The unique error code (e.g., RRP-101, IH-503)."
+          },
+          "category": {
+            "type": "string",
+            "enum": ["Integrity Hardening", "Rollback Protocol", "Resource Limit", "Data Corruption"]
+          },
+          "summary": {
+            "type": "string",
+            "description": "Short human-readable summary of the failure."
+          },
+          "details": {
+            "type": "string",
+            "description": "Technical root cause description."
+          },
+          "triage_action": {
+            "type": "string",
+            "description": "Recommended automated or manual next step for remediation."
+          }
+        },
+        "required": ["code", "category", "summary", "details", "triage_action"]
+      }
+    }
+  },
+  "required": ["code_version", "errors"]
+}

@@ -1,0 +1,19 @@
+{
+  "Proposal_Scoring_Model": {
+    "Complexity_Metrics": {
+      "cyclomatic_weight": 0.45,
+      "dependency_depth_weight": 0.35,
+      "line_of_code_normalized_weight": 0.20
+    },
+    "Impact_Multipliers": {
+      "core_system_impact": 1.8,
+      "interface_modification": 1.2,
+      "utility_creation": 0.9,
+      "documentation_update": 0.1
+    },
+    "Threshold_Scaling": {
+      "complexity_max_score": 100,
+      "base_governance_cost": 5
+    }
+  }
+}

@@ -1,0 +1,19 @@
+# Sovereign Governance Parameter Configuration
+# Centralized tunables for Phase 2 system regulation.
+
+consensus:
+  default_threshold: 0.75  # Default consensus score required for low-risk mutations
+  critical_threshold: 0.95 # Consensus score required for high-dependency/core file modifications
+  mcra_complexity_score_ceiling: 50 # Score above which critical_threshold applies
+
+atm_system:
+  initial_trust_score: 0.5
+  trust_decay_schedule_tds:
+    decay_rate: 0.02 # Decay per cycle for non-active agents
+    minimum_trust: 0.2 # Floor trust score
+
+ciw_weighting:
+  # Contextual Influence Weighting multipliers based on context or file type
+  core_architecture_weight: 1.25 # Architect Agent gets 25% weight boost on core file proposals
+  config_file_weight: 1.10
+  documentation_weight: 0.90

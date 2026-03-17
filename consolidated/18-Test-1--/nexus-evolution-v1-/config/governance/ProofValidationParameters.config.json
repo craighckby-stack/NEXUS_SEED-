@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agi.sovereign/config/governance/ProofValidationParameters.config.json",
+  "title": "Axiomatic Proof Validation Configuration",
+  "description": "Configuration parameters defining the run-time requirements for various consensus mechanisms referenced by finalized state records.",
+  "type": "object",
+  "properties": {
+    "mechanisms": {
+      "type": "array",
+      "description": "List of active consensus mechanism definitions used to verify 'requiredThreshold' and 'consensusMechanism' fields.",
+      "items": {
+        "type": "object",
+        "required": ["id", "minThreshold", "validationStrategy"],
+        "properties": {
+          "id": { "type": "string", "description": "The identifier referenced by state validation records (e.g., PoS-V2)." },
+          "minThreshold": { "type": "number", "minimum": 0.5, "maximum": 1.0, "description": "The system-enforced minimum fractional stake or vote weight (must match the 'requiredThreshold' in the state record)." },
+          "validationStrategy": { "type": "string", "enum": ["STAKE_WEIGHTED", "SIMPLE_MAJORITY", "CUSTOM_BFT"], "description": "How the proof weight is calculated by the validation service." },
+          "minSigners": { "type": "integer", "minimum": 1, "description": "Minimum number of unique signers required, regardless of stake weight (optional operational constraint)." }
+        },
+        "additionalProperties": false
+      }
+    },
+    "activeMechanismId": {
+      "type": "string",
+      "description": "The currently active mechanism ID used for new state finalization."
+    }
+  },
+  "required": ["mechanisms", "activeMechanismId"],
+  "additionalProperties": false
+}

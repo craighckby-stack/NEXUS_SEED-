@@ -1,0 +1,17 @@
+{
+  "engine_id": "AISP-Signing-Engine-1",
+  "protocol_reference": "urn:aass:protocol:aisp:v2.0",
+  "environment": "production",
+  "key_lookup": {
+    "service_uri": "https://key-management.aass.ai/lookup",
+    "timeout_ms": 500
+  },
+  "rate_limiting": {
+    "max_signatures_per_second": 1000,
+    "burst_tolerance": 200
+  },
+  "data_plane": {
+    "buffer_size_mb": 16,
+    "canonicalization_fail_policy": "REJECT_AND_LOG"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "registry_version": "1.0.0",
+  "description": "Maps logical Schema IDs used in validation rules (MCC) to physical storage paths or retrieval endpoints.",
+  "schema_map": {
+    "SGS-POLICY-VETO-SCHEMA-V1": {
+      "path": "storage/schemas/policies/policy_veto_v1.yaml",
+      "integrity_hash": "sha256:abc123def456",
+      "retrieval_endpoint": "https://sgsi.corp/schemas/v1/policy_veto"
+    },
+    "SGS-ARCH-CONSTRAINTS-V3": {
+      "path": "storage/schemas/architecture/arch_constraints_v3.json",
+      "integrity_hash": "sha256:ghi789jkl012",
+      "retrieval_endpoint": "https://sgsi.corp/schemas/v3/arch_constraints"
+    }
+  }
+}

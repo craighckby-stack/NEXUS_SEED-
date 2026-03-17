@@ -1,0 +1,22 @@
+# SOVEREIGN MANDATE TRANSLATION PROTOCOL (SMTL) V1.0
+# Artifact responsible for formalizing abstract objectives into ACV-compliant numerical constraints.
+
+metadata:
+  version: 1.0
+  authoring_agent: GAX (Input Handler)
+
+policy_input_structure:
+  objective_id: String (Unique identifier for the mission segment)
+  human_mandate_raw: String (Text description of the high-level goal, e.g., 'Maximize stability while achieving 90% optimization.')
+  translation_timestamp: DateTime (Time of mandate formalization)
+
+constraint_mapping_output:
+  # Directly maps raw objectives to ACVD bounds
+  ACV_I_utility_minimum:
+    UFRM: 0.85 # Minimum utility floor (85%)
+    CFTM: 0.05 # Conservative finality margin (5%)
+
+  ACV_III_integrity_thresholds:
+    PVLM_Threshold: 0.9999 # Policy Violation Likelihood Limit (99.99% adherence)
+    MPAM_Threshold: 0.01 # Metric Parameter Anomaly Margin (Max 1% drift tolerance)
+    ADTM_Flag: True # Anomaly Detection Trigger Mandate (Activate runtime veto on detection)

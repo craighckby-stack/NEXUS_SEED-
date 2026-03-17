@@ -1,0 +1,36 @@
+{
+  "version": "1.0",
+  "metadata": {
+    "registry_id": "GACR-POLICY-DEFINITIONS-V1",
+    "description": "Definition of standardized security and governance policies referenced across GACR resource access."
+  },
+  "policies": {
+    "POLICY_P4_M_CONF_MTLS": {
+      "classification": "Moderate Confidentiality",
+      "level": 4,
+      "requirements": {
+        "authentication": "mTLS Required",
+        "cipher_suite": "TLS_AES_256_GCM_SHA384",
+        "data_retention_days": 365
+      }
+    },
+    "POLICY_P2_H_INTEGRITY": {
+      "classification": "High Integrity",
+      "level": 2,
+      "requirements": {
+        "authentication": "API Key/JWT Required",
+        "cipher_suite": "TLS_AES_128_GCM_SHA256",
+        "rate_limiting_enforced": true
+      }
+    },
+    "POLICY_P4_M_CONF_TLS": {
+      "classification": "Moderate Confidentiality (DB)",
+      "level": 4,
+      "requirements": {
+        "authentication": "Service Account + TLS",
+        "cipher_suite": "TLS_AES_256_GCM_SHA384",
+        "db_isolation": true
+      }
+    }
+  }
+}

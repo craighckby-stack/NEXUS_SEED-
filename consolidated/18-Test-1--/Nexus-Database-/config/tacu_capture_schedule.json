@@ -1,0 +1,27 @@
+{
+  "schedule_version": "1.0",
+  "default_capture_rate_hz": 10,
+  "capture_events": [
+    {
+      "event_id": "SYSTEM_CALL_ENTRY",
+      "trigger_mode": "ON_ENTER",
+      "priority": 3,
+      "state_groups_to_capture": ["REG_CRITICAL_CORE"],
+      "description": "Fast capture of critical registers before high-risk execution branch."
+    },
+    {
+      "event_id": "TRANSACTION_COMMIT_BOUNDARY",
+      "trigger_mode": "PRE_COMMIT",
+      "priority": 1,
+      "state_groups_to_capture": ["ALL"],
+      "description": "Full TSE snapshot required before finalizing transaction state."
+    },
+    {
+      "event_id": "ASYNC_INTERRUPT_VECTOR",
+      "trigger_mode": "ON_INTERRUPT",
+      "priority": 2,
+      "state_groups_to_capture": ["REG_CRITICAL_CORE", "FLOW_CONTROL_STACK"],
+      "description": "Capture sufficient state to enable precise synchronous recovery after an asynchronous fault."
+    }
+  ]
+}

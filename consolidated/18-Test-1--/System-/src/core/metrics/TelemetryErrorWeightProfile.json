@@ -1,0 +1,26 @@
+{
+  "title": "Efficiency Penalty Weighting Profile",
+  "description": "Defines the baseline penalty weights applied to the Autonomous Efficiency Score (AES) when specific failure classifications occur during an evolution cycle.",
+  "weights": {
+    "MISINTERPRETATION": {
+      "severity": 0.95,
+      "description": "Fundamental misunderstanding of the task objective. Often requires full cycle restart."
+    },
+    "RESOURCE_EXHAUSTION": {
+      "severity": 0.40,
+      "description": "Cycle aborted due to reaching defined resource limits (e.g., recursion depth, max budget, timeout)."
+    },
+    "CODE_REVERSION_LIMIT": {
+      "severity": 0.75,
+      "description": "Excessive instability requiring multiple reverts; cycle failed to stabilize."
+    },
+    "LLM_HALLUCINATION": {
+      "severity": 0.60,
+      "description": "Failure traced back to injecting structurally flawed or non-existent external information."
+    },
+    "EXTERNAL_API_ERROR": {
+      "severity": 0.30,
+      "description": "Non-deterministic external service failure (e.g., connection reset, 500 status).	"
+    }
+  }
+}

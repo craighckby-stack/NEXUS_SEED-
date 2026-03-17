@@ -1,0 +1,20 @@
+{
+  "engineId": "AEE_V3.0",
+  "evaluationStrategy": "PriorityOrder_FailFast",
+  "defaultTelemetryLevel": "PolicyViolationsOnly",
+  "inputNormalizationSchema": "IPSM_Runtime_Input_V2",
+  "modes": {
+    "Enforcement": {
+      "onError": "HaltAndReport",
+      "vetoThreshold": 1
+    },
+    "Advisory": {
+      "onError": "ContinueAndLog",
+      "logRateLimit": 100
+    }
+  },
+  "telemetryHooks": [
+    "AXIOM_PRE_EVAL",
+    "AXIOM_POST_EVAL"
+  ]
+}

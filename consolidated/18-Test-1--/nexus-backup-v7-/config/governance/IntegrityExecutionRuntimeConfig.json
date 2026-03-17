@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agi.sovereign.v94/config/IntegrityExecutionRuntimeConfig.json",
+  "title": "Sovereign AGI Integrity Execution Runtime Configuration",
+  "type": "object",
+  "properties": {
+    "runtimeId": { "type": "string", "description": "Unique identifier for the specific runtime instance." },
+    "maxParallelChecks": { "type": "integer", "default": 64, "description": "Maximum number of integrity checks run concurrently." },
+    "failureMode": {
+      "type": "string",
+      "enum": ["FAIL_FAST", "CONTINUE_ALL"],
+      "default": "CONTINUE_ALL",
+      "description": "Policy for handling runtime errors during check execution."
+    },
+    "reportEndpoints": {
+      "type": "array",
+      "items": { "type": "string", "format": "uri" },
+      "description": "API endpoints to stream integrity check results to."
+    },
+    "cacheStrategy": {
+      "type": "string",
+      "enum": ["OFF", "PER_SESSION", "GLOBAL_TTL"],
+      "default": "PER_SESSION",
+      "description": "Strategy for caching results of long-running external integrity checks (e.g., external license checks)."
+    }
+  },
+  "required": ["runtimeId", "reportEndpoints"]
+}

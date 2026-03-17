@@ -1,0 +1,9 @@
+{
+    "report_output_path": "output/s09_cpr_metrics.json",
+    "required_artifacts": [
+        "GAX_I",
+        "GAX_II",
+        "GAX_III"
+    ],
+    "acvm_config_path": "config/acvm_core_constraints.json"
+}

@@ -1,0 +1,30 @@
+{
+  "governance_id": "GACR-MPAM-V97-001",
+  "target_schema_version": "V97.5-MPAM-02",
+  "validation_rules": [
+    {
+      "rule_id": "V97_METRICS_NON_NEGATIVE",
+      "field_path": "certified_models[*].performance_baseline.performance_metrics.utility_p99_score",
+      "constraint": "min_value: 0.0",
+      "severity": "CRITICAL"
+    },
+    {
+      "rule_id": "V97_DRIFT_THRESHOLD_BOUND",
+      "field_path": "certified_models[*].monitoring_configuration.model_drift_parameters.threshold",
+      "constraint": "range: 0.001 to 0.5",
+      "severity": "WARNING"
+    },
+    {
+      "rule_id": "V97_REQUIRED_FIELDS",
+      "constraint": "schema_validation_strict: true",
+      "severity": "BLOCKING"
+    }
+  ],
+  "migration_hooks": [
+    {
+      "from_versions": ["V97.4-MPAM-01"],
+      "action": "STANDARD_DRIFT_PARAM_REMAP",
+      "description": "Standardize 'threshold_epsilon'/'alert_limit' keys to 'threshold' based on the V97.5 schema definition."
+    }
+  ]
+}

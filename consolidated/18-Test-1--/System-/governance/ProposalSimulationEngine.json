@@ -1,0 +1,8 @@
+{
+  "SimulationParameters": {
+    "RunThreshold": 0.8,
+    "InfluenceMatrix": "Active",
+    "DependencyCheck": true
+  },
+  "AuditLog": []
+}

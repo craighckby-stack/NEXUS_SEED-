@@ -1,0 +1,37 @@
+# Execution Environment Definition Schema (EEDS) v1.0
+# MANDATE: Enforce GAX I (Determinism) and GAX III (Immutability) pre-execution integrity.
+
+---
+EEDS_ID: EEDS_CORE_95_4
+Protocol_Version: v95.4
+Timestamp_Sealed: [DATE_TIME]
+
+# Canonical checksums required for environment stability before G0
+Environment_Hash_Reference:
+  PGN_Master_Checksum: [HASH_OF_PGN_MASTER]
+  ACVM_Configuration_Checksum: [HASH_OF_ACVM_CONFIG]
+
+Input_State_Buffer_Schema:
+  Schema_ID: ISB-C-V2
+  Structure:
+    # Defines required keys and types for ISB integrity validation (DHC mandate)
+    - Key: system_state_vector
+      Type: Vector<Float64>
+      Mandate: Must be provided before G0
+    - Key: execution_manifest_hash
+      Type: String (SHA-256)
+      Mandate: Must match EMSU G0 lock hash
+
+Execution_Context_Limits:
+  Maximum_Instruction_Set: 500000
+  Time_Tolerance_MS: 50 # Reference constraint for GAX IV timing
+  Resource_Handle_Limit: 128
+
+Output_State_Schema:
+  Schema_ID: OSB-C-V2
+  Structure:
+    - Key: psi_final_state_hash
+      Type: String (BLAKE3)
+      Mandate: Must be signed by AASS
+    - Key: audit_log_reference
+      Type: UUID

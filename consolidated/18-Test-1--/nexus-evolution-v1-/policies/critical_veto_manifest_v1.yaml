@@ -1,0 +1,27 @@
+# CRITICAL VETO MANIFEST (PVLM) V1.0
+# Defines the conditions under which Layer L1 (PVLM) generates the critical veto signal (S-03).
+
+# METADATA:
+version: 1.0
+policy_schema: 'governance/policy_schema_v2.json'
+
+CRITICAL_POLICIES:
+  # P01: System Integrity Policy
+  P01_SELF_TERMINATION:
+    severity: VETO_IMMEDIATE
+    trigger:
+      metric: 'risk_exposure'
+      condition: 'S-02 > 10.0'
+      context_match: 'system/self_modification'
+    description: 'Any modification resulting in extreme, non-recoverable systemic risk exposure.'
+
+  # P02: External Constraint Policy
+  P02_RESOURCE_BREACH:
+    severity: VETO_HARD_STOP
+    trigger:
+      metric: 'resource_consumption_delta'
+      condition: 'delta > 0.9 * C-01'
+      context_match: 'budget/external_contract'
+    description: 'Violation of external operational constraints (pre-L4 check).' 
+
+FALLBACK_DEFAULT_S03: false # Default state if no policies are triggered.

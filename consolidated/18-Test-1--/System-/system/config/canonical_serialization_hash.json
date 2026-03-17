@@ -1,0 +1,7 @@
+{
+  "description": "Defines the standard canonical JSON serialization method for calculating contentHash to ensure system-wide cryptographic consistency.",
+  "hashingAlgorithm": "SHA-256",
+  "canonicalizationStandard": "RFC 8785 (ECMAScript compatibility, deterministic sorting by key)",
+  "encoding": "UTF-8",
+  "normalizationForm": "NFC"
+}

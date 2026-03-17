@@ -1,0 +1,21 @@
+{
+  "engine_version": "V94.1.AME.1",
+  "monitoring_targets": [
+    {
+      "metric": "RETV_ComplianceFailures",
+      "aggregation_window_seconds": 300,
+      "anomaly_detection": "Z_SCORE_3",
+      "reporting_tag": "CRITICAL_VIOLATION_COUNT"
+    },
+    {
+      "metric": "PSR_SimulationEfficacyData",
+      "aggregation_window_seconds": 600,
+      "anomaly_detection": "OUTLIER_TOLERANCE_0.02",
+      "reporting_tag": "EFFICACY_DEGRADATION_ALERT"
+    }
+  ],
+  "alert_distribution_policy": {
+    "high_priority_threshold": 3,
+    "distribution_endpoint": "Planner_Input_Queue_1A"
+  }
+}

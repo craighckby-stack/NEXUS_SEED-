@@ -1,0 +1,37 @@
+{
+  "protocol_id": "RRP-AI-V1",
+  "description": "Defines the structured schema for transmitting a confirmed RRP activation trigger from an external domain (P1-P4) to the FIA's P-05 RRP Activation Interface (RRP-AI). Ensures message integrity and non-repudiation.",
+  "fields": [
+    {
+      "name": "Signal_Timestamp",
+      "type": "ISO8601",
+      "required": true,
+      "comment": "Timestamp of the initiation of the fault condition in UTC."
+    },
+    {
+      "name": "Trigger_Mask",
+      "type": "enum(PVLM, MPAM, ADTM, P-01 Failure Lock)",
+      "required": true,
+      "comment": "The specific Fault Mask Signal detected."
+    },
+    {
+      "name": "Source_Agent_ID",
+      "type": "AgentID",
+      "required": true,
+      "comment": "The ID of the Agent issuing the RRP-AI signal."
+    },
+    {
+      "name": "Verification_Hash",
+      "type": "SHA-512",
+      "required": true,
+      "comment": "Hash of the immediate preceding operational state, attested by the Source Agent before signaling RRP."
+    },
+    {
+      "name": "Signal_Signature",
+      "type": "Cryptographic Signature",
+      "required": true,
+      "comment": "Cryptographic signature of the entire payload using the Source Agent's trusted key."
+    }
+  ],
+  "delivery_mechanism": "Isolated Channel (IPC or secure bus)"
+}

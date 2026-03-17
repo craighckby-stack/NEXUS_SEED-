@@ -1,0 +1,27 @@
+{
+  "description": "Defines the authorized rules and constraints for dynamic, context-aware adjustment of governance parameters at runtime. All adjustments must conform to these constraints and require OPR justification.",
+  "adjustmentPolicies": [
+    {
+      "parameterId": "P01_RISK_FLOOR",
+      "adjustmentType": "percentage_relative",
+      "maxIncrease": 0.15,
+      "maxDecrease": 0.20,
+      "temporalConstraints": {
+        "maxDurationMinutes": 60,
+        "coolDownMinutes": 120
+      },
+      "allowedContexts": ["CRITICAL_RECOVERY_MODE", "ADVERSARIAL_ATTACK_MITIGATION"]
+    },
+    {
+      "parameterId": "SANDBOX_TIMEOUT_MS",
+      "adjustmentType": "absolute_delta",
+      "maxIncrease": 10000,
+      "maxDecrease": 500,
+      "temporalConstraints": {
+        "maxDurationMinutes": 300,
+        "coolDownMinutes": 0
+      },
+      "allowedContexts": ["COMPLEX_MODEL_EVOLUTION_TASK"]
+    }
+  ]
+}

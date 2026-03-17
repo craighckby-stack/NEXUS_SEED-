@@ -1,0 +1,31 @@
+{
+  "serviceConfig": {
+    "id": "ArtifactIntegrityGuard",
+    "enforcementMode": "STRICT_ENFORCEMENT",
+    "schemaRegistryPath": "config/ASDM_ArtifactSchemas.json"
+  },
+  "caching": {
+    "enabled": true,
+    "ttlSeconds": 300,
+    "evictionStrategy": "LRU"
+  },
+  "globalPolicy": {
+    "defaultActionOnViolation": "REJECT_ARTIFACT",
+    "versioning": {
+      "allowMinorVersionMismatch": true,
+      "forceLatestPatch": true,
+      "strictModeCheckOnMajorBump": true
+    }
+  },
+  "reporting": {
+    "enabled": true,
+    "reportingEndpoint": "http://integrity-monitor/api/v1/violation",
+    "failureRateThresholdPercent": 50,
+    "bufferLimit": 100
+  },
+  "configuredArtifactTypes": [
+    "TaskDefinition",
+    "CodeArtifact",
+    "ObservationReport"
+  ]
+}

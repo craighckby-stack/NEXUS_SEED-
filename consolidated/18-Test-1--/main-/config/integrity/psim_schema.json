@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Configuration schema for the Payload Security and Integrity Module (PSIM). Defines cryptographic and semantic integrity standards for M-02.",
+  "cryptographic_hash_algo": "SHA3-512",
+  "provenance_chain_length_min": 5,
+  "semantic_diff_threshold_max": 0.05,
+  "whitelist_violation_action": "REJECT_EPDP_B",
+  "constraint_managers_linked": ["RACM", "CEE"]
+}

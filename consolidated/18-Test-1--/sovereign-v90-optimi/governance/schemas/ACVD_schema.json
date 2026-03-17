@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agi.sovereign/schemas/ACVD_v1.json",
+  "title": "Autonomous Code Versioning Document (ACVD)",
+  "description": "Defines the structure for recording autonomous code evolution decisions and outcomes.",
+  "type": "object",
+  "required": ["acvd_version", "timestamp", "source_system", "context_hash", "decision_summary", "artifact_changes"],
+  "properties": {
+    "acvd_version": { 
+      "type": "string",
+      "description": "Version of the ACVD schema standard."
+    },
+    "timestamp": {
+      "type": "string", 
+      "format": "date-time"
+    },
+    "source_system": {
+      "type": "string",
+      "description": "Identifier of the AGI instance generating the ACVD."
+    },
+    "context_hash": { 
+      "type": "string", 
+      "description": "SHA256 hash of the system state context required for verification."
+    },
+    "decision_summary": {
+      "type": "string",
+      "description": "High-level natural language summary of the changes and objectives."
+    },
+    "artifact_changes": {
+      "type": "array",
+      "description": "List of files modified, created, or deleted.",
+      "items": {
+        "type": "object",
+        "required": ["path", "operation"],
+        "properties": {
+          "path": { "type": "string" },
+          "operation": { "type": "string", "enum": ["CREATE", "UPDATE", "DELETE"] },
+          "hash_before": { 
+            "type": ["string", "null"], 
+            "description": "Hash prior to operation (null for CREATE)."
+          },
+          "hash_after": { 
+            "type": ["string", "null"], 
+            "description": "Hash after operation (null for DELETE). Required for integrity validation."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": true
+}

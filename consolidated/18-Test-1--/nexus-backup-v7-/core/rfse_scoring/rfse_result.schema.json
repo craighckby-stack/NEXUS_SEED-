@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agiv94.1/schemas/rfse-result-v1.0.json",
+  "title": "RFSE Calculation Result Schema",
+  "description": "Schema defining the expected output structure for the Rollback Feasibility Scoring Engine (RFSE), detailing the R-01 index and all constituent factors for MEE/L2 consumption.",
+  "type": "object",
+  "required": ["r01_complexity_index", "factors"],
+  "properties": {
+    "r01_complexity_index": {
+      "type": "number",
+      "minimum": 0,
+      "description": "The final calculated R-01 Rollback Complexity Index."
+    },
+    "factors": {
+      "type": "object",
+      "description": "Detailed breakdown of the metrics and modifiers used in the calculation.",
+      "properties": {
+        "target_type": {
+          "type": "string",
+          "description": "The GSC V4.0 target type assessed (e.g., LOGIC_CORE)."
+        },
+        "base_risk_score": {
+          "type": "number",
+          "description": "The initial complexity score derived from manifest metrics."
+        },
+        "target_multiplier_applied": {
+          "type": "number",
+          "description": "The deployment target specific multiplier used."
+        },
+        "persistence_impact_adjustment": {
+          "type": "number",
+          "description": "The multiplicative adjustment due to persistence layer involvement."
+        },
+        "raw_manifest_depth": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Input metric: Count of manifest entries."
+        }
+      },
+      "required": ["target_type", "base_risk_score", "target_multiplier_applied", "persistence_impact_adjustment"]
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Time of calculation."
+    }
+  },
+  "additionalProperties": false
+}

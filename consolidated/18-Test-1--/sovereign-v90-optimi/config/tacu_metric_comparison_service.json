@@ -1,0 +1,28 @@
+{
+  "service_enabled": true,
+  "rolling_window_configuration": {
+    "lookback_periods": [
+      {"label": "short_term", "steps": 1000},
+      {"label": "medium_term", "steps": 5000}
+    ],
+    "baseline_algorithm": "ExponentialMovingAverage"
+  },
+  "metric_definitions": [
+    {
+      "id": "evolution_score_f1",
+      "target_direction": "maximize",
+      "stability_check": {
+        "window": "short_term",
+        "min_data_points": 50
+      }
+    },
+    {
+      "id": "resource_utilization_ratio",
+      "target_direction": "minimize",
+      "variance_tolerance": 0.1
+    }
+  ],
+  "alerting_thresholds": {
+    "stability_violation": "Warn"
+  }
+}

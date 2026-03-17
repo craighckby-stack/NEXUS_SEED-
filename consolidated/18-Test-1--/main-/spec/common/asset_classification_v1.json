@@ -1,0 +1,39 @@
+{
+  "spec_id": "ASSET_CLASS_V1.0",
+  "title": "Enterprise Asset Classification Registry",
+  "version": "1.0",
+  "description": "Definitive source for all recognized critical asset types managed within the GAC ecosystem, used for cross-service registration and policy enforcement.",
+  "urn": "urn:gac-sys:registry:asset-classification:v1",
+  "asset_types": [
+    {
+      "code": "CAC",
+      "name": "Core Application Configuration",
+      "description": "Critical configuration data defining runtime environments."
+    },
+    {
+      "code": "CFTM",
+      "name": "Core Financial Transaction Manifest",
+      "description": "Integrity manifests for irreversible financial operations."
+    },
+    {
+      "code": "PVLM",
+      "name": "Policy Version Lifecycle Manifest",
+      "description": "Manifests tracking changes and approvals for governance policies."
+    },
+    {
+      "code": "SIHM",
+      "name": "System Integrity Hash Manifest",
+      "description": "Hardware and firmware integrity verification artifacts."
+    },
+    {
+      "code": "FSVM",
+      "name": "File System Volume Manifest",
+      "description": "Root-level filesystem integrity hashes."
+    },
+    {
+      "code": "GOV_POLICY",
+      "name": "Governance Policy Definition",
+      "description": "The executable definition of a system governance rule."
+    }
+  ]
+}

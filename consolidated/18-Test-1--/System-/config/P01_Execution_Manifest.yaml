@@ -1,0 +1,41 @@
+# P01_Execution_Manifest.yaml (SGS Runtime Configuration)
+# Provides centralized configuration paths and fallback definitions for GSEP-C stages
+# requiring external constraint data during the CONSTRAINT (P2) and AUDIT (P3) phases.
+
+gsep_execution:
+  s02_context_check:
+    agent: SGS
+    check_type: ContextAttestation
+    config_path: schema/governance/GatingIntegrityCheckManifest.schema.json # GICM
+    failure_protocol: RRP
+
+  s03_policy_veto:
+    agent: GAX
+    check_type: Veto_PVLM
+    config_path: config/GAX/AxiomaticConstraintVectorDefinition.json # ACVD defines logic
+    failure_protocol: RRP
+
+  s04_stability_veto:
+    agent: GAX
+    check_type: Veto_MPAM
+    config_path: config/GAX/AxiomaticConstraintVectorDefinition.json # ACVD defines logic
+    failure_protocol: RRP
+
+  s06_context_fulfillment:
+    agent: SGS
+    check_type: ContextVerification_ECVM
+    failure_protocol: RRP
+
+  s10_threshold_validation:
+    agent: SGS
+    check_type: UMA_Validation
+    required_configs:
+      - path: config/GAX/UtilityFunctionRegistry.yaml # UFRM (S02)
+      - path: config/GAX/FinalityThresholdConfig.yaml # CFTM (Epsilon)
+    failure_protocol: STANDARD
+
+  s11_finality_check:
+    agent: GAX
+    check_type: ACV_P01_PASS
+    output_schema: schema/governance/P01_Finality_Result.schema.json
+    failure_protocol: RRP

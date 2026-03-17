@@ -1,0 +1,26 @@
+{
+  "description": "Standardized action definitions for integrity violation responses across core AGI modules (PSIM, RACM).",
+  "definitions_version": "1.0.0",
+  "actions": {
+    "REJECT_HARDSUSPEND_A": {
+      "level": "CRITICAL",
+      "description": "Immediate halt of processing thread (Thread-Local Suspend). Diagnostic flag Primary Channel (Low-Latency). No retry.",
+      "implementation": "EXEC_HALT_T_LOCAL"
+    },
+    "REJECT_HARDSUSPEND_B": {
+      "level": "CATASTROPHIC",
+      "description": "Immediate halt of dependent execution cluster. Diagnostic flag Primary and Secondary channels (Secure Log Write). Initiate traceback.",
+      "implementation": "EXEC_HALT_C_DEP"
+    },
+    "ISOLATE_SHUTDOWN": {
+      "level": "CATASTROPHIC_SEGMENT",
+      "description": "Force termination of the originating manager process and segment isolation (Sandbox purge). Notify Core Sentinel.",
+      "implementation": "SYSTEM_ISOLATE_N_CORE"
+    },
+    "ADVISORY": {
+      "level": "WARNING",
+      "description": "Log anomaly in tertiary channel. Allow continued processing based on current trust heuristic.",
+      "implementation": "LOG_TERTIARY_CONTINUE"
+    }
+  }
+}

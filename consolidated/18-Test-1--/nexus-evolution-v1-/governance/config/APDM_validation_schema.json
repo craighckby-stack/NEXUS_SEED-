@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "policy_definition": {
+    "required": ["policy_id", "priority", "enforcement_action", "trigger"],
+    "policy_id": {"type": "string", "pattern": "^[A-Z]{3}-[0-9]{3}$"},
+    "priority": {"type": "integer", "min": 0, "max": 9},
+    "enforcement_action": {"enum": ["BLOCK", "ALLOW", "REM_ONLY", "LOG_ONLY"]}
+  },
+  "constraint_rules": {
+    "max_active_policies": 500
+  }
+}

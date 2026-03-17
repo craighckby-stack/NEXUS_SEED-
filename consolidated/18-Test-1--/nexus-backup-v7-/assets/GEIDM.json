@@ -1,0 +1,12 @@
+{
+  "schema_id": "GEIDM_V1.0",
+  "description": "Governance Emergency Interlock Definition Manifest. Defines cryptographic requirements for HIL-T authorization, mandatory during SIH recovery.",
+  "attestation_policy": {
+    "minimum_signer_threshold": 3,
+    "required_key_type": ["Secp256k1", "Ed25519"],
+    "authorization_window_seconds": 300
+  },
+  "allowed_hac_identities": [
+    {"identity": "HIL_OVR-A01", "cryptographic_root_hash": "sha256:...", "required_factors": ["MF1_HardwareToken", "MF2_GeoFenced" ]}
+  ]
+}

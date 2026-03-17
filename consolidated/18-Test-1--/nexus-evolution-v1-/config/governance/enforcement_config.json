@@ -1,0 +1,26 @@
+{
+  "module_name": "Governance Enforcement Engine (GEE)",
+  "monitoring_interval_ms": 100,
+  "monitored_targets": [
+    "metrics/trust_score",
+    "metrics/systemic_risk_index",
+    "system/resource_allocator"
+  ],
+  "protocol_mapping": {
+    "TRP-001": {
+      "path": "protocols/trust_reconciliation.js",
+      "priority": 95,
+      "dependencies": ["SecurityKernel", "ExternalCommmsAdapter"]
+    },
+    "RMM": {
+      "path": "protocols/risk_mitigation.js",
+      "priority": 80,
+      "dependencies": ["ResourceScheduler"]
+    }
+  },
+  "alerting": {
+    "internal_log_level": "WARNING",
+    "external_reporting_active": true,
+    "critical_failure_email": "oversight@aoc.gov"
+  }
+}

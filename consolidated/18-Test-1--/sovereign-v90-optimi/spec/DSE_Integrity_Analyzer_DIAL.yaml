@@ -1,0 +1,31 @@
+# DIAL Specification: DSE Integrity Analyzer Utility
+
+version: 1.0
+protocol_dependency: DSE V94.6
+
+interface:
+  function: analyze_halt
+  description: Executes deterministic Root Cause Analysis (RCA) on an Integrity Halt (IH) event.
+  
+input_schema:
+  required_artifacts: # Integrity Locks generated during GSEP-C flow
+    - CSR (Configuration Snapshot Receipt) # GAX III
+    - ECVM (Execution Context Validation Map) # GAX II
+    - TEMM (Transition Efficacy Measure) # GAX I
+  required_logs: # Structured failure traces
+    - MPAM (Matrix Policy Abstraction Map)
+    - SGS (System Governance Snapshot)
+    - ADTM (Axiomatic Drift Threshold Metric)
+
+execution_mandate:
+  - Must execute RCA deterministically based solely on provided inputs.
+  - Must be immutable (write-once) operationally.
+  - Must provide a definitive trace path linking failure logs (MPAM, SGS, ADTM) back to the relevant artifact (CSR, ECVM, TEMM) failure point.
+  
+output_schema:
+  report_type: Immutable Fault Report (IFR)
+  content:
+    - halt_stage: S[xx] (Stage where IH occurred)
+    - failing_axiom: GAX [I, II, or III]
+    - definitive_root_cause_id: Hash identifying the causal event within the trace logs.
+    - final_rollback_status: RRP completion status.

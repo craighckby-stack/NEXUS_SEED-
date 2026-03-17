@@ -1,0 +1,22 @@
+{
+  "critical_configurations": [
+    {
+      "file": "config/key_rotation_schedule.json",
+      "required_checks": [
+        {"type": "minimum_rotation_days", "value": 30},
+        {"type": "key_strength", "algorithm": "ECC-521", "status": "MANDATORY"}
+      ]
+    },
+    {
+      "file": "config/acvm_bounds.json",
+      "required_checks": [
+        {"type": "max_memory_cap", "threshold": "95%", "action_on_breach": "P-M02"},
+        {"type": "max_execution_threads", "limit": 64}
+      ]
+    }
+  ],
+  "semantic_policy_enforcement": {
+    "GAX_V_integrity": "Ensures that configurations adhere to mandated security baseline before EMSU sealing.",
+    "auditor": "PSCA"
+  }
+}

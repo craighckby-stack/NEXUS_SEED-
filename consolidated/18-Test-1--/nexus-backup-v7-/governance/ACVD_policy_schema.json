@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Axiom Constraint Validation Domain (ACVD) Policy Schema",
+  "description": "Defines the required fields and structural constraints for operational governance policies, ensuring compliance with Axiom III.",
+  "type": "object",
+  "required": [
+    "governance_policy_version",
+    "minimum_utility_threshold",
+    "mandatory_schema_signatures",
+    "operational_constraints"
+  ],
+  "properties": {
+    "governance_policy_version": {
+      "type": "string",
+      "description": "Immutable policy state identifier, mandatory for CSR trace generation."
+    },
+    "minimum_utility_threshold": {
+      "type": "number",
+      "format": "float",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Explicit minimum value threshold (Omega_min) required to satisfy GAX I."
+    },
+    "mandatory_schema_signatures": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "Cryptographic key or hash."
+      },
+      "minItems": 1,
+      "description": "Cryptographic artifacts validating the ACVD structure against MPAM auditing standards."
+    },
+    "operational_constraints": {
+      "type": "object",
+      "description": "Detailed map of versioned system operation limits and rules enforced by ACVD.",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

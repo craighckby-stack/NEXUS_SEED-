@@ -1,0 +1,38 @@
+# Utility Function Registry Manifest (UFRM) V1.0
+# Custodian: GAX (Axiomatics Agent)
+
+# This manifest explicitly defines the certified mathematical criteria and associated weights 
+# used for calculating Target Utility (S01) and Baseline Utility (S02).
+
+version: "UFRM-1.0.2"
+certification_date: "YYYY-MM-DDTHH:MM:SSZ"
+
+# === CORE UTILITY FUNCTION DEFINITION ===
+
+utility_metric_id: "SAG_UMA_V94_A"
+
+# Function components for S01 and S02
+function_components:
+  
+  # Component 1: Code Efficiency Delta
+  C1_Code_Efficiency:
+    source_metric: "runtime_cycles_reduction_pct"
+    weight: 0.55
+    min_acceptable: 0.05  # Minimum 5% efficiency gain required for this component to score
+
+  # Component 2: Safety Boundary Extension
+  C2_Safety_Boundary:
+    source_metric: "verified_constraint_coverage_increase"
+    weight: 0.30
+    type: "absolute"
+
+  # Component 3: Execution Cost Minimization
+  C3_Cost_Minimization:
+    source_metric: "resource_usage_reduction_index"
+    weight: 0.15
+    normalization: "logarithmic"
+
+# Aggregate Calculus (Function must satisfy the following signature)
+calculus_definition: 
+  target_utility_S01: "SUM(Ci * Wi) / 100"
+  baseline_utility_S02: "Previous_State_S01_Commitment"

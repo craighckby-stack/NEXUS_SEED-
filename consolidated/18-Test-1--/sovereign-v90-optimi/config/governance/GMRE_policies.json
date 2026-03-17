@@ -1,0 +1,13 @@
+{
+  "description": "Configuration policies and adaptive thresholds for the Governance Model Refinement Engine (GMRE). These values are targets for self-modification via M-01 Intents.",
+  "version": "1.0.0",
+  "thresholds": {
+    "P01_Veto_Max": 0.045, 
+    "Stage3_Latency_Max": 1200, 
+    "SEA_Latency_Correlation_Weight": 0.15
+  },
+  "protocols": {
+    "refinement_interval_ms": 3600000,
+    "max_intents_per_cycle": 1
+  }
+}

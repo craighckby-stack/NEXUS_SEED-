@@ -1,0 +1,19 @@
+{
+  "engine_version": "1.0",
+  "validation_rules": {
+    "minimum": {"description": "Numeric lower bound.", "params": ["value", "error_code"]},
+    "max_length": {"description": "String length upper bound.", "params": ["value"]},
+    "max_precision": {"description": "Maximum number of decimal places allowed.", "params": ["value"]},
+    "regex_match": {"description": "Must match provided regular expression, potentially restricted by geography.", "params": ["pattern", "countries"]}
+  },
+  "transformation_steps": {
+    "trim": {"description": "Removes leading/trailing whitespace.", "params": []},
+    "capitalize_words": {"description": "Capitalizes the first letter of every word.", "params": []},
+    "standardize_timezone": {"description": "Converts datetime field to a target timezone.", "params": ["target"]},
+    "coerce_to_iso8601": {"description": "Ensures date/time is in ISO 8601 format.", "params": []},
+    "round_to_decimals": {"description": "Rounds numeric value to specified precision.", "params": ["precision"]}
+  },
+  "sensitivity_levels": [
+    "GENERAL", "FINANCIAL", "PII", "SYSTEM", "HIGH_FINANCIAL"
+  ]
+}
