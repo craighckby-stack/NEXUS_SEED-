@@ -1,93 +1,95 @@
-{
-  "improvedCode": "export class DisposableTokenService {
-    private _linkedToken: DisposableToken | null;
-    private _cancelled: boolean;
-    private readonly _disposedCount = 1;
-    private readonly _tokens = new Set<DisposableToken>();
+#!/bin/bash
 
-    constructor(public linkedToken: DisposableToken | null, private readonly eventBus: EventBus) {}
+DisposableTokenService() {
+    local linkedToken=$1
+    local eventBus=$2
+    local linkedTokens=()
+    local disposalListeners=()
 
-    get disposedCount(): number {
-      return this._disposedCount;
+    linked_tokens() {
+        tokens=()
+        if [ -n "$linkedToken" ]; then
+            tokens+=("$linkedToken")
+            eval "$linkedToken getLinkedTokens" | while read -r linkedToken; do
+                tokens+=("$linkedToken")
+            done
+        fi
+        echo "${tokens[@]}"
     }
 
-    get cancelled(): boolean {
-      return this._cancelled || this._linkedToken?.cancelled;
+    cancel() {
+        local reason=$1
+        if [ -n "$linkedToken" ]; then
+            if $linkedToken cancel "$reason" && $linkedToken cancelled; then
+                $linkedToken updateCancellationStatus "$reason"
+            fi
+        fi
+        echo "\"cancelled\": true"
     }
 
-    get linkedTokens(): DisposableToken[] {
-      if (this.linkedToken) {
-        this._linkTokens(this.linkedToken);
-      }
-      return Array.from(this._tokens);
+    cancel_token() {
+        $1 cancel "$1" && echo "$1 cancelled"
     }
 
-    private _linkTokens(token: DisposableToken): void {
-      const tokens = new Set();
-      tokens.add(this._linkedToken);
-      token.getLinkedTokens().forEach((t) => tokens.add(t));
-      this._tokens = tokens;
+    disposal_listener_count=0
+    dispose() {
+        ((disposal_listener_count++))
+        local token=$1
+        eventBus.emit "dispose" "$token"
     }
 
-    async dispose(): Promise<void> {
-      if (this.linkedToken) {
-        await this._cancelLinkedToken('unknown reason');
-      }
-      this._cancelled = true;
+    async cancel_linked_token() {
+        if [ -n "$linkedToken" ]; then
+            await cancel "$1"
+        fi
     }
 
-    private async _cancelLinkedToken(reason: string): Promise<void> {
-      if (this._linkedToken) {
-        await this._linkedToken.cancel(reason);
-      } else {
-        throw new Error('Linked token is null');
-      }
+    cancelled=false
+    on_cancelled() {
+        cancelled=true
     }
 
-    addListener(callback: (token: DisposableToken) => void, context: DisposableToken): void {
-      this._disposalListeners.add({ callback, context });
-      if (context.cancelled) {
-        callback(context);
-        this.removeListener(context);
-      }
+    dispose() {
+        ((disposal_listener_count++))
+        local token=$1
+        for listener in "${disposalListeners[@]}"; do
+            if echo "${listener.callback}" | grep -q "^$"; then
+                eval "$listener.callback $token"
+            fi
+        done
     }
 
-    removeListener(context: DisposableToken): void {
-      this._disposalListeners.delete({ callback: () => null, context });
+    get_cancelled() {
+        echo "$cancelled"
     }
-  }
+}
 
-  export function _hasAnyListeners(): boolean {
-    return this.disposalListeners.size > 0;
-  }
+DisposableTokenServiceEnhancer() {
+    local token=$1
+    local eventBus=$2
+    local disposalListeners=()
+    enhancedDisposableTokenService=$(DisposableTokenService "$token" "$eventBus")
 
-  export function _getAllListeners(): { callback: (token: DisposableToken) => void; context: DisposableToken }[] {
-    return Array.from(this.disposalListeners).map(({ callback, context }) => ({ callback, context }));
-  }
+    dispose() {
+        disposalListeners+=("{\"callback\": \"$1\", \"context\": \"$2\" }")
+        enhancedDisposableTokenService.dispose "$1"
+    }
 
-  async _executeTokens() {
-    // Assuming linkedTokens is already obtained and ready to execute
-    return this.linkedTokens.map(async (token) => {
-      try {
-        await token.cancel('unknown reason'); // you may need to pass reason
-        console.log('Token successfully cancelled.');
-        await token.disposed?.then((_) => console.log('Listener executed'));
-        return true;
-      } catch (error) {
-        console.error(`Error cancelling token: ${error}`);
-        return false;
-      }
-    });
-  }
-",
-  "summary": "Implemented asynchronous token cancellation and disposal handlers, refactored getLinkedTokens, added token disposal listeners, and improved naming",
-  "emergentTool": true,
-  "tool": {
-    "name": "DisposableTokenService",
-    "description": "Manages and cancels disposable tokens, provides disposal listeners, and ensures concurrent cancellation",
-    "serializedFn": ""
-  },
-  "strategicDecision": "Minimize dependencies and coupling to provide thread-safety through asynchronous token cancellation",
-  "priority": 8,
-  "bestSuitedRepo": "spring-projects/spring-framework"
+    has_any_listeners() {
+        [ ${#disposalListeners[@]} -gt 0 ]
+    }
+
+    get_all_listeners() {
+        local listeners=()
+        for listener in "${disposalListeners[@]}"; do
+            listeners+=("$listener")
+        done
+        echo "${listeners[@]}"
+    }
+
+    async dispose_callback() {
+        for listener in "${disposalListeners[@]}"; do
+            eval "$listener.callback"
+        done
+    }
 }
