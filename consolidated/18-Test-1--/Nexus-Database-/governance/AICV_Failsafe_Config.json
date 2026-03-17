@@ -1,0 +1,17 @@
+{
+  "vei_protocol_version": "1.2.0",
+  "failsafe_routing_policy": {
+    "F-01_LINEAGE_DISCONTINUITY": {
+      "trigger_behavior": "HARD_STOP",
+      "escalation_channel": "CRITICAL_GOVERNANCE_BUS",
+      "message_priority": 99,
+      "notification_targets": ["MCR_Interface", "GSEP_State_Coordinator"]
+    },
+    "F-02_POLICY_VIOLATION": {
+      "trigger_behavior": "SOFT_STOP",
+      "escalation_channel": "AUDIT_LOG_STREAM",
+      "message_priority": 50
+    }
+  },
+  "vei_timeout_ms": 500
+}

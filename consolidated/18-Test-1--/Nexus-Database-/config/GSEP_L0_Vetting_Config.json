@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "GSEP_L0_Vetting_Config_V1.0.0",
+  "title": "GSEP L0 Mandate Vetting Configuration",
+  "description": "Defines runtime thresholds and parameters for SCR validation of MIS inputs.",
+  "runtime_settings": {
+    "max_payload_size_bytes": 1048576,
+    "active_evaluation_engine": "SVA_V7.3.1",
+    "logging_level": "HIGH_CRITICALITY"
+  },
+  "compliance_thresholds": {
+    "max_risk_score_L2": 0.2,
+    "min_efficacy_score_Hotfix": 0.9,
+    "override_justification_min_length": 100
+  },
+  "priority_mapping": {
+    "ATOMIC": 100,
+    "IMMEDIATE": 80,
+    "SCHEDULED": 40
+  }
+}

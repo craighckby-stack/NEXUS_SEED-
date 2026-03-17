@@ -1,0 +1,15 @@
+{
+  "component_id": "ValidationExecutionSandbox_VES",
+  "isolation_level": "CONTAINERIZED_HARDENED",
+  "resource_limits": {
+    "cpu_quota_ms": 500,
+    "memory_limit_mb": 256,
+    "max_runtime_ms": 5000
+  },
+  "governance_hooks": [
+    "CHECK_ACM_INTEGRITY",
+    "EFFICACY_SCORE_PASS",
+    "RISK_ASSESSMENT_L3"
+  ],
+  "default_behavior": "FAIL_CLOSED"
+}

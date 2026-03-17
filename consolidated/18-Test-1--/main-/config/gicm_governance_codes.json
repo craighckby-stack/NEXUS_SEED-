@@ -1,0 +1,36 @@
+{
+  "description": "Centralized mapping of Governance, Integrity, and Compliance Monitoring (GICM) violation codes, their severity, and enforcement metadata.",
+  "schema_version": "1.0.0",
+  "codes": [
+    {
+      "code": "GICM_L5_DATA_LEAK",
+      "severity": "CRITICAL",
+      "description": "System integrity compromise leading to unauthorized data exposure.",
+      "enforcement_action": "IMMEDIATE_STOP"
+    },
+    {
+      "code": "INTEGRITY_COMPROMISED",
+      "severity": "CRITICAL",
+      "description": "A core state machine or operational guarantee has been violated.",
+      "enforcement_action": "ALERT_OPS"
+    },
+    {
+      "code": "CONSTRAINT_VIOLATION_SCHEMA",
+      "severity": "HIGH",
+      "description": "A mandatory data schema constraint failed validation.",
+      "enforcement_action": "REJECT_INPUT"
+    },
+    {
+      "code": "MISSING_REQUIRED_FIELD",
+      "severity": "HIGH",
+      "description": "A necessary field for transactional integrity was null or missing.",
+      "enforcement_action": "REJECT_INPUT"
+    },
+    {
+      "code": "DATA_STALE_INFO",
+      "severity": "LOW",
+      "description": "Data object is older than synchronization threshold.",
+      "enforcement_action": "LOG_WARNING"
+    }
+  ]
+}

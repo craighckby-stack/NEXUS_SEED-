@@ -1,0 +1,18 @@
+{
+  "generation": 15,
+  "capabilities": {
+    "language": 0.8889183879108925,
+    "coding": 0.9887076543029798,
+    "execution": 1,
+    "learning": 1,
+    "overall": 0.969406510553468
+  },
+  "dnaCount": 2565,
+  "autonomyStats": {
+    "llmCalls": 0,
+    "systemDecisions": 0,
+    "dnaUsed": 1,
+    "selfEvolved": 2
+  },
+  "saturationGuidelines": ""
+}

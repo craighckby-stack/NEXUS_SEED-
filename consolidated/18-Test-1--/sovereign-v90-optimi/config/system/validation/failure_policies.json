@@ -1,0 +1,30 @@
+{
+  "description": "Defines runtime behaviors for Preflight Validation (PFR) failures based on artifact criticality levels (0-100). This couples validation outcome to operational response.",
+  "policies": [
+    {
+      "level_range": [80, 100],
+      "name": "Sovereign Abort Protocol (SAP)",
+      "action": "HALT_IMMEDIATE",
+      "reporting": ["ERROR_LOG", "PAGER_DUTY", "CORE_DUMP"],
+      "log_severity": "FATAL"
+    },
+    {
+      "level_range": [60, 79],
+      "name": "Critical Degraded Mode (CDM)",
+      "action": "FALLBACK_OR_DEGRADE",
+      "reporting": ["ERROR_LOG", "SLACK_ALERT"],
+      "log_severity": "CRITICAL",
+      "fallback_config": {
+        "service": "PFR_Monitor",
+        "method": "INITIATE_FAILOVER"
+      }
+    },
+    {
+      "level_range": [0, 59],
+      "name": "Advisory Warning (AW)",
+      "action": "LOG_AND_PROCEED",
+      "reporting": ["WARNING_LOG"],
+      "log_severity": "WARNING"
+    }
+  ]
+}

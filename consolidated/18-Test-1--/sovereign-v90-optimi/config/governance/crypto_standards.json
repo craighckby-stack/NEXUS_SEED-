@@ -1,0 +1,18 @@
+{
+  "protocol_version": "V94.1_CS1.0",
+  "commitment_hash": {
+    "algorithm": "SHA-256",
+    "encoding": "hex",
+    "length": 64,
+    "pattern_regex": "^[0-9a-fA-F]{64}$"
+  },
+  "agent_signature": {
+    "algorithm": "Ed25519",
+    "encoding": "base64url",
+    "min_length": 100
+  },
+  "timestamp_format": {
+    "standard": "ISO-8601",
+    "precision": "milliseconds"
+  }
+}

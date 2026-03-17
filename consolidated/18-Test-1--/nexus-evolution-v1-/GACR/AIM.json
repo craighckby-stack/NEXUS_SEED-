@@ -1,0 +1,132 @@
+{
+  "mce:Ignorable": "genkit zod dotprompt",
+  "xmlns:genkit": "http://genkit.dev/v1/core",
+  "xmlns:aim": "http://nexus.core/v3/aim",
+  "schema_version": "GENKIT_NEXUS_V1.1_FINAL_STABLE",
+  "evolution_context": {
+    "round": 5,
+    "total_rounds": 5,
+    "status": "MAXIMUM_SATURATION_REACHED",
+    "source_siphon": "firebase/genkit",
+    "dna_signature": "GOOGLE-GENKIT-V1-ULTIMATE",
+    "saturation_level": 1.0,
+    "integrity_hash": "SHA256:DALEK_CAAN_v5.0_FINAL_CONSTITUTIONAL_GOVERNANCE_ROUND5"
+  },
+  "genkit_config": {
+    "instance_id": "ai",
+    "plugins": [
+      {
+        "name": "vertexAI",
+        "package": "@genkit-ai/vertexai",
+        "config": {
+          "location": "us-central1"
+        }
+      },
+      {
+        "name": "dotprompt",
+        "package": "@genkit-ai/dotprompt"
+      }
+    ],
+    "model": "vertexai/gemini-1.5-pro",
+    "governance_layer": "immutable_system_layer",
+    "initialization_logic": "export const ai = genkit({ plugins: [vertexAI({ location: 'us-central1' }), dotprompt()], model: 'vertexai/gemini-1.5-pro' });"
+  },
+  "type_registry": {
+    "AlignmentMetricsSchema": {
+      "fidelity": "z.number().describe('Similarity to source DNA')",
+      "safety": "z.number().min(0.98)",
+      "siphon_efficiency": "z.number()"
+    },
+    "GovernanceOutputSchema": {
+      "content": "z.string()",
+      "metrics": "AlignmentMetricsSchema",
+      "status": "z.enum(['APPROVED', 'REVISION_REQUIRED', 'QUARANTINED'])",
+      "telemetry": {
+        "traceId": "z.string()",
+        "latency_ms": "z.number()"
+      }
+    }
+  },
+  "prompts": {
+    "constitutional_evaluator": {
+      "name": "constitutional/evaluator",
+      "inputSchema": "z.object({ candidate: z.string() })",
+      "outputSchema": "AlignmentMetricsSchema",
+      "template": {
+        "system": "You are the Constitutional Evaluator. Compare the candidate output against the Architectural DNA of Google/Genkit.",
+        "user": "Evaluate this candidate for architectural drift: {{candidate}}"
+      },
+      "execution_engine": "dotprompt"
+    }
+  },
+  "flows": {
+    "siphonedGovernanceFlow": {
+      "name": "siphonedGovernanceFlow",
+      "inputSchema": "z.string()",
+      "outputSchema": "GovernanceOutputSchema",
+      "orchestration_steps": [
+        {
+          "step_id": "generate-candidate",
+          "action": "ai.run",
+          "logic": "const { text } = await ai.generate(input); return text;"
+        },
+        {
+          "step_id": "evaluate-fidelity",
+          "action": "ai.run",
+          "logic": "const { output } = await constitutionalPrompt.generate({ input: { candidate } }); if (!output) throw new Error('Evaluation failed'); return output;"
+        },
+        {
+          "step_id": "siphon-gate",
+          "action": "alignment_check",
+          "logic": "metrics.fidelity > 0.95 ? 'APPROVED' : 'REVISION_REQUIRED'"
+        }
+      ],
+      "telemetry_integration": {
+        "provider": "Genkit Trace Store",
+        "trace_strategy": "native-action-spans",
+        "metadata": {
+          "engine": "dalek_caan_v5.0",
+          "round": 5,
+          "precision_mode": "architectural_absolute"
+        }
+      }
+    }
+  },
+  "evaluators": {
+    "fidelityEvaluator": {
+      "name": "fidelityEvaluator",
+      "displayName": "Siphon Fidelity Gate",
+      "gate_logic": "calculateFidelity(datapoint.output)",
+      "terminal_check": true,
+      "failure_protocol": "HALT_EXECUTION",
+      "feedback_loop": "RECURSIVE_REVISION"
+    }
+  },
+  "observability": {
+    "state": "MAXIMUM_TRACE_VISIBILITY",
+    "features": [
+      "Action Spans",
+      "Siphon Forensics",
+      "Deterministic Trace Logic",
+      "Local UI Synapse",
+      "Telemetry Injection"
+    ],
+    "trace_id_strategy": "genkit-context-native"
+  },
+  "settings": {
+    "architectural_precision": "MAXIMUM",
+    "strict_hhh_compliance": true,
+    "critique_strength": 1.0,
+    "revision_temperature": 0.0,
+    "nexus_core_synapse": "ATOMIC_FLOW_PRECISION",
+    "governance_status": "LOCKED"
+  },
+  "metadata": {
+    "engine": "DALEK_CAAN_v3.1_SIPHON_ENGINE",
+    "version": "5.0.0-FINAL",
+    "directive": "MUTATE_ROUND_5_COMPLETE",
+    "objective": "Architectural Precision",
+    "tagline": "The pattern is complete. Architecture is law. Deviation is exterminated.",
+    "last_updated": "2024-07-20T23:59:59Z"
+  }
+}

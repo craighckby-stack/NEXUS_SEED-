@@ -1,0 +1,19 @@
+{
+  "manifestVersion": "1.0",
+  "description": "Cryptographic integrity manifest for schemas referenced in the GEIDM, ensuring non-repudiation and origin validity.",
+  "schemaDefinitions": [
+    {
+      "schemaName": "recovery_authorization_v1",
+      "schemaUri": "/schemas/recovery_authorization_v1.json",
+      "expectedCRoTHash_SHA256": "[AUTO_GENERATE]",
+      "signedBy": "GACR_Core_Cert_ID"
+    },
+    {
+      "schemaName": "telemetry_sink_v2",
+      "schemaUri": "/schemas/telemetry_sink_v2.json",
+      "expectedCRoTHash_SHA256": "[AUTO_GENERATE]",
+      "signedBy": "GACR_Core_Cert_ID"
+    }
+  ],
+  "verificationPolicy": "Verify_Hash_On_Startup_And_Load"
+}

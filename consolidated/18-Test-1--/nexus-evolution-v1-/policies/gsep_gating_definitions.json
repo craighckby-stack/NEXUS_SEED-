@@ -1,0 +1,22 @@
+{
+  "P-01_ACVD_FINALITY": {
+    "description": "Atomic Consensus Validation Dependency Check: Ensures all primary state vectors (CSR, ECVM, TEMM) have achieved immutable consensus confirmation (ACD) before commitment lock is issued.",
+    "check_type": "DataIntegrity/Consensus",
+    "required_conditions": [
+      {
+        "artifact": "A02_CSR",
+        "state_target": "ACD_CONFIRMED"
+      },
+      {
+        "artifact": "A04_ECVM",
+        "state_target": "ACD_CONFIRMED"
+      },
+      {
+        "artifact": "A05_TEMM",
+        "state_target": "ACD_CONFIRMED",
+        "min_time_s": 5
+      }
+    ],
+    "transition_on_fail": "S11_AUDIT_LOG_FALLBACK"
+  }
+}

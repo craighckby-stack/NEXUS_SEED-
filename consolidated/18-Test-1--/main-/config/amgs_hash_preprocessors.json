@@ -1,0 +1,24 @@
+{
+  "description": "Defines and configures hash preprocessing routines referenced by AMGS artifact strategies. Ensures integrity checks use verifiable and consistent pre-hashing transformations.",
+  "preprocessors": {
+    "NONE": {
+      "description": "No preprocessing applied. Raw file content is hashed.",
+      "implementation_path": "core/hashing/preprocessors/none.py"
+    },
+    "JSON_STRIP_COMMENTS": {
+      "description": "Removes C-style comments (// and /* */) from JSON files before hashing.",
+      "implementation_path": "core/hashing/preprocessors/json_comment_stripper.py",
+      "parameters": {
+        "strip_mode": "C_STYLE"
+      }
+    },
+    "SOURCE_NORMALIZE": {
+      "description": "Standardizes source code whitespace/encoding to ensure byte-for-byte reproducibility regardless of development environment linting.",
+      "implementation_path": "core/hashing/preprocessors/source_normalizer.py",
+      "parameters": {
+        "trim_whitespace": true,
+        "ensure_encoding": "UTF-8"
+      }
+    }
+  }
+}

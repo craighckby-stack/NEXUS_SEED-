@@ -1,0 +1,48 @@
+{
+  "version": "2.0.0",
+  "meta": {
+    "description": "Configuration parameters for the multi-modal resource cost forecasting engine.",
+    "update_reason": "Refactored for modularity, adaptive coefficients, and multi-tiered alerting."
+  },
+  "global_timing": {
+    "prediction_horizon_sec": 300,
+    "calculation_frequency_sec": 5,
+    "input_averaging_window_sec": 60
+  },
+  "forecasting_engine": {
+    "selected_model": "AdaptiveExponentialSmoothing",
+    "inputs_required": [
+      "tokens_consumed_rate",
+      "gpu_seconds_rate",
+      "storage_iops_cost",
+      "read_write_latency_p99"
+    ],
+    "model_params": {
+      "AdaptiveExponentialSmoothing": {
+        "alpha_cost": 0.1,
+        "beta_trend": 0.01,
+        "gamma_seasonality": 0.05,
+        "adaptive_rate_limit": 0.005,
+        "initial_state_mode": "warm_start"
+      },
+      "RecurrentNeuralNetwork": {
+        "is_enabled": false,
+        "h_layers": 2
+      }
+    }
+  },
+  "input_preprocessing": {
+    "enabled": true,
+    "scaling_method": "MinMaxScaler",
+    "normalization_range": [0, 1]
+  },
+  "alerting_config": {
+    "enabled": true,
+    "reference_metric": "PredictedNormalizedCost",
+    "thresholds": {
+      "warning": 0.85,
+      "critical": 0.98,
+      "kill_switch": 1.10
+    }
+  }
+}

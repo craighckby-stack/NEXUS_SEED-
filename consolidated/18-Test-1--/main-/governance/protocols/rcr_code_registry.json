@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://governance.sovereign.agi/protocols/rcr/rcr_code_registry_v1_0.json",
+  "title": "Root Cause Resolution Code Registry",
+  "description": "A centralized registry defining standardized RCR trigger codes, their default severity, human-readable descriptions, and recommended initial automated remediation targets.",
+  "type": "object",
+  "properties": {
+    "RCR_CODE": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^RCR-[0-9]{3}$",
+            "description": "The standardized RCR code (e.g., RCR-101)."
+          },
+          "default_priority": {
+            "type": "string",
+            "enum": ["P0_CORE_FAILURE", "P1_SERVICE_DEGRADATION", "P2_WARNING"]
+          },
+          "short_description": {
+            "type": "string"
+          },
+          "long_description": {
+            "type": "string"
+          },
+          "mitigation_target": {
+            "type": "string",
+            "description": "Internal service/module responsible for initial automated resolution attempt."
+          }
+        },
+        "required": ["code", "default_priority", "short_description", "mitigation_target"]
+      }
+    }
+  },
+  "required": ["RCR_CODE"]
+}

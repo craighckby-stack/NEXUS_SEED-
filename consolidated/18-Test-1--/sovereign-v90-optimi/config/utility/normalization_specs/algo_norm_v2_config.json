@@ -1,0 +1,14 @@
+{
+  "algorithm_id": "ALGO_NORM_V2",
+  "implementation_version": "1.1.2",
+  "description": "Standardized Non-linear Scaling implementation parameters for governing S-Metrics.",
+  "parameters": {
+    "scaling_function": "OptimizedSigmoid",
+    "target_range": [0.0, 1.0],
+    "clipping_thresholds": {
+      "lower_percentile": 0.001,
+      "upper_percentile": 0.999
+    },
+    "stability_epsilon": 1e-6
+  }
+}

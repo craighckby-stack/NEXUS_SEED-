@@ -1,0 +1,29 @@
+{
+  "description": "Configuration for Predictive Constraint Sentinel (PCS) Action Profiles. Maps standardized action sets to decoupled IDs.",
+  "profiles": {
+    "PROFILE_PIM_TELEMETRY": {
+      "L1": [
+        { "action_id": "ACTION_LOG_PRIORITY", "config": { "level": "PIM" } },
+        { "action_id": "ACTION_REQUEST_TELEMETRY_SAMPLE", "config": {} }
+      ],
+      "L2": [
+        { "action_id": "ACTION_DIAGNOSE_FAILURE_PREDICTION", "config": {} }
+      ]
+    },
+    "PROFILE_DRO_MITIGATION": {
+      "L1": [
+        { "action_id": "ACTION_NOTIFY_IH_WATCH", "config": { "context": "RESOURCE_MARGIN" } }
+      ],
+      "L2": [
+        { "action_id": "ACTION_REQUEST_NONCRITICAL_RELEASE", "config": {} },
+        { "action_id": "ACTION_INITIATE_SWAP", "config": { "target": "ACVM" } }
+      ]
+    },
+    "PROFILE_DHC_THROTTLE": {
+      "L3": [
+        { "action_id": "ACTION_THROTTLE_INPUT_ACQUISITION", "config": { "reduction_rate": 0.25 } },
+        { "action_id": "ACTION_HALT_STREAM", "config": { "stream_id": "DHC_PRIMARY" } }
+      ]
+    }
+  }
+}

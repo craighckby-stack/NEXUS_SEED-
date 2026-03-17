@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "modes": {
+    "HARD_FAIL": {
+      "action": "HALT_EXECUTION",
+      "logging_level": "CRITICAL",
+      "remediation_strategy": "TRIGGER_QUARANTINE_PROTOCOL"
+    },
+    "SOFT_WARNING": {
+      "action": "LOG_AND_CONTINUE",
+      "logging_level": "WARNING",
+      "remediation_strategy": "ASYNC_ANALYSIS_JOB"
+    },
+    "QUARANTINE": {
+      "action": "ISOLATE_PROCESS_SPACE",
+      "logging_level": "EMERGENCY",
+      "remediation_strategy": "REPORT_AND_REBOOT"
+    }
+  }
+}

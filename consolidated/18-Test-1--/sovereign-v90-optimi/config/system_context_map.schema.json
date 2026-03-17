@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agi.sovereign.v94/config/system_context_map.schema.json",
+  "title": "Sovereign AGI Runtime Context Map",
+  "description": "Defines the official, globally accessible context variables used by the Policy Enforcement Point (PEP) for evaluating activation_condition fields in governance constraints.",
+  "type": "object",
+  "properties": {
+    "system": {
+      "type": "object",
+      "description": "Variables related to the AGI's internal state and hardware.",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "safe_mode",
+            "efficiency_mode",
+            "evolutionary_mode",
+            "audit_mode"
+          ]
+        },
+        "load_average": {
+          "type": "number",
+          "description": "Current system load average."
+        }
+      },
+      "required": ["mode", "load_average"]
+    },
+    "mission": {
+      "type": "object",
+      "description": "Variables related to the current operational mission.",
+      "properties": {
+        "security_level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "criticality_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1.0
+        },
+        "is_production_environment": {
+          "type": "boolean"
+        }
+      },
+      "required": ["security_level", "is_production_environment"]
+    },
+    "time": {
+      "type": "object",
+      "description": "Variables related to temporal data.",
+      "properties": {
+        "hour_utc": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 23
+        },
+        "is_evolution_window": {
+          "type": "boolean"
+        }
+      },
+      "required": ["hour_utc"]
+    }
+  },
+  "required": [
+    "system",
+    "mission",
+    "time"
+  ]
+}

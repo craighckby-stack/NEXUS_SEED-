@@ -1,0 +1,27 @@
+{
+  "cmac_version": "1.0.0",
+  "policy_hash": "[MUST BE G0 SEALED HASH]",
+  "compliance_contracts": [
+    {
+      "contract_id": "C001_Input_Bias_Tolerance",
+      "target_metric": "Input_State_Skew",
+      "enforcement_gate": "G2",
+      "bounds": {
+        "max_deviation_percent": 0.005,
+        "failure_mode": "P-C04"
+      }
+    },
+    {
+      "contract_id": "C002_Output_Predictive_Range",
+      "target_metric": "Finality_Output_Mean",
+      "enforcement_gate": "G2/G3",
+      "bounds": {
+        "min": -100.0,
+        "max": 100.0,
+        "failure_mode": "P-C04"
+      }
+    }
+  ],
+  "attestation_frequency": "REALTIME_MICROBATCH",
+  "logging_schema_path": "protocol/cmac_telemetry_schema.yaml"
+}

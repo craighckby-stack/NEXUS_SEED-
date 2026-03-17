@@ -1,0 +1,37 @@
+############################################################
+# TEDS Integrity Policy Schema (TIPS V1.0)
+# Defines the mandatory structure and chaining requirements 
+# for the Trusted Event Data Stream (TEDS).
+############################################################
+
+metadata:
+  policy_version: 1.0
+  agent_responsible: CRoT
+  hash_requirement: SHA3-512
+
+integrity_constraints:
+  chaining_mechanism: StateRoot Chaining (SRL-Link)
+  field_immutability: [timestamp, agent_id, stage_id, previous_entry_hash]
+  required_linking_fields:
+    - field: 'previous_entry_hash'
+      description: Hash of the full previous TEDS entry payload.
+    - field: 'csr_hash_link'
+      description: Cryptographic hash of the active Config State Root.
+
+required_fields:
+  - name: timestamp
+    type: ISO-8601
+    source: System Clock (CRoT Attested)
+  - name: agent_id
+    type: ENUM [CRoT, GAX, SGS]
+  - name: stage_id
+    type: ENUM [S00-S14, IH, RRP]
+  - name: state_delta_hash
+    type: HASH (SHA-256)
+    description: Hash of the resulting operational state delta for this stage.
+  - name: p01_result
+    type: BOOLEAN
+    description: Must be NULL except at Stage S11.
+  - name: payload_data
+    type: STRING (Base64)
+    description: Structured log data specific to the stage operation.

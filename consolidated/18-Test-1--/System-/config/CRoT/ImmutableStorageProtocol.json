@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "CRoT:v96.0.0/ImmutableStorageProtocol",
+  "ISP_Version": "v96.0.0",
+  "CRoT_Owner": "CRoT/Custodian-94.5",
+  "Description": "Defines the protocol and constraints for generating verifiable, content-addressed references (URIs/URNs) for immutable CRoT artifacts (GSM, TVCR). This abstracts the mechanism used by GSM_Pointer and TVCR_Link fields.",
+  "ProtocolDefinition": {
+    "StorageScheme": "CAS/AGI-96",
+    "SchemeFormat": "URN",
+    "HashAlgorithmReference": "SIPM:/SecurityContext/IndexingHashAlgorithm/name",
+    "URN_Template_Regex": "^urn:agi-96:(GSM|TVCR|SGSKeyMaterial):v\\d{1,4}:[a-fA-F0-9]{128}$"
+  },
+  "ReferenceMechanism": {
+    "IntegrityType": "ContentAddressable",
+    "HashLength": 128,
+    "Requirement": "All state artifact pointers must utilize the defined URN structure."
+  }
+}

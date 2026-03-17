@@ -1,0 +1,29 @@
+{
+  "$schema_id": "mdsm_metric_schema_v1",
+  "description": "Defines the required structure and constraints for operational metrics consumed by the MDSM engine (v94.2).",
+  "metrics": {
+    "stability_index": {
+      "source_path_deprecated": "data/metrics/architecture_stability.json",
+      "type": "Float",
+      "range": [0.0, 1.0],
+      "trend": "Positive_Optimal",
+      "unit": "Scaled Confidence",
+      "required": true
+    },
+    "risk_profile": {
+      "source_path_deprecated": "data/metrics/operational_risk.json",
+      "type": "Float",
+      "range": [0.0, 1.0],
+      "trend": "Negative_Optimal",
+      "unit": "Severity Score",
+      "required": true
+    }
+  },
+  "validation_rules": {
+    "strict_compliance": true,
+    "scaling_method": "MinMaxNormalization"
+  },
+  "post_ingestion_hooks": [
+    "metric_normalization_check"
+  ]
+}

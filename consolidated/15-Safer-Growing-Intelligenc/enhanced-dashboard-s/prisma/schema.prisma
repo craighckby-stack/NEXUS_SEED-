@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model AGIMemory {
+  id           String   @id @default(cuid())
+  concept      String
+  confidence   Float    @default(0.0)
+  relationships String?
+  category     String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model AGISession {
+  id            String   @id @default(cuid())
+  sessionId     String   @unique
+  status        String   @default("inactive")
+  currentLevel  String   @default("CAVEMAN")
+  domain        String?
+  lastActivity  DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model LearningStrategy {
+  id          String   @id @default(cuid())
+  strategy    String
+  effectiveness Float  @default(0.0)
+  usageCount  Int      @default(0)
+  lastUsed    DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model EmergentAlert {
+  id          String   @id @default(cuid())
+  sessionId   String
+  alertType   String
+  severity    String
+  description String
+  baseline    String?
+  observed    String?
+  resolved    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model VirtualEnvironment {
+  id          String   @id @default(cuid())
+  domain      String
+  level       String
+  completed   Boolean  @default(false)
+  score       Float?
+  sessionId   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

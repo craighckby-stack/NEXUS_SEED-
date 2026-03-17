@@ -1,0 +1,118 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.agi/schemas/APM_v1.json",
+  "title": "Attested Policy Mandate v1 (Canonical Integrity Layer)",
+  "description": "Defines the verifiable structure for policy ratification, ensuring cryptographic integrity and required multi-agent Triumvirate consensus for canonical governance data.",
+  "type": "object",
+  "$defs": {
+    "Ref_TriumvirateAgentID": {
+      "type": "string",
+      "enum": [
+        "GAX",
+        "CRoT",
+        "SGS"
+      ],
+      "description": "Identifier for a Sovereign Governing Triumvirate agent."
+    },
+    "Ref_SHA512Hash": {
+      "type": "string",
+      "description": "Standard SHA-512 cryptographic hash (128 hex characters).",
+      "pattern": "^[0-9a-fA-F]{128}$"
+    },
+    "Ref_CryptographicSignature": {
+      "type": "string",
+      "description": "A detached cryptographic signature (typically Base64 encoded payload). Limiting length for operational safety.",
+      "maxLength": 2048
+    },
+    "CoSignature": {
+      "type": "object",
+      "description": "A cryptographic co-signature structure ensuring Triumvirate participation.",
+      "properties": {
+        "agent_id": {
+          "$ref": "#/$defs/Ref_TriumvirateAgentID"
+        },
+        "signature": {
+          "$ref": "#/$defs/Ref_CryptographicSignature"
+        },
+        "key_id": {
+          "type": "string",
+          "description": "Reference identifier for the public key used for verification (e.g., cryptographic fingerprint or URI reference)."
+        }
+      },
+      "required": [
+        "agent_id",
+        "signature",
+        "key_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "mandate_id",
+    "version",
+    "timestamp_utc",
+    "payload_hashes",
+    "co_signatures",
+    "final_signature"
+  ],
+  "properties": {
+    "mandate_id": {
+      "type": "string",
+      "description": "Unique, immutable identifier for this mandate (Pattern: AGI-APM-YYYYMMDD-SEQ).",
+      "pattern": "^AGI-APM-\d{4}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])-\d{3}$"
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version (SemVer 2.0) of the ratified Policy Vertex Logic Manifest (PVLM).",
+      "pattern": "^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "timestamp_utc": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC time of mandate finalization. Explicitly requires UTC."
+    },
+    "payload_hashes": {
+      "type": "object",
+      "description": "Cryptographic hashes (SHA-512) of the core manifest artifacts ratified by this APM.",
+      "properties": {
+        "PVLM_hash": {
+          "$ref": "#/$defs/Ref_SHA512Hash",
+          "description": "Policy Vertex Logic Manifest hash."
+        },
+        "CFTM_hash": {
+          "$ref": "#/$defs/Ref_SHA512Hash",
+          "description": "Computational Flow Trace Manifest hash."
+        },
+        "ACP_hash": {
+          "$ref": "#/$defs/Ref_SHA512Hash",
+          "description": "Agent Configuration Profile hash."
+        },
+        "prior_APM_hash": {
+          "$ref": "#/$defs/Ref_SHA512Hash",
+          "description": "Optional: Hash of the previous canonical APM, establishing integrity chain linkage."
+        }
+      },
+      "required": [
+        "PVLM_hash",
+        "CFTM_hash",
+        "ACP_hash"
+      ],
+      "additionalProperties": false
+    },
+    "co_signatures": {
+      "type": "array",
+      "description": "Required signatures from key Triumvirate agents (minimum 2 unique items).",
+      "minItems": 2,
+      "maxItems": 3,
+      "items": {
+        "$ref": "#/$defs/CoSignature"
+      },
+      "uniqueItems": true
+    },
+    "final_signature": {
+      "$ref": "#/$defs/Ref_CryptographicSignature",
+      "description": "Primary cryptographic signature of the entire APM payload (canonicalized JSON) affixed by the designated Governing Proponent."
+    }
+  },
+  "additionalProperties": false
+}

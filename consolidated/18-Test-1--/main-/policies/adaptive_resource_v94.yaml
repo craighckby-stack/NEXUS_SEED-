@@ -1,0 +1,14 @@
+# Policy defining dynamic scaling rules for AGI_v94.1 resources.
+policy_version: 94.1
+
+memory_scaling_rules:
+  - rule_id: VEC_LOAD_001
+    trigger: {metric: 'vector_pool_utilization', threshold: 0.95, duration_s: 5}
+    action: {resource: 'vector_memory_mb', scale_factor: 1.15, max_mb: 32768}
+    priority: HIGH
+
+executor_adjustment_rules:
+  - rule_id: LATENCY_SPIKE_002
+    trigger: {metric: 'task_latency_p99', threshold_ms: 200, duration_s: 3}
+    action: {resource: 'thread_allocation.max_executors', change_amount: 8, max_limit: 128}
+    priority: MEDIUM

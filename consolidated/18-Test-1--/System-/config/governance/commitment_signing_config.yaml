@@ -1,0 +1,17 @@
+# config/governance/commitment_signing_config.yaml
+# Configuration for the Commitment Authority Service (CAS) responsible for
+# generating and applying cryptographic signatures to DSE Commitment Summary Manifests (DCSMs).
+cas_config:
+  service_endpoint: "https://cas.governance.svc/sign_manifest"
+  signing_algorithm: "Ed25519" # High-efficiency, modern curve standard
+  hashing_algorithm: "SHA3-256" # Algorithm used to canonicalize the payload before signing
+  key_management:
+    provider: "HardwareSecurityModule_A"
+    key_id: "gov-commit-v94-prod-001"
+    rotation_policy:
+      frequency: "180 days"
+      mandate_verification: true # Requires successful zero-downtime key verification before switch
+
+manifest_validation:
+  signature_required: true
+  schema_id: "http://sovereign.agi/schema/governance/DSE_Commitment_Summary_Manifest_v94.1.json"

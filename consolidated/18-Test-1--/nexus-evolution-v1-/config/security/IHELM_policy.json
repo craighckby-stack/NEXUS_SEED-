@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "http://sovereignagi.com/ihelm_policy_v1.0.json",
+  "title": "Integrity Halt Enforcement & Logging Module (IHELM) Policy",
+  "description": "Configuration policy defining IHELM's operational parameters, including signature key identification and immutable log sinking.",
+  "type": "object",
+  "properties": {
+    "PSM_Interface": {
+      "type": "string",
+      "description": "Endpoint or path for communicating with the PSM/HSM for CSK signature operations.",
+      "pattern": "^((/|\\\/)?dev/hsm|tcp:\/\/.*)"
+    },
+    "CSK_Key_ID": {
+      "type": "string",
+      "description": "The specific identifier for the Core Security Key to be used for signing halt logs (must reside in PSM).
+    },
+    "Log_Sink_Destination": {
+      "type": "object",
+      "description": "Configuration for immutable, append-only log storage.",
+      "properties": {
+        "Protocol": {
+          "type": "string",
+          "enum": ["SWOB", "S3_WORM", "NVM_LOCKDOWN"],
+          "description": "Storage protocol ensuring Write Once, Read Many (WORM) compliance."
+        },
+        "Path_Reference": {
+          "type": "string",
+          "description": "The specific path, bucket name, or device ID for the log sink."
+        }
+      },
+      "required": ["Protocol", "Path_Reference"]
+    },
+    "Maximum_Queue_Depth": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 16,
+      "description": "Maximum number of pending halt logs before IHELM initiates a buffer overflow halt (IH-301)."
+    }
+  },
+  "required": ["PSM_Interface", "CSK_Key_ID", "Log_Sink_Destination"]
+}

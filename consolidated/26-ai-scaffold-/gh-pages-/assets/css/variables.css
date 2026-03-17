@@ -1,0 +1,39 @@
+/* CSS Variables */
+:root {
+  /* Colors */
+  --color-primary: #dc2626;
+  --color-secondary: #27272a;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  /* Backgrounds */
+  --bg-primary: #000000;
+  --bg-secondary: #09090b;
+  --bg-tertiary: #18181b;
+  --bg-card: #27272a;
+
+  /* Text */
+  --text-primary: #fafafa;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --text-disabled: #52525b;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* Transitions */
+  --transition-fast: 150ms;
+  --transition-normal: 300ms;
+  --transition-slow: 500ms;
+}

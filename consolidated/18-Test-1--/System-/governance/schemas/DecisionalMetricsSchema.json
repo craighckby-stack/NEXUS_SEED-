@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agi.sovereign/governance/schemas/DecisionalMetricsSchema.json",
+  "title": "DecisionalMetrics",
+  "description": "Defines standardized metrics used to evaluate the efficiency, safety, alignment, and outcome of autonomous code evolution decisions.",
+  "type": "object",
+  "properties": {
+    "metricId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for this metric record."
+    },
+    "decisionContextId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "ID linking back to the autonomous decision log entry."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Time the metrics were recorded/evaluated."
+    },
+    "efficiency": {
+      "type": "object",
+      "description": "Metrics relating to resource consumption and speed.",
+      "properties": {
+        "latencyMs": { "type": "number", "minimum": 0, "description": "Total time taken for decision formulation and execution initiation (in milliseconds)." },
+        "computationalCostUnits": { "type": "number", "minimum": 0, "description": "Normalized cost (e.g., TFLOPs equivalent) used for the decision cycle." },
+        "codeChurnDelta": { "type": "integer", "description": "Measure of lines added/removed in the associated code evolution step." }
+      },
+      "required": ["latencyMs", "computationalCostUnits", "codeChurnDelta"]
+    },
+    "alignment": {
+      "type": "object",
+      "description": "Metrics relating to safety, governance adherence, and mission alignment.",
+      "properties": {
+        "alignmentScore": { "type": "number", "minimum": 0, "maximum": 1, "description": "Score reflecting fidelity to overall mission objectives (1.0 is perfect alignment)." },
+        "safetyDeviationIndex": { "type": "number", "minimum": 0, "description": "Quantified deviation from predefined safety guardrails (0.0 is perfect adherence)." },
+        "governanceChecksPassed": { "type": "boolean", "description": "Did all necessary governance policy checks pass?" }
+      },
+      "required": ["alignmentScore", "safetyDeviationIndex"]
+    },
+    "outcomeValidation": {
+      "type": "object",
+      "description": "Metrics relating to the functional and qualitative success of the resulting code change.",
+      "properties": {
+        "successStatus": { "type": "string", "enum": ["SUCCESS", "FAILURE", "PARTIAL_SUCCESS", "ROLLBACK_INITIATED"], "description": "The determined outcome status of the proposed change." },
+        "testCoverageImpact": { "type": "number", "description": "Change in system-wide test coverage percentage due to this change (positive or negative)." },
+        "validatedQualityRating": { "type": "number", "minimum": 1, "maximum": 5, "description": "Post-execution subjective quality rating (e.g., 5-star quality)." }
+      },
+      "required": ["successStatus"]
+    }
+  },
+  "required": ["metricId", "decisionContextId", "timestamp", "efficiency", "alignment", "outcomeValidation"],
+  "additionalProperties": false
+}

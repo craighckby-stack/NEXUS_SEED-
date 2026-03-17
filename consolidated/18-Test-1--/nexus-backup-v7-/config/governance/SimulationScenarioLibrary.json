@@ -1,0 +1,34 @@
+{
+  "description": "Library of reusable state configurations and assertion templates.",
+  "scenarios": [
+    {
+      "scenarioId": "StandardAaveUpgradeV3",
+      "stateOverrides": [
+        {
+          "address": "0xPoolConfigurator",
+          "storageSlot": "0xAdminSlot",
+          "value": "0xSimulationWalletAddress"
+        }
+      ],
+      "assertionTemplate": [
+        {
+          "target": "0xProposalExecutor",
+          "check": "STATUS_SUCCESS",
+          "gasMax": 8500000
+        }
+      ]
+    },
+    {
+      "scenarioId": "DefiCrisisScenario",
+      "stateOverrides": [
+        {
+          "address": "0xOraclePriceFeed",
+          "storageSlot": "0xPriceSlot",
+          "value": "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "reason": "Simulates catastrophic price drop (e.g., $1)"
+        }
+      ],
+      "assertionTemplate": []
+    }
+  ]
+}

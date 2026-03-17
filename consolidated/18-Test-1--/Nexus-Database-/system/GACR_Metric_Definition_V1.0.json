@@ -1,0 +1,21 @@
+{
+  "metric_schema_version": "1.0.0",
+  "system_id": "GACR_Core",
+  "metric_definitions": [
+    {
+      "name": "CodeDensityMetric",
+      "description": "Quantifies new feature density relative to overall lines of code changes (Density / SLOC). Lower is better for stable releases.",
+      "calculation_method": "JiraTickets_Implemented / Total_SLOC_Change",
+      "data_source": "CI/CD_Pipeline_Metrics",
+      "reporting_threshold": 0.01
+    },
+    {
+      "name": "TestCoverageDelta",
+      "description": "Change in test coverage percentage since the last minor version.",
+      "calculation_method": "CurrentCoverage - PreviousMinorCoverage",
+      "data_source": "SonarQube/Jacoco_Integration",
+      "reporting_threshold": -0.05,
+      "alert_level": "WARNING"
+    }
+  ]
+}

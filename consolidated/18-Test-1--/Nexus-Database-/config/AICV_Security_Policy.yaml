@@ -1,0 +1,21 @@
+# governance/config/AICV_Security_Policy.yaml
+
+Policy_Version: "94.1.A"
+
+Cryptographic_Primitives:
+  Hash_Algorithm: "SHA3-512" # Mandatory algorithm for CPH generation.
+  Signature_Standard: "Ed25519" # Required signing scheme for IVR commitment.
+  Key_Length_Minimum: 256 # Bits required for secure key material.
+
+AICVD_Configuration:
+  Linkage_Mandate: "Strict_Embedded_Reference" # Must find L_N-1 embedded in Commit_N signature.
+  Timestamp_Source: "Governance_Trusted_NTP"
+  Timeout_Ms: 500 # Max allowed duration for CPH generation and IVR write cycle.
+
+IVR_Logging:
+  Required_Fields:
+    - Lock_N_Minus_1_ID
+    - CPH_Output
+    - AICVD_Verification_Result
+    - GSEP_Stage_ID
+  Commitment_Method: "Sync_Atomic_Write"

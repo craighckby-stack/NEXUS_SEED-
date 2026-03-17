@@ -1,0 +1,40 @@
+# MCRA_ARBITRATION_SCHEMA V94.1
+# Defines the calculation basis for S-02 (Synthesis Projection / Risk Floor)
+# Managed by the Maximum Critical Risk Arbitrator (MCRA) in GSEP Stage 4.
+
+version: "94.1"
+integrity_lock: true
+
+# --- I. BASELINE WEIGHTS ---
+# Defines static risk factors applied universally.
+baseline:
+  criticality_rating_default: 0.15
+  rollback_cost_factor: 1.2
+  deployment_latency_threshold_ms: 500
+
+# --- II. RESOURCE CONSTRAINT PENALTIES (RACM Input Mapping) ---
+# How resource overages translate into proportional risk increase.
+resource_penalties:
+  memory_utilization_max_percent:
+    threshold: 90
+    risk_factor_per_percent: 0.005
+  compute_cost_over_budget_limit:
+    threshold_usd: 1000
+    risk_factor_per_usd: 0.0001
+  storage_io_wait_max_ms:
+    threshold: 20
+    risk_factor: 0.08 # Binary penalty if exceeded
+
+# --- III. ENVIRONMENTAL FACTORS (ECR Input Mapping) ---
+# Dynamic environmental instability mapping.
+environmental_factors:
+  current_system_load_high:
+    load_average_threshold: 4.0
+    risk_multiplier: 1.5 # 50% increase if system load is high
+  critical_vulnerability_alert:
+    active: false
+    risk_floor_override: 1.0 # Veto-level floor if active
+  data_stale_tolerance_hours: 1
+
+# S-02 CALCULATION MODEL:
+# S-02 = BASELINE_DEFAULT + SUM( RESOURCE_PENALTIES * WEIGHT ) + DYNAMIC_ENVIRONMENTAL_MULTIPLIER

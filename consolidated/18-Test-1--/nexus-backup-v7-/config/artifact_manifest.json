@@ -1,0 +1,279 @@
+// Mutated class definitions
+
+class Event {
+  constructor(event, payload = {},
+    target = new Target(),
+    context = {
+      lifecycle: lifecycle,
+      listeners: listeners
+    }) {
+    this.event = event;
+    this.payload = payload;
+    this.target = target;
+    this.context = context;
+  }
+}
+
+class LifecycleHandler {
+  constructor(target = new Target(), context = {
+    lifecycle: lifecycle,
+    listeners: listeners
+  }) {
+    this.target = target;
+    this.context = context;
+  }
+
+  async execute(args, lifecycle) {
+    if (this.#method) {
+      return await this.#handler(...args);
+    } else {
+      return this.target.execute(...args);
+    }
+  }
+
+  bind(target = this) {
+    this.#target = target;
+    return this;
+  }
+
+  async #handler(...args) {
+    const result = await super.execute(...args);
+    return result !== undefined ? result : null;
+  }
+}
+
+class Config {
+  static #staticConfig = {
+    VERSION: '1.0.0',
+    env: process.env.NODE_ENV || 'development'
+  };
+
+  static get defaultConfig() {
+    return {
+      foo: 'bar',
+      baz: true
+    };
+  }
+
+  constructor(values = {}, lifecycle = lifecycle, listeners = listeners) {
+    if (!lifecycle.has('CONFIGURED')) {
+      if (lifecycle.configured) {
+        console.error('Configuration not initialized');
+        throw new Error('Configuration not initialized');
+      }
+      lifecycle.configured = false;
+      lifecycle.loaded = false;
+      lifecycle.shuttingDown = false;
+    }
+    this.values = Object.assign({}, Config.defaultConfig, values);
+    this.lifecycle = lifecycle;
+    this.listeners = listeners;
+  }
+
+  async validate() {
+    const schema = Config.configSchema;
+    try {
+      new Validator().validate(this.values, schema);
+      return true;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }
+
+  static get configSchema() {
+    return {
+      type: 'object',
+      properties: {
+        foo: { type: 'string' },
+        baz: { type: 'boolean' }
+      },
+      required: ['foo', 'baz'],
+      additionalProperties: false
+    };
+  }
+}
+
+class Configurator {
+  #lifecycle = lifecycle;
+  #config = new Config({ foo: 'baz', baz: false }, lifecycle, listeners);
+  #handlers = new Map();
+
+  static get defaultConfig() {
+    return {
+      foo: 'bar',
+      baz: true
+    };
+  }
+
+  static get namespace() {
+    return process.env.NODE_ENV || 'development';
+  }
+
+  get config() {
+    return this.#config;
+  }
+
+  constructor() {
+    Object.values(lifecycle.#events).forEach((event, handler) => {
+      lifecycle.on(event, handler.bind(this));
+      this.listeners.set(event, handler);
+    });
+  }
+
+  async configure(config) {
+    if (!(config instanceof Config)) {
+      throw new Error('Invalid config');
+    }
+    this.#config = config;
+    lifecycle.trigger('CONFIGURED');
+  }
+
+  async load() {
+    lifecycle.trigger('LOADED');
+    this.#config = new Config({
+      foo: 'baz',
+      baz: false
+    }, lifecycle, listeners);
+  }
+
+  async shutdown() {
+    lifecycle.trigger('SHUTDOWN_INITIATED');
+    lifecycle.configured = false;
+    lifecycle.loaded = false;
+    lifecycle.shuttingDown = true;
+  }
+}
+
+class Executor {
+  #lifecycle = lifecycle;
+  #config = new Config({ foo: 'baz', baz: false });
+  #handlers = new Map();
+
+  static get defaultConfig() {
+    return {
+      foo: 'bar',
+      baz: true
+    };
+  }
+
+  static get namespace() {
+    return process.env.NODE_ENV || 'development';
+  }
+
+  constructor() {}
+
+  async execute(event) {
+    return this.listeners.get(event)();
+  }
+
+  async executeLifecycle(lifecycle) {
+    const event = eventConstructor('EXECUTED', {
+      foo: 'baz',
+      baz: false
+    });
+    await this.execute(event);
+  }
+}
+
+const lifecycle = new Lifecycle();
+const events = createEvent();
+const validator = new Validator();
+const listeners = new Map();
+
+class LifecycleEvent extends LifecycleHandler {
+  constructor(event, payload = {}, lifecycle = lifecycle, listeners = listeners) {
+    super(event, payload, lifecycle, listeners);
+  }
+
+  async execute(list) {
+    return Promise.all(list.map((handler) => handler()));
+  }
+}
+
+async function main() {
+  lifecycle.on('DESTROYED', () => {
+    console.log("NexusCore instance destroyed.")
+  });
+  const events = createEvent('LOADED', 'CONFIGURED', 'SHUTDOWN_INITIATED', 'SHUTTING_DOWN', 'DESTROYED');
+  events.off();
+  await Configurator.create({
+    foo: 'baz',
+    baz: false
+  });
+  await Executor.run('EXECUTED');
+  console.log("Main function complete.")
+}
+
+class Target {
+  constructor() {
+    this.#initialized = true;
+  }
+}
+
+const eventConstructor = (event, payload = {},
+  lifecycle = lifecycle,
+  listeners = listeners) => {
+  if (!lifecycle.has(event)) {
+    return Promise.reject(`Lifecycle event key not found: ${event}`);
+  }
+  const Event = lifecycle.get(event);
+  lifecycle.set(Event, new Set());
+  return Event;
+};
+
+Target.run = (event) => {
+  return eventConstructor(event).then((event) => {
+    return listeners.get(event)();
+  });
+};
+
+Target.reset = (method = this.run) => {
+  return Promise.all(Object.keys(lifecycle).map((event) => (
+    listeners.get(event)()
+  ));
+};
+
+module.exports = {
+  Configurator,
+  ConfigValidator,
+  LifecycleEvent,
+  LifecycleHandler,
+  Lifecycle,
+  Executor,
+  Target,
+  lifecycle
+}
+
+// Helper functions
+
+const createEvent = (eventKey1) => {
+  const event = new Event(eventKey1);
+  const lifecycle = new Lifecycle();
+  const listeners = new Map();
+  return event;
+};
+
+const fireEvent = (event, context) => {
+  return Promise.resolve()
+};
+
+const addListener = (event, context, method) => {
+  return context.on(event, method);
+};
+
+const removeListener = (event, method, context) => {
+  const eventList = context.get(event);
+  return eventList.delete(method);
+};
+
+const createValidator = (schema) => {
+  return new Validator(schema);
+};
+
+const validate = (values, schema) => {
+  const validator = new Validator(schema);
+  return validator.validate(values, schema);
+};
+
+Please note that some parts of the code might need adjustments based on the specific requirements of your project. This mutated code is intended to be a part of a larger system, so it's likely that you will need to modify it to fit your needs.

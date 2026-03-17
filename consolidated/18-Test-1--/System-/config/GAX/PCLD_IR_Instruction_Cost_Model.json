@@ -1,0 +1,15 @@
+{
+  "version": "1.0",
+  "bytecode_standard": "ABX",
+  "instruction_costs": {
+    "NOP": {"cycles": 1, "memory": 0},
+    "LOAD_REG": {"cycles": 2, "memory": 0},
+    "ADD_I32": {"cycles": 3, "memory": 0},
+    "CALL_FN": {"cycles": 10, "memory_overhead": 8}
+    // ... (All defined ABX instructions and their WCET/memory metrics)
+  },
+  "policy_ceiling": {
+    "max_wcet_cycles": 500000,
+    "max_peak_memory_kb": 64
+  }
+}

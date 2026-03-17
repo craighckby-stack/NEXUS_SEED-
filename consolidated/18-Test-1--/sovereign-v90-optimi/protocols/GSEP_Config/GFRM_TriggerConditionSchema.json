@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GFRM Trigger Condition Schema",
+  "description": "Defines standardized conditions and criteria that trigger GFRM actions, linking system telemetry/error states to fallback protocols.",
+  "type": "object",
+  "properties": {
+    "conditionId": { "type": "string", "pattern": "^GTC:[A-Z_]+$" },
+    "priority": { "type": "integer", "minimum": 1, "maximum": 100 },
+    "triggerType": { "type": "string", "enum": ["ERROR_CODE", "METRIC_THRESHOLD", "TIMEOUT"] },
+    "conditionParams": {
+      "type": "object",
+      "description": "Parameters defining the failure criteria.",
+      "oneOf": [
+        {
+          "properties": { "errorCode": { "type": "integer", "minimum": 50000 } },
+          "required": ["errorCode"]
+        },
+        {
+          "properties": {
+            "metricName": { "type": "string" },
+            "operator": { "type": "string", "enum": [">= ", "<= ", ">", "<"] },
+            "value": { "type": ["integer", "number"] }
+          },
+          "required": ["metricName", "operator", "value"]
+        },
+        {
+          "properties": { "durationSeconds": { "type": "integer", "minimum": 1 } },
+          "required": ["durationSeconds"]
+        }
+      ]
+    },
+    "targetGFRM": {
+      "type": "string",
+      "pattern": "^GFRM:[A-Z_]+$",
+      "description": "The identifier of the action (defined in GFRM_Schema) to execute when this condition is met."
+    }
+  },
+  "required": ["conditionId", "priority", "triggerType", "conditionParams", "targetGFRM"]
+}

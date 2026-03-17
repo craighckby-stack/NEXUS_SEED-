@@ -1,0 +1,31 @@
+{
+  "description": "Manifest of all whitelisted and securely defined remediation primitives executable by the DSE during RCRP processing.",
+  "manifest_version": "1.0.0",
+  "commands": [
+    {
+      "command_id": "CR_001_CONFIG_REVERT_LAST_SAFE",
+      "security_scope": "SYSTEM_CRITICAL",
+      "execution_target": "ConfigurationManager",
+      "parameters_schema": {
+        "required": ["component_id"],
+        "properties": {
+          "component_id": {"type": "string"}
+        }
+      },
+      "estimated_duration_ms": 500
+    },
+    {
+      "command_id": "APIC_004_STATE_PATCH_ASYNC",
+      "security_scope": "HIGH_INTEGRITY",
+      "execution_target": "DataPlaneAPI",
+      "parameters_schema": {
+        "required": ["patch_data_key", "version_checksum"],
+        "properties": {
+          "patch_data_key": {"type": "string"},
+          "version_checksum": {"type": "string"}
+        }
+      },
+      "estimated_duration_ms": 2000
+    }
+  ]
+}

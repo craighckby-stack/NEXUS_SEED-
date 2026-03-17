@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$id": "https://agi.sovereign/schemas/v94.1/cmanifest.schema.json",
+  "title": "Sovereign AGI Component Manifest Schema",
+  "description": "Defines the properties and metrics of a deployable system component.",
+  "type": "object",
+  "required": [
+    "component_id",
+    "version",
+    "interfaces"
+  ],
+  "properties": {
+    "component_id": {
+      "type": "string",
+      "description": "Unique identifier for the component (e.g., 'API_Gateway')."
+    },
+    "version": {
+      "type": "string"
+    },
+    "maintainer": {
+      "type": "string"
+    },
+    "stability_score": {
+      "type": "number",
+      "description": "Calculated score (0.0 to 1.0) reflecting stability based on test coverage and history."
+    },
+    "complexity_metrics": {
+      "type": "object",
+      "properties": {
+        "cyclomatic_complexity": {
+          "type": "integer"
+        },
+        "source_lines_of_code": {
+          "type": "integer"
+        }
+      }
+    },
+    "internal_files": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "Relative path to file."
+      }
+    },
+    "interfaces": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/InterfaceDefinition"
+      },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "InterfaceDefinition": {
+      "type": "object",
+      "required": [
+        "name",
+        "type"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "PUBLIC_API",
+            "INTERNAL_RPC",
+            "DATA_STREAM"
+          ]
+        },
+        "signature_hash": {
+          "type": "string",
+          "description": "Hash representing the interface signature for drift detection."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agi.sovereign/governance/FVT_v1.0.json",
+  "title": "Failure Vector Taxonomy Schema",
+  "description": "Defines standardized, versioned classifications for recognized failure modes in the AGI system, used by Resilience Definition Manifests.",
+  "type": "object",
+  "properties": {
+    "taxonomy_version": {
+      "type": "string",
+      "description": "Semantic version of the taxonomy structure.",
+      "pattern": "^v?\\d+\\.\\d+(\\.\\d+)?$"
+    },
+    "categories": {
+      "type": "array",
+      "description": "List of core failure categories (e.g., Integrity, Resource, Operational).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "category_id": {
+            "type": "string",
+            "description": "Category identifier (e.g., CAT_MODEL_RISK)",
+            "pattern": "^CAT_[A-Z_]+$"
+          },
+          "description": { "type": "string" },
+          "vectors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "vector_id": {
+                  "type": "string",
+                  "description": "Unique Failure Vector Identifier (e.g., FVT_MDRIFT_HIGH). Referenced by GRDM.",
+                  "pattern": "^FVT_[A-Z0-9_]+$"
+                },
+                "name": { "type": "string" },
+                "severity_default": {
+                  "type": "string",
+                  "enum": [
+                    "CRITICAL",
+                    "HIGH",
+                    "MEDIUM",
+                    "LOW"
+                  ]
+                },
+                "trigger_condition": {
+                  "type": "string",
+                  "description": "Brief description of the condition that activates this vector (e.g., Model output entropy exceeds threshold)."
+                }
+              },
+              "required": [
+                "vector_id",
+                "name",
+                "severity_default"
+              ]
+            }
+          }
+        },
+        "required": [
+          "category_id",
+          "vectors"
+        ]
+      }
+    }
+  },
+  "required": [
+    "taxonomy_version",
+    "categories"
+  ]
+}

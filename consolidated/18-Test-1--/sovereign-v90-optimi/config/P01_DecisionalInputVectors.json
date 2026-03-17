@@ -1,0 +1,32 @@
+{
+  "vectorDefinition": "P-01_DECISIONAL_CALCULUS_INPUT_CONTRACT_V94.1",
+  "schemaVersion": "1.0",
+  "description": "Defines the mandatory structural contract for the three P-01 decision vectors (S-01, S-02, S-03). This structure is enforced by ASDM and validated by AICV prior to DSCM Lock.",
+  "vectors": [
+    {
+      "id": "S-01",
+      "name": "Efficacy Projection (Trust Score)",
+      "type": "Float",
+      "range": "[0.0, 1.0]",
+      "sourceModule": "ATM",
+      "requiredField": "trustScoreNormalized"
+    },
+    {
+      "id": "S-02",
+      "name": "Synthesis Projection (Risk Floor)",
+      "type": "Float",
+      "range": "[0.0, 1.0]",
+      "sourceModule": "MCRA",
+      "requiredField": "calculatedRiskFloorNormalized"
+    },
+    {
+      "id": "S-03",
+      "name": "Compliance State (Policy Veto Flag)",
+      "type": "Boolean",
+      "value": "FALSE",
+      "sourceModule": "C-15",
+      "requiredField": "isVetoAsserted"
+    }
+  ],
+  "verificationCheck": "S-01 > S-02 AND S-03 == FALSE"
+}

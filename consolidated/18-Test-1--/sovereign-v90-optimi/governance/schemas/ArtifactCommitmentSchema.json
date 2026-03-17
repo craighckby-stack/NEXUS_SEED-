@@ -1,0 +1,16 @@
+{
+  "schemaName": "ArtifactCommitment",
+  "version": "1.0.0",
+  "description": "Definitive schema for data submitted and permanently recorded in the Immutable Artifact Ledger (IAL).",
+  "fields": [
+    {"name": "ArtifactID", "type": "SHA-512", "required": true, "description": "Canonical hash of the M-02 payload artifact."}, 
+    {"name": "CommitmentID", "type": "UUIDv7", "required": true, "description": "Unique entry ID within the IAL chain."}, 
+    {"name": "ParentHash", "type": "SHA-512", "required": true, "description": "Hash linkage to the previous ledger entry, establishing the cryptographic chain."}, 
+    {"name": "AACE_Verification_Status", "type": "Boolean", "required": true, "description": "Result of integrity check by AACE (must be true for commit).
+"}, 
+    {"name": "T_Score", "type": "Float(5)", "required": true, "description": "Terminal Vetting Confidence Score (0.000 to 1.000) from APSM."}, 
+    {"name": "CommitmentTimestamp", "type": "ISO 8601", "required": true, "description": "UTC Timestamp of irreversible write operation."}, 
+    {"name": "ProvenanceMetadata", "type": "JSONB", "required": false, "description": "Auxiliary trace data (e.g., initiator principal ID, detailed risk metrics).
+"}
+  ]
+}

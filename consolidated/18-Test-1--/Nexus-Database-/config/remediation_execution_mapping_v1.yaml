@@ -1,0 +1,29 @@
+schema_version: "v1"
+executor_service_id: "AHRS-REM-02"
+
+execution_mapping:
+  ROLLBACK:
+    processor_function: "AHRS.Core.RollbackProcessor"
+    parameters_schema: ["target_component", "snapshot_id"]
+    timeout_policy: "HIGH_SAFETY"
+  PATCH:
+    processor_function: "AHRS.Core.PatchingService"
+    parameters_schema: ["target_path", "patch_type", "source_url"]
+    timeout_policy: "MEDIUM"
+  CONFIG_UPDATE:
+    processor_function: "AHRS.Core.ConfigurationManager"
+    parameters_schema: ["config_file_path", "key_path", "new_value"]
+    timeout_policy: "LOW_SAFETY"
+  SCRIPT_EXECUTION:
+    processor_function: "AHRS.Utility.SandboxRunner"
+    parameters_schema: ["script_hash", "env_variables", "isolation_level"]
+    timeout_policy: "CUSTOM"
+  VERIFY:
+    processor_function: "AHRS.Core.StateVerifier"
+    parameters_schema: ["verification_method", "expected_state"]
+    timeout_policy: "CRITICAL_SHORT"
+
+default_timeouts_ms:
+  HIGH_SAFETY: 120000
+  MEDIUM: 60000
+  LOW_SAFETY: 30000

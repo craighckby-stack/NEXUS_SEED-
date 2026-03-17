@@ -1,0 +1,25 @@
+{
+  "policyVersion": "v1.0.0",
+  "comment": "System-wide maximally conservative default RTPC policy. Used when P-01 fails to load/validate the active configuration.",
+  "temporalSettings": {
+    "trustDecayFactor": 0.85
+  },
+  "riskMetrics": {
+    "riskMitigationWeight": 0.1,
+    "serviceWeights": [
+      {
+        "serviceId": "CORE_SELF_MONITORING",
+        "weight": 0.7
+      },
+      {
+        "serviceId": "EXTERNAL_VALIDATION_LINK",
+        "weight": 0.3
+      }
+    ]
+  },
+  "trustThresholds": {
+    "criticalScore": 0.1,
+    "alertScore": 0.35,
+    "operationalMinimum": 0.75
+  }
+}

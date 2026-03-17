@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sovereign-agi://schemas/fragments/data_structures",
+  "title": "Sovereign AGI Core Data Structures for Governance",
+  "description": "A repository of reusable, standardized JSON Schema definitions for core system types referenced by various policies and configurations.",
+  "$defs": {
+    "InputMetric": {
+      "type": "object",
+      "required": ["metric_id", "weight", "source"],
+      "properties": {
+        "metric_id": {"type": "string", "description": "Identifier for the metric (e.g., resource.utilization.cpu)."},
+        "weight": {"type": "number", "minimum": 0.0, "maximum": 1.0, "description": "The relative influence weight applied to this metric."}, 
+        "source": {"type": "string", "enum": ["telemetry", "local_cache", "external_api"], "description": "Source system from which the metric data is derived."}
+      },
+      "additionalProperties": false
+    },
+    "OverrideCondition": {
+      "type": "object",
+      "description": "Defines conditions and associated parameters under which standard policy execution is bypassed or modified.",
+      "properties": {
+        "trigger_id": {"type": "string", "description": "Unique identifier for the triggering event or state."}, 
+        "priority_level": {"type": "integer", "minimum": 1, "description": "Priority level for conflict resolution among multiple simultaneous overrides."}
+      },
+      "required": ["trigger_id"]
+    }
+  }
+}

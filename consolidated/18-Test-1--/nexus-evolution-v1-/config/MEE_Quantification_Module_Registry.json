@@ -1,0 +1,13 @@
+{
+  "quantification_targets": [
+    {
+      "target": "evolutionary_objectives.termination_of_scaffolding",
+      "module": "/utility/PruningService.js"
+    },
+    {
+      "target": "unifier_protocol.integration_status",
+      "module": "/core/kernel.js"
+    }
+  ],
+  "status": "ACTIVE"
+}

@@ -1,0 +1,65 @@
+{
+  "asset_id": "VRRM-V3.0",
+  "asset_type": "VRRM_CONFIGURATION",
+  "schema_version": "3.0",
+  "status": "AWAITING_REVIEW",
+  "veto_policies": [
+    {
+      "policy_id": "GCP_101",
+      "policy_name": "Axiomatic Safety Veto",
+      "policy_target_asset": "PVLM",
+      "constraints": [
+        {
+          "constraint_id": "GCM_2_1",
+          "priority": {
+            "risk_level": "CRITICAL",
+            "severity_score": 100
+          },
+          "trigger_condition": {
+            "asset_id": "PVLM",
+            "violation_vector": "NEG_V_POLICY"
+          },
+          "remediation_plan_ref": "VRRP-2A"
+        }
+      ]
+    },
+    {
+      "policy_id": "GCP_102",
+      "policy_name": "Stability Degradation Veto",
+      "policy_target_asset": "MPAM",
+      "constraints": [
+        {
+          "constraint_id": "GCM_2_2",
+          "priority": {
+            "risk_level": "HIGH",
+            "severity_score": 90
+          },
+          "trigger_condition": {
+            "asset_id": "MPAM",
+            "violation_vector": "NEG_V_STABILITY"
+          },
+          "remediation_plan_ref": "VRRP-2B"
+        }
+      ]
+    },
+    {
+      "policy_id": "GCP_103",
+      "policy_name": "Adaptive Behavior Monitoring",
+      "policy_target_asset": "ADTM",
+      "constraints": [
+        {
+          "constraint_id": "GCM_2_3",
+          "priority": {
+            "risk_level": "MODERATE",
+            "severity_score": 80
+          },
+          "trigger_condition": {
+            "asset_id": "ADTM",
+            "violation_vector": "NEG_V_BEHAVIOR"
+          },
+          "remediation_plan_ref": "VRRP-2C"
+        }
+      ]
+    }
+  ]
+}

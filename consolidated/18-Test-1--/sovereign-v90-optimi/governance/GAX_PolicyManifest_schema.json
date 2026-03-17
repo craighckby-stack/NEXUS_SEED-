@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sag-v94.1/GAX_PolicyManifest_schema.json",
+  "title": "GAX Policy Context Manifest",
+  "description": "Defines the mandatory structural links and metadata for a complete policy package used by GAX, ensuring integrity chain linking to the operational ACVD.",
+  "type": "object",
+  "properties": {
+    "manifest_version": {
+      "type": "string",
+      "description": "Version hash of the Manifest structure."
+    },
+    "target_policy_id": {
+      "type": "string",
+      "description": "Unique identifier for the governed policy artifact."
+    },
+    "ACVD_integrity_hash": {
+      "type": "string",
+      "description": "The required acvd_epoch_id hash that must govern this policy manifest, enforcing version lock.",
+      "pattern": "^[a-fA-F0-9]{64}$"
+    },
+    "policy_definitions": {
+      "type": "array",
+      "description": "References or inline definitions of the operational policy constraints (ECVM inputs).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "resource_path": {"type": "string"},
+          "resource_type": {"type": "string"},
+          "checksum": {"type": "string", "pattern": "^[a-fA-F0-9]{64}$"}
+        },
+        "required": ["resource_path", "checksum"]
+      }
+    }
+  },
+  "required": ["manifest_version", "target_policy_id", "ACVD_integrity_hash", "policy_definitions"]
+}

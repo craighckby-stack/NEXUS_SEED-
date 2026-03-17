@@ -1,0 +1,16 @@
+{
+  "name": "Meta-123",
+  "status": "Instantiated",
+  "round": 1,
+  "lifecycle": "READY",
+  "config": {
+    "Core": {
+      "version": "1.0.1",
+      "mode": "Active"
+    }
+  },
+  "logs": [
+    "Round 1 sync completed. Vote: Google/Genkit"
+  ],
+  "license": "MTCL-V1 (Proprietary)"
+}

@@ -1,0 +1,23 @@
+{
+  "registry_version": "1.0.0",
+  "engines": {
+    "ConflictResolutionMatrix_V2": {
+      "path": "services/validation/crm/v2/run.py",
+      "api_endpoint": "http://localhost:8080/api/crm/v2/validate",
+      "trust_level": "L4_CORE",
+      "dependencies": [
+        "DB_PolicyStore"
+      ]
+    },
+    "PDL_Validator_Engine": {
+      "path": "components/language/pdl/validator.ts",
+      "trust_level": "L3_UTILITY",
+      "language_version": "PDL_V1.1"
+    },
+    "GRS_Integrity_Monitor": {
+      "path": "monitors/integrity/gsep_commit.go",
+      "trust_level": "L4_CORE",
+      "is_passive": true
+    }
+  }
+}

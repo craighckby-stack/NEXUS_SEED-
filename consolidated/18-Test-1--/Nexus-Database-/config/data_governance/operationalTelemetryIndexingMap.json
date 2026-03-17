@@ -1,0 +1,32 @@
+{
+  "indexingStrategyId": "v1.2-strict",
+  "description": "Maps Certified Operational Telemetry fields to specific index targets and queues based on governance level, ensuring efficient data routing.",
+  "targetIndexes": {
+    "L2_Certified": {
+      "defaultIndex": "prod_certified_telemetry_l2",
+      "retentionDays": 365,
+      "requiredFieldsForIndexing": [
+        "telemetryId",
+        "governance.sourceSystemId"
+      ],
+      "metricFieldMapping": {
+        "latency.*": "time_series_fast_path",
+        "error.count": "critical_events_log"
+      }
+    },
+    "L1_Validated": {
+      "defaultIndex": "stage_validated_telemetry_l1",
+      "retentionDays": 90,
+      "metricFieldMapping": {
+        "debug.*": "dev_test_storage"
+      }
+    }
+  },
+  "transformationHooks": [
+    {
+      "triggerField": "governance.certificationLevel",
+      "action": "RouteToQueue",
+      "queueName": "Certification_Event_Bus_High_Priority"
+    }
+  ]
+}

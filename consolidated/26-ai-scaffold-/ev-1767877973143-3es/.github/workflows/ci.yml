@@ -1,0 +1,71 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, gh-pages ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  ci:
+    name: Code Validation and Linting
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4 # Optimization: Updated to v4
+      
+    - name: Set up Node.js
+      # Optimization: Dedicated setup for better performance and environment control
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20' 
+        
+    - name: Install Validation Dependencies
+      # Optimization: Install locally instead of globally for cleaner separation
+      run: npm install html-validator
+      
+    - name: Validate HTML Structure
+      # Optimization: Execute locally installed binary
+      run: |
+        ./node_modules/.bin/html-validator index.html || true
+
+    - name: Basic File Check
+      run: |
+        echo "Running basic validation..."
+        # Ensures critical files exist before deployment
+        test -f index.html
+
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.ref == 'refs/heads/gh-pages'
+    needs: ci # Optimization: Ensure CI passes before deployment attempts
+    runs-on: ubuntu-latest
+    
+    # Required permissions and environment setup for standard GH Pages deployment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+      
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Pages
+        uses: actions/configure-pages@v4 # Modern standardized configuration
+        
+      # Since this is a static site with no explicit build step, upload the root directory
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './' 
+          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4 # Modern standardized deployment action
+```

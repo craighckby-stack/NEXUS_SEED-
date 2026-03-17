@@ -1,0 +1,24 @@
+{
+  "engine_version": "1.0.0",
+  "description": "Configuration for the Automated Cryptographic Transition Engine (CTE). Handles key rotation and algorithm deprecation.",
+  "transition_policies": {
+    "key_rollover_buffer_days": 14,
+    "algorithm_deprecations": [
+      {
+        "algorithm_id": "SHA3_512_P3",
+        "reason": "Efficiency/Standardization",
+        "enforced_cutoff_date": "2026-01-01",
+        "grace_period_days": 365
+      }
+    ],
+    "pqc_mandate": {
+      "trigger_date": "2025-10-01",
+      "minimum_signers_required": 2,
+      "pqc_algorithm_reference": "SLH_DSA_PQC"
+    }
+  },
+  "integrity_monitoring": {
+    "manifest_verification_frequency_minutes": 5,
+    "hash_verification_strategy": "Concurrent_Double_Check"
+  }
+}

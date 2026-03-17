@@ -1,0 +1,126 @@
+{
+  "metadata": {
+    "origin": "NEXUS_CORE",
+    "version": "3.9.0-FINAL-NEXUS-PRECISION",
+    "stability_index": 0.99999,
+    "architectural_pattern": "Reactive-AOP-Proxy-Cascading-Smart-Governance",
+    "lifecycle_state": "STABILIZED_EVOLUTION_COMPLETE"
+  },
+  "governance_binding": {
+    "compliance_mode": "STRICT_HHH_V2",
+    "proxy_config": {
+      "proxy_target_class": true,
+      "expose_proxy": true,
+      "frozen": true,
+      "optimization_level": "AGGRESSIVE",
+      "proxy_factory_bean": "NexusSecurityProxyFactory"
+    },
+    "advice_chain": [
+      "ConsensusSignatureValidator",
+      "HhhComplianceInterceptor",
+      "PolicyVolatilityInterceptor",
+      "ContextualFluxBoundaryGuard",
+      "DelegatingSecurityContextInterceptor",
+      "ReactiveBackpressureCoordinator",
+      "MicrometerObservationInterceptor"
+    ],
+    "pointcut_expression": "execution(* nexus.core.crypto.SiphonCrypter.*(..)) || @annotation(nexus.core.annotations.GatedSiphon) || @within(nexus.core.annotations.NexusSecureTransition)",
+    "spel_validation": "@nexusMetricNexus.isStable() && #root.cryptographic_assertion_config.key_requirements.ECC_minimum_bits >= 384 && #root.calibration_metrics.TCF > 0.995 && T(org.springframework.util.Assert).notNull(#root.telemetry_nexus_snapshot.integrity_gates)",
+    "inheritance_resolver": {
+      "parent_policy": "governance/base_crypto_defaults.json",
+      "resolution_strategy": "RECURSIVE_CASCADING_DECORATOR",
+      "memoization_enabled": true,
+      "cache_provider": "CaffeineCacheManager",
+      "cache_eviction_policy": "LRU_TTL_3600"
+    }
+  },
+  "cryptographic_assertion_config": {
+    "allowed_algorithms": [
+      "ES384",
+      "ES512",
+      "EdDSA",
+      "Ed448-Nexus-V3",
+      "ChaCha20-Poly1305-IETF"
+    ],
+    "disallowed_algorithms": [
+      "HS256",
+      "RS256",
+      "PS256",
+      "ES256",
+      "SHA1",
+      "MD5",
+      "3DES"
+    ],
+    "key_requirements": {
+      "ECC_minimum_bits": 384,
+      "RSA_minimum_bits": 4096,
+      "padding_standard": "PSS",
+      "kdf_derivation_iterations": 600000,
+      "secret_key_factory_algorithm": "PBKDF2WithHmacSHA512",
+      "enforce_fips_140_3": true,
+      "provider": "BCFIPS"
+    },
+    "replay_prevention": {
+      "nonce_required": true,
+      "max_time_skew_seconds": 10,
+      "token_cache_manager": "CaffeineCacheManager",
+      "cache_spec": "maximumSize=50000,expireAfterWrite=60s,recordStats"
+    }
+  },
+  "calibration_metrics": {
+    "TCF": 0.9998,
+    "RCF": 0.0002,
+    "confidence_interval": 0.99999,
+    "reactive_strategy": "BUFFER_DROP_OLDEST_SYNERGY",
+    "flux_backpressure_threshold": 0.05,
+    "state_machine_cycle": 5,
+    "heartbeat_interval_ms": 100,
+    "drift_tolerance_score": 0.00001
+  },
+  "telemetry_nexus_snapshot": {
+    "ufrm": 0.0005,
+    "cftm": 0.0012,
+    "pvm": 0.0001,
+    "health_status": "UP",
+    "integrity_gates": [
+      "HHH_ALIGNMENT_V2",
+      "CISM_INTEGRITY_GROUP",
+      "SPRING_SECURITY_CONTEXT_ADAPTER",
+      "AOP_ADVICE_VERIFIER",
+      "REACTIVE_FLUX_INTEGRITY",
+      "MICROMETER_OBSERVATION_VALIDATED"
+    ],
+    "active_profiles": [
+      "production",
+      "nexus-v3-reactive",
+      "secure-enclave",
+      "zero-trust-mode",
+      "high-availability-siphon"
+    ]
+  },
+  "trajectory_projection": {
+    "temm_score": 0.9999,
+    "ecvm": 0.00001,
+    "simulation_mode": "DIGITAL_TWIN",
+    "simulation_strategy_bean": "predictiveModelHandler",
+    "fallback_action": "REVERT_TO_SAFE_STATE",
+    "on_violation_revert_target": "LATEST_STABLE_HASH",
+    "condition": "@environment.getProperty('nexus.simulation.enabled', 'true') == 'true'",
+    "predictive_depth": "P4_EXECUTION_OUTCOME",
+    "error_handler": "NexusTrajectoryExceptionHandler"
+  },
+  "dependency_graph": {
+    "scope": "singleton",
+    "autowire_mode": "BY_TYPE",
+    "is_lazy": false,
+    "primary_bean_id": "cryptoPolicyProvider",
+    "object_provider": "ObjectProvider<PolicyDefinition>",
+    "relations": {
+      "cryptoProvider": "f3a2b1c0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2",
+      "policyAuditor": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2",
+      "securityEnforcer": "b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0e9d8c7b6a5f4e3d2c1b0a9f",
+      "observationRegistry": "d3f4e5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2"
+    },
+    "qualifier": "nexus-high-integrity-v3"
+  }
+}

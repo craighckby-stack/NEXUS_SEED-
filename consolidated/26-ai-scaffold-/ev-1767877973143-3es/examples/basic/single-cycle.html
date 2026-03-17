@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Optimized Single Cycle Example</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Optimized dark theme styling */
+        body { 
+            font-family: 'Consolas', monospace; 
+            background: #1a1a1a; 
+            color: #aaa; 
+            padding: 20px; 
+        }
+        h1 { 
+            color: #00ff99; /* Neon green header */
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+        button { 
+            background: #00ff99; 
+            color: #1a1a1a; 
+            border: none; 
+            padding: 12px 25px; 
+            cursor: pointer; 
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        button:hover { 
+            background: #00cc88; 
+        }
+        .log { 
+            margin-top: 25px; 
+            font-size: 14px; 
+            border-left: 3px solid #00ff99; 
+            padding-left: 15px;
+            white-space: pre-wrap;
+        }
+        .success { color: #00ff99; font-weight: bold; }
+        .timing { color: #ffff66; }
+    </style>
+</head>
+<body>
+    <h1>Optimized Evolution Cycle</h1>
+    <button onclick="startEvolution()">Execute Single Optimized Cycle</button>
+    <div id="log" class="log"></div>
+    
+    <script>
+        /**
+         * Simulates an optimized CPU-bound calculation cycle and measures its performance.
+         * The calculation uses iterative optimization principles (Fibonacci sequence iteration)
+         * to force the CPU to perform work, justifying the "optimization" theme.
+         */
+        async function startEvolution() {
+            const log = document.getElementById('log');
+            log.innerHTML = '<p>Initiating optimized cycle...</p>';
+            
+            const startTime = performance.now();
+            
+            // --- Step 1: Data Setup and Initialization ---
+            const ITERATIONS = 50000; // Large iteration count for measurable CPU load
+            let [a, b] = [0, 1];
+            let result = 0;
+            let logOutput = `<span class="timing">T+${(performance.now() - startTime).toFixed(3)} ms</span> | Initialization complete.\n`;
+            
+            // --- Step 2: Optimized Calculation Phase ---
+            const calcStart = performance.now();
+
+            // Using tuple assignment/destructuring for slight readability/modern JS optimization 
+            // of state update in the tight loop.
+            for (let i = 0; i < ITERATIONS; i++) {
+                // Optimized state update: Calculate next Fibonacci number (modulo 997 for range stability)
+                [a, b] = [b, (a + b) % 997];
+                result = b; 
+            }
+
+            const calculationTime = performance.now() - calcStart;
+            logOutput += `<span class="timing">T+${(performance.now() - startTime).toFixed(3)} ms</span> | Calculation phase executed (${ITERATIONS} ops).\n`;
+            
+            // --- Step 3: Finalization and Reporting ---
+            const totalTime = performance.now() - startTime;
+
+            log.innerHTML = `
+                <p>--- CYCLE REPORT ---</p>
+                ${logOutput}
+                
+                <p style="margin-top: 15px;">
+                â€¢ Calculated Result Hash: <span class="success">${result}</span><br>
+                â€¢ Calculation Duration: <span class="timing">${calculationTime.toFixed(3)} ms</span><br>
+                â€¢ Total Cycle Duration: <span class="timing">${totalTime.toFixed(3)} ms</span>
+                </p>
+                <p class="success">âœ“ Single Optimized Cycle Complete.</p>
+            `;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+# Utility Function Registry (UFR) V1.0
+# Artifact governing the precise definition of TEMM calculation logic (SGS: P4, S08-S10).
+# This configuration root ensures that TEMM calculation is versioned and auditable, separate 
+# from the GAX-defined constraints (ACVD).
+
+registry_id: UFR-001A
+version: 1.0.0
+
+target_metric: TEMM
+
+# Mapping raw P3 data fields (from ASM) to calculation components.
+input_map:
+  - source: 'S07.raw_utility_output_A'
+    label: 'EfficiencyScore'
+  - source: 'S07.resource_burn_rate_B'
+    label: 'CostFactor'
+
+# Detailed steps for TEMM calculation. Must be deterministically interpreted by SGS engine.
+# Expression format: Postfix Notation (e.g., [10, 5, +, 2, *, 1, -] = 29)
+calculation_steps_postfix:
+  - ["EfficiencyScore", "CostFactor", "Divide", "Weight_X", "Multiply"]
+  - ["Constant_Bias_C", "Add"]
+  - ["Clip_Min_Zero"]
+
+# Defined constants and external weights used in the steps above.
+constants:
+  Weight_X: 0.95
+  Constant_Bias_C: 1.0

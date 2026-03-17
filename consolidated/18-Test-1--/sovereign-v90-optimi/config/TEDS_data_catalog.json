@@ -1,0 +1,38 @@
+{
+  "catalog_version": "v1.0",
+  "description": "Definitive schema for all keys used in the Trusted Event Data Stream (TEDS), enabling strict type and format validation.",
+  "data_keys": {
+    "start_timestamp": {
+      "type": "string",
+      "format": "ISO_8601",
+      "description": "The exact time the process initiated."
+    },
+    "previous_hash": {
+      "type": "string",
+      "format": "SHA256_HEX",
+      "description": "Cryptographic hash of the TEDS record immediately preceding this one.",
+      "validation": "^([a-fA-F0-9]){64}$"
+    },
+    "csr_lock_hash": {
+      "type": "string",
+      "format": "SHA256_HEX",
+      "description": "Hash derived from the CRoT State Register (CSR) lock."
+    },
+    "environment_verification_status": {
+      "type": "boolean",
+      "description": "Flag indicating successful pre-execution environment verification."
+    },
+    "acvd_final_hash": {
+      "type": "string",
+      "format": "SHA256_HEX",
+      "description": "Final cryptographic hash of the validated Assessment & Validation Cycle Definition (ACVD) package."
+    },
+    "str_hash": {
+      "type": "string",
+      "format": "SHA256_HEX",
+      "description": "Hash of the persistent State Transition Record (STR) confirmed at persistence completion."
+    }
+    
+    // ... remaining data keys (e.g., acvd_template_load_status, ecvm_result, temm_score) must be defined here.
+  }
+}

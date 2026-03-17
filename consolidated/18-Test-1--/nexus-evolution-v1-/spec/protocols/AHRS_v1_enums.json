@@ -1,0 +1,22 @@
+{
+  "$id": "http://example.com/AHRS_v1_enums.json",
+  "title": "AHRS Protocol V1 Enumerations",
+  "description": "Defines standard constants, bitmasks, and lookup mappings used in the AHRS_v1 protocol, specifically for the calibration_status integer field.",
+  "enums": {
+    "calibration_status_flags": {
+      "0": "Uncalibrated/Booting",
+      "1": "Magnetometer Calibrated (or N/A)",
+      "2": "Accelerometer Calibrated",
+      "4": "Gyroscope Calibrated",
+      "8": "Altitude/Reference Stable",
+      "16": "Heading Initialized",
+      "32": "Full Sensor Fusion Lock"
+    },
+    "quaternion_order": {
+      "w": 0,
+      "x": 1,
+      "y": 2,
+      "z": 3
+    }
+  }
+}

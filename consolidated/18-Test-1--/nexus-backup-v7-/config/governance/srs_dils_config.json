@@ -1,0 +1,8 @@
+{
+  "dils_client_name": "DILS_Governance_Client_A",
+  "ledger_endpoint": "https://dils.sovereign.local/gov-state",
+  "commitment_strategy": "SHA3-512_Signature_Envelope",
+  "schema_collection_id": "SRS_Schemas_V2",
+  "trust_anchor_ref": "GRTA_Signing_Key_ID_P9",
+  "max_retries": 5
+}

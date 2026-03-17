@@ -1,0 +1,21 @@
+{
+  "ROM_version": "v1.0",
+  "name": "Resource Orchestration Module",
+  "policy_defaults": {
+    "traffic_steering_algorithm": "LeastLatency_Weighted",
+    "max_load_threshold": 0.85,
+    "scaling_reaction_time_ms": 500
+  },
+  "critical_resource_mapping": {
+    "Gov-Critical": {
+      "deployment_zones": ["Zone_A_Secure", "Zone_B_Secure"],
+      "minimum_redundancy": 3,
+      "geo_fencing_required": true
+    },
+    "Standard": {
+      "deployment_zones": ["Zone_C_Standard"],
+      "minimum_redundancy": 1
+    }
+  },
+  "integration_points": ["PRE", "L4", "L7"]
+}

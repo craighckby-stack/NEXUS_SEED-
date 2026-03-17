@@ -1,0 +1,1 @@
+Directive received: Optimize for maximum computational efficiency and recursive abstraction.

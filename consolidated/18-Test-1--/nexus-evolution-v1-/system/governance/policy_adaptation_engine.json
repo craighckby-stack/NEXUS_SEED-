@@ -1,0 +1,25 @@
+{
+  "engine_version": "1.0",
+  "policies": [
+    {
+      "ref_id": "POLICY_EMA_K1",
+      "type": "ExponentialMovingAverage",
+      "parameters": {
+        "alpha": 0.1,
+        "lookback_window": 100,
+        "application": "ThresholdAdjustment"
+      },
+      "description": "Standard EMA used for smoothing critical fidelity metrics."
+    },
+    {
+      "ref_id": "POLICY_CVM_T3",
+      "type": "ContextualVarianceMitigation",
+      "parameters": {
+        "variance_cap": 0.05,
+        "context_sensitivity": ["EXTERNAL_API_CALLS"],
+        "application": "RiskAdjustment"
+      },
+      "description": "Mitigates threshold drift based on specific volatile execution contexts."
+    }
+  ]
+}

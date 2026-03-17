@@ -1,0 +1,27 @@
+{
+  "governance_failure_resolution_map": {
+    "description": "Maps GFRM symbolic references to concrete, executable failure resolution procedures.",
+    "GFRM:INIT_ROLLBACK_SST_PREV": {
+      "action_type": "STATE_TRANSITION",
+      "target_module": "StateEngine.Rollback",
+      "parameters": {"scope": "protocol_instance", "depth": 1}
+    },
+    "GFRM:HALT_PROTOCOL": {
+      "action_type": "CONTROL",
+      "target_module": "ControlPlane.Halt",
+      "severity": "CRITICAL_TERMINATION"
+    },
+    "GFRM:RECALCULATE_CONTEXT": {
+      "action_type": "PIPELINE_MANIPULATION",
+      "target_module": "Context.ReEvaluate",
+      "retry_stage_id": "S_03_CONTEXT_SYNC"
+    },
+    "GFRM:LOG_AND_RETRY_S_04": {
+      "action_type": "PIPELINE_MANIPULATION",
+      "target_module": "Pipeline.Retry",
+      "retry_stage_id": "S_04_METRIC_DYN",
+      "max_retries": 1,
+      "log_level": "WARNING"
+    }
+  }
+}

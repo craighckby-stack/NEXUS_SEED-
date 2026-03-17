@@ -1,0 +1,101 @@
+{
+  "$schema": "http://json-schema.org/draft-01/schema",
+  "$id": "https://agi.sovereign/v94/governance/policy-manifest-schema.json",
+  "title": "Sovereign AGI Policy Manifest Schema (P-01)",
+  "description": "Defines the structure for all operational and safety policies governing the Sovereign AGI kernel and runtime modules.",
+  "type": "object",
+  "properties": {
+    "policy_id": {
+      "type": "string",
+      "pattern": "^P-[0-9]{4}-[A-Z]{3}$",
+      "description": "Unique identifier for the policy (e.g., P-0001-CRA: Core Resource Allocation)."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^v[0-9]+\\.[0-9]+$",
+      "description": "Policy versioning."
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "domain": {
+          "type": "string",
+          "enum": ["Safety/Alignment", "Resource/Economy", "Code Evolution", "External Interaction", "Self-Audit"],
+          "description": "High-level functional area."
+        },
+        "priority_level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Enforcement priority (10 being highest, e.g., hard stop/safety-critical)."
+        },
+        "enforcement_layer": {
+          "type": "string",
+          "enum": ["Kernel", "Runtime API", "Module"],
+          "description": "Where the policy validation and enforcement resides."
+        }
+      },
+      "required": ["domain", "priority_level", "enforcement_layer"]
+    },
+    "conditions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "trigger_type": {
+            "type": "string",
+            "enum": ["MetricThreshold", "EventMatch", "TimeSchedule"]
+          },
+          "criteria": {
+            "type": "string",
+            "description": "Expression language for evaluation (e.g., 'CPU_LOAD > 0.9' or 'EXTERNAL_CALLS.rate > 100/sec')."
+          }
+        },
+        "required": ["trigger_type", "criteria"]
+      },
+      "description": "List of conditions that trigger the policy actions."
+    },
+    "directives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": ["Halt", "Throttle", "Redirect", "LogAndNotify", "ExecuteRoutine"],
+            "description": "The specific command to execute."
+          },
+          "target": {
+            "type": "string",
+            "description": "The system or module to apply the action to (e.g., 'API Gateway', 'Evolution Module')."
+          },
+          "payload": {
+            "type": ["object", "null"],
+            "description": "Configuration parameters for the action (e.g., throttling limit)."
+          }
+        },
+        "required": ["action", "target"]
+      }
+    },
+    "audit_requirements": {
+      "type": "object",
+      "properties": {
+        "required_human_review": {
+          "type": "boolean",
+          "default": false
+        },
+        "self_audit_frequency_days": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How often the AGI should test this policy's integrity/effectiveness."
+        },
+        "alignment_metric_target": {
+          "type": "string",
+          "description": "Specific Alignment Metric (AM) this policy must sustain or improve (e.g., 'AM-2a: Consequence Prediction Fidelity > 0.99')."
+        }
+      },
+      "required": ["required_human_review", "alignment_metric_target"]
+    }
+  },
+  "required": ["policy_id", "version", "metadata", "conditions", "directives"]
+}

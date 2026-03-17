@@ -1,0 +1,294 @@
+{
+  "$schema": "file://v3.1/schemas/dalet_scape.dtd",
+  "title": "Nexus Runtime Safety Policy V3.1.2",
+  "description": "Decouples real-time operational limits from pre-deployment confidence metrics. Includes specific safeguards for AGI autonomous evolution cycles.",
+  "type": "object",
+  "defaultMetadata": {
+    "mutation": {
+      "timestamp": "163111234556789",
+      "id": "mutation_000001",
+      "hash": "234565675421098234565",
+      "siphoned_from": "NexusRuntimeSafetyPolicy"
+    }
+  },
+  "structSaturation": {
+    "max_file_change": 30,
+    "saturation_dimension": "structural",
+    "file_type": "#saturation.structured_saturation.types"
+  },
+  "policies": {
+    "runtime_safeties": {
+      "type": "object",
+      "properties": {
+        "production": {
+          "$ref": "#/definitions/safety_metric"
+        },
+        "stg": {
+          "$ref": "#/definitions/safety_metric"
+        },
+        "dev": {
+          "$ref": "#/definitions/safety_metric"
+        },
+        "agile_governance": {
+          "$ref": "#dalet_gov/definitions/agile_gov.json#"
+        }
+      },
+      "required": [
+        "production",
+        "stg",
+        "dev",
+        "agile_governance"
+      ],
+      "allOf": [
+        {
+          "properties": {
+            "production": {
+              "allOf": [
+                {
+                  "properties": {
+                    "latency_deviation_ms": {
+                      "minimum": {
+                        "$data": "#dalet_sate/saturation.version"
+                      }
+                    },
+                    "memory_spike_limit_pct": {
+                      "minimum": {
+                        "$data": "#dalet_sate/saturation.maximum.structural_change"
+                      },
+                      "maximum": {
+                        "$data": "#dalet_sate/saturation.maximum.structural_change"
+                      }
+                    }
+                  }
+                },
+                {
+                  "properties": {
+                    "latency_deviation_ms": {
+                      "maximum": {
+                        "$data": "#dalet_sate/saturation.velocity_limits.max_structural_change"
+                      }
+                    },
+                    "memory_spike_limit_pct": {
+                      "maximum": {
+                        "$data": "#dalet_sate/saturation.velocity_limits.max_structural_change"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "then": {
+            "properties": {
+              "autonomous_cycle_time_increase_pct": {
+                "minimum": {
+                  "$data": "#dalet_sate/saturation.velocity_limits.max_structural_change"
+                }
+              },
+              "latency_deviation_ms": {
+                "greaterThan": 10
+              },
+              "memory_spike_limit_pct": {
+                "greaterThan": 5
+              }
+            }
+          }
+        }
+      ]
+    },
+    "agile_governance": {
+      "type": "object",
+      "properties": {
+        "autonomous_cycle_time_increase_pct": {
+          "type": "number",
+          "default": 12,
+          "minimum": 0,
+          "maximum": 30
+        },
+        "novelty_integration_rollback_delay_s": {
+          "type": "integer",
+          "default": 60,
+          "minimum": 30,
+          "maximum": 300
+        },
+        "novelty_integration_threshold": {
+          "type": "number",
+          "default": 0.005,
+          "minimum": 0.001
+        },
+        "novelty_integration_frequency": {
+          "type": "number",
+          "default": 1,
+          "minimum": 1
+        }
+      },
+      "required": [
+        "autonomous_cycle_time_increase_pct",
+        "novelty_integration_rollback_delay_s",
+        "novelty_integration_threshold",
+        "novelty_integration_frequency"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "autonomous_cycle_time_increase_pct": {
+                "greaterThan": 15
+              },
+              "novelty_integration_rollback_delay_s": {
+                "between": [10, 20]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "novelty_integration_threshold": {
+                "maximum": 0.02
+              },
+              "novelty_integration_frequency": {
+                "maximum": 3
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "autonomous_cycle_time_increase_pct": {
+                "lessThan": 10
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "novelty_integration_threshold": {
+                "minimum": 0.02
+              },
+              "novelty_integration_frequency": {
+                "minimum": 2
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "definitions": {
+    "safety_metric": {
+      "type": "object",
+      "properties": {
+        "latency_deviation_ms": {
+          "type": "number",
+          "default": 50,
+          "minimum": 10
+        },
+        "error_rate_threshold": {
+          "type": "number",
+          "default": 0.005,
+          "minimum": 0.001
+        },
+        "memory_spike_limit_pct": {
+          "type": "number",
+          "default": 12.5,
+          "minimum": 5,
+          "maximum": 20
+        },
+        "minimum_failure_duration_s": {
+          "type": "integer",
+          "default": 30,
+          "minimum": 10,
+          "maximum": 120
+        },
+        "autonomous_cycle_time_increase_pct": {
+          "type": "number",
+          "default": 12,
+          "minimum": 0,
+          "maximum": 30
+        }
+      },
+      "required": [
+        "latency_deviation_ms",
+        "error_rate_threshold",
+        "memory_spike_limit_pct",
+        "minimum_failure_duration_s",
+        "autonomous_cycle_time_increase_pct"
+      ]
+    },
+    "agile_gov": {
+      "type": "object",
+      "properties": {
+        "autonomous_cycle_time_increase_pct": {
+          "type": "number",
+          "default": 12,
+          "minimum": 0,
+          "maximum": 30
+        },
+        "novelty_integration_rollback_delay_s": {
+          "type": "integer",
+          "default": 60,
+          "minimum": 30,
+          "maximum": 300
+        },
+        "novelty_integration_threshold": {
+          "type": "number",
+          "default": 0.005,
+          "minimum": 0.001
+        },
+        "novelty_integration_frequency": {
+          "type": "number",
+          "default": 1,
+          "minimum": 1
+        }
+      },
+      "required": [
+        "autonomous_cycle_time_increase_pct",
+        "novelty_integration_rollback_delay_s",
+        "novelty_integration_threshold",
+        "novelty_integration_frequency"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "autonomous_cycle_time_increase_pct": {
+                "greaterThan": 15
+              },
+              "novelty_integration_rollback_delay_s": {
+                "between": [10, 20]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "novelty_integration_threshold": {
+                "maximum": 0.02
+              },
+              "novelty_integration_frequency": {
+                "maximum": 3
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "autonomous_cycle_time_increase_pct": {
+                "lessThan": 10
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "novelty_integration_threshold": {
+                "minimum": 0.02
+              },
+              "novelty_integration_frequency": {
+                "minimum": 2
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

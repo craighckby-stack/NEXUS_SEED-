@@ -1,0 +1,17 @@
+{
+  "pedr_version": "1.1",
+  "action_types": [
+    {"type": "EXECUTION", "params": ["command"]},
+    {"type": "NOTIFICATION", "params": ["channel", "level"]},
+    {"type": "DATABASE", "params": ["command"]},
+    {"type": "LOGGING", "params": ["level"]},
+    {"type": "FEATURE_MANAGEMENT", "params": ["command", "feature_id"]}
+  ],
+  "retry_strategies": [
+    {"strategy": "NONE"},
+    {"strategy": "TENTATIVE_BACKOFF", "required_params": ["max_attempts", "initial_delay_ms"]},
+    {"strategy": "IMMEDIATE_FAILOVER"},
+    {"strategy": "DELAY_THEN_RETRY", "required_params": ["delay_seconds", "max_attempts"]},
+    {"strategy": "MANUAL_OVERRIDE"}
+  ]
+}

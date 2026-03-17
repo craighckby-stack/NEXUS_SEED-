@@ -1,0 +1,18 @@
+PCRE_Workflow_Tracker_Definition:
+  description: Data model for tracking in-flight Policy Consensus Ratification Evolution (PCRE) workflows.
+  endpoints:
+    GET: "/v1/policy/{hash}/status"
+    POST: "/v1/policy/{hash}/sign"
+    PUT: "/v1/policy/{hash}/transition"
+  data_model:
+    workflow_hash: str # Cryptographic Hash (L2) of the proposed policy
+    current_stage: enum(P-DRAFT, P-VOTE, P-DEPLOY)
+    timestamp_started: datetime
+    signer_signatures: # Map of Role -> Signer Key -> Timestamp/Signature
+      Regulatory_Governance: {}
+      System_Integrity_Verification: {}
+      Operational_Stability: {}
+    constraint_status: # Validation checks result
+      P_M02_Validated: bool
+      Quorum_Met: bool
+    transition_log: list # Historical log of successful stage transitions

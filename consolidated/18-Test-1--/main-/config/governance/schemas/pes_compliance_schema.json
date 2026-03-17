@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.agi/pes_compliance_report.json",
+  "title": "PES Compliance Report Schema",
+  "description": "Standard schema for modules reporting against Sovereign AGI PES standards.",
+  "type": "object",
+  "properties": {
+    "module_id": { "type": "string", "description": "Unique identifier of the reporting module." },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "tier_context": { "type": "string", "enum": ["Production_HighVolume", "Development_UnitTest", "Staging"] },
+    "metric_readings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": { "type": "string" },
+          "value": { "type": "number" },
+          "unit": { "type": "string" },
+          "status": { "type": "string", "enum": ["COMPLIANT", "WARNING", "CRITICAL"] }
+        },
+        "required": ["key", "value", "status"]
+      }
+    },
+    "governance_check_results": {
+      "type": "array",
+      "items": { "type": "object", "properties": {"rule_id": {"type": "string"}, "passed": {"type": "boolean"}, "action_triggered": {"type": "string"} } }
+    }
+  },
+  "required": ["module_id", "timestamp", "metric_readings"]
+}

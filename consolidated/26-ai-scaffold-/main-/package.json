@@ -1,0 +1,35 @@
+{
+  "name": "ai-scaffold",
+  "version": "18.0.0",
+  "description": "Dalek Linear Evolution - Recursive Commits v18",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "dev": "python -m http.server 8000",
+    "lint": "echo 'No linter configured'",
+    "test": "echo 'Run tests in tests/ directory'",
+    "validate": "node tools/validate.js",
+    "setup": "bash scripts/setup.sh",
+    "deploy": "bash scripts/deploy.sh"
+  },
+  "keywords": [
+    "ai",
+    "evolution",
+    "github",
+    "automation",
+    "code-refactoring",
+    "self-improving"
+  ],
+  "author": "Dalek Khan AGI",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/craighckby-stack/ai-scaffold.git"
+  },
+  "bugs": {
+    "url": "https://github.com/craighckby-stack/ai-scaffold/issues"
+  },
+  "homepage": "https://craighckby-stack.github.io/ai-scaffold/",
+  "devDependencies": {},
+  "dependencies": {}
+}

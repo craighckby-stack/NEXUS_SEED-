@@ -1,0 +1,28 @@
+{
+  "description": "Governing parameters and thresholds for the MCRE engine, securely managed by GCO.",
+  "version": "1.0.0",
+  "parameters": {
+    "beta_MCRE": {
+      "type": "float",
+      "value": 0.015, 
+      "units": "Absolute S-01 Delta",
+      "note": "Maximum allowable rolling average TEDA before MRA is triggered."
+    },
+    "t_hold": {
+      "type": "integer",
+      "value": 300, 
+      "units": "Seconds",
+      "note": "Duration TEDA must exceed beta_MCRE before MRA locks in."
+    },
+    "V_data_schema_version": {
+      "type": "string",
+      "value": "D-02_v3.4",
+      "note": "Required schema version for ESIC validation."
+    },
+    "recalibration_priority": {
+      "type": "string",
+      "value": "STANDARD",
+      "valid_values": ["EMERGENCY", "STANDARD", "DEFERRED"]
+    }
+  }
+}

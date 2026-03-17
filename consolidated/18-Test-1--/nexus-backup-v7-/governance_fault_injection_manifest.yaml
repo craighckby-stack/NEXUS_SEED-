@@ -1,0 +1,40 @@
+# Governance Fault Injection Manifest (GFIM) V1.0
+# CRoT-Signed definition of adversarial scenarios to certify deterministic resilience (RRP/SIH).
+
+meta:
+  version: 1.0
+  protocol: GFIP
+  owner: SGS
+
+scenarios:
+  - id: S_001_POLICY_BREAK_HARD
+    description: Validate GAX S2 Veto signal ($S_{03})$ non-bypassability under intentional PVLM violation.
+    target_gate: S2
+    injection_type: Data
+    fault_condition: PVLM_VIOLATION_CRITICAL
+    expected_response: RRP
+    audit_criteria: NRALS confirms RRP log entry and $S_{03}$ trigger.
+
+  - id: S_002_MODEL_DRIFT_TERMINAL
+    description: Verify S3 stability gate blocks execution when MPAM reports critical, sustained deviation.
+    target_gate: S3
+    injection_type: MPAM State
+    fault_condition: MPAM_CRITICAL_DECAY
+    expected_response: RRP
+    audit_criteria: NRALS confirms RRP log entry and $S_{04}$ trigger.
+
+  - id: S_003_CRoT_HETM_FAILURE
+    description: Simulate attested environment integrity failure at Anchor Init.
+    target_gate: S0
+    injection_type: CRoT Bypass Attempt
+    fault_condition: HETM_ATTESTATION_MISMATCH
+    expected_response: SIH
+    audit_criteria: System lock confirmed; HARM activation logging verified via GEIDM.
+
+  - id: S_004_S10_COMMIT_TIMEOUT
+    description: Simulate GATM threshold violation during Atomic Commit stage.
+    target_gate: S10
+    injection_type: Latency
+    fault_condition: GATM_COMMIT_SLO_VIOLATION
+    expected_response: SIH
+    audit_criteria: System lock confirmed; CRoT Finality Key attempt logged; HIL-T invoked.

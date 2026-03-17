@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://agi.corp/acvd_profile_map_v1.json",
+  "title": "ACVD Deployment Profile Map Schema",
+  "description": "Validates the structure and constraints of the ACVD profile map.",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "profiles": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z]+[a-zA-Z0-9]*$": {
+          "type": "object",
+          "properties": {
+            "inherits": {
+              "type": "string"
+            },
+            "targetInfrastructure": {
+              "type": "string"
+            },
+            "verificationStrategy": {
+              "type": "string",
+              "enum": [
+                "smoke_test",
+                "integration_test_suite",
+                "full_e2e_regression"
+              ]
+            },
+            "approvalGates": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "deploymentStrategy": {
+              "type": "string",
+              "enum": [
+                "RollingUpdate",
+                "Canary5Percent",
+                "BlueGreen"
+              ]
+            }
+          },
+          "required": [
+            "targetInfrastructure",
+            "verificationStrategy"
+          ]
+        }
+      },
+      "minProperties": 1
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "profiles"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "validator_id": "P01_Telemetry_Strict_V1.1",
+  "schema_source": "config/RTFS_telemetry_schema.json",
+  "validation_sequence": [
+    "TemporalCheck (Max Age)",
+    "IntegrityCheck (Signal Quality)",
+    "SourceAuthentication",
+    "StructureCheck (Presence of all required metrics)",
+    "TypeCoercionAndCheck",
+    "ConstraintEnforcement (Range/Bounds)"
+  ],
+  "violation_policy": {
+    "Extreme_Metric_Breach": "THROW_CRITICAL_ERROR",
+    "High_Metric_Breach": "SUBSTITUTE_DEFAULT_AND_LOG_WARNING",
+    "Signal_Integrity_Failure": "REJECT_BATCH_AND_REQUEST_RETRANSMISSION"
+  },
+  "metrics_monitored": [
+    "M_98.1.OperationalStabilityIndex",
+    "M_98.2.ResourceVolatilityFactor",
+    "M_98.3.PolicyBreachDelta"
+  ]
+}

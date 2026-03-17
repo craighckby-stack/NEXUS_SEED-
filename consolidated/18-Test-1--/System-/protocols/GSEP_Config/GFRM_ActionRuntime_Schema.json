@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GFRM Action Definition Schema",
+  "type": "object",
+  "properties": {
+    "handler": {
+      "type": "string",
+      "description": "The internal path or class reference for the execution function."
+    },
+    "description": {
+      "type": "string"
+    },
+    "priority": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "description": "Execution priority (higher value means sooner execution)."
+    },
+    "timeout_ms": {
+      "type": "integer",
+      "minimum": 100
+    },
+    "requires_auth": {
+      "type": "boolean",
+      "default": false
+    },
+    "input_schema": {
+      "type": "object",
+      "description": "JSON schema definition for required input parameters."
+    },
+    "output_schema": {
+      "type": "object",
+      "description": "JSON schema definition for expected output structure."
+    },
+    "lifecycle_hooks": {
+      "type": "object",
+      "properties": {
+        "validation": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Hooks run before parameter binding."
+        },
+        "pre_execution": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Hooks run immediately before main handler execution."
+        },
+        "post_execution": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Hooks run immediately after main handler execution."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["handler", "input_schema", "output_schema"]
+}

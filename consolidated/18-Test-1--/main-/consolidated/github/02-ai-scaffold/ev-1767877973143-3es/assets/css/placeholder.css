@@ -1,0 +1,15 @@
+/* Placeholder CSS file */
+/* Add custom styles here */
+
+:root {
+    --primary-color: #dc2626;
+    --secondary-color: #27272a;
+    --text-color: #a1a1aa;
+    --background-color: #000000;
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: 'Courier New', monospace;
+}

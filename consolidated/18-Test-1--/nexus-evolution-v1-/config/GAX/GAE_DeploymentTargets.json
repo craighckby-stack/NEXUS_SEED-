@@ -1,0 +1,35 @@
+{
+  "version": "V1.0",
+  "description": "Defines resource constraints, scaling policies, and target execution environments for GAE modules based on inferred trust level and operational category.",
+  "default_policies": {
+    "L5_CORE": {
+      "environment": "HyperIsolated_Secure",
+      "resource_profile": "High_Density",
+      "scaling_strategy": "Fixed_Replicas(3)"
+    },
+    "L4_SYSTEM": {
+      "environment": "StandardContainer_Optimized",
+      "resource_profile": "Medium_Density",
+      "scaling_strategy": "HPA_P90_Latency_300ms"
+    },
+    "L3_OPERATIONAL": {
+      "environment": "StandardContainer",
+      "resource_profile": "Low_Density",
+      "scaling_strategy": "HPA_CPU_50_Percent"
+    }
+  },
+  "category_overrides": {
+    "AI_Control": {
+      "priority": 900
+    },
+    "Data_Ingest": {
+      "resource_profile": "High_IO",
+      "scaling_strategy": "Buffer_Queue_Length"
+    }
+  },
+  "module_specific_overrides": {
+    "CISM_Integrator": {
+      "dedicated_affinity": true
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "risk_floor_enabled": true,
+  "default_floor_level": 0.05,
+  "critical_thresholds": {
+    "core_execution": 0.10,
+    "integrity_check": 0.07
+  },
+  "override_policy": "STRICT_COMPLIANCE"
+}

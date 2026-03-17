@@ -1,0 +1,21 @@
+# PSR Governance - Production Dependencies
+# ===========================================
+
+# Core dependencies (none - pure Python)
+# The framework uses only standard library:
+# - cProfile
+# - time
+# - gc
+# - json
+# - dataclasses
+# - typing
+
+# Optional development dependencies
+# Install with: pip install -e ".[dev]"
+
+pylint>=3.0.0
+bandit>=1.7.0
+pytest>=7.4.0
+pytest-cov>=4.1.0
+black>=23.0.0
+isort>=5.12.0

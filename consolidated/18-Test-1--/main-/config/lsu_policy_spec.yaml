@@ -1,0 +1,26 @@
+LSU_VERSION: 1.0
+SCOPE: LOCAL_OPTIMIZATION
+
+# The Local Stabilization Utility (LSU) handles transient non-critical anomalies
+# reported by RTOM before they breach P-Set thresholds (P-M01, P-M02).
+# LSU actions must NEVER violate constraints imposed by DRO (GAX II).
+
+# --- Temporal Fluctuation Policies ---
+POLICY_T_01:
+  MONITOR_METRIC: RTOM.GATE_DWELL_TIME
+  TARGET_GATE: G1
+  THRESHOLD_TYPE: WARNING
+  THRESHOLD_VALUE_PERCENT: 90
+  ACTION_TYPE: RESOURCE_REALLOCATION
+  ACTION_PARAM: { DRO_SUBMISSION_REQUEST: '1.05X_CPU_LIMIT', MAX_RETRIES: 1 }
+  FAILURE_MODE: PIM_REPORT (if retry fails)
+
+# --- Resource Pre-Check Policies ---
+POLICY_R_02:
+  MONITOR_METRIC: RTOM.MEMORY_UTILIZATION_PRE_S08
+  TARGET_STAGE: S07
+  THRESHOLD_TYPE: SOFT_LIMIT
+  THRESHOLD_VALUE_PERCENT: 85
+  ACTION_TYPE: CACHE_FLUSH
+  ACTION_PARAM: { MODULE: 'ISB_Cache_Manager', LEVEL: 'MEDIUM' }
+  FAILURE_MODE: NONE # PIM/FSMU handles subsequent hard failure if GAX II violated

@@ -1,0 +1,18 @@
+pipeline_id: SGMI_V1
+stages:
+  - name: Data Ingestion
+    source_mapping:
+      P01_SUCCESS_RATE: governance.audit.task_completion
+      RPD_COMPLIANCE_DRIFT: engine.l9_dere_score
+  - name: Calculation
+    metric: P01_SUCCESS_RATE
+    method: MovingAverage
+    parameters:
+      time_window: 'config:metrics.P01_SUCCESS_RATE.window'
+      lookback_points: 1000
+  - name: Threshold Evaluation
+    check_against: 'config:metrics.P01_SUCCESS_RATE.constraints'
+    trigger_alert: true
+  - name: Data Persistence
+    storage_engine: ChronosDB
+    schema_version: GMI_V2

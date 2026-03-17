@@ -1,0 +1,4 @@
+This is a placeholder for screenshot-wide.png
+Recommended for PWA screenshots: 1280x720 pixels
+Format: PNG
+Purpose: wide device screenshots

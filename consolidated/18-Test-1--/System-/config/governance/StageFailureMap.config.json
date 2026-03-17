@@ -1,0 +1,26 @@
+{
+  "$schema": "../schemas/StageFailureMap.schema.json",
+  "description": "Defines mandatory failure codes, required evidence, and remediation paths for core Axiom stages, critical for reliable Veto Gate functionality and NRALS logging (S9).",
+  "S3": {
+    "VETO_POLICY_BREACH": {
+      "name": "Policy Breach (Hard Stop)",
+      "impact": "CRITICAL",
+      "evidence_required": ["Psi_N_ArtifactID", "Policy_Violation_Vector"],
+      "remediation_strategy": "Halt, Initiate certified rollback, Notify Governance Layer (L0)"
+    },
+    "VETO_RESOURCE_EXCESS": {
+      "name": "Excessive Resource Request",
+      "impact": "HIGH",
+      "evidence_required": ["S2_Cost_Profile", "Policy_Resource_Ceiling"],
+      "remediation_strategy": "Request re-computation via S2 iteration with capped limits"
+    }
+  },
+  "S4": {
+    "VETO_INSTABILITY": {
+      "name": "Stability Threshold Exceeded",
+      "impact": "CRITICAL",
+      "evidence_required": ["Dynamic_Range_Profile", "Instability_Metrics"],
+      "remediation_strategy": "Halt, Quarantine stage state, Initiate L1 audit."
+    }
+  }
+}

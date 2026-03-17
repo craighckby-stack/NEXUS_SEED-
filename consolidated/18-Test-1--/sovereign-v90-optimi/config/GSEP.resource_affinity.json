@@ -1,0 +1,23 @@
+{
+  "GSEP_ResourceMap": {
+    "HighPriority_A100_Cluster": {
+      "type": "NVIDIA_A100_80GB",
+      "instance_count": 4,
+      "preemptible": false,
+      "GFLOPS_budget_max": 500000.0,
+      "storage_gb": 1000,
+      "network_affinity": "Infiniband_200G",
+      "scheduling_priority": 95
+    },
+    "Standard_V100_Pool": {
+      "type": "NVIDIA_V100_32GB",
+      "instance_count": 32,
+      "preemptible": true,
+      "GFLOPS_budget_max": 150000.0,
+      "storage_gb": 500,
+      "network_affinity": "Ethernet_100G",
+      "scheduling_priority": 60
+    }
+  },
+  "default_affinity": "Standard_V100_Pool"
+}

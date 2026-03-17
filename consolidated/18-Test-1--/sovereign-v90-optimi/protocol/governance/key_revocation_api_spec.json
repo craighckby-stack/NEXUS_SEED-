@@ -1,0 +1,27 @@
+{
+  "api_version": "V1.0.0",
+  "name": "Online Certificate Status (OCS) / Key Revocation API",
+  "purpose": "Defines the external interface for verifying the live revocation status of Key Identifiers (KID) used for artifact sealing, supporting P-R03 and DARM governance compliance.",
+  "endpoint": "/v1/governance/ocs/key_status",
+  "method": "POST",
+  "request_schema": {
+    "required_fields": [
+      "key_identifier",
+      "verification_timestamp_utc"
+    ],
+    "key_identifier_format": "DID_URN:v1:AASS-KID:[hash]"
+  },
+  "response_schema": {
+    "status_code": 200,
+    "fields": {
+      "key_identifier": "string",
+      "is_revoked": "boolean",
+      "revocation_reason": "string (null if not revoked)",
+      "effective_since_utc": "string (ISOString, null if not revoked)"
+    }
+  },
+  "failure_codes": {
+    "404": "KID not found in registry",
+    "503": "DARM governance service unavailable"
+  }
+}

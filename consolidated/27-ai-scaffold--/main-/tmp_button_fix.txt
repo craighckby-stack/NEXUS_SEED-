@@ -1,0 +1,6 @@
+            <Link href="/reasoning">
+              <Button className="hover:bg-accent/50 transition-colors">Reasoning</Button>
+            </Link>
+            <Link href="/agents">
+              <Button className="hover:bg-accent/50 transition-colors">Agents</Button>
+            </Link>

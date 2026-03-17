@@ -1,0 +1,10 @@
+{
+  "PolicyName": "Resilience and Recovery Protocol (RRP)",
+  "Version": "1.0",
+  "Status": "ACTIVE",
+  "Parameters": {
+    "IntegrityThreshold": 0.995,
+    "ReversionLimit": 100,
+    "ExecutionPriority": "P1_GOVERNANCE_OVERRIDE"
+  }
+}

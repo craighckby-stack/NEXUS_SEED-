@@ -1,0 +1,1024 @@
+async function addStrategyPatternToEvolveMicroservicesWithDistributedTracing(baseCode, sourceData, label) {
+  try {
+    const strategyPatternDescription = `
+      Strategy Pattern (ISP):
+      Implement the Strategy interface \`LinesDiffStrategy\` and its concrete implementation \`MyDiffStrategy\`.
+      Define a separate class for each strategy, allowing for multiple line difference algorithms to be used.
+    `;
+    log(`[${label}] Adding Strategy Pattern (ISP)...`, "Output ONLY descriptive text or comments, NO JavaScript code.");
+    await callCerebras(strategyPatternDescription, "Output ONLY descriptive text or comments, NO JavaScript code.");
+
+    const strategyPattern = `
+      interface LinesDiffStrategy {
+        computeDiff(text1: string, text2: string): LinesDiff;
+      }
+
+      class MyDiffStrategy implements LinesDiffStrategy {
+        computeDiff(text1: string, text2: string): LinesDiff {
+          // Implement MyDiffStrategy here
+          return new LinesDiff();
+        }
+      }
+    `;
+    log(`[${label}] Implementing Strategy Pattern (ISP)...`, "Output ONLY valid JavaScript.");
+    await callCerebras(strategyPattern, "Output ONLY valid JavaScript.");
+
+    const mutated = await evolveMicroservicesWithDistributedTracing(baseCode, sourceData, label);
+
+    // Update the mutated code to use the strategy pattern
+    const mutatedWithStrategy = mutated.replace(`
+      // Old implementation for computing line differences
+      return new LinesDiff();
+    `, `
+      // New implementation using the Strategy Pattern
+      return myDiffStrategy.computeDiff(text1, text2);
+    `);
+
+    return mutatedWithStrategy;
+  } catch (e) {
+    log(`Cycle Error: ${e.message}`, "err");
+    return baseCode;
+  }
+}
+async function evolveMicroservicesToLayeredArchitecture(baseCode, sourceData, label) {
+  try {
+    const layeredArchitecturePatternDescription = `
+      Layered Architecture:
+      Organize components into horizontal layers:
+      1. Presentation Layer (UI)
+      2. Business Logic Layer (Service Layer)
+      3. Data Access Layer (Repository)
+    `;
+    log(`[${label}] Adding Layered Architecture Pattern...`, "Description only");
+    await callCerebras(layeredArchitecturePatternDescription, "Description only");
+
+    const layeredArchitecturePattern = `
+      // Presentation Layer
+      export class PresentationLayer {
+        constructor(private serviceLayer: ServiceLayer) {}
+        public displayData(data: any) {
+          this.serviceLayer-businessLogic(data);
+        }
+      }
+
+      // Business Logic Layer
+      export class ServiceLayer {
+        private repository: Repository;
+
+        constructor() {
+          this.repository = new Repository();
+        }
+        public businessLogic(data: any) {
+          this.repository.getData(data);
+        }
+      }
+
+      // Data Access Layer
+      export class Repository {
+        public getData(data: any) {
+          // Fetch data from database or API
+        }
+      }
+    `;
+    log(`[${label}] Implementing Layered Architecture Pattern...`, "Valid JavaScript code");
+    await callCerebras(layeredArchitecturePattern, "Valid JavaScript code");
+
+    const mutated = await evolveMicroservicesWithDistributedTracing(baseCode, sourceData, label);
+
+    // Update the mutated code to use the layered architecture
+    const mutatedWithLayered = mutated.replace(`
+      // Old implementation for business logic
+      return new ServiceLayer();
+    `, `
+      // New implementation using the Layered Architecture
+      const presentationLayer = new PresentationLayer(new ServiceLayer());
+      presentationLayer.displayData(data);
+    `);
+
+    return mutatedWithLayered;
+  } catch (e) {
+    log(`Layered Error: ${e.message}`, "err");
+    return baseCode;
+  }
+}
+async function addAIOrcchestrationPatternToEvolveMicroservicesWithDistributedTracing(baseCode, sourceData, label) {
+  try {
+    const aiOrchestrationPatternDescription = `
+      AI Orchestration Pattern:
+      Define an interface for interacting with the Large Language Model (LLM), 
+      `;
+    log(`[${label}] Using AI Orchestration Pattern...`, "Output ONLY descriptive text or comments, NO JavaScript code.");
+    await callCerebras(aiOrchestrationPatternDescription, "Output ONLY descriptive text or comments, NO JavaScript code.");
+
+    const aiOrchestrationPattern = `
+      interface IToolDefinition {
+        execute(messageData: MessageData): MessageData;
+      }
+
+      class LargeLanguageModel implements IToolDefinition {
+        public execute(messageData: MessageData): MessageData {
+          // Implement LLM execution logic here
+          return new MessageData();
+        }
+      }
+
+      interface MessageData {
+        toolId: string;
+        part: Part;
+      }
+
+      class Turn {
+        private messageData: MessageData;
+
+        public constructor(messageData: MessageData) {
+          this.messageData = messageData;
+        }
+      }
+    `;
+    log(`[${label}] Implementing AI Orchestration Pattern...`, "Output ONLY valid JavaScript.");
+    await callCerebras(aiOrchestrationPattern, "Output ONLY valid JavaScript.");
+
+    const mutated = await evolveMicroservicesWithDistributedTracing(baseCode, sourceData, label);
+
+    // Update the mutated code to use the AI Orchestration Pattern
+    const mutatedWithAIOrchestration = mutated.replace(`
+      // Old implementation for message handling
+      const messageData = new MessageData();
+    `, `
+      // New implementation using the AI Orchestration Pattern
+      const messageData = new MessageData();
+      const toolDefinition = new LargeLanguageModel();
+      const turn = new Turn(messageData);
+      toolDefinition.execute(messageData);
+    `);
+
+    return mutatedWithAIOrchestration;
+  } catch (e) {
+    log(`Cycle Error: ${e.message}`, "err");
+    return baseCode;
+  }
+}
+
+async function addStructuredMultimodalContentMessagingPatternToEvolveMicroservicesWithDistributedTracing(baseCode, sourceData, label) {
+  try {
+    const structuredMultimodalContentMessagingPatternDescription = `
+      Structured Multi-modal Content Messaging:
+      Define a \`MessageData\` class and its subcomponents (\`Part\`, \`TextPart\`, \`ImagePart\`) to encapsulate
+      diverse types of content (text, images, etc.) within a single message structure.
+      This pattern facilitates flexible and extensible communication for AI and other services.
+    `;
+    log(`[${label}] Using Structured Multi-modal Content Messaging Pattern...`, "Output ONLY descriptive text or comments, NO JavaScript code.");
+    await callCerebras(structuredMultimodalContentMessagingPatternDescription, "Output ONLY descriptive text or comments, NO JavaScript code.");
+
+    const structuredMultimodalContentMessagingPattern = `
+      interface Part {
+        contentType: string;
+        data: string | Uint8Array;
+      }
+
+      class TextPart implements Part {
+        public readonly contentType: string = 'text/plain';
+        constructor(public data: string) {}
+      }
+
+      class ImagePart implements Part {
+        public readonly contentType: string = 'image/jpeg';
+        constructor(public data: Uint8Array) {} // Or string for base64
+      }
+
+      class MessageData {
+        public toolId: string;
+        public parts: Part[];
+
+        constructor(toolId: string, parts: Part[] = []) {
+          this.toolId = toolId;
+          this.parts = parts;
+        }
+
+        public addPart(part: Part): void {
+          this.parts.push(part);
+        }
+      }
+    `;
+    log(`[${label}] Implementing Structured Multi-modal Content Messaging Pattern...`, "Output ONLY valid JavaScript.");
+    await callCerebras(structuredMultimodalContentMessagingPattern, "Output ONLY valid JavaScript.");
+
+    const mutated = await evolveMicroservicesWithDistributedTracing(baseCode, sourceData, label);
+
+    // Update the mutated code to use the Structured Multi-modal Content Messaging Pattern
+    const mutatedWithStructuredMultimodalContentMessaging = mutated.replace(`
+      // Old implementation for message handling
+      const messageData = new MessageData();
+    `, `
+      // New implementation using Structured Multi-modal Content Messaging Pattern
+      const textContent = new TextPart("Hello, this is a multi-modal message.");
+      const imageContent = new ImagePart(new Uint8Array([0xFF, 0xD8, 0xFF])); // Example image data
+      const messageData = new MessageData("orchestration-tool", [textContent, imageContent]);
+      messageData.addPart(new TextPart("Another part of the message."));
+    `);
+
+    return mutatedWithStructuredMultimodalContentMessaging;
+  } catch (e) {
+    log(`MultiModal Messaging Error: ${e.message}`, "err");
+    return baseCode;
+  }
+}
+
+async function addClientServerPatternToEvolveMicroservicesWithDistributedTracing(baseCode, sourceData, label) {
+  try {
+    const clientServerPatternDescription = `
+      Client-Server Pattern:
+      Implement the Client-Server architecture to separate the concerns of the application into two main categories:
+      1.  The Server: responsible for handling business logic, data storage, and authentication logic.
+      2.  The Client: responsible for rendering the UI, handling user input, and making requests to the server for data.
+    `;
+    log(`[${label}] Adding Client-Server Pattern...`, "Output ONLY descriptive text or comments, NO JavaScript code.");
+    await callCerebras(clientServerPatternDescription, "Output ONLY descriptive text or comments, NO JavaScript code.");
+
+    const clientServerPattern = `
+      interface Server {
+        handleBusinessLogic(data: any): any;
+        authenticateUser(user: string, password: string): boolean;
+      }
+
+      class ServerImpl implements Server {
+        public handleBusinessLogic(data: any): any {
+          // Implement Server logic here
+          return data;
+        }
+
+        public authenticateUser(user: string, password: string): boolean {
+          // Implement authentication logic here
+          return true;
+        }
+      }
+
+      interface Client {
+        renderUI(): void;
+        handleUserInput(input: any): void;
+        makeRequestToServer(data: any): any;
+      }
+
+      class ClientImpl implements Client {
+        private server: Server;
+
+        public constructor(server: Server) {
+          this.server = server;
+        }
+
+        public renderUI(): void {
+          // Implement Client UI rendering here
+        }
+
+        public handleUserInput(input: any): void {
+          // Implement Client input handling here
+        }
+
+        public makeRequestToServer(data: any): any {
+          // Implement Client request to Server here
+          return this.server.handleBusinessLogic(data);
+        }
+      }
+    `;
+    log(`[${label}] Implementing Client-Server Pattern...`, "Output ONLY valid JavaScript.");
+    await callCerebras(clientServerPattern, "Output ONLY valid JavaScript.");
+
+    const mutated = await evolveMicroservicesWithDistributedTracing(baseCode, sourceData, label);
+
+    // Update the mutated code to use the Client-Server Pattern
+    const mutatedWithClientServer = await addClientServerClientCode(
+      mutated.replace(`
+        // Old implementation for business logic
+        return new BusinessLogic();
+      `, `
+        // New implementation using Client-Server
+        const server = new ServerImpl();
+        const client = new ClientImpl(server);
+        client.renderUI();
+        client.handleUserInput("user-input-data"); // Example user input
+        const response = client.makeRequestToServer(sourceData);
+        return response;
+      `),
+      label
+    );
+
+    return mutatedWithClientServer;
+  } catch (e) {
+    log(`Client-Server Error: ${e.message}`, "err");
+    return baseCode;
+  }
+}
+
+// Expansion: Add Client-Server Client Code
+async function addClientServerClientCode(mutated, label) {
+  try {
+    const clientServerClientCode = `
+      // Client Interface
+      interface Client {
+        renderUI(): void;
+        handleUserInput(input: any): void;
+        makeRequestToServer(data: any): any;
+      }
+
+      // Client Implementation
+      class ClientImpl implements Client {
+        private server: Server;
+
+        public constructor(server: Server) {
+          this.server = server;
+        }
+
+        public renderUI(): void {
+          // Implement Client UI rendering here
+        }
+
+        public handleUserInput(input: any): void {
+          // Implement Client input handling here
+        }
+
+        public makeRequestToServer(data: any): any {
+          // Implement Client request to Server here
+          return this.server.handleBusinessLogic(data);
+        }
+      }
+    `;
+    log(`[${label}] Implementing Client-Server Client Code...`, "Output ONLY valid JavaScript.");
+    await callCerebras(clientServerClientCode, "Output ONLY valid JavaScript.");
+
+    return mutated;
+  } catch (e) {
+    log(`Client-Server Client Code Error: ${e.message}`, "err");
+    return mutated;
+  }
+}
+
+async function addMicroservicePatternToEvolveMicroservicesWithDistributedTracing(baseCode, sourceData, label) {
+  try {
+    const microservicePatternDescription = `
+      Microservices Pattern:
+      Break down the application into smaller, independent services that communicate with each other using APIs.
+    `;
+    log(`[${label}] Adding Microservices Pattern...`, "Output ONLY descriptive text or comments, NO JavaScript code.");
+    await callCerebras(microservicePatternDescription, "Output ONLY descriptive text or comments, NO JavaScript code.");
+
+    const microservicePattern = `
+      // Service 1
+      export class Service1 {
+        constructor(private service2: Service2) {}
+
+        public processRequest(request: any): any {
+          // Process request using Service1 logic
+          return request;
+        }
+      }
+
+      // Service 2
+      export class Service2 {
+        public processResponse(response: any): any {
+          // Process response using Service2 logic
+          return response;
+        }
+      }
+
+      // Service 3
+      export class Service3 {
+        public processData(data: any): any {
+          // Process data using Service3 logic
+          return data;
+        }
+      }
+    `;
+    log(`[${label}] Implementing Microservices Pattern...`, "Output ONLY valid JavaScript.");
+    await callCerebras(microservicePattern, "Output ONLY valid JavaScript.");
+
+    const mutated = await evolveMicroservicesWithDistributedTracing(baseCode, sourceData, label);
+
+    // Update the mutated code to use the Microservices Pattern
+    const mutatedWithMicroservices = mutated.replace(`
+      // Old implementation for business logic
+      return new BusinessLogic();
+    `, `
+      // New implementation using Microservices
+      const service1 = new Service1(new Service2());
+      const response = service1.processRequest(sourceData);
+      const result = new Service3().processData(response);
+      return result;
+    `);
+
+    return mutatedWithMicroservices;
+  } catch (e) {
+    log(`Microservices Error: ${e.message}`, "err");
+    return baseCode;
+  }
+}
+
+async function addMonolithicPatternToEvolveMicroservicesWithDistributedTracing(baseCode, sourceData, label) {
+  try {
+    const monolithicPatternDescription = `
+      Monolithic Pattern:
+      Implement all components of an application into a single program, providing a self-contained, monolithic system.
+    `;
+    log(`[${label}] Adding Monolithic Pattern...`, "Output ONLY descriptive text or comments, NO JavaScript code.");
+    await callCerebras(monolithicPatternDescription, "Output ONLY descriptive text or comments, NO JavaScript code.");
+
+    const monolithicPattern = `
+      // Monolithic Application
+      export class MonolithicApplication {
+        private businessLogic: MonolithicBusinessLogic;
+        private dataAccess: MonolithicDataAccess;
+
+        constructor() {
+          this.businessLogic = new MonolithicBusinessLogic();
+          this.dataAccess = new MonolithicDataAccess();
+        }
+
+        public runApplication(input: any): any {
+          const processedInput = this.businessLogic.processInput(input);
+          const data = this.dataAccess.fetchData(processedInput);
+          return this.businessLogic.executeBusinessRules(data);
+        }
+      }
+
+      // Monolithic Business Logic
+      class MonolithicBusinessLogic {
+        public processInput(input: any): any {
+          // Implement input processing
+          return input;
+        }
+
+        public executeBusinessRules(data: any): any {
+          // Implement complex business rules
+          return { ...data, processed: true };
+        }
+      }
+
+      // Monolithic Data Access
+      class MonolithicDataAccess {
+        public fetchData(query: any): any {
+          // Fetch data from a database or other source
+          return { id: 1, name: "Monolithic Data", query };
+        }
+      }
+    `;
+    log(`[${label}] Implementing Monolithic Pattern...`, "Output ONLY valid JavaScript.");
+    await callCerebras(monolithicPattern, "Output ONLY valid JavaScript.");
+
+    const mutated = await evolveMicroservicesWithDistributedTracing(baseCode, sourceData, label);
+
+    // Update the mutated code to use the Monolithic Pattern
+    const mutatedWithMonolithic = mutated.replace(`
+      // Old implementation for business logic
+      return new BusinessLogic();
+    `, `
+      // New implementation using Monolithic Pattern
+      const app = new MonolithicApplication();
+      const result = app.runApplication(sourceData);
+      return result;
+    `);
+
+    return mutatedWithMonolithic;
+  } catch (e) {
+    log(`Monolithic Error: ${e.message}`, "err");
+    return baseCode;
+  }
+}
+
+// Expansion: Add Repository Pattern to Evolve Microservices with Distributed Tracing
+async function addRepositoryPatternToEvolveMicroservicesWithDistributedTracing(baseCode, sourceData, label) {
+  try {
+    const repositoryPatternDescription = `
+      Repository Pattern:
+      Introduce an abstraction layer to persist and retrieve data using a uniform interface.
+      This helps decouple the business logic from the data storage mechanism.
+    `;
+    log(`[${label}] Adding Repository Pattern...`, "Output ONLY descriptive text or comments, NO JavaScript code.");
+    await callCerebras(repositoryPatternDescription, "Output ONLY descriptive text or comments, NO JavaScript code.");
+
+    const repositoryPattern = `
+      interface Repository<T> {
+        create(data: T): void;
+        read(id: number): T;
+        update(data: T): void;
+        delete(id: number): void;
+      }
+
+      class DatabaseRepository<T> implements Repository<T> {
+        public create(data: T): void {
+          // Implement data creation logic using a database
+        }
+
+        public read(id: number): T {
+          // Implement data retrieval logic using a database
+          return null;
+        }
+
+        public update(data: T): void {
+          // Implement data update logic using a database
+        }
+
+        public delete(id: number): void {
+          // Implement data deletion logic using a database
+        }
+      }
+
+      // Business logic using the Repository
+      interface BusinessLogic {
+        processInput(input: any): any;
+        executeBusinessRules(data: any): any;
+      }
+
+      class BusinessLogicImpl implements BusinessLogic {
+        private repository: Repository<BusinessData>;
+
+        constructor(repository: Repository<BusinessData>) {
+          this.repository = repository;
+        }
+
+        public processInput(input: any): any {
+          const data = new BusinessData();
+          this.repository.create(data);
+          return input;
+        }
+
+        public executeBusinessRules(data: any): any {
+          return data;
+        }
+      }
+    `;
+    log(`[${label}] Implementing Repository Pattern...`, "Output ONLY valid JavaScript.");
+    await callCerebras(repositoryPattern, "Output ONLY valid JavaScript.");
+
+    const mutated = await evolveMicroservicesWithDistributedTracing(baseCode, sourceData, label);
+
+    // Update the mutated code to use the Repository Pattern
+    const mutatedWithRepository = mutated.replace(`
+      // Old implementation for business logic
+      this.dataAccess.fetchData(query).
+    `, `
+      // New implementation using Repository Pattern
+      const repository = new DatabaseRepository<BusinessData>();
+      const businessLogic = new BusinessLogicImpl(repository);
+      // Business logic processing using the repository
+      businessLogic.processInput(sourceData); // Example input processing, creates data internally
+      const dataFromRepo = repository.read(1); // Example: read an item with ID 1
+      const result = businessLogic.executeBusinessRules(dataFromRepo);
+      return result;
+    `);
+
+    return mutatedWithRepository;
+  } catch (e) {
+    log(`Repository Error: ${e.message}`, "err");
+    return baseCode;
+  }
+}
+
+// New function to add the Plugin Architecture Pattern
+async function addPluginArchitecturePatternToEvolveMicroservicesWithDistributedTracing(baseCode, sourceData, label) {
+  try {
+    const pluginArchitecturePatternDescription = `
+      Plugin Architecture Pattern:
+      Define a core system that provides a mechanism for adding functionality through independent, swappable components (plugins).
+    `;
+    log(`[${label}] Adding Plugin Architecture Pattern...`, "Output ONLY descriptive text or comments, NO JavaScript code.");
+    await callCerebras(pluginArchitecturePatternDescription, "Output ONLY descriptive text or comments, NO JavaScript code.");
+
+    const pluginArchitecturePattern = `
+      interface Plugin {
+        registerCallback(): void;
+      }
+
+      class PluginImpl implements Plugin {
+        registerCallback(): void {
+          // Implement plugin registration logic
+        }
+      }
+
+      interface CoreSystem {
+        registerPlugin(plugin: Plugin): void;
+      }
+
+      class CoreSystemImpl implements CoreSystem {
+        public registerPlugin(plugin: Plugin): void {
+          // Implement plugin registration logic
+        }
+      }
+    `;
+    log(`[${label}] Implementing Plugin Architecture Pattern...`, "Output ONLY valid JavaScript.");
+    await callCerebras(pluginArchitecturePattern, "Output ONLY valid JavaScript.");
+
+    const mutated = await evolveMicroservicesWithDistributedTracing(baseCode, sourceData, label);
+
+    // Update the mutated code to use the Plugin Architecture Pattern
+    const mutatedWithPluginArchitecture = mutated.replace(`
+      // Old implementation for plugin management
+      const plugin = new Plugin();
+    `, `
+      // New implementation using Plugin Architecture Pattern
+      const plugin = new PluginImpl();
+      const coreSystem = new CoreSystemImpl();
+      coreSystem.registerPlugin(plugin);
+    `);
+
+    return mutatedWithPluginArchitecture;
+  } catch (e) {
+    log(`Plugin Architecture Error: ${e.message}`, "err");
+    return baseCode;
+  }
+}
+
+// New function to add the API Gateway Pattern
+async function addApiGatewayPatternToEvolveMicroservicesWithDistributedTracing(baseCode, sourceData, label) {
+  try {
+    const apiGatewayPatternDescription = `
+      API Gateway Pattern:
+      Designate a single entry point for all API requests, responsible for routing and controlling access to individual microservices.
+    `;
+    log(`[${label}] Adding API Gateway Pattern...`, "Output ONLY descriptive text or comments, NO JavaScript code.");
+    await callCerebras(apiGatewayPatternDescription, "Output ONLY descriptive text or comments, NO JavaScript code.");
+
+    const apiGatewayPattern = `
+      interface ApiGateway {
+        routeRequest(request: any): Promise<any>;
+        authenticate(token: string): boolean;
+      }
+
+      class ApiGatewayImpl implements ApiGateway {
+        private microservices: Map<string, any>; // Map service name to service instance
+
+        constructor() {
+          this.microservices = new Map();
+          // Example: Register some microservices
+          this.microservices.set('serviceA', { process: (req) => Promise.resolve('Response from service A for ' + req) });
+          this.microservices.set('serviceB', { process: (req) => Promise.resolve('Response from service B for ' + req) });
+        }
+
+        public async routeRequest(request: { path: string; payload: any }): Promise<any> {
+          // Simplified authentication, replace with actual logic
+          if (!this.authenticate(request.payload.token)) {
+            throw new Error("Unauthorized access");
+          }
+
+          const serviceName = request.path.split('/')[1]; // e.g., /serviceA/endpoint -> serviceA
+          const service = this.microservices.get(serviceName);
+
+          if (service) {
+            // Log the request or apply other cross-cutting concerns
+            console.log(\`[API Gateway] Routing request to \${serviceName}\`);
+            return service.process(request.payload);
+          } else {
+            throw new Error(\`Service \${serviceName} not found\`);
+          }
+        }
+
+        public authenticate(token: string): boolean {
+          // Implement authentication logic
+          return token === "valid-token"; // Simple example
+        }
+      }
+    `;
+    log(`[${label}] Implementing API Gateway Pattern...`, "Output ONLY valid JavaScript.");
+    await callCerebras(apiGatewayPattern, "Output ONLY valid JavaScript.");
+
+    const mutated = await evolveMicroservicesWithDistributedTracing(baseCode, sourceData, label);
+
+    // Update the mutated code to use the API Gateway Pattern
+    const mutatedWithApiGateway = mutated.replace(`
+      // Old implementation for handling requests
+      return new ResponseHandler().handle(request);
+    `, `
+      // New implementation using API Gateway Pattern
+      const apiGateway = new ApiGatewayImpl();
+      try {
+        const requestPayload = { path: "/serviceA/data", payload: { data: sourceData, token: "valid-token" } };
+        const response = await apiGateway.routeRequest(requestPayload);
+        return response;
+      } catch (error) {
+        console.error("API Gateway Error:", error.message);
+        return "Error: " + error.message;
+      }
+    `);
+
+    return mutatedWithApiGateway;
+  } catch (e) {
+    log(`API Gateway Error: ${e.message}`, "err");
+    return baseCode;
+  }
+}
+
+// New function to add the Layered (N-Tier) Architecture Pattern
+async function addLayeredNTierArchitecturePatternToEvolveMicroservicesWithDistributedTracing(baseCode, sourceData, label) {
+  try {
+    const layeredNTierArchitecturePatternDescription = `
+      Layered (N-Tier) Architecture Pattern:
+      Organize an application into horizontal layers, each with a specific responsibility:
+      Presentation Layer (UI)
+      Business Logic Layer (Service Layer)
+      Data Access Layer (Repository)
+    `;
+    log(`[${label}] Adding Layered (N-Tier) Architecture Pattern...`, "Output ONLY descriptive text or comments, NO JavaScript code.");
+    await callCerebras(layeredNTierArchitecturePatternDescription, "Output ONLY descriptive text or comments, NO JavaScript code.");
+
+    const layeredNTierArchitecturePattern = `
+      // Presentation Layer
+      export class PresentationLayer {
+        constructor(private serviceLayer: ServiceLayer) {}
+
+        public displayData(data: any) {
+          this.serviceLayer.businessLogic(data);
+        }
+      }
+
+      // Business Logic Layer
+      export class ServiceLayer {
+        private repository: Repository;
+
+        constructor() {
+          this.repository = new Repository();
+        }
+
+        public businessLogic(data: any) {
+          const result = this.repository.getData(data);
+          return result;
+        }
+      }
+
+      // Data Access Layer
+      export class Repository {
+        public getData(data: any): any {
+          // Fetch data from database or API
+          return { id: 1, name: "Data from repository" };
+        }
+      }
+    `;
+    log(`[${label}] Implementing Layered (N-Tier) Architecture Pattern...`, "Output ONLY valid JavaScript.");
+    await callCerebras(layeredNTierArchitecturePattern, "Output ONLY valid JavaScript.");
+
+    const mutated = await evolveMicroservicesWithDistributedTracing(baseCode, sourceData, label);
+
+    // Update the mutated code to use the Layered (N-Tier) Architecture Pattern
+    const mutatedWithLayeredNTierArchitecture = mutated.replace(`
+      // Old implementation for business logic
+      this.dataAccess.fetchData(query).
+    `, `
+      // New implementation using Layered (N-Tier) Architecture Pattern
+      const presentationLayer = new PresentationLayer(new ServiceLayer());
+      const businessData = presentationLayer.displayData(sourceData);
+    `);
+
+    return mutatedWithLayeredNTierArchitecture;
+  } catch (e) {
+    log(`Layered (N-Tier) Architecture Error: ${e.message}`, "err");
+    return baseCode;
+  }
+}
+
+// New function to add the Workflow Orchestration Pattern
+async function addWorkflowOrchestrationPatternToEvolveMicroservicesWithDistributedTracing(baseCode, sourceData, label) {
+  try {
+    const workflowOrchestrationPatternDescription = `
+      Workflow Orchestration Pattern:
+      Encapsulate sequences of operations into named, reusable workflows.
+    `;
+    log(`[${label}] Adding Workflow Orchestration Pattern...`, "Output ONLY descriptive text or comments, NO JavaScript code.");
+    await callCerebras(workflowOrchestrationPatternDescription, "Output ONLY descriptive text or comments, NO JavaScript code.");
+
+    const workflowOrchestrationPattern = `
+      class Workflow {
+        private flow: any;
+
+        constructor(flow: any) {
+          this.flow = flow;
+        }
+
+        public async execute() {
+          return this.flow();
+        }
+      }
+
+      // Example workflow
+      const aiWorkflow = async () => {
+        // Assume 'ai' and 'webAPI' are globally available or passed in context
+        // and 'prompt' and 'processResponse' are defined.
+        // This is a placeholder for actual AI interaction and API calls.
+        const prompt = "Generate a response for the user.";
+        const aiResponse = await ai.generate(prompt); // Hypothetical AI call
+        const response = await webAPI.call("/getData"); // Hypothetical Web API call
+        return processResponse(aiResponse, response); // Hypothetical processing
+      };
+
+      // In actual usage, you would create and execute like this:
+      // const workflow = new Workflow(aiWorkflow);
+      // const result = await workflow.execute();
+    `;
+    log(`[${label}] Implementing Workflow Orchestration Pattern...`, "Output ONLY valid JavaScript.");
+    await callCerebras(workflowOrchestrationPattern, "Output ONLY valid JavaScript.");
+
+    const mutated = await evolveMicroservicesWithDistributedTracing(baseCode, sourceData, label);
+
+    // Update the mutated code to use the Workflow Orchestration Pattern
+    const mutatedWithWorkflowOrchestration = mutated.replace(`
+      // Old implementation for invoking AI
+      const aiResponse = await ai.generate(prompt);
+    `, `
+      // New implementation using Workflow Orchestration Pattern
+      // Assume 'ai', 'webAPI', 'prompt', 'processResponse' are defined in scope for aiWorkflow to work.
+      const aiWorkflow = async () => {
+        const prompt = "Generate a response for the user based on " + JSON.stringify(sourceData);
+        const aiResponse = await ai.generate(prompt);
+        const webApiResponse = await webAPI.call("/getData");
+        return processResponse(aiResponse, webApiResponse);
+      };
+      const workflow = new Workflow(aiWorkflow);
+      const aiResponse = await workflow.execute();
+    `);
+
+    return mutatedWithWorkflowOrchestration;
+  } catch (e) {
+    log(`Workflow Orchestration Error: ${e.message}`, "err");
+    return baseCode;
+  }
+}
+
+// New function to add the API Gateway with Dynamic Plugin Loading Pattern
+async function addApiGatewayWithDynamicPluginLoadingPatternToEvolveMicroservicesWithDistributedTracing(baseCode, sourceData, label) {
+  try {
+    const apiGatewayWithDynamicPluginLoadingPatternDescription = `
+      API Gateway with Dynamic Plugin Loading Pattern:
+      Designate a single entry point for all API requests, responsible for routing,
+      controlling access to individual microservices, and dynamically loading plugins to extend its functionality.
+    `;
+    log(`[${label}] Adding API Gateway with Dynamic Plugin Loading Pattern...`, "Output ONLY descriptive text or comments, NO JavaScript code.");
+    await callCerebras(apiGatewayWithDynamicPluginLoadingPatternDescription, "Output ONLY descriptive text or comments, NO JavaScript code.");
+
+    const apiGatewayWithDynamicPluginLoadingPattern = `
+      interface Plugin {
+        name: string;
+        execute(request: any): Promise<any>;
+      }
+
+      class DynamicPluginLoader {
+        private plugins: Map<string, Plugin> = new Map();
+
+        public loadPlugin(plugin: Plugin): void {
+          this.plugins.set(plugin.name, plugin);
+          console.log(\`[Plugin Loader] Plugin '\${plugin.name}' loaded.\`);
+        }
+
+        public getPlugin(name: string): Plugin | undefined {
+          return this.plugins.get(name);
+        }
+
+        public unloadPlugin(name: string): boolean {
+          if (this.plugins.has(name)) {
+            this.plugins.delete(name);
+            console.log(\`[Plugin Loader] Plugin '\${name}' unloaded.\`);
+            return true;
+          }
+          return false;
+        }
+      }
+
+      interface ApiGatewayWithPlugins {
+        routeRequest(request: { path: string; payload: any }): Promise<any>;
+        authenticate(token: string): boolean;
+      }
+
+      class ApiGatewayWithPluginsImpl implements ApiGatewayWithPlugins {
+        private microservices: Map<string, any>; // Map service name to service instance
+        private pluginLoader: DynamicPluginLoader;
+
+        constructor(pluginLoader: DynamicPluginLoader) {
+          this.pluginLoader = pluginLoader;
+          this.microservices = new Map();
+          // Example: Register some microservices
+          this.microservices.set('user-service', { process: (req) => Promise.resolve('User data for ' + req.userId) });
+          this.microservices.set('product-service', { process: (req) => Promise.resolve('Product info for ' + req.productId) });
+        }
+
+        public async routeRequest(request: { path: string; payload: any }): Promise<any> {
+          // Simplified authentication, replace with actual logic
+          if (!this.authenticate(request.payload.token)) {
+            throw new Error("Unauthorized access");
+          }
+
+          const pathParts = request.path.split('/');
+          if (pathParts.length < 2) {
+            throw new Error("Invalid request path");
+          }
+          const targetName = pathParts[1]; // e.g., /user-service/getUser or /plugin-analytics/track
+
+          const plugin = this.pluginLoader.getPlugin(targetName);
+          if (plugin) {
+            console.log(\`[API Gateway] Executing plugin '\${targetName}' for request: \${request.path}\`);
+            return plugin.execute(request.payload);
+          }
+
+          const service = this.microservices.get(targetName);
+          if (service) {
+            console.log(\`[API Gateway] Routing request to microservice '\${targetName}' for path: \${request.path}\`);
+            return service.process(request.payload);
+          } else {
+            throw new Error(\`Service or Plugin '\${targetName}' not found for path: \${request.path}\`);
+          }
+        }
+
+        public authenticate(token: string): boolean {
+          // Implement authentication logic (e.g., validate JWT)
+          return token === "secure-token"; // Simple example
+        }
+      }
+    `;
+    log(`[${label}] Implementing API Gateway with Dynamic Plugin Loading Pattern...`, "Output ONLY valid JavaScript.");
+    await callCerebras(apiGatewayWithDynamicPluginLoadingPattern, "Output ONLY valid JavaScript.");
+
+    const mutated = await evolveMicroservicesWithDistributedTracing(baseCode, sourceData, label);
+
+    // Update the mutated code to use the API Gateway with Dynamic Plugin Loading Pattern
+    const mutatedWithApiGatewayWithDynamicPluginLoading = mutated.replace(`
+      // Old implementation for business logic
+      return new BusinessLogic();
+    `, `
+      // New implementation using API Gateway with Dynamic Plugin Loading Pattern
+      const pluginLoader = new DynamicPluginLoader();
+      // Register an example plugin
+      pluginLoader.loadPlugin({
+        name: "logging-plugin",
+        execute: async (requestPayload) => {
+          console.log(\`[LOGGING PLUGIN] Received request: \${JSON.stringify(requestPayload)}\`);
+          // In a real scenario, this plugin would likely forward the request
+          // or perform pre/post-processing before/after actual service calls.
+          return { status: "logged", originalPayload: requestPayload };
+        }
+      });
+
+      const apiGateway = new ApiGatewayWithPluginsImpl(pluginLoader);
+      try {
+        // Example: Route a request to a microservice
+        const userServiceRequest = { path: "/user-service/profile", payload: { userId: "123", token: "secure-token", data: sourceData } };
+        const userServiceResponse = await apiGateway.routeRequest(userServiceRequest);
+        console.log("User Service Response:", userServiceResponse);
+
+        // Example: Route a request that is handled by a plugin
+        const pluginRequest = { path: "/logging-plugin/status", payload: { operation: "check", token: "secure-token" } };
+        const pluginResponse = await apiGateway.routeRequest(pluginRequest);
+        console.log("Plugin Response:", pluginResponse);
+
+        return { userServiceResponse, pluginResponse };
+      } catch (error) {
+        console.error("API Gateway with Dynamic Plugin Loading Error:", error.message);
+        return "Error processing request via API Gateway: " + error.message;
+      }
+    `);
+
+    return mutatedWithApiGatewayWithDynamicPluginLoading;
+  } catch (e) {
+    log(`API Gateway with Dynamic Plugin Loading Error: ${e.message}`, "err");
+    return baseCode;
+  }
+}
+
+// New function to add the Service Interface Pattern
+async function addServiceInterfacePatternToEvolveMicroservicesWithDistributedTracing(baseCode, sourceData, label) {
+  try {
+    const serviceInterfacePatternDescription = `
+      Service Interface Pattern:
+      Define the API between the client and server as a service interface, which is the set of methods that define the behavior of the service.
+    `;
+    log(`[${label}] Adding Service Interface Pattern...`, "Output ONLY descriptive text or comments, NO JavaScript code.");
+    await callCerebras(serviceInterfacePatternDescription, "Output ONLY descriptive text or comments, NO JavaScript code.");
+
+    const serviceInterfacePattern = `
+      interface ServiceInterface {
+        processData(data: any): any;
+      }
+
+      class DefaultService implements ServiceInterface {
+        public processData(data: any): any {
+          // Implement Data Processing logic here
+          return data;
+        }
+      }
+    `;
+    log(`[${label}] Implementing Service Interface Pattern...`, "Output ONLY valid JavaScript.");
+    await callCerebras(serviceInterfacePattern, "Output ONLY valid JavaScript.");
+
+    const mutated = await evolveMicroservicesWithDistributedTracing(baseCode, sourceData, label);
+
+    // Update the mutated code to use the Service Interface Pattern
+    const mutatedWithServiceInterface = mutated.replace(`
+      // Old implementation for data handling
+      const defaultService = new DefaultService();
+      defaultService.processData(data);
+    `, `
+      // New implementation using Service Interface Pattern
+      const service: ServiceInterface = new DefaultService();
+      const processedData = service.processData(sourceData);
+      return processedData;
+    `);
+
+    return mutatedWithServiceInterface;
+  } catch (e) {
+    log(`Service Interface Error: ${e.message}`, "err");
+    return baseCode;
+  }
+}

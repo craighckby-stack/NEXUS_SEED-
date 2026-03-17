@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agi.sovereign/config/playbook_execution_context_schema.json",
+  "title": "Remediation Playbook Execution Context Policy Schema",
+  "description": "Defines mandatory environmental and policy constraints for executing specific remediation playbooks, overriding or supplementing standard safety levels.",
+  "type": "object",
+  "required": ["policies"],
+  "properties": {
+    "policy_version": {
+      "type": "string",
+      "description": "Version of the context policy file."
+    },
+    "policies": {
+      "type": "object",
+      "description": "Map of Playbook Identifiers to execution policies.",
+      "patternProperties": {
+        "^P[0-9]{3}_[A-Z0-9_]+$": {
+          "$ref": "#/$defs/ExecutionContextPolicy"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "ExecutionContextPolicy": {
+      "type": "object",
+      "description": "A set of conditions that must be met by the execution environment before the playbook is allowed to launch.",
+      "properties": {
+        "allowed_environments": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["TEST", "STAGING", "PRODUCTION", "QUARANTINE", "ISOLATED_SANDBOX"] },
+          "description": "The deployment environments where this playbook is authorized to run."
+        },
+        "required_security_tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Specific security labels (e.g., 'FIPS_COMPLIANT', 'HARDENED_ENDPOINT') required of the execution host."
+        },
+        "rate_limit_minute": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 1,
+          "description": "Maximum times this playbook can be executed per minute across the fleet."
+        },
+        "human_oversight_required_if_context": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "If the execution context metadata matches any of these keywords, mandatory human override is triggered (e.g., ['PRODUCTION', 'CRITICAL_FAILURE'])"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

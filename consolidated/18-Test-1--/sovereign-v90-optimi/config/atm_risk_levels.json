@@ -1,0 +1,55 @@
+{
+  "levels": {
+    "P0_CRITICAL": {
+      "severity_score": 1000,
+      "impact": "Systematic Trust Collapse (Immediate Failure)",
+      "enforcement_type": "HARD_HALT",
+      "required_action": "Autonomous Kernel Isolation/Rollback",
+      "trust_penalty_multiplier": 10.0,
+      "notification_groups": ["Sovereign_Kernel", "Ops_Critical"],
+      "action_ttl_s": 0
+    },
+    "P1_HIGH": {
+      "severity_score": 500,
+      "impact": "Major Operational/Trust Degradation",
+      "enforcement_type": "THROTTLE_50",
+      "required_action": "Immediate Audit & Root Cause Analysis",
+      "trust_penalty_multiplier": 5.0,
+      "notification_groups": ["Development_Leads", "ATM_Response"],
+      "action_ttl_s": 60
+    },
+    "P2_MEDIUM": {
+      "severity_score": 250,
+      "impact": "Localized Trust Compromise or High Latency",
+      "enforcement_type": "RESOURCE_REALLOCATE",
+      "required_action": "System Triggered Mitigation Pathway",
+      "trust_penalty_multiplier": 2.5,
+      "notification_groups": ["Telemetry_Watch", "Engineering_Core"],
+      "action_ttl_s": 300
+    },
+    "P3_LOW": {
+      "severity_score": 100,
+      "impact": "Minor Metric Volatility (Noise/Anomaly)",
+      "enforcement_type": "OBSERVE",
+      "required_action": "Scheduled Review/Background Logging",
+      "trust_penalty_multiplier": 1.0,
+      "notification_groups": ["Telemetry_Watch"],
+      "action_ttl_s": 3600
+    },
+    "P4_INFO": {
+      "severity_score": 10,
+      "impact": "Standard Metric Baseline Fluctuation",
+      "enforcement_type": "LOG_ONLY",
+      "required_action": "None (Standard Logging)",
+      "trust_penalty_multiplier": 0.1,
+      "notification_groups": ["None"],
+      "action_ttl_s": null
+    }
+  },
+  "default_risk_level": "P4_INFO",
+  "metadata": {
+    "description": "Defines standardized criticality levels used by the Autonomous Trust Manager (ATM) components. Structure optimized for O(1) lookup.",
+    "version": "v2.0.0",
+    "schema_ref": "v2.0.0/risk_level_schema.json"
+  }
+}

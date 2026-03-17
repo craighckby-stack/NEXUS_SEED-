@@ -1,0 +1,37 @@
+{
+  "config_schema_version": "1.1",
+  "system_version": "v7.4.4",
+  "governance_security": {
+    "constants": {
+      "MAX_RISK_TOLERANCE_L4": 0.05,
+      "MIN_TRUST_SCORE_L1": 0.85,
+      "GSEP_PROTOCOL_VERSION": "v2.3",
+      "ACM_ENTRY_SCHEMA": "SHA256_STRICT"
+    }
+  },
+  "agi_kernel_parameters": {
+    "maturity_tracking": true,
+    "current_maturity_percent": 0.0,
+    "exploration_strategy": "PRIORITY_DIVERSITY",
+    "navigator_limits": {
+      "max_blacklist_size": 50,
+      "diversity_enforcement": true
+    },
+    "emergent_directory_path": "/emergent"
+  },
+  "operational_control": {
+    "current_mode": "EXPLORATION_INITIALIZATION",
+    "core_loop_settings": {
+      "synthesis_efficacy_threshold": 0.95,
+      "autonomous_rollback_timeout_ms": 30000
+    },
+    "telemetry": {
+      "SDR_report_rate_hz": 10,
+      "log_level": "INFO"
+    }
+  },
+  "integration_endpoints": {
+    "trust_module_api": "http://atm.core/api/v1",
+    "telemetry_sink_url": "http://sdr.telemetry.core/ingest"
+  }
+}

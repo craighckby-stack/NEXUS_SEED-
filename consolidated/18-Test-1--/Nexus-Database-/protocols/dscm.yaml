@@ -1,0 +1,12 @@
+utility_name: Deterministic State Commitment Manager
+acronym: DSCM
+purpose: Manages ordered, non-repudiable transaction submission of attested state fragments (e.g., Veto states, Metrics S01/S02) into the CISM.
+governing_protocol: GDECM/CISM
+integrity_layer: Data Continuity / Determinism
+responsibilities:
+  - Enforce serialized write operations defined by GDECM stage order.
+  - Implement cryptographic non-repudiation on committed fragments before CISM acceptance.
+  - Provide atomic read-lock mechanisms for downstream stages relying on committed values.
+integration_stages: S1 through S9
+governing_agent_primary: SGS (Orchestration)
+governing_agent_secondary: CRoT (Attestation Signing)

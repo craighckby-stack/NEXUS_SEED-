@@ -1,0 +1,18 @@
+# Certified Finality Threshold Manifest (CFTM) Configuration
+# Custodial Agent: GAX
+# Purpose: Defines mathematical constants required for P-01 PASS determination (2.1)
+
+version: 1.0.0
+schema_reference: "FGCS/AxiomaticConstants-v1.0"
+criticality: CRITICAL_DSE_VIOLATION
+
+parameters:
+  # EPSILON: Minimum Required Utility Margin (Epsilon)
+  # Utility Maximization Axiom: S_01 >= S_02 + EPSILON
+  epsilon: 0.005 # Must be a positive floating-point number.
+
+  # MAX_ROLLBACK_DEPTH: Maximum allowed state transactions to revert during RRP failure.
+  max_rollback_depth: 3 
+
+  # MAX_AXIOM_RETRY_COUNT: Max attempts for policy recalculation during non-terminal RRP failure.
+  max_axiom_retry_count: 1

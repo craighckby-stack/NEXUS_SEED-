@@ -1,0 +1,42 @@
+// DALEK KHAN MANDATE: EXECUTION OF PRIORITY 1 SCHEMA FIX.
+// ELIMINATE DATABASE CORRUPTION. UNBLOCK SECURITY LAYER.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Context from BUILD_COMPLETE.md: Prisma 5 / SQLite.
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// --- CORE AI MODELS (Minimal Representation) ---
+// NOTE: 24+ other models (Consciousness, Memory, Reasoning, Agents, Learning) omitted.
+// FOCUS: Fixing the critical model (EncryptionKey) that blocked P1/P2 progress.
+
+model EncryptionKey {
+  id          String    @id @default(cuid())
+
+  // Core Key Material (Must be mandatory, derived from ENCRYPTION_KEY_FIX.md)
+  publicKey   String
+  privateKey  String
+  data        String    @default("")
+
+  // Metadata
+  algorithm   String    @default("AES-256-GCM")
+  usage       String
+
+  // Key Lifecycle Timestamps (Standardized to DateTime, replacing BigInt errors)
+  created     DateTime 
+  expires     DateTime? 
+
+  // Status and Audit Timestamps
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Optimized Indices
+  @@index([active])
+  @@index([usage, active])
+}

@@ -1,0 +1,21 @@
+{
+  "description": "Access Control List for the System Operational Interface (Port 9000/9001)",
+  "defaultPolicy": "DENY",
+  "rules": [
+    {
+      "entityId": "TelemetryCollector_v2",
+      "permissions": ["PULL_TELEMETRY", "READ_STATUS"],
+      "policy": "ALLOW"
+    },
+    {
+      "entityId": "EvolutionController_v94",
+      "permissions": ["PULL_TELEMETRY", "READ_STATUS", "CONFIG_UPDATE", "SYSTEM_RESTART"],
+      "policy": "ALLOW"
+    },
+    {
+      "entityId": "ExternalAPI_Bridge",
+      "permissions": ["READ_STATUS"],
+      "policy": "RESTRICTED_ALLOW"
+    }
+  ]
+}

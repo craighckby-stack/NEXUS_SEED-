@@ -1,0 +1,30 @@
+{
+  "schema_version": "v94.2",
+  "schema_path": "governance/teds_schema.json",
+  "enforcement_points": [
+    {
+      "agent": "CRoT",
+      "stages": ["S00", "S01", "S02", "S03"],
+      "policy": "strict_validation",
+      "on_failure": "TERMINATE_CYCLE"
+    },
+    {
+      "agent": "GAX",
+      "stages": ["S04", "S09", "S14"],
+      "policy": "audit_only",
+      "on_failure": "LOG_WARNING_ROUTE_GS_C1"
+    },
+    {
+      "agent": "SGS",
+      "stages": ["S05", "S06", "S07", "S08"],
+      "policy": "strict_validation",
+      "on_failure": "INITIATE_ROLLBACK"
+    }
+  ],
+  "data_routing": {
+    "status_PASS": "Stream_Audit_Primary",
+    "status_FAIL": "Stream_Audit_Failure_HotPath",
+    "status_COMMIT": "Stream_State_Commit",
+    "default": "Stream_Audit_Fallback"
+  }
+}

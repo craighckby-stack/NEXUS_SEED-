@@ -1,0 +1,41 @@
+{
+  "policy_id": "RSP-2024.3",
+  "version": "2.0.0",
+  "description": "Enhanced governance policy utilizing decoupled cryptographic requirements, defined assurance levels, and granular temporal constraints for RCR input streams.",
+  "security_domains": {
+    "cryptographic_requirements": {
+      "integrity_hashing_algorithm": "SHA3-512",
+      "signature_suite": "EdDSA-Ed25519"
+    },
+    "temporal_constraints": {
+      "signature_freshness_tolerance_ms": 500,
+      "max_processing_skew_ms": 100,
+      "relevance_window_s": 30
+    },
+    "validation_rules": {
+      "signer_requirements": [
+        {
+          "required_role": "RootTrust",
+          "assurance_level": "L4_CRITICAL_HIGH",
+          "verification_mode": "StrictRevocationCheck"
+        },
+        {
+          "required_role": "CommitAuthorization",
+          "assurance_level": "L3_CORE_OPERATIONAL",
+          "verification_mode": "OnlineOCSPPreferred"
+        }
+      ],
+      "key_revocation_policy": {
+        "check_enabled": true,
+        "criticality_filter": "CRITICAL_ONLY",
+        "default_source_id": "RSL-Primary-001"
+      }
+    }
+  },
+  "operational_constraints": {
+    "max_state_rollback_units": 500000,
+    "minimum_command_priority_level": 9,
+    "policy_escalation_threshold": 15,
+    "monitoring_level": "Level_2_High_Audit"
+  }
+}

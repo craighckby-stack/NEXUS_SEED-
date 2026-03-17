@@ -1,0 +1,34 @@
+{
+  "$schema": "../../schemas/EnforcementConfig_v1.json",
+  "description": "Maps constitutional enforcement actions (CAC_v2) to concrete system API endpoints or internal functions.",
+  "action_bindings": {
+    "HARD_STOP_EXECUTION": {
+      "priority": 100,
+      "module": "Kernel.SafetyInterrupt",
+      "function": "trigger_level_0_halt",
+      "logging": "HIGH_SEVERITY"
+    },
+    "ROLLBACK_TRANSACTION": {
+      "priority": 80,
+      "module": "State.ReversionEngine",
+      "function": "rollback_to_pre_transaction_state",
+      "logging": "CRITICAL"
+    },
+    "EMIT_CRITICAL_ALERT": {
+      "priority": 50,
+      "module": "Telemetry.Auditor",
+      "function": "broadcast_alert",
+      "channels": ["GUARDIAN_NETWORK", "INTERNAL_LOG"]
+    },
+    "SELF_REMEDIATION_PROTOCOL": {
+      "priority": 90,
+      "module": "System.AutonomousRecovery",
+      "function": "execute_clean_restart_cycle",
+      "timeout_ms": 5000
+    }
+  },
+  "monitoring_scope_hooks": {
+    "RUNTIME_EXECUTION": "Kernel.Hook.pre_opcode_exec",
+    "STATE_MUTATION": "State.Hook.pre_write"
+  }
+}

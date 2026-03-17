@@ -1,0 +1,31 @@
+const measureAsyncExecution = async (fn) => {
+  // Use high-resolution timer (performance.now()) if available, 
+  // falling back to Date.now() if running in a highly constrained environment.
+  const timer = typeof performance !== 'undefined' ? performance : Date;
+  
+  const start = timer.now();
+  let result;
+  let error = null;
+
+  try {
+    // Direct await on the execution result
+    result = await fn();
+  } catch (e) {
+    error = e;
+  }
+
+  const end = timer.now();
+  const durationMs = end - start;
+
+  if (error) {
+    // Optimization: Minimize stack depth by re-throwing
+    throw error;
+  }
+
+  // Optimized return structure: includes high-resolution duration 
+  // alongside the executed result for direct use in performance assertions.
+  return {
+    result,
+    durationMs,
+  };
+};

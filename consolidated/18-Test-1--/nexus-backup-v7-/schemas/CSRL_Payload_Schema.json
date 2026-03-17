@@ -1,0 +1,24 @@
+{
+  "schema_id": "CSRL_V1.1_PAYLOAD",
+  "description": "Defines the required metadata and structure for a valid Critical State Rollback Ledger entry, ensuring integrity prior to recovery.",
+  "required_fields": [
+    "state_id",
+    "capture_timestamp_utc",
+    "source_component_hash",
+    "integrity_hash_sha512",
+    "signature_chain_hash",
+    "state_payload_reference"
+  ],
+  "field_details": {
+    "state_id": {"type": "string", "format": "UUIDv4"},
+    "capture_timestamp_utc": {"type": "timestamp"},
+    "source_component_hash": {"type": "string", "description": "Hash of the system components active during state capture."},
+    "integrity_hash_sha512": {"type": "string", "description": "Merkle root hash verifying the integrity of the stored state payload."},
+    "signature_chain_hash": {"type": "string", "description": "Reference to the chain of custody signatures required for Level_4_MCR_PreSigned status."},
+    "state_payload_reference": {"type": "string", "description": "Secure storage location (e.g., decentralized ledger reference, secure vault URI)."}
+  },
+  "integrity_constraints": {
+    "hash_verification_timeout_ms": 1500,
+    "min_required_signatures": 4
+  }
+}

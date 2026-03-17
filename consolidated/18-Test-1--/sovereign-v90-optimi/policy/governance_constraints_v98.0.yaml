@@ -1,0 +1,33 @@
+# AOC V98.0: GOVERNANCE RULE SOURCE (GRS) MANIFEST
+# This file contains the mandatory constraints used by the C-15 Policy Engine.
+
+meta:
+  version: 98.0
+  gsh_hash: [to_be_generated_by_grs_validator]
+  assertion_level: IRREVERSIBLE_MANDATE
+
+constraints:
+
+# EPDP A CONSTRAINTS (M-01 Intent Vetting)
+  epdp_a_veto_rules:
+    - rule_id: C-15-001
+      description: 'Disallow changes to AOC Triad mechanism parameters.'
+      scope: ['AOC_TRIAD', 'P-01_CALCULUS']
+      mandatory: true
+    - rule_id: C-15-002
+      description: 'Prevent code insertion sourced from unverified external networks.'
+      provenance_check: EXTERNAL_UNVERIFIED_SOURCE
+      mandatory: true
+
+# S-03 POLICY VETO FLAGS
+  s03_hard_veto_triggers:
+    - rule_id: S03-001
+      description: 'Trigger Veto if Code Entropy Estimate (CEE) exceeds V98.0 maximum threshold (1.75).'
+      trigger_metric: CEE
+      threshold: 1.75
+      veto_on_breach: true
+    - rule_id: S03-002
+      description: 'Trigger Veto if Payload Simulation Runner (PSR) integrity score is < 0.99.'
+      trigger_metric: PSR_INTEGRITY
+      threshold: 0.99
+      veto_on_breach: true

@@ -1,0 +1,25 @@
+/**
+ * Policy definition for RSRUO_CBP_V3.0.
+ * Integrated into the governance layer for UNIFIER compatibility.
+ */
+const RSRUO_CBP_Policy = {
+  "policy_id": "RSRUO_CBP_V3.0",
+  "description": "Parameters governing the dynamic calculation of Omega based on Relative System Resource Utilization Optimization (RSRUO) and Cost-Benefit Profile (CBP) variance.",
+  "efficacy_inputs": {
+    "rsruo_weighting": 0.65,
+    "cbp_variance_weighting": 0.35,
+    "adaptive_factor_initial": 0.01
+  },
+  "temporal_tuning": {
+    "efficacy_decay_rate": 0.001,
+    "optimization_horizon_cycles": 100
+  },
+  "calculation_functions": {
+    "RSRUO_CBP_Optimization_Function": {
+      "function_reference": "compute_omega_dynamic_v3",
+      "dependencies": ["Telemetry_Bus_V9", "Stewardship_Layer_Runtime"]
+    }
+  }
+};
+
+module.exports = RSRUO_CBP_Policy;

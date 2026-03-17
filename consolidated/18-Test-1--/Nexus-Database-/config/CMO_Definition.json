@@ -1,0 +1,55 @@
+{
+  "cmo_version": "2.0",
+  "manifest_id": "9F7D3A1B",
+  "metadata": {
+    "creation_date": "2024-07-28T10:30:00Z",
+    "interface_mandate": "Ensures all runtime constants derived from the Manifest ID are traceable, immutable across the active configuration set, and accessible for high-level validation (L1-L7)."
+  },
+  "modules": {
+    "viability_margin_oracle": {
+      "context": {
+        "level_rank": 6,
+        "description": "Risk Assessment Layer (L6)"
+      },
+      "schema_version": "v1.2",
+      "notes": "Controls dynamic computation of the epsilon safety margin based on temporal stability data.",
+      "configuration": {
+        "constants": {
+          "epsilon_decay_rate": 0.05,
+          "spdm_window_size_epochs": 100
+        },
+        "limits": {
+          "epsilon_minimum_floor": 0.01
+        }
+      }
+    },
+    "constraint_budget_matrix": {
+      "context": {
+        "level_rank": 2,
+        "description": "Resource Allocation Layer (L2)"
+      },
+      "schema_version": "v1.1",
+      "notes": "Defines static and dynamic resource allocation limits enforced system-wide.",
+      "configuration": {
+        "limits": {
+          "max_compute_units": 500000,
+          "max_data_ingress_gb": 100
+        }
+      }
+    },
+    "metric_efficacy_contract": {
+      "context": {
+        "level_rank": 5,
+        "description": "Performance Synthesis Layer (L5)"
+      },
+      "schema_version": "v2.0",
+      "notes": "Defines the core weighting schema used for synthesizing critical performance metrics (Utility/Risk trade-off).",
+      "configuration": {
+        "weights": {
+          "utility_weight": 0.6,
+          "risk_penalty": 0.4
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://governance.agi/gedm/constraint-schema-v1.json",
+  "title": "GEDM Dependency Constraint Object (Di)",
+  "description": "Defines a mandatory artifact required for GSEP stage execution.",
+  "type": "object",
+  "required": ["artifact_id", "version", "path", "integrity_check"],
+  "properties": {
+    "artifact_id": {
+      "type": "string",
+      "description": "Canonical identifier of the required dependency (e.g., 'Model.VetoPolicy.v3')."
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version of the required artifact."
+    },
+    "path": {
+      "type": "string",
+      "description": "CISM access path pointer to the artifact's location/data."
+    },
+    "integrity_check": {
+      "type": "object",
+      "description": "Details required for state artifact validation.",
+      "required": ["method", "expected_hash"],
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["SHA256", "PGP_Signature", "TimeLock_Hash"],
+          "description": "Cryptographic integrity validation method."
+        },
+        "expected_hash": {
+          "type": "string",
+          "description": "The certified, expected value for the specified integrity check."
+        }
+      }
+    },
+    "optional": {
+      "type": "boolean",
+      "default": false,
+      "description": "If true, a DEPENDENCY_FAIL is not triggered by absence, only integrity mismatch."
+    }
+  }
+}

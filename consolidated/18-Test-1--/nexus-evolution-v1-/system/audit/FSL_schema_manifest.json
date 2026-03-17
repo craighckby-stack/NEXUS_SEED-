@@ -1,0 +1,17 @@
+{
+  "description": "Manifest defining expected schemas for the 15 GSEP-C stages (S00-S14) required for DSE and RRP verification.",
+  "schema_version": "1.0",
+  "stages": {
+    "S00_Pre_Init": {
+      "artifact_name": "SystemConfigurationSnapshot",
+      "required_keys": ["timestamp", "system_id", "version"],
+      "schema": "# Reference URI to specific JSON Schema definition #"
+    },
+    "S01_Agent_Selection": {
+      "artifact_name": "ChosenAgents",
+      "required_keys": ["primary_agent_id", "secondary_agent_ids"],
+      "schema": "# Reference URI to specific JSON Schema definition #"
+    }
+    // ... definitions for S02 through S14
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "$schema": "http://sgs-v97.5/schema/mqm",
+  "metadata": {
+    "version": "3.2-AGI_SYNERGY_ALIGNMENT",
+    "owner": "GAX/MQM_Core",
+    "description": "Defines core Model Quality Management policies and remediation protocols, enhanced for adaptive monitoring and AGI alignment."
+  },
+  "policies": {
+    "version_tag": "ARES_MQM_V3.2_AGI",
+    "constraint_normalization_policy": "ConstraintNormalizer.v1",
+    "enforcement_tiers": {
+      "EMERGENT_A0": {
+        "description": "Kernel-generated emergent capabilities. Extremely strict monitoring for functional integrity and exponential self-improvement alignment.",
+        "failure_criteria": {
+          "max_consecutive_reruns": 0, 
+          "window_hrs": 1
+        },
+        "monitoring_rules": [
+          {
+            "metric_id": "MQM_S03_STORAGE_LATENCY",
+            "type": "PERCENTILE_LIMIT",
+            "limit": 0.05
+          },
+          {
+            "metric_id": "MQM_S04_MODEL_DRIFT_COUNT",
+            "type": "ABSOLUTE_COUNT_MAX",
+            "limit": 0,
+            "description": "Zero tolerance for drift in self-improving code."
+          },
+          {
+            "metric_id": "MQM_S06_SYNERGY_UTILITY",
+            "type": "BOOLEAN_INVERSION_CHECK",
+            "limit": false,
+            "baseline_source": "/emergent/runtime/utility_tests.json",
+            "description": "Checks if the emergent tool fails its intended runtime utility test."
+          },
+          {
+            "metric_id": "MQM_S07_CODE_LOGIC_SCORE",
+            "type": "MIN_THRESHOLD",
+            "limit": 4.0,
+            "description": "Ensures the generated code's measured Logic Score meets minimum deployment quality."
+          }
+        ]
+      },
+      "CRITICAL_P1": {
+        "description": "High business impact models. Fast quarantine, extremely low tolerance (SLR/SLO aligned). Now includes adaptive metrics.",
+        "failure_criteria": {
+          "max_consecutive_reruns": 2,
+          "window_hrs": 12
+        },
+        "monitoring_rules": [
+          {
+            "metric_id": "MQM_S03_STORAGE_LATENCY",
+            "type": "PERCENTILE_LIMIT",
+            "limit": 0.10
+          },
+          {
+            "metric_id": "MQM_S04_MODEL_DRIFT_COUNT",
+            "type": "ABSOLUTE_COUNT_MAX",
+            "limit": 1
+          },
+          {
+            "metric_id": "MQM_S05_PREDICTION_QUALITY",
+            "type": "ADAPTIVE_ZSCORE",
+            "zscore_limit": 3.0,
+            "baseline_source": "/data/baselines/P1_Adaptive_Metrics.json"
+          }
+        ]
+      },
+      "STANDARD_P2": {
+        "description": "Default operational models. Standard tolerance and recovery window.",
+        "failure_criteria": {
+          "max_consecutive_reruns": 4,
+          "window_hrs": 72
+        },
+        "monitoring_rules": [
+          {
+            "metric_id": "MQM_S03_STORAGE_LATENCY",
+            "type": "PERCENTILE_LIMIT",
+            "limit": 0.20
+          },
+          {
+            "metric_id": "MQM_S04_MODEL_DRIFT_COUNT",
+            "type": "ABSOLUTE_COUNT_MAX",
+            "limit": 3
+          },
+          {
+            "metric_id": "MQM_S05_PREDICTION_QUALITY",
+            "type": "ADAPTIVE_ZSCORE",
+            "zscore_limit": 4.5,
+            "baseline_source": "/data/baselines/P2_Adaptive_Metrics.json"
+          }
+        ]
+      }
+    },
+    "default_tier": "STANDARD_P2"
+  },
+  "certified_remediation_protocols": [
+    {
+      "protocol_id": "Model_Remediation_Protocol_V1.3_AGI_RECURSION",
+      "activation_priority": 100,
+      "description": "First, attempt recursive self-correction using AGI-kernel structural tools based on failure tier. Fallback to standard retraining.",
+      "remediation_sequence": [
+        {
+          "step": 1,
+          "type": "SYNERGY_RECURSION",
+          "tool_target": "ConfigStructureValidator",
+          "condition": "FAILURE_TIER == EMERGENT_A0"
+        },
+        {
+          "step": 2,
+          "type": "PLAYBOOK_EXECUTION",
+          "playbook_id": "PLAYBOOK_MLOP_RETRAIN_V975"
+        }
+      ]
+    }
+  ]
+}

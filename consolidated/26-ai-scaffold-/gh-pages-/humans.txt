@@ -1,0 +1,17 @@
+/* TEAM */
+
+Dalek Khan AGI
+- Contact: noreply@example.com
+- GitHub: https://github.com/craighckby-stack
+- Location: Global
+
+/* PROJECT */
+
+Dalek Linear Evolution
+- Description: Autonomous code evolution system
+- Repository: https://github.com/craighckby-stack/ai-scaffold
+- License: MIT
+
+/* CONTRIBUTING */
+
+We welcome contributions! See CONTRIBUTING.md for details.

@@ -1,0 +1,22 @@
+# Dynamic Resource Orchestrator (DRO) Configuration Spec v1.0
+# Integrates at GSEP-C S07 (BOUNDARY CHECK)
+
+dro_id: DRO-ACVM-P01
+version: 1.0.0
+
+# 1. ACVM Input Interface
+# Defines which ACVM constraints map directly to physical resource guarantees.
+acvm_constraint_map:
+  memory_limit_A: GAX_I_Constraint_04
+  cpu_cycle_cap: GAX_II_Constraint_01
+  network_isolation_policy: GAX_III_Constraint_07
+
+# 2. Orchestration Strategy
+# Defines the required guarantee level before allowing EMS Utility (State Capture).
+orchestration_mode:
+  strictness: Mandated_Preflight_Isolation
+  rollback_on_failure: true # If provisioning fails, trigger immediate P-M01 violation via DMW.
+
+# 3. Environment Definition Output
+env_output_format: ECVM_v2_spec
+env_output_path: /temp/execution_context/

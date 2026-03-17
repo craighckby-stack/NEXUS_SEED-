@@ -1,0 +1,26 @@
+{
+  "description": "Maps configuration integrity failure criticality levels (L1-L5) defined in chr_schema to mandated system enforcement actions (L-9 Procedures).",
+  "criticality_levels": {
+    "L1_INFORMATIONAL": {
+      "action": "LOG_WARNING",
+      "alert_target": "DEV_AUDIT",
+      "mandate": "Log non-critical checksum warnings for review."
+    },
+    "L3_MODULE_HIGH": {
+      "action": "MODULE_ISOLATE",
+      "alert_target": "SEC_ENGINE",
+      "mandate": "Restart affected subsystem in restricted sandbox mode."
+    },
+    "L4_SYSTEM_HIGH": {
+      "action": "QUARANTINE_SHUTDOWN",
+      "alert_target": "SOVEREIGN_CORE",
+      "mandate": "Immediate full system halt, save diagnostic core dump, await manual review."
+    },
+    "L5_CORE_CRITICAL": {
+      "action": "L9_ARMAGEDDON",
+      "alert_target": "ROOT_TERMINAL",
+      "mandate": "Initiate irreversible operational lock, self-terminate execution, erase volatile memory banks (required for self-integrity failure or critical protocol breaches)."
+    }
+  },
+  "default_action": "LOG_ALERT"
+}

@@ -1,0 +1,26 @@
+## Data Provenance and Integrity Module (DPIM) Configuration
+
+# DPIM serves as the mandatory gatekeeper (GSEP-C: L4) for all data used in metric synthesis (L5: RDM/SEM/SDR). It prevents systemic failure originating from degraded or compromised input data.
+
+configuration_id: V96.2-L4.1
+
+### 1. Mandatory Veracity Checks (Minimum Compliance)
+
+veracity_thresholds:
+  freshness_tolerance_ms: 10800000 # 3 hours maximum data age.
+  source_signature_policy: 'P4-ECDSA-256' # Required cryptographic proof of origin.
+  minimum_dataset_size: 50000 # Minimum acceptable data volume for statistical relevance.
+  bias_index_max: 0.05 # Maximum permissible deviation from balanced distribution (Calculated via Bias Assessment Engine (BAE)).
+
+### 2. Failure Handling Policy
+
+integrity_failure_action:
+  S02_override_increment: 0.9 # If DPIM fails, S-02 (Risk) is immediately inflated by this factor.
+  mandatory_l0_reentry: true # Force restart of SST processing.
+
+### 3. Integration Targets
+
+data_pipelines_monitored:
+  - RDM_input_stream
+  - SEM_input_stream
+  - SDR_input_stream

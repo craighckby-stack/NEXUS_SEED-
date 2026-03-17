@@ -1,0 +1,46 @@
+{
+  "system_version": "v94.1",
+  "description": "Tiered definitions for autonomous validation and performance tracking.",
+  "evaluation_tiers": [
+    "lightweight_validation",
+    "integration_testing",
+    "production_readiness"
+  ],
+  "metrics": {
+    "evolution_success_rate": {
+      "type": "KPI",
+      "unit": "percentage",
+      "aggregation": "rolling_mean(100)",
+      "critical_threshold": 0.98,
+      "alert_if": "below_threshold",
+      "is_resource_intensive": false
+    },
+    "compute_token_efficiency": {
+      "type": "ResourceUsage",
+      "unit": "tokens_per_successful_step",
+      "aggregation": "P90",
+      "max_acceptable": 12000,
+      "is_resource_intensive": true
+    }
+  },
+  "oracles": {
+    "syntactic_conformance_check": {
+      "purpose": "Validate output code structure/format.",
+      "tier": ["lightweight_validation"],
+      "component_id": "validation.syntax_checker",
+      "timeout_ms": 500
+    },
+    "behavioral_equivalence_oracle": {
+      "purpose": "Verify functionality against initial requirements.",
+      "tier": ["integration_testing", "production_readiness"],
+      "component_id": "validation.state_differ",
+      "strictness_level": "max",
+      "required_pass_rate": 0.995,
+      "caching_strategy": "disabled"
+    }
+  },
+  "default_evaluation_pipeline": {
+    "lightweight_validation": ["syntactic_conformance_check"],
+    "integration_testing": ["behavioral_equivalence_oracle", "compute_token_efficiency"]
+  }
+}

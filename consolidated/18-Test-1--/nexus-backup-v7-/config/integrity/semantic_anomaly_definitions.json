@@ -1,0 +1,26 @@
+{
+  "definition_version": "1.0.0",
+  "module_reference": "PSIM_SI",
+  "description": "Detailed configuration and thresholds for behavioral semantic anomaly detection metrics.",
+  "metrics": [
+    {
+      "metric_name": "behavioral_variance",
+      "description": "Measures deviation from established execution profiles (e.g., instruction count delta over last 10k cycles).",
+      "data_type": "float_ratio",
+      "detection_algorithm": "MovingAverageZScore",
+      "threshold": 0.02,
+      "severity_map": {
+        "0.02": "WARNING",
+        "0.05": "CRITICAL"
+      }
+    },
+    {
+      "metric_name": "resource_utilization_anomaly",
+      "description": "Detects unexpected spikes or drops in CPU/Memory utilization normalized against historical mission parameters.",
+      "data_type": "percent_delta",
+      "detection_algorithm": "IsolationForest",
+      "threshold": 15.0,
+      "alert_if_exceeded_for_cycles": 3
+    }
+  ]
+}

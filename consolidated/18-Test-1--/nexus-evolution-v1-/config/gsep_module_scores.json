@@ -1,0 +1,17 @@
+{
+  "criticality": {
+    "module/core/kernel.js": 5.0,
+    "utilities/gsep_impact_analyzer.js": 4.0,
+    "system/telemetry_aggregator.js": 3.5,
+    "module/data_api.js": 2.0,
+    "tests/jest_setup.js": 1.0
+  },
+  "stability": {
+    "module/core/kernel.js": 0.85,
+    "utilities/gsep_impact_analyzer.js": 0.7,
+    "system/telemetry_aggregator.js": 0.4,
+    "module/data_api.js": 0.95,
+    "tests/jest_setup.js": 0.99
+  },
+  "description": "Defines the baseline Criticality (1.0 low to 5.0 high) and Stability (0.0 low to 1.0 high) scores for modules. Used by GSEP for advanced priority calculation."
+}

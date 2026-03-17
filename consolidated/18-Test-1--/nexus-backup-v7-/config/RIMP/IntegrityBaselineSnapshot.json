@@ -1,0 +1,38 @@
+{
+  "snapshotId": "V94.1.20240101.BASELINE",
+  "schemaVersion": "3.0",
+  "algorithm": "SHA3_384",
+  "snapshotHash": "A7D9B1C5E3F0D2B4A6C8E0F2D4B6A8C06E4F8D2C0A4B6E8F0D2C4A6B8E0F2D4C",
+  "governance": {
+    "strictnessLevel": "CRITICAL_PATH_LOCK",
+    "monitoringIntervalMs": 30000
+  },
+  "components": {
+    "RIMP_CORE": {
+      "priority": 100,
+      "immutable": true,
+      "description": "Essential components for AGI self-governance and integrity checks.",
+      "hashes": {
+        "engine/integrity.js": "550e8400e29b41d4a716446655440000",
+        "config/RIMP/Watchlist.json": "8d96b4b46a0b486a848f3081e64901f4"
+      }
+    },
+    "RUNTIME_APIS": {
+      "priority": 50,
+      "immutable": true,
+      "description": "Core operational APIs subject to strict verification.",
+      "hashes": {
+        "src/api/executor.ts": "f47ac10b58cc4372a5670e02b2c3d479",
+        "src/system/reflection.bin": "a8c7b6d54e321f0ed9c87b6a5d4c3e21"
+      }
+    },
+    "DYNAMIC_CONFIGS": {
+      "priority": 10,
+      "immutable": false,
+      "description": "Configuration files expected to change only via governance APIs.",
+      "hashes": {
+        "config/parameters.json": "c2b1a0d3e4f567890abcfedcba987654"
+      }
+    }
+  }
+}

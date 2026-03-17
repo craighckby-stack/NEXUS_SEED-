@@ -1,0 +1,46 @@
+{
+  "policy_name": "Default Agent Cognitive Failure Modes",
+  "policy_version": "1.0.0",
+  "applies_to_modules": ["AGENT_CORE", "INFERENCE_WORKER"],
+  "heuristics": [
+    {
+      "mode_id": "CONTEXT_SATURATION",
+      "trigger": {
+        "metric": "ContextWindowUtilization",
+        "operator": ">=",
+        "value": 0.98,
+        "duration_s": 120
+      },
+      "action": {
+        "type": "RESTART_SAFE",
+        "description": "Agent context memory saturation detected. Perform soft restart with last verified state checkpoint."
+      }
+    },
+    {
+      "mode_id": "RECURSIVE_LOCK",
+      "trigger": {
+        "metric": "FunctionCallDepth",
+        "operator": ">",
+        "value": 150,
+        "duration_s": 10
+      },
+      "action": {
+        "type": "TERMINATE_HARD",
+        "description": "Immediate termination to prevent resource spiraling caused by logic recursion."
+      }
+    },
+    {
+      "mode_id": "LOW_ENTROPY_OUTPUT",
+      "trigger": {
+        "metric": "OutputEntropyIndex",
+        "operator": "<",
+        "value": 0.05,
+        "duration_s": 300
+      },
+      "action": {
+        "type": "PAUSE_INSPECT",
+        "description": "Output degradation detected (likely looping/stuck). Pause process for inspection before restart."
+      }
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "state_map_version": "1.0",
+  "map_type": "Transient State Element (TSE) Selection",
+  "active_components": [
+    "ACVM_Execution_Registers",
+    "Sovereign_Control_Flow_Stack",
+    "Active_Context_Handle"
+  ],
+  "element_definition": {
+    "ACVM_Execution_Registers": {
+      "capture_level": "Atomic",
+      "memory_region": "0xAC00 - 0xACFF",
+      "description": "Critical registers holding intermediate calculation results."
+    },
+    "Sovereign_Control_Flow_Stack": {
+      "capture_level": "Differential (Last 128 entries)",
+      "memory_region": "0xS000 - 0xS400",
+      "description": "Essential for precise rollback and re-entry during P-M01."
+    }
+  },
+  "exclusion_list": [
+    "Temporary_IO_Buffer_01",
+    "Debug_Logging_Heap"
+  ]
+}

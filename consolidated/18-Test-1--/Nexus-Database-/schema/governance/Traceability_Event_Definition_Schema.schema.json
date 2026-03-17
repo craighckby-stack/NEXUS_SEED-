@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.agi/schema/governance/Traceability_Event_Definition_Schema.schema.json",
+  "title": "Traceability Event Definition Schema (TEDS)",
+  "description": "Defines the mandatory structure for forensic data capture (TEDS) required by the Rollback Protocol (RRP) and stored in the TVCR registry. Enforces strict type and pattern validation for high-stakes governance auditing.",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Unique, system-defined monotonic identifier for the event. Must be immutable."
+    },
+    "timestamp_utc": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Time of failure or trace capture, standardized to UTC ISO 8601."
+    },
+    "gsep_stage": {
+      "type": "string",
+      "pattern": "^S(0[0-9]|1[0-4])$",
+      "description": "The specific GSEP-C stage (S00 to S14) where the event occurred. Strictly validated by pattern."
+    },
+    "agent_custodian": {
+      "type": "string",
+      "enum": [
+        "SGS",
+        "GAX",
+        "CRoT"
+      ],
+      "description": "The Triumvirate agent responsible during the stage (SGS: Sovereign Governance System, GAX: General Autonomy Executor, CRoT: Constitutional Regulator of Trust)."
+    },
+    "failure_level": {
+      "type": "string",
+      "enum": [
+        "IH",
+        "RRP",
+        "STANDARD"
+      ],
+      "description": "Codified failure hierarchy level (Interdiction High, Rollback Protocol trigger, or standard operational anomaly)."
+    },
+    "p01_context_vector_capture": {
+      "$ref": "Context_Vector_Snapshot_Schema.schema.json",
+      "description": "Required state snapshot definition detailing internal system context (PVLM, MPAM, ADTM, TEMM, UFRM, CFTM) at the precise point of trace capture."
+    },
+    "log_reference_hash": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{64}$",
+      "description": "SHA-256 cryptographic hash linking securely to detailed, immutable internal system logs (TVCR entry)."
+    }
+  },
+  "required": [
+    "event_id",
+    "timestamp_utc",
+    "gsep_stage",
+    "agent_custodian",
+    "failure_level",
+    "p01_context_vector_capture",
+    "log_reference_hash"
+  ],
+  "additionalProperties": false
+}

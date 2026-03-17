@@ -1,0 +1,18 @@
+{
+  "provenance_id": "GAX-I-BASELINE-T2",
+  "description": "Defines critical operational constants derived from Governance Axiom I (GAX I) requirements, specifically tier 2 optimization.",
+  "source_document": "GAX-I-Specification_V1.1",
+  "approval_date": "2094-10-01",
+  "constants": [
+    {
+      "key": "OMEGA_MIN_COMPUTE",
+      "value": 0.985,
+      "rationale": "Minimum required operational efficiency ratio (98.5%) mandated for TEMM validity under nominal load conditions."
+    },
+    {
+      "key": "OMEGA_MAX_LATENCY_MS",
+      "value": 50,
+      "rationale": "Maximum permissible average end-to-end latency during critical processing phases."
+    }
+  ]
+}

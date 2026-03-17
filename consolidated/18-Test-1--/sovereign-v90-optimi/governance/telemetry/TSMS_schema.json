@@ -1,0 +1,42 @@
+{
+  "streamId": "TSMS-Schema-V1",
+  "title": "Telemetry Stream Metadata Schema (TSMS)",
+  "description": "Defines expected parameters and required chronometric tolerances for all S-0x input streams consumed by the TSSM, informing HPTA behavior.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "stream_name": {
+        "type": "string",
+        "description": "Human-readable identifier (e.g., 'Core_Execution_Clock', 'RFCI_Thermal_Monitor')."
+      },
+      "source_id": {
+        "type": "string",
+        "description": "Unique cryptographic identifier of the generating component."
+      },
+      "expected_frequency_hz": {
+        "type": "number",
+        "description": "Nominal reporting frequency of the stream data."
+      },
+      "latency_budget_ns": {
+        "type": "integer",
+        "description": "Maximum allowable synchronization offset (drift budget) in nanoseconds before logging a Chronometric Fidelity Warning (CFW). Critical streams should be <= 100."
+      },
+      "trust_priority": {
+        "type": "integer",
+        "description": "A score (1-10, 10 being highest) indicating the stream's criticality to P-01 Trust Calculus."
+      },
+      "failure_policy": {
+        "type": "string",
+        "enum": ["WARN_AND_PASS", "QUARANTINE", "FORCE_HALT"],
+        "description": "Action to take if the stream repeatedly violates its latency_budget_ns threshold."
+      }
+    },
+    "required": [
+      "stream_name",
+      "source_id",
+      "latency_budget_ns",
+      "trust_priority"
+    ]
+  }
+}

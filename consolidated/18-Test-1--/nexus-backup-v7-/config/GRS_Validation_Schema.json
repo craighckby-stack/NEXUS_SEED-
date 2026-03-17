@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://api.sovereign-agi.com/schemas/v94/GRS_Validation_Schema.json",
+  "title": "Global Rule Set (GRS) Configuration Validation Schema",
+  "description": "Defines the mandatory structure and constraints for all Sovereign AGI configuration rules, ensuring modularity and strict type adherence.",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^v[0-9]+\\.[0-9]+$",
+      "description": "The schema version identifier."
+    },
+    "rulesetName": {
+      "type": "string",
+      "minLength": 3,
+      "description": "Human-readable name for the configuration ruleset."
+    },
+    "enabledModules": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ModuleIdentifier" },
+      "uniqueItems": true,
+      "description": "List of system modules activated in this configuration."
+    },
+    "rateLimits": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "api": { "$ref": "#/$defs/LimitDefinition" },
+        "compute": { "$ref": "#/$defs/LimitDefinition" },
+        "storage": { "$ref": "#/$defs/LimitDefinition" }
+      },
+      "required": ["api"],
+      "description": "Defines global throttling policies."
+    },
+    "securityPolicy": {
+      "type": "string",
+      "enum": ["STRICT", "PERMISSIVE", "ISOLATED"],
+      "default": "STRICT"
+    }
+  },
+  "required": ["version", "rulesetName", "enabledModules", "securityPolicy"],
+  "additionalProperties": false,
+  "$defs": {
+    "ModuleIdentifier": {
+      "type": "string",
+      "description": "Standard identifier for an operational module (PascalCase enforcement).",
+      "pattern": "^[A-Z][a-zA-Z0-9]+$"
+    },
+    "LimitDefinition": {
+      "type": "object",
+      "properties": {
+        "maxRequests": { "type": "integer", "minimum": 1, "description": "Maximum operations allowed." },
+        "timeWindowMs": { "type": "integer", "minimum": 100, "description": "Duration in milliseconds for the window." }
+      },
+      "required": ["maxRequests", "timeWindowMs"],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "$id": "http://agiv94.1.com/config/agent_runtime_manifest_standard_v1.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Agent Runtime Capability Manifest",
+  "description": "Defines the static capabilities, tools, and environmental constraints available to an agent instance.",
+  "type": "object",
+  "properties": {
+    "manifest_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "execution_limits": {
+      "type": "object",
+      "properties": {
+        "max_tokens_per_cycle": { "type": "integer" },
+        "execution_timeout_s": { "type": "integer" },
+        "max_concurrent_tools": { "type": "integer" }
+      }
+    },
+    "available_tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "schema": { "type": "object", "description": "JSON schema defining tool input parameters." }
+        },
+        "required": ["name", "schema"]
+      }
+    },
+    "persistent_memory_paths": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "File system paths the agent can read/write persistent memory."
+    }
+  },
+  "required": ["manifest_version", "available_tools", "execution_limits"]
+}

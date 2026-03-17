@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "GACR/ModelTierMapping.schema.json",
+  "title": "Model Tier Mapping Configuration Schema",
+  "type": "object",
+  "properties": {
+    "mapping_version": {
+      "type": "string",
+      "enum": ["2.0"],
+      "description": "Schema version control."
+    },
+    "default_tier_id": {
+      "type": "string",
+      "description": "The ID of the tier assigned if no rule matches."
+    },
+    "tier_definitions": {
+      "type": "object",
+      "patternProperties": {
+        "^[A-Z0-9_]+$": {
+          "type": "object",
+          "properties": {
+            "priority_level": {"type": "integer"},
+            "description": {"type": "string"},
+            "sla_target_ms": {"type": "integer"},
+            "redundancy_level": {"type": "string"}
+          },
+          "required": ["priority_level", "sla_target_ms"]
+        }
+      },
+      "minProperties": 1
+    },
+    "assignment_rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "rule_id": {"type": "string"},
+          "assign_tier_id": {"type": "string"},
+          "rationale": {"type": "string"},
+          "criteria": {
+            "type": "object",
+            "properties": {
+              "match_type": {"type": "string", "enum": ["exact_id", "tag_match", "regex_id"]},
+              "values": {"type": "array", "items": {"type": "string"}, "description": "Used for exact_id/regex_id matching.", "minItems": 1},
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {"type": "string"},
+                    "operator": {"type": "string", "enum": ["equals", "not_equals", "less_than", "greater_than"]},
+                    "value": {"type": "string"}
+                  },
+                  "required": ["key", "operator", "value"]
+                }
+              }
+            },
+            "required": ["match_type"]
+          }
+        },
+        "required": ["rule_id", "assign_tier_id", "criteria"]
+      }
+    }
+  },
+  "required": ["mapping_version", "default_tier_id", "tier_definitions", "assignment_rules"]
+}

@@ -1,0 +1,15 @@
+{
+  "description": "Configuration map for zone/asset-specific validation overrides.",
+  "globalDefaults": {
+    "sensorIdFormat": "SENSOR-[0-9]{4}"
+  },
+  "zones": {
+    "datacenter_a": {
+      "policy_level_override": "ENFORCED",
+      "sensorIdFormat": "DC_A-[A-Z]{2}-[0-9]{3}"
+    },
+    "perimeter_fence": {
+      "riskScoreTolerance": 50
+    }
+  }
+}

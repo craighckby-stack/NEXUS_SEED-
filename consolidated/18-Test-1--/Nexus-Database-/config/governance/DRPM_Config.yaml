@@ -1,0 +1,31 @@
+# DRPM: Dynamic Risk Parameter Manager Configuration
+# Governs attested, real-time adjustments to GAX axiomatic parameters.
+
+metadata:
+  version: 1.0
+  agent_owner: GAX
+  attestation_required: CRoT_S9_Lock
+
+real_time_risk_manifest_path: manifest/RTRM.yaml
+
+threshold_adjustment_rules:
+  
+  # Rule 1: Dynamic epsilon (CFTM) Adjustment
+  CFTM_Epsilon_Rule:
+    metric_source: TIVS/Telemetry/S6.5_Anomaly_Rate
+    trigger_threshold: 0.05  # Trigger adjustment if anomaly rate exceeds 5% of TQM baseline
+    adjustment_function:
+      type: ExponentialDecay
+      parameter: CFTM.epsilon
+      factor: 1.15  # Increase required epsilon by 15% for next 5 cycles
+      max_epsilon_bound: 0.8
+
+  # Rule 2: MPAM Stability Range Adjustment
+  MPAM_Model_Drift_Tolerance:
+    metric_source: S7/Utility_Delta_Deviation
+    trigger_threshold: 0.20  # Trigger if observed S01/S02 delta variance exceeds 20% of GRCS historic baseline
+    adjustment_function:
+      type: ClampReduction
+      parameter: MPAM.stability_bounds
+      limit_increase: -0.10 # Tighten stability bounds by 10%
+      cooldown_cycles: 10

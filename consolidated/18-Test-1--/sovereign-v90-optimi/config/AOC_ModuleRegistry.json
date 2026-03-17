@@ -1,0 +1,23 @@
+[
+  {
+    "module_id": "EvolutionaryPlanner_V3",
+    "priority_weight": 90,
+    "resource_tag": "PSIM_INTENSIVE",
+    "is_active": true,
+    "config_path": "modules/planners/ep3_config.json"
+  },
+  {
+    "module_id": "OptimizedScheduler_v1",
+    "priority_weight": 75,
+    "resource_tag": "CPU_BOUND",
+    "is_active": true,
+    "config_path": "modules/schedulers/os1_config.json"
+  },
+  {
+    "module_id": "Hypervisor_V94",
+    "priority_weight": 100,
+    "resource_tag": "SYSTEM_CRITICAL",
+    "is_active": true,
+    "config_path": null
+  }
+]

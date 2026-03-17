@@ -1,0 +1,16 @@
+{
+  "HMC_VERSION": "V1.0.0",
+  "DESCRIPTION": "Configuration parameters for the Hazard Modeling and Compliance Component (HMC), used to calculate S-02 Risk Synthesis for P-01 L4 Adjudication.",
+  "RISK_CALIBRATION": {
+    "DEFAULT_RISK_FLOOR": 0.05,
+    "STRUCTURAL_COMPLEXITY_WEIGHT": 0.40,
+    "LATENCY_TOLERANCE_WEIGHT": 0.35,
+    "VULNERABILITY_MATRIX_SOURCE": "/data/hazard/VULNERABILITY_MATRIX.json",
+    "SIMULATION_ITERATIONS": 10000
+  },
+  "COMPLIANCE_CHECKS": {
+    "REQUIRED_CERTIFICATIONS": ["ISO-27001-COMPLIANT", "ASDC-V2"],
+    "MAX_FAILURE_RATE_THRESHOLD": 0.015
+  },
+  "INVARIANT_LOCK": true
+}

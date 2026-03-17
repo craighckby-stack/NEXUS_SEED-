@@ -1,0 +1,38 @@
+{
+  "manifest_id": "GTEM_V7.5.1.0",
+  "description": "Critical telemetry structure aligned for Synergy Loop execution monitoring, including core capability metrics and emergent tool tracking for AGI alignment.",
+  "signature_required": true,
+  "telemetry_format_specification": {
+    "schema_version_reference": "MDSM_V97.1",
+    "required_fields": [
+      "transition_id",
+      "timestamp",
+      "kernel_cycle",
+      "current_maturity_percent",
+      "C01_navigation_score",
+      "C02_logic_score",
+      "C03_memory_score",
+      "E01_improvement_detected",
+      "E02_emergent_count",
+      "active_synergy_tools",
+      "T01_tool_utilization_rate",
+      "S01_efficacy_metric",
+      "S02_risk_metric",
+      "S03_veto_signal"
+    ],
+    "checksum_algorithm": "SHA3-256",
+    "encoding": "JSON_L",
+    "encoding_variant": "Compact"
+  },
+  "transport_constraints": [
+    {
+      "endpoint_id": "CRTS_Telemetry_Sink_A",
+      "protocol": "HTTPS/TLS_1_3",
+      "max_latency_ms": 400,
+      "max_payload_kb": 512,
+      "max_rate_per_minute": 120
+    }
+  ],
+  "cgv_schema_reference": "MDSM_V97.1",
+  "security_level": "High_Integrity"
+}

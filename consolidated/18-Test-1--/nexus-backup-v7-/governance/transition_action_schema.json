@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agi.sovereign.io/schemas/governance/transition_action_schema.json",
+  "title": "SMC Transition Action Policy Schema",
+  "description": "Defines mandatory executable steps and side effects required upon successful state transitions.",
+  "type": "object",
+  "required": ["transition_actions"],
+  "properties": {
+    "transition_actions": {
+      "type": "object",
+      "description": "Maps source_state__target_state identifiers to required actions.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["required_commands", "logging_level"],
+        "properties": {
+          "required_commands": {
+            "type": "array",
+            "description": "List of sovereign commands that MUST be executed (in order) during this transition phase.",
+            "items": {
+              "type": "object",
+              "required": ["command_id", "params_schema_id"],
+              "properties": {
+                "command_id": {"type": "string", "pattern": "^[a-z_]+$"},
+                "params_schema_id": {"type": "string"},
+                "criticality": {"type": "string", "enum": ["CRITICAL", "HIGH", "NORMAL"]}
+              }
+            }
+          },
+          "resource_updates": {
+            "type": "array",
+            "description": "External resource identifiers or configurations that must be updated.",
+            "items": {"type": "string"}
+          },
+          "logging_level": {
+            "type": "string",
+            "enum": ["AUDIT", "GOVERNANCE_CRITICAL", "STANDARD"],
+            "description": "The minimum logging level required for this transition execution."
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "governance/smc_validator_schema.json",
+  "title": "Sovereign Machine Control Specification Schema",
+  "type": "object",
+  "required": [
+    "smc_spec_version",
+    "name",
+    "state_definitions",
+    "authorization_config",
+    "command_permissions",
+    "transition_map"
+  ],
+  "properties": {
+    "smc_spec_version": {"type": "string", "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+.*$"},
+    "state_definitions": {
+      "type": "object",
+      "required": ["states", "initial_state"],
+      "properties": {
+        "states": {"type": "array", "items": {"type": "string"}, "minItems": 3},
+        "initial_state": {"type": "string"}
+      }
+    },
+    "authorization_config": {
+      "type": "object",
+      "required": ["model_type", "transition_threshold", "required_governance_roles"],
+      "properties": {
+        "model_type": {"type": "string"},
+        "transition_threshold": {"type": "number", "minimum": 0, "maximum": 1},
+        "required_governance_roles": {"type": "array", "items": {"type": "string"}, "minItems": 1}
+      }
+    },
+    "command_permissions": {
+      "type": "object",
+      "description": "Mapping command names to required authorization roles.",
+      "additionalProperties": {
+        "type": "array",
+        "items": {"type": "string"}
+      }
+    },
+    "state_contexts": {
+        "type": "object",
+        "description": "Contextual settings (resource limits, specific flags) for specific states."
+    },
+    "transition_map": {
+      "type": "object",
+      "description": "Mapping Current State to Array of Allowed Next States",
+      "additionalProperties": {
+        "type": "array",
+        "items": {"type": "string"}
+      }
+    }
+  },
+  "additionalProperties": false
+}

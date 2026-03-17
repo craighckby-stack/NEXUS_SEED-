@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "S00 Initial State Commit Configuration Schema",
+  "type": "object",
+  "properties": {
+    "process_identification": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "enum": ["S00_INITIAL_STATE_COMMIT"] },
+        "handler_utility": { "type": "string" },
+        "output_artifact": { "type": "string", "enum": ["CSR_ROOT"] }
+      },
+      "required": ["name", "handler_utility", "output_artifact"]
+    },
+    "integrity_control": {
+      "type": "object",
+      "properties": {
+        "hashing": {
+          "type": "object",
+          "properties": {
+            "algorithm": { "type": "string" },
+            "constraints": { "type": "array", "items": { "type": "string" } }
+          },
+          "required": ["algorithm", "constraints"]
+        },
+        "serialization": {
+          "type": "object",
+          "properties": {
+            "method": { "type": "string" },
+            "standard": { "type": "string" }
+          },
+          "required": ["method", "standard"]
+        },
+        "pre_execution_verifier": { "type": "string" }
+      },
+      "required": ["hashing", "serialization", "pre_execution_verifier"]
+    },
+    "resource_dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "path": { "type": "string", "format": "path" },
+          "status": { "type": "string", "enum": ["MANDATORY", "OPTIONAL"] },
+          "description": { "type": "string" }
+        },
+        "required": ["id", "path", "status"]
+      },
+      "minItems": 1
+    }
+  },
+  "required": ["process_identification", "integrity_control", "resource_dependencies"]
+}

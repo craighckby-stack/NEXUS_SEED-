@@ -1,0 +1,27 @@
+{
+  "AOC_Configuration": {
+    "version": "1.0",
+    "gsep_link": "OCM-24.3.AIA",
+    "critical_resource_reserve": {
+      "C_R_Compute_Budget_Percent": 0.15,
+      "C_R_Storage_GB": 1024,
+      "reason": "Ensures persistent diagnostic and recovery capability under failure state."
+    },
+    "guided_threshold_control_metrics": {
+      "C-201_P-STI_Safety_Floors": {
+        "memory_swap_ratio_max": 0.05,
+        "latency_max_ms": 500,
+        "integrity_check_frequency_s_min": 60
+      },
+      "veto_response_template_id": "VETO-S03-TEMPLATE-A"
+    },
+    "intent_pathway_registry": {
+      "C-301_Audit_Path": "/config/audited_intents/current.yaml",
+      "required_fields": [
+        "target_system",
+        "justification_hash",
+        "authorizing_agent"
+      ]
+    }
+  }
+}

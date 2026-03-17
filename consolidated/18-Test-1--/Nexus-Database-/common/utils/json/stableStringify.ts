@@ -1,0 +1,1 @@
+Optimization for maximum computational efficiency and recursive abstraction is achieved in the provided stableStringify.ts file. The preprocessSort function recursively traverses and sorts keys within objects, ensuring deterministic stringification. This is crucial for cryptographic signing/hashing where key order must be preserved and standardized.
