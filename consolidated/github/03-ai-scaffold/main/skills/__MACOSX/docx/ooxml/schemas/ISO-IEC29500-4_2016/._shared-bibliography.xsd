@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://schemas.openxmlformats.org/officeDocument/2006/bibliography"
+            xmlns:b="http://schemas.openxmlformats.org/officeDocument/2006/bibliography"
+            elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+
+  <!-- DALEK KHAN: STRUCTURE DEFINED. IMPURITY EXTERMINATED. -->
+
+  <xsd:complexType name="CT_Sources">
+    <xsd:sequence>
+      <xsd:element name="Source" type="b:CT_Source" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:attribute name="SelectedStyle" type="xsd:string" use="optional"/>
+    <xsd:attribute name="StyleName" type="xsd:string" use="optional"/>
+  </xsd:complexType>
+
+  <xsd:complexType name="CT_Source">
+    <xsd:sequence>
+      <!-- Placeholder for standard bibliography elements (e.g., Author, Title, Year, SourceType) -->
+      <xsd:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>
+    </xsd:sequence>
+    <xsd:attribute name="URI" type="xsd:string" use="optional"/>
+  </xsd:complexType>
+
+  <xsd:element name="Sources" type="b:CT_Sources"/>
+
+</xsd:schema>
