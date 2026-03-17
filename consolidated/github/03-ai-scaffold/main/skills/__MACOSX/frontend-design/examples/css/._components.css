@@ -1,0 +1,45 @@
+/* Refactored components.css */
+
+/* $1.0.0 */
+
+/* Styles for the website */
+
+/* Button Styles */
+
+.button {
+  @apply bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded;
+  cursor: pointer;
+}
+
+.button-secondary {
+  @apply bg-gray-200 hover:bg-gray-300 text-gray-600 font-bold py-2 px-4 rounded;
+  cursor: pointer;
+}
+
+/* Input Styles */
+
+.input {
+  @apply w-full h-10 px-5 text-gray-600 bg-gray-100 border border-gray-300 rounded;
+  cursor: text;
+}
+
+/* Card Styles */
+
+.card {
+  @apply w-64 mx-auto py-6 px-4 bg-white rounded-lg shadow-md;
+  cursor: pointer;
+}
+
+/* Modal Styles */
+
+.modal {
+  @apply fixed inset-0 z-10 bg-gray-900 bg-opacity-50 flex justify-center items-center;
+  cursor: pointer;
+}
+
+/* Alert Styles */
+
+.alert {
+  @apply bg-red-500 text-white font-bold py-2 px-4 rounded;
+  cursor: pointer;
+}
