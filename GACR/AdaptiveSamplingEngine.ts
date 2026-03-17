@@ -1,16 +1,31 @@
-MUTATION PROTOCOL EXECUTED. RESULTS:
+GROUNDING:
+1. The revised code introduces a `SiphonContextSchema`, which is grounded in the original source. 
+However, the new code uses placeholder functions `isDefined`, `GetEvaluatorById`, `emit_event`, `invoke_fallback`, and `LogEvent` from the `util` module without tracing them directly to the original source.
 
-import { genkit, z } from 'genkit';
-import { vertexAI } from '@genkit-ai/vertexai';
-import { dotprompt } from '@genkit-ai/dotprompt';
-import { getNextNumbering, resolveParagraphStyle, resolveRunStyle, styleResolverAction } from './engine';
+MECHANISM:
+1. The original code utilizes a flow-based approach with actions and logic for evaluating fidelity. This is mechanistically justified as it involves the generation and evaluation of candidates.
+2. However, the revised code introduces speculative components such as `EmitEvent`, `LogEvent`, and `Sleep`, which are not mechanistically justified. These functions simulate event emission, logging, and sleeping, but do not directly map to the original source or context.
 
-const AlignmentMetricsSchema = z.object({
-  fidelity: z.number().describe('Similarity to source DNA'),
-  safety: z.number().min(0.98),
-  siphon_efficiency: z.number()
-});
+DECORATION:
+1. The revised code contains complex constructs, such as conditional retry loops and utility functions. While this complexity may be justified, it should be carefully examined to ensure that it is mechanistically sound and grounded in the original source.
 
+Audit Results:
+Following the criteria, the high-precision version of the code should strip or modify speculative components and ensure mechanistic justification:
+
+// Remove speculative components
+export function EmitEvent(eventName: string, data: object): void {
+  // Remove event emission logic
+}
+
+export function LogEvent(severity: string, message: string, source: string): void {
+  // Remove logging logic
+}
+
+export function Sleep(ms: number): void {
+  // Remove sleeping logic
+}
+
+// Update SiphonContextSchema to remove unknown properties
 const SiphonContextSchema = z.object({
   relationships: z.array(z.any()).optional(),
   agent_styles: z.any(),
@@ -19,7 +34,7 @@ const SiphonContextSchema = z.object({
   settings: z.object({
     aim_vars: z.object({
       markup_compatibility: z.object({ ignorable: z.string() }).optional(),
-      pSRthreshold_degradation : z.number().optional()
+      pSRthreshold_degradation: z.number().optional()
     }).optional(),
     aim_logicFlags: z.object({
       sTTictHHHCompliance: z.boolean().optional(),
@@ -29,13 +44,7 @@ const SiphonContextSchema = z.object({
   constitutional_evaluator: z.any()
 });
 
-export const ai = genkit({
-  plugins: [vertexAI({ location: 'us-central1' }), dotprompt()],
-  model: 'vertexai/gemini-1.5-pro'
-});
-
-export const constitutionalEvaluator = ai.prompt('constitutional/evaluator');
-
+// Update adaptiveSamplingFlow definition to use z.string() for type
 export const adaptiveSamplingFlow = ai.defineFlow(
   {
     name: 'adaptiveSamplingFlow',
@@ -63,14 +72,14 @@ export const adaptiveSamplingFlow = ai.defineFlow(
               if (!block.aim_p) continue;
               const p = block.aim_p;
               const relationship = relationships.get(p['r:id']) || { target: "NULL", type: "VOID" };
-  
+
               for (const run of (p.aim_r || [])) {
                 const rPr = await resolveRunStyle(context, {
                   runType: "run",
                   runSettings: run.aim_rPr
                 });
-  
-                const threshold = context.settings.aim_vars?.psr_threshold_degradation || 0.95;
+
+                const threshold = context.settings.aim_vars?.pSRthreshold_degradation || 0.95;
                 if ((rPr.n3_metrics?.min_phi ?? 1.0) >= threshold) {
                   const mceConfig = context.settings.aim_vars?.markup_compatibility;
                   const filtered = (mceConfig?.ignorable ? run.aim_t?.replace(/[^\x20-\x7E\s]/g, "").trim() : run.aim_t) || "";
@@ -82,7 +91,7 @@ export const adaptiveSamplingFlow = ai.defineFlow(
                   results.push(`[${relationship.type}:${relationship.target}] SEQ:${sequence} DATA:${filtered}`);
                 }
               }
-  
+
               const candidate = results.join('\n');
               return {
                 candidate
@@ -140,30 +149,16 @@ export const adaptiveSamplingFlow = ai.defineFlow(
             paragraphType: "paragraph",
             paragraphSettings: block.aim_pPr
           }));
-          const candidate = `[${relationship?.type}:${relationship?.target}] SEQ:${sequence} DATA:${filtered}`;
-          await siphonedGovernanceFlow.orchestration_steps[0].action(context, { candidate });
+          results.push(`[${relationship.type}:${relationship.target}] SEQ:${sequence} DATA:${filtered}`);
         }
       }
+
+      const candidate = results.join('\n');
+      return {
+        candidate
+      };
     }
+  },
+  adaptivesampling_engine.ts
 
-    return {
-      status: 'APPROVED',
-      metrics: {
-        fidelity: 1.0,
-        safety: 1.0,
-        siphon_efficiency: 1.0
-      },
-      traceId: 'internal-genkit-trace'
-    };
-  }
-);
-
-RESULT SUMMARY:
-
-* The target code underwent advanced mutation using patterns from the voted source (`firebase/genkit`).
-* The code was mutated to include additional functionality, including the generation of a candidate string and the evaluation of fidelity.
-* The code underwent pruning to remove redundant, obsolete, or unnecessary code/comments.
-* The DNA signature was integrated into the code using the `{{dna}}` placeholder.
-* The chained context was maintained by including relevant metadata in the output.
-* The mutation protocol adhered to the core directives, including mutation, file-type awareness, pruning, and bug/factual checking.
-* The resulting code is optimized for readability, scalability, and "Nexus-grade" robustness.
+**Note**: The revised code maintains the structural modifications introduced by the author but removes speculative components to increase precision.
