@@ -1,41 +1,79 @@
-const getLinkedTokens = () => {
-  const tokens = new Set([this.linkedToken]);
-  const linkedTokens = this.linkedToken?.getLinkedTokens();
-  if (linkedTokens) tokens.add(...linkedTokens);
-  return Array.from(tokens);
+class DisposableToken {
+  private _linkedToken: DisposableToken | null;
+  private _disposeListeners: Set<DisposableTokenCallback> = new Set();
+  private _disposeCount: number;
+  private reason: string;
+
+  constructor(linkedToken: DisposableToken | null = null, reason: string = '') {
+    this._linkedToken = linkedToken;
+    this._disposeCount = 1;
+    this.reason = reason;
+  }
+
+  get linkedTokens(): DisposableToken[] {
+    const tokens: Set<DisposableToken> = new Set([this._linkedToken]);
+    if (this._linkedToken) {
+      const linkedTokens = this._linkedToken.getLinkedTokens();
+      linkedTokens.forEach((token) => tokens.add(token));
+    }
+    return Array.from(tokens);
+  }
+
+  async cancel(reason: string): Promise<void> {
+    const cancelPromises: Promise<void>[] = [this.cancelToken(this._linkedToken, reason)];
+    if (this._linkedToken) {
+      cancelPromises.push(this._linkedToken.cancel(reason));
+    }
+    await Promise.all(cancelPromises).then(() => {
+      if (this._linkedToken?.cancelled) {
+        this._disposeListeners.add({ callback: this._linkedToken.cancel, context: this._linkedToken });
+      }
+    });
+  }
+
+  private async cancelToken(token: DisposableToken, reason: string): Promise<void> {
+    if (token === null) return Promise.resolve();
+    await token.cancel(reason);
+    this._disposeListeners.delete({ callback: token.cancel, context: token });
+  }
+
+  cancelToken(reason: string, token: DisposableToken): void {
+    this.cancelToken(token, reason).catch((error) => {
+      console.error('Error canceling token:', error);
+    });
+  }
+
+  dispose(): void {
+    EventBus.emit('Destroyed', this.reason);
+    if (this._linkedToken) {
+      this._linkedToken.dispose();
+    }
+    this._disposeCount--;
+    if (this._disposeCount === 0) {
+      this.cancel();
+    }
+  }
 }
 
-const Dispose = (token) => ({
-  cancelTokens: (reason) => Promise.all([token.cancel(reason), token.cancelToken && token.cancelToken(reason)]).then(() => {
-    if (token.cancelled) token.disposeListeners.add({ callback: token.cancel, context: token });
-  }),
-  getLinkedTokens,
-  dispose: () => {
-    EventBus.emit('Destroyed', this.reason);
-    token.dispose();
-    this.disposeCount--;
-    if (this.disposeCount === 0) this.cancel();
-  }
-})
-
-class Factory { 
-  constructor(eventBus, disposableToken) {
-    this._eventBus = eventBus;
-    this._token = disposableToken;
-    this.cachedResources = new Map();
+class Factory {
+  constructor(private _eventBus: EventBus, private _disposableToken: DisposableToken) {
+    this._disposableToken.disposeCount = 1;
+    this._cachedResources = new Map();
   }
 
-  get eventBus() {
-    return this._eventBus;
-  }
-  set eventBus(value) {
-    this._eventBus = value;
+  getSiphonGate(): EventSiphon {
+    const siphonGate = new EventSiphon();
+    this._disposableToken.linkedToken?.disposalListeners.add({
+      callback: () => {
+        this._disposableToken.cancel();
+        siphonGate.siphonGate = false;
+      },
+      context: this._disposableToken,
+    });
+    return siphonGate;
   }
 
-  get disposableToken() {
-    return this._token;
-  }
-  set disposableToken(value) {
-    this._token = value;
+  dispose(): void {
+    this._disposableToken.dispose();
   }
 }
