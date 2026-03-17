@@ -1,38 +1,37 @@
-**AUDIT RESULTS**
+**GROUNDING**
 
-1. **GROUNDING**
-   - `from './governance_layer.ts'`: PASS
-   - `import { z } from 'genkit';`: FAIL (Missing origin, assuming error)
-   - `import { dotprompt } from '@genkit-ai/dotprompt';`: FAIL (Lack of context)
-   - `import { vertexAI } from '@genkit-ai/vertexai';`: FAIL (Missing origin)
-   - `import { sleep } from 'util';`: FAIL (Deprecation warning in Node.js 10 and later)
-   - `import { EventEmitter } from 'events';`: PASS
-   - `import { log_event, emit_event } from './logging.ts';`: PASS
+- `from './governance_layer.ts'`: Cannot verify origin, assume error
+- `import { z } from 'zod';`: Origin verified, PASS
+- `import { governanceInstance, evaluators } from './governance_layer.ts';`: Origin verified, PASS
 
-2. **MECHANISM**
-   - `attemptTracker(attempt: number, maxAttempts: number)`: PASS
-   - `createBackoff(attempt: number)`: PASS (However, the intervals could be more precise)
-   - `AdaptiveSamplingEngine.runEvaluation`: PASS
+**MECHANISM**
 
-3. **DECORATION**
-   - `// Define a utility function to track attempts and failures`: PASS
-   - `// Define a utility function to create a retry backoff strategy`: PASS
-   - `// Define the AdaptiveSamplingEngine class`: PASS
+- `attemptTracker(attempt: number, maxAttempts: number)`: Speculative, cannot verify mechanism
+- `createBackoff(attempt: number)`: Speculative, mechanism could be more precise
+- `selfInjectionEvaluator(input: InputJson): Promise<OutputJson>`: Mechanism unspecified, assume speculative
+- `executeAction(action_id: string, input_json: InputJson): Promise<OutputJson>`: Mechanism unspecified, assume speculative
+
+**DECORATION**
+
+- `// Refactored AdaptiveSamplingEngine for clarity`: Flowery, PASS
+- `// Utilize Genkit-based evaluators for precision-oriented logic`: Flowery, PASS
 
 **AUDIT FINDINGS**
 
-- The "emergentTool" key is removed.
-- The `AdaptiveSamplingEngine` class is preserved but refactored for clarity.
-- The `attemptTracker` function is retained.
-- The `createBackoff` function is simplified to a more mechanistic approach.
+- `SelfInjectionEvaluator` is speculative and cannot be mechanistically justified. Remove it.
+- `attemptTracker` and `createBackoff` are not mechanistically justified. Remove them.
+- `executeAction` and `AdaptiveSamplingEngine.runEvaluation` mechanism is unspecified. Refactor it for clarity and precision.
 
 **CLEANED VERSION**
 
 import timers from 'timers';
 import { z } from 'zod';
 import { EventEmitter } from 'events';
+import {
+  governanceInstance,
+  evaluators
+} from './governance_layer.ts';
 
-// Define the AdaptiveSamplingEngine class
 class AdaptiveSamplingEngine {
   private readonly maxAttempts: number;
   private readonly initialDelay: number;
@@ -45,38 +44,26 @@ class AdaptiveSamplingEngine {
   async runEvaluation(actionId: string, input: any): Promise boolean> {
     let success: boolean = false;
     let attempt: number = 0;
-    const backoffDelay = Math.min(this.initialDelay * Math.pow(2, attempt), 10000); // Exponential backoff with a maximum of 10000ms
 
     while (!success && attempt < this.maxAttempts) {
       try {
-        const output = await timers.setTimeout(() => {}, backoffDelay);
-        log_event('INFO', `Action ${actionId} succeeded on attempt ${attempt + 1}`);
-        success = true;
-        emit_event('action.success', { action: actionId });
+        const validatedInput = input.validateWithGenkit();
+        success = await evaluators[actionId].evaluate(validatedInput);
         break;
       } catch (error) {
-        log_event('ERROR', `Action ${actionId} failed on attempt ${attempt + 1}`);
         attempt++;
-        backoffDelay = Math.min(this.initialDelay * Math.pow(2, attempt), 10000);
-        emit_event('action.retry', { action: actionId, attempt });
-      } finally {
-        log_event('WARN', `Failure in ${actionId}. Scaling backoff... ${backoffDelay}`);
-        await timers.setTimeout(() => {}, backoffDelay);
+        if (attempt < this.maxAttempts) {
+          await timers.setTimeout(() => {}, this.initialDelay * Math.pow(2, attempt));
+        }
       }
     }
 
     if (!success) {
-      log_event('ERROR', `Action ${actionId} exhausted all attempts`);
-      emit_event('action.failed', { action: actionId });
-      invokeFallback(actionId, input);
+      throw new Error(`Action ${actionId} exhausted all attempts`);
     }
 
     return success;
   }
 }
 
-const adaptiveSamplingEngine = new AdaptiveSamplingEngine(5, 1000);
-
-adaptiveSamplingEngine.runEvaluation('example_action_id', {
-  /* input data */
-});
+export default AdaptiveSamplingEngine;
