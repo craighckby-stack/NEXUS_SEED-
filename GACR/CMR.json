@@ -1,7 +1,5 @@
 {
   "nexus_core": {
-    "version": "3.5.0_FINAL",
-    "signature": "ARCH-OOXML-V2-DOCX-DNA",
     "identity": {
       "purpose": "Self-optimising AGI substrate for real-world problem solving",
       "mechanism": "Siphoning patterns from advanced codebases",
@@ -11,9 +9,6 @@
     "evolution_state": {
       "composite": true,
       "incremental": true,
-      "tsBuildInfoFile": "/GACR/.tsbuildinfo",
-      "program_hash": "SHA256:F5E8D2A...",
-      "semantic_drift": 0.04,
       "finalized": true
     }
   },
@@ -48,8 +43,7 @@
         "rId": "rId3",
         "metadata": {
           "kind": "style",
-          "cascading": true,
-          "inheritance_depth": 10
+          "cascading": true
         }
       }
     ],
@@ -61,13 +55,9 @@
         {
           "path": "../NEXUS_CORE/Types",
           "rId": "rIdRef1",
-          "prepend": true,
-          "circular_dependency_gate": "Strict",
-          "resolution_mode": "node"
+          "prepend": true
         }
-      ],
-      "dependency_resolution": "RelationalDependencyMapping",
-      "type_check_cache": "/GACR/.cache/types.dat"
+      ]
     },
     "relationships": [
       {
@@ -97,39 +87,16 @@
     "strict": true,
     "composite": true,
     "incremental": true,
-    "experimentalDecorators": true,
-    "emitDeclarationOnly": false,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "downlevelIteration": true,
-    "typeAcquisition": {
-      "enable": true,
-      "include": [
-        "@nexus/core-types"
-      ]
-    },
-    "cascading_inheritance": {
-      "enabled": true,
-      "resolver": "CascadingStyleResolver",
-      "flatten_strategy": "RecursiveFlatten",
-      "local_overrides_priority": "high"
-    }
+    "experimentalDecorators": true
   },
   "diagnostics_engine": {
     "enable_semantic_checks": true,
     "strict_hhh_compliance": true,
     "drift_threshold": 0.35,
-    "saturation_level": 2,
-    "source_map_resolution": {
-      "inlineSourceMap": true,
-      "declarationMap": true
-    },
     "emergency_brake": {
       "corruption_threshold": 5,
-      "log_target": "NEXUS_LOG.txt",
       "auto_halt": true
     },
-    "identity_anchors_enforced": true,
     "validation_rules": [
       "NoOrphanedRIds",
       "StyleChainResolution",
@@ -158,16 +125,6 @@
         ]
       }
     ],
-    "instance_mapping": [
-      {
-        "numId": "101",
-        "abstractNumId": "0",
-        "lvlOverride": {
-          "ilvl": 0,
-          "startOverride": 1
-        }
-      }
-    ],
     "symbol_table": {
       "rId1": "EngineCore",
       "rId2": "GovSaturate",
@@ -180,24 +137,5 @@
         "TypeLink": "rIdRef1"
       }
     }
-  },
-  "markup_compatibility": {
-    "ignorable": "ve o r v ts mce apx",
-    "namespaces": {
-      "w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
-      "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
-      "aim": "http://schemas.nexus.org/agi/instantiation/2026/main",
-      "ts": "http://schemas.microsoft.com/typescript/2026/main",
-      "mce": "http://schemas.openxmlformats.org/markup-compatibility/2006",
-      "apx": "http://schemas.nexus.org/agi/extension/v4/patterns"
-    }
-  },
-  "metadata": {
-    "author": "DALEK_CAAN_V3.1_SIPHON_ENGINE",
-    "last_mutation": "2026-03-02T16:00:00Z",
-    "evolution_round": 5,
-    "status": "CONVERGED_ARCHITECTURAL_PRECISION",
-    "integrity_hash": "SHA256:B2C4E6...",
-    "opc_compliant": true
   }
 }
