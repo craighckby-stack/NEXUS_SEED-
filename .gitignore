@@ -1,89 +1,90 @@
 class DisposableToken {
-  constructor() {
+  id: string;
+  linkedToken: any;
+  cancelled: boolean;
+  reason: string;
+  disposalListeners: Set<DisposableTokenCancelCallback>;
+  disposeCount: number;
+  eventBus: EventBus;
+
+  constructor(linkedToken, eventBus) {
+    this.id = crypto.randomUUID().replace('-','');
+    this.linkedToken = linkedToken;
     this.cancelled = false;
-    this.linkedToken = null;
     this.disposalListeners = new Set();
+    this.disposeCount = 1;
+    this.eventBus = eventBus;
   }
 
-  public async cancel(reason: string): Promise<void> {
-    if (!this.cancelled) {
-      this.emitEvent('Cancelled', reason);
-      this.dispose();
-      this.cancelled = true;
-    }
-  }
+  cancel(reason: string) {
+    if (this.cancelled) return;
+    this.cancelled = true;
+    this.disposalListeners.forEach(callback => {
+      try {
+        callback.cancel(reason);
+      } catch (e) {}
+    });
 
-  public dispose(): void {
-    this.emitEvent('Destroyed', this.reason);
     if (this.linkedToken) {
-      this.emitEvent('LinkedTokenDisposed');
+      this.cancelToken(this.linkedToken, reason);
     }
-    this.cancelLinkedTokens();
+
+    const resourcesToRemove = this.eventBus.resourcesToRemove();
+    resourcesToRemove.forEach(resource => {
+      if (resource.disposeCount === 1 && this.disposalListeners.has(resource.cancel)) {
+        resource.disposalListeners.delete(resource.cancel);
+      }
+    });
   }
 
-  private async cancelLinkedTokens(): Promise<void> {
-    const linkedTokens = this.getLinkedTokens();
-    await Promise.all(linkedTokens.map(token => token.cancel()));
+  cancelToken(token: any, reason: string) {
+    if (token instanceof DisposableToken) {
+      return Promise.all([token.cancel(reason), this.cancelToken(token.linkedToken, reason)]).then(() => {
+        if (token.cancelled) this.disposalListeners.add({ callback: token.cancel, context: token });
+      });
+    } else if (token.cancel) {
+      return Promise.all([token.cancel(reason)]).then();
+    } else {
+      return Promise.resolve();
+    }
   }
 
-  private getLinkedTokens(): DisposableToken[] {
-    const tokens = new Set([this.linkedToken]);
+  getLinkedTokens(): DisposableToken[] {
+    const tokens = new Set<[DisposableToken, string]>([(this.linkedToken, this.id)]);
     if (this.linkedToken) {
       const linkedTokens = this.linkedToken.getLinkedTokens();
-      if (linkedTokens) tokens.add(...linkedTokens);
+      if (linkedTokens) {
+        linkedTokens.forEach(linkedToken => {
+          linkedTokens.forEach(lt => tokens.add([lt, lt.id]));
+        });
+      }
     }
-    return Array.from(tokens);
+    return Array.from(tokens).map(t => t[0]);
+  }
+
+  dispose() {
+    if (this.disposeCount <= 0) return;
+    this.eventBus.emit('Destroyed', this.reason);
+    this.cancelToken(this.linkedToken, this.reason);
+    this.disposeCount--;
+    if (this.disposeCount === 0) this.cancel();
   }
 }
 
-DisposableToken.prototype.reason = '';
-DisposableToken.prototype._cancelToken = 0;
+class DisposableTokenFactory {
+  eventBus: EventBus;
 
-DisposableToken.prototype.addLinkedToken = async function(token: DisposableToken): Promise<void> {
-  this.linkedToken = token;
-  const callback = () => {
-    this.onCancelHandler();
-  };
-
-  this.disposalListeners.add({ callback, context: this });
-  this.dispatchEvent('DisposableTokenLinkedTokensAdded', token);
-  if (token.cancelled) this.dispatchEvent('DisposableTokenLinkedTokensCancelled', token);
-};
-
-DisposableToken.prototype.removeLinkedToken = function(token: DisposableToken): void {
-  const callback = () => {
-    this.onCancelHandler();
-  };
-
-  this.disposalListeners.delete({ callback, context: this });
-  if (token === this.linkedToken) this.linkedToken = null;
-};
-
-DisposableToken.prototype.cancelToken = async function(): Promise<void> {
-  const currentTime = Date.now();
-  if (currentTime - this._cancelToken > 50) {
-    return Promise.resolve();
-  } else {
-    return new Promise(resolve => setTimeout(resolve, 50));
-  }
-};
-
-DisposableToken.prototype.onCancelHandler = function(): void {
-  this.cancel();
-};
-
-DisposableToken.prototype.cancel = async function(reason: string): Promise<void> {
-  if (this.cancelled) return;
-
-  if (Date.now() - this._cancelToken <= 50) {
-    await this.cancelToken();
+  constructor(eventBus) {
+    this.eventBus = eventBus;
   }
 
-  this.dispatchEvent('DisposableTokenCancelScheduled', reason);
-  this._cancelToken = Date.now();
-  if (this.linkedToken) await this.linkedToken.cancel(reason);
-};
+  createDefaultDisposableToken(disposableToken) {
+    return new DisposableToken(disposableToken, this.eventBus);
+  }
 
-DisposableToken.prototype.dispatchEvent = async function(eventName: string, token: DisposableToken): Promise<void> {
-  EventBus.emit(eventName, eventToken);
-};
+  getOrCreate(id: string) {
+    const disposableToken = this.eventBus.getDisposableTokenById(id);
+    if (disposableToken) return disposableToken;
+    return this.createDefaultDisposableToken(null);
+  }
+}
