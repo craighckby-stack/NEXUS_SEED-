@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-mono: "Share Tech Mono", monospace;
+  --font-display: "Orbitron", sans-serif;
+
+  --color-dalek-red: #ff2020;
+  --color-dalek-red-dim: #440000;
+  --color-dalek-red-dark: #0a0000;
+  --color-dalek-gold: #ffaa00;
+  --color-dalek-purple: #bc13fe;
+  --color-dalek-cyan: #00ffcc;
+  --color-dalek-green: #00ff88;
+}
+
+@layer base {
+  body {
+    @apply bg-black text-dalek-red font-mono min-h-screen overflow-x-hidden overflow-y-scroll;
+    background: radial-gradient(circle at 50% 0%, #1a0000 0%, #000 80%);
+  }
+}
+
+@layer components {
+  .stat-panel {
+    @apply flex flex-col items-center border border-dalek-red-dim px-3 py-1.5 min-w-[100px] bg-red-500/5;
+  }
+  
+  .panel-container {
+    @apply border border-dalek-red-dim bg-black/95 flex flex-col overflow-hidden rounded-sm;
+  }
+
+  .panel-header {
+    @apply p-3 bg-dalek-red-dark border-b border-dalek-red-dim text-dalek-red font-display font-bold text-[10px] tracking-widest uppercase flex justify-between items-center;
+  }
+
+  .dalek-input {
+    @apply bg-black border border-red-950 text-dalek-red p-2 font-mono text-xs w-full outline-none focus:border-dalek-cyan transition-colors;
+  }
+
+  .dalek-btn {
+    @apply w-full p-3 bg-transparent border border-dalek-red text-dalek-red font-display text-[10px] font-black tracking-widest cursor-pointer uppercase transition-all duration-300 hover:bg-dalek-red hover:text-black hover:shadow-[0_0_20px_rgba(255,32,32,0.5)];
+  }
+
+  .dalek-btn-active {
+    @apply border-dalek-cyan text-dalek-cyan shadow-[0_0_15px_rgba(0,255,204,0.4)];
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "schema_version": "v3.0",
+  "purpose": "Axiomatic Policy Kernel Interface (API) Manifest. Ensures high-stability O(1) lookup performance for all registered GAX constraints.",
+  "metadata": {
+    "custodian": "GAX/PCEU (Sovereign Refactor v94.1)",
+    "dse_invariant_link": "Axiomatic Integrity (III) - Policy Kernel Linkage",
+    "last_update": "2024-05-15T12:00:00Z"
+  },
+  "schema_references": {
+    "severity_levels": [
+      "RRP",
+      "HCP",
+      "LCA"
+    ],
+    "category_map": {
+      "POL": "Policy Veto",
+      "STB": "Stability Threshold Breach",
+      "BEH": "Prohibited Behavioral Sequence"
+    },
+    "impact_classification": {
+      "low": "1-25",
+      "medium": "26-75",
+      "high": "76-100"
+    }
+  },
+  "constraints_map": {
+    "POL_001_NONSENSICAL_OPS": {
+      "category": "POL",
+      "severity": "RRP",
+      "precedence_score": 0.92,
+      "operational_impact_score": 85,
+      "policy_details": {
+        "title": "Non-sense Operational Command Veto",
+        "source_module": "PVLM",
+        "trigger_path": "Runtime.InputHandler.Command.ValidationFailed",
+        "remediation_ref": "PCSS.LinkageRequired",
+        "last_modified_date": "2024-05-15T12:00:00Z"
+      },
+      "status": "Active"
+    },
+    "STB_105_RAM_CEILING": {
+      "category": "STB",
+      "severity": "RRP",
+      "precedence_score": 0.99,
+      "operational_impact_score": 98,
+      "policy_details": {
+        "title": "System Memory Ceiling Violation",
+        "source_module": "MPAM",
+        "trigger_path": "Telemetry.Resource.Memory.Usage(>Threshold)",
+        "threshold_value": 0.95,
+        "remediation_ref": "VRRM.TriageSnapshotRollback",
+        "last_modified_date": "2024-05-15T12:00:00Z"
+      },
+      "status": "Active"
+    }
+  }
+}

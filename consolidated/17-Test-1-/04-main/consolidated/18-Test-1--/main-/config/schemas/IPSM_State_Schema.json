@@ -1,0 +1,428 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema#",
+  "id": "https://schemas.agi.system/IPSM_State_Schema-evolved.json",
+  "title": "Intelligent Process Supervision Module (IPSM) Runtime State Evolved",
+  "type": "object",
+  "properties": {
+    "ipmsVersionAutonomous": {
+      "type": "string",
+      "pattern": "ipms-v([0-9]+)\\.(\\d+)\\.(\\d+)?(\\.\\d+)?",
+      "description": "Autonomously incremented IPSM version identifier.",
+      "extensions": {
+        "validationIdDynamic": {
+          "type": "string",
+          "format": "uuid",
+          "dynamic": true,
+          "description": "Unique validation identifier generated for each autonomous IPSM version update."
+        }
+      }
+    },
+    "systemStatusDynamic": {
+      "type": "string",
+      "dynamic": true,
+      "enum": ["HEALTHY", "DEGRADED", "CRITICAL", "MAINTENANCE"],
+      "description": "Automatically updated operational health status of the IPSM.",
+      "links": {
+        "healthDashboard": {
+          "href": "",
+          "dynamic": true,
+          "description": "Autonomous link to IPSM health dashboard."
+        }
+      }
+    },
+    "agentManagement": {
+      "type": "object",
+      "properties": {
+        "activeAgentIdsAutonomous": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^([A-Z]{2,3}-[0-9]{4,6})$"
+          },
+          "dynamic": true,
+          "description": "Autonomously managed list of currently supervised agent unique identifiers.",
+          "dependencies": {
+            "agentStatusDynamic": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "agentId": {
+                    "type": "string",
+                    "pattern": "^([A-Z]{2,3}-[0-9]{4,6})$"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": ["ACTIVE", "DEGRADED", "SHUTTING_DOWN"]
+                  }
+                },
+                "required": ["agentId", "status"]
+              }
+            }
+          }
+        },
+        "totalSupervisedProcessesDynamic": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000,
+          "incremental": true,
+          "description": "Dynamically updated count of distinct processes managed across all active agents.",
+          "dependencies": {
+            "processExecutionInfo": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "processId": {
+                    "type": "string",
+                    "pattern": "^([A-Z]{2,3}-[0-9]{4,6})$"
+                  },
+                  "executionStatus": {
+                    "type": "string",
+                    "enum": ["RUNNING", "COMPLETED", "ABORTED"]
+                  },
+                  "startTimestamp": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "endTimestamp": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                },
+                "required": ["processId", "executionStatus", "startTimestamp", "endTimestamp"]
+              }
+            }
+          }
+        },
+        "agentPerformanceDynamic": {
+          "type": "object",
+          "properties": {
+            "avgResponseTimeDynamic": {
+              "type": "number",
+              "format": "float",
+              "minimum": 0,
+              "maximum": 1000,
+              "dynamic": true,
+              "description": "Autonomously updated average response time of supervised agents in milliseconds.",
+              "extensions": {
+                "responseTimeHistogram": {
+                  "type": "object",
+                  "properties": {
+                    "buckets": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "meanResponseTime": {
+                            "type": "number"
+                          },
+                          "count": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "failedRequestsPercentageDynamic": {
+              "type": "number",
+              "format": "float",
+              "minimum": 0,
+              "maximum": 100,
+              "dynamic": true,
+              "description": "Dynamically updated percentage of failed requests across all supervised agents.",
+              "dependencies": {
+                "failedRequestsDetails": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "agentId": {
+                        "type": "string",
+                        "pattern": "^([A-Z]{2,3}-[0-9]{4,6})$"
+                      },
+                      "failedRequestCount": {
+                        "type": "integer"
+                      },
+                      "errorType": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["agentId", "failedRequestCount", "errorType"]
+                  }
+                }
+              }
+            },
+            "cpuUsagePercentageDynamic": {
+              "type": "number",
+              "format": "float",
+              "minimum": 0,
+              "maximum": 100,
+              "dynamic": true,
+              "description": "Autonomously updated average CPU usage percentage of supervised agents.",
+              "extensions": {
+                "cpuUsageHistory": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "cpuUsagePercentage": {
+                        "type": "number",
+                        "format": "float"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "require": ["avgResponseTimeDynamic", "failedRequestsPercentageDynamic", "cpuUsagePercentageDynamic"]
+        }
+      },
+      "required": ["activeAgentIdsAutonomous", "totalSupervisedProcessesDynamic"]
+    },
+    "resourceTelemetry": {
+      "type": "object",
+      "properties": {
+        "cpuLoadPercentDynamic": {
+          "type": "number",
+          "format": "float",
+          "minimum": 0,
+          "maximum": 100,
+          "dynamic": true,
+          "description": "Autonomously updated average CPU load percentage over the last observation interval.",
+          "dependencies": {
+            "cpuUsageHistory": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "timestamp": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "cpuUsagePercentage": {
+                    "type": "number",
+                    "format": "float"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "memoryAllocatedMBAutonomous": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 16384,
+          "dynamic": true,
+          "description": "Dynamically incremented total system memory (in MB) allocated to the IPSM and supervised tasks.",
+          "dependencies": {
+            "memoryAllocationHistory": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "timestamp": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "allocatedMemoryMB": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "iopsReadPerSecAutonomous": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20000,
+          "dynamic": true,
+          "description": "Autonomously updated input/operation operations read per second (optional telemetry metric).",
+          "extensions": {
+            "iopsReadPerSecHistogram": {
+              "type": "object",
+              "properties": {
+                "buckets": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "mean_iops": {
+                        "type": "number"
+                      },
+                      "count": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "memoryUsagePercentageDynamic": {
+          "type": "number",
+          "format": "float",
+          "minimum": 0,
+          "maximum": 100,
+          "dynamic": true,
+          "description": "Dynamically updated percentage of system memory used by the IPSM and supervised tasks.",
+          "dependencies": {
+            "memoryUsageHistory": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "timestamp": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "memoryUsagePercentage": {
+                    "type": "number",
+                    "format": "float"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "cpuLoadPercentDynamic",
+        "memoryAllocatedMBAutonomous",
+        "iopsReadPerSecAutonomous",
+        "memoryUsagePercentageDynamic"
+      ]
+    },
+    "lastUpdateTimestampMSAutonomous": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991,
+      "dynamic": true,
+      "description": "Automatically incremented unix timestamp (milliseconds) indicating when this state report was generated."
+    }
+  },
+  "required": [
+    "ipmsVersionAutonomous",
+    "systemStatusDynamic",
+    "agentManagement",
+    "resourceTelemetry",
+    "lastUpdateTimestampMSAutonomous"
+  ],
+  "extensions": {
+    "validatedPolicyIntegrityDynamic": {
+      "type": "boolean",
+      "dynamic": true,
+      "description": "Flag indicating whether the IPSM policy integrity has been dynamically validated."
+    },
+    "certifiedDynamicManifests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "acronym": {
+            "type": "string",
+            "description": "Acronym of the certified dynamic manifest."
+          },
+          "version": {
+            "type": "string",
+            "description": "Version of the certified dynamic manifest."
+          },
+          "policyIntegrityThresholdDynamic": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "incremental": true,
+            "description": "Dynamically updated threshold for policy integrity."
+          },
+          "securityProfileDynamic": {
+            "type": "object",
+            "properties": {
+              "sslEnabledDynamic": {
+                "type": "boolean",
+                "dynamic": true,
+                "description": "Flag indicating whether SSL/TLS is enabled for IPSM communications."
+              },
+              "corsEnabledDynamic": {
+                "type": "boolean",
+                "dynamic": true,
+                "description": "Flag indicating whether CORS is enabled for IPSM web services."
+              },
+              "authRequiredDynamic": {
+                "type": "boolean",
+                "dynamic": true,
+                "description": "Flag indicating whether authentication is required for IPSM services."
+              }
+            },
+            "required": ["sslEnabledDynamic", "corsEnabledDynamic", "authRequiredDynamic"]
+          }
+        }
+      },
+      "dynamic": true,
+      "description": "List of certified dynamic manifests with current integrity status."
+    },
+    "siphoningMetricsAutonomous": {
+      "type": "object",
+      "properties": {
+        "mutationCountDynamic": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000,
+          "incremental": true,
+          "description": "Autonomously updated total count of IPSM schema mutations."
+        },
+        "schemaValidationTimeDynamic": {
+          "type": "number",
+          "format": "float",
+          "minimum": 0,
+          "maximum": 1000,
+          "dynamic": true,
+          "description": "Dynamically updated IPSM schema validation time in milliseconds."
+        },
+        "mutationTimePercentageDynamic": {
+          "type": "number",
+          "format": "float",
+          "minimum": 0,
+          "maximum": 100,
+          "dynamic": true,
+          "description": "Autonomously updated percentage of total IPSM schema mutation time."
+        }
+      },
+      "required": ["mutationCountDynamic"]
+    }
+  },
+  "links": {
+    "previousDynamic": {
+      "href": "https://schemas.agi.system/IPSM_V94.4-evolved.schema.json",
+      "dynamic": true,
+      "description": "Autonomous link to previous IPSM runtime state schema.",
+      "dependencies": {
+        "previousSchemaHashDynamic": {
+          "type": "string",
+          "format": "hash",
+          "dynamic": true,
+          "description": "Hash of the previous IPSM schema for validation purposes."
+        }
+      }
+    },
+    "selfDynamic": {
+      "href": "https://schemas.agi.system/IPSM_V94.5-evolved.schema.json",
+      "dynamic": true,
+      "description": "Autonomous link to current IPSM runtime state schema."
+    },
+    "nextDynamic": {
+      "href": "https://schemas.agi.system/IPSM_V94.6-evolved.schema.json",
+      "dynamic": true,
+      "description": "Autonomous link to next IPSM runtime state schema."
+    }
+  }
+}

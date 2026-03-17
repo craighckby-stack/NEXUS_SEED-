@@ -1,0 +1,66 @@
+{
+  "protocol_id": "RIMP_VRS_1.1",
+  "baseline_identification": {
+    "type": "PREFIXED_HASH",
+    "prefix": "BASE_GSEP"
+  },
+  "verification_policies": [
+    {
+      "policy_id": "V_KR_001",
+      "scope": "kernel_integrity",
+      "target_field": "measurement_hash",
+      "verification": {
+        "method": "TPM_PCR_CHECK",
+        "operator": "==",
+        "method_config": {
+          "pcr_register_set": "0,1,2,3,4,5,6,7",
+          "register_type": "HEX_STRING"
+        }
+      },
+      "failure_response": {
+        "severity": "CRITICAL",
+        "action": "SYSTEM_RECOVERY_EXEC",
+        "handler_ref": "recovery.reboot_module_safe",
+        "description": "Kernel integrity mismatch requires immediate system restart."
+      }
+    },
+    {
+      "policy_id": "V_CN_002",
+      "scope": "critical_containers",
+      "target_field": "image_manifest_hash",
+      "verification": {
+        "method": "CONTAINER_IMAGE_MANIFEST_HASH",
+        "operator": "==",
+        "method_config": {}
+      },
+      "failure_response": {
+        "severity": "HIGH",
+        "action": "PROCESS_TERMINATION",
+        "handler_ref": "containment.kill_process_and_audit",
+        "description": "Untrusted container image detected."
+      }
+    },
+    {
+      "policy_id": "V_RT_003",
+      "scope": "resource_limits",
+      "target_field": "resource_usage_limit",
+      "verification": {
+        "method": "RUNTIME_MONITORING_PULL",
+        "operator": "<=",
+        "method_config": {
+          "monitor_target": "CPU_UTILIZATION"
+        }
+      },
+      "failure_response": {
+        "severity": "MODERATE",
+        "action": "RATE_LIMIT_ACTIVATION",
+        "handler_ref": "traffic.throttle_scope",
+        "description": "Exceeded defined runtime thresholds."
+      }
+    }
+  ],
+  "runtime_defaults": {
+    "unverified_scope_policy": "LOG_AND_CONTINUE",
+    "critical_failure_limit": 3
+  }
+}

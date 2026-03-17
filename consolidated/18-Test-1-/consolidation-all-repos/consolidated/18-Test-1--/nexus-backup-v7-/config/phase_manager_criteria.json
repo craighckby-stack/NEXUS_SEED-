@@ -1,0 +1,30 @@
+{
+  "module_name": "SystemicPhaseClassifier",
+  "version": "1.0.0",
+  "description": "Defines the criteria for transitioning between operational phases based on key system metrics. This decouples phase determination logic from the VMO calculation weights.",
+  "phases": [
+    {
+      "name": "OPERATIONAL_NORMAL",
+      "priority": 10,
+      "exit_conditions": [
+        {"metric": "RSL", "operator": ">=", "threshold": 0.85, "trigger_phase": "DEGRADED_PERFORMANCE"},
+        {"metric": "S-02_sigma", "operator": ">", "threshold": 1.5, "trigger_phase": "DEGRADED_PERFORMANCE"}
+      ]
+    },
+    {
+      "name": "DEGRADED_PERFORMANCE",
+      "priority": 20,
+      "exit_conditions": [
+        {"metric": "L0_ReEntry_Ratio", "operator": ">", "threshold": 0.05, "trigger_phase": "CRITICAL_FAILURE_IMMINENT"},
+        {"metric": "RSL", "operator": "<", "threshold": 0.70, "trigger_phase": "OPERATIONAL_NORMAL"}
+      ]
+    },
+    {
+      "name": "CRITICAL_FAILURE_IMMINENT",
+      "priority": 30,
+      "exit_conditions": [
+        {"metric": "S-02_sigma", "operator": "<", "threshold": 2.0, "trigger_phase": "DEGRADED_PERFORMANCE"}
+      ]
+    }
+  ]
+}

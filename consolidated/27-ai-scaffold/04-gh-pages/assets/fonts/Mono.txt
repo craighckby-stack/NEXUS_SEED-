@@ -1,0 +1,3 @@
+This is a placeholder for monospace font
+Replace with actual monospace font file (.ttf, .otf, or .woff2)
+Recommended: JetBrains Mono, Fira Code, or similar

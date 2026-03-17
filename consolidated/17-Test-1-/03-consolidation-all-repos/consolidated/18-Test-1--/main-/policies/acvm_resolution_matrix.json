@@ -1,0 +1,24 @@
+{
+  "description": "Defines deterministic failure resolution strategies for ACVM constraint violations.",
+  "version": "v1.0",
+  "resolution_policies": [
+    {
+      "artifact_id": "TEMM",
+      "condition": "FAILURE_THRESHOLD_VIOLATION",
+      "action": "QUARANTINE_TRANSITION_ROLLBACK",
+      "priority": 100
+    },
+    {
+      "artifact_id": "ECVM",
+      "condition": "UNPERMITTED_ENVIRONMENT_DETECTED",
+      "action": "IMMEDIATE_PROCESS_TERMINATION",
+      "priority": 95
+    },
+    {
+      "artifact_id": "CSR",
+      "condition": "POLICY_HASH_MISMATCH",
+      "action": "ALERT_SECURITY_GOVERNOR_AND_HALT",
+      "priority": 99
+    }
+  ]
+}

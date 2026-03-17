@@ -1,0 +1,16 @@
+/* Program Definition Language v4 Grammar (BNF representation) */
+
+<program> ::= <directive> <definition> <entry_point>
+<directive> ::= 'DECLARE' <component_id> 'VERSION' <version_string> ;
+<component_id> ::= [A-Za-z0-9_]+
+
+<definition> ::= 'DEFINE' <function_name> '(' <parameters> ')' ':' <return_type> <block>
+<parameters> ::= <parameter> | <parameter> ',' <parameters> | ''
+<parameter> ::= <variable_name> ':' <type>
+
+<block> ::= '{' <statement> '}' | <statement>
+<statement> ::= <invocation> ';' | <assignment> ';' | <conditional_statement>
+
+<invocation> ::= <component_id> '.' <function_name> '(' <arguments> ')'
+
+<entry_point> ::= 'START' <invocation> ';'

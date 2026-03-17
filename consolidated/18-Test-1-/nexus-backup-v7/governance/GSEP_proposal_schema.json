@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.ai/GSEP_proposal_schema.json",
+  "title": "Governance State Transition (SST) Proposal Payload",
+  "description": "The definitive structure required for all inputs to the Governance State Evolution Pipeline (GSEP-C V3.1). Must be validated by PPC (PRE) and SCR (L0).",
+  "type": "object",
+  "required": [
+    "proposal_id",
+    "target_module",
+    "change_manifest",
+    "expected_impact_metrics"
+  ],
+  "properties": {
+    "proposal_id": {
+      "type": "string",
+      "description": "Unique monotonic identifier for the proposal."
+    },
+    "target_module": {
+      "type": "string",
+      "description": "The fully qualified path or identifier of the system module intended for modification."
+    },
+    "source_hash": {
+      "type": "string",
+      "description": "Provenance hash verifying the source and authorizing agent (Verified by L4: CTAL)."
+    },
+    "change_manifest": {
+      "type": "array",
+      "description": "A list of atomic changes (code updates, configuration modifications) to be simulated and enacted.",
+      "minItems": 1,
+      "items": {
+        "type": "object"
+      }
+    },
+    "budget_projection": {
+      "type": "number",
+      "description": "Pre-calculated resource allocation requirement (Verified by L3: CMO/CBM)."
+    },
+    "expected_impact_metrics": {
+      "type": "object",
+      "required": ["S_01_min", "S_02_max"],
+      "properties": {
+        "S_01_min": {
+          "type": "number",
+          "description": "Minimum projected Efficacy Score required."
+        },
+        "S_02_max": {
+          "type": "number",
+          "description": "Maximum tolerable Risk Score."
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

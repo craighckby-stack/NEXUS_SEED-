@@ -1,0 +1,21 @@
+{
+  "description": "Defines the configuration and execution targets for all named processing pipeline steps referenced in the telemetry routing map.",
+  "transformation_steps": {
+    "UNIT_CONVERSION_HPA": {
+      "description": "Converts high-pressure absolute (HPA) units to standard Pascal (PA).",
+      "handler_type": "SERVICE_BUS",
+      "target_queue": "processor_svc_conversion_q",
+      "parameters": {
+        "unit_in": "HPA",
+        "unit_out": "PA",
+        "scaling_factor": 1000
+      }
+    },
+    "DATA_ANONYMIZATION_POLICY_V1": {
+      "description": "Applies Anonymization Policy V1 (K-anonymity) to sensitive fields.",
+      "handler_type": "FUNCTION_FaaS",
+      "target_function_arn": "arn:aws:lambda:us-west-2:1234567890:function:anonymizerV1",
+      "rate_limit": 10000
+    }
+  }
+}

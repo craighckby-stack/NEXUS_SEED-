@@ -1,0 +1,30 @@
+{
+  "description": "Manifest defining mandatory, immutable constants and tiered operational thresholds required by Core Decision Axioms (COF/P-01 Finality) and GSEP-C V3.5 Layer L7. Structured for flattened, efficient read operations.",
+  "version": "v2.0",
+  "CONSTANTS": {
+    "TAU_NORM": 0.000001,
+    "RATIONALE_TAU_NORM": "Normalization constant preventing division by zero and establishing minimum systemic risk weight.",
+    "EPSILON_MIN": 0.005,
+    "RATIONALE_EPSILON_MIN": "The minimum required viable safety margin (P-01 Certification buffer)."
+  },
+  "THRESHOLDS": {
+    "COF_MAX_DEVIATION": {
+      "level": "CRITICAL",
+      "value": 0.015,
+      "unit": "Absolute Difference",
+      "rationale": "Maximum allowed divergence in COF stability checks before initiating an immediate Axiom Halt (S-03 Protocol)."
+    },
+    "GSEP_MAX_ITERATIONS": {
+      "level": "CRITICAL",
+      "value": 10000,
+      "unit": "Count",
+      "rationale": "Hard limit on iterative cycles within GSEP-C V3.5 Layer L7 computation layers to prevent infinite loop or resource exhaustion."
+    },
+    "P01_LOW_CONFIDENCE_WARNING": {
+      "level": "WARNING",
+      "value": 0.9999,
+      "unit": "Confidence Level (0-1)",
+      "rationale": "If P-01 finality confidence falls below this level, generate a persistent audit warning, allowing processing to continue under monitoring."
+    }
+  }
+}

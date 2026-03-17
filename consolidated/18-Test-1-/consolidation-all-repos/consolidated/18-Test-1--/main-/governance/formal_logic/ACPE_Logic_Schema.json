@@ -1,0 +1,32 @@
+{
+  "protocol_version": "V94.1_LPM",
+  "engine_target": "ACPE",
+  "description": "Defines required predicates, sets, and formalized constraints for the Automated Theorem Proving Environment (ATE) used by ACPE V2.0.",
+  "required_sets": [
+    "Omega_N_NormalContexts",
+    "P_01_PassConditions",
+    "GACR_CriticalDomains"
+  ],
+  "required_predicates": [
+    {
+      "name": "Satisfies",
+      "signature": "Context, Rule -> Boolean",
+      "purpose": "Checks if context satisfies the antecedent of a Veto Rule R_i."
+    },
+    {
+      "name": "Veto",
+      "signature": "Context, Ruleset -> Boolean",
+      "purpose": "Checks if the Ruleset prevents P-01 Pass under given Context."
+    },
+    {
+      "name": "Domain",
+      "signature": "Rule -> Set[DomainID]",
+      "purpose": "Maps a rule to the domains it covers for CT."
+    }
+  ],
+  "axiomatic_constraints": {
+    "RNC_T_NonContradiction": "\u2200 i, j \u2208 P', i \u2260 j : \u00ac (Satisfies(\u03c9, R_i) \u2227 Satisfies(\u03c9, R_j))",
+    "CT_Coverage": "\u222a R_i \u2208 P' Domain(R_i) \u2287 GACR_CriticalDomains",
+    "P_DT_Decidability": "\u2203 \u03c9 \u2208 \u03a9_N : (P_01_Pass(\u03c9) \u2227 \u00ac Veto(\u03c9, P'))"
+  }
+}

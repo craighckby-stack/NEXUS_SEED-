@@ -1,0 +1,29 @@
+{
+  "map_version": "1.0",
+  "target_config": "CMO_Definition.json",
+  "validation_rules": {
+    "viability_margin_oracle": {
+      "consumer_levels": ["L6"],
+      "schema": {
+        "epsilon_decay_rate": {"type": "float", "min": 0.0, "max": 1.0},
+        "epsilon_minimum_floor": {"type": "float", "min": 0.0, "max": 0.1},
+        "spdm_window_size_epochs": {"type": "integer", "min": 50, "max": 500}
+      }
+    },
+    "constraint_budget_matrix": {
+      "consumer_levels": ["L2"],
+      "schema": {
+        "max_compute_units": {"type": "integer", "min": 100000},
+        "max_data_ingress_gb": {"type": "integer", "min": 1}
+      }
+    },
+    "metric_efficacy_contract": {
+      "consumer_levels": ["L5"],
+      "schema": {
+        "utility_weight": {"type": "float", "constraint": "sum_to_one", "partner": "risk_penalty"},
+        "risk_penalty": {"type": "float", "constraint": "sum_to_one", "partner": "utility_weight"},
+        "schema_version": {"type": "string", "pattern": "^v\\d+$"}
+      }
+    }
+  }
+}

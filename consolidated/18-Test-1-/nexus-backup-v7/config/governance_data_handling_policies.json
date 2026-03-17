@@ -1,0 +1,27 @@
+{
+  "policies": {
+    "90D_IMMUTABLE": {
+      "description": "Retain data immutably for 90 days.",
+      "duration_days": 90,
+      "immutable": true,
+      "encryption": "AES256_GCM"
+    },
+    "30D_WIPE_AFTER_ANALYSIS": {
+      "description": "30-day retention, requires explicit manual review completion before scheduled deletion.",
+      "duration_days": 30,
+      "deletion_trigger": "ANALYSIS_COMPLETE_FLAG"
+    },
+    "GOV_PKEY_SCRUB": {
+      "type": "SANITIZATION_PIPELINE",
+      "steps": [
+        {"action": "REDACT", "target_data_type": "GOVERNANCE_PRIVATE_KEYS"},
+        {"action": "ANONYMIZE", "target_data_type": "USER_AGENT_IDENTIFIERS"}
+      ]
+    },
+    "7D_VOLATILE": {
+      "description": "Short-term rolling buffer for low-impact telemetry.",
+      "duration_days": 7,
+      "retention_type": "FIFO_ROLLING"
+    }
+  }
+}

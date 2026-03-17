@@ -1,0 +1,31 @@
+OperationalModeMatrix:
+  ModeDefinitions:
+    HIGH_SOVEREIGNTY_MODE:
+      PolicyLayerTarget: 5
+      ActivationPreconditions:
+        - Metric: "Sovereignty_AU"
+          Operator: ">="
+          Threshold: 0.999
+        - Metric: "CPU_Load_pct"
+          Operator: "<"
+          Threshold: 0.70
+      ExitConditions:
+        - Metric: "P99_CommitTime_ms"
+          Operator: ">"
+          Threshold: 250
+      FallbackMode: "BALANCED_GOVERNANCE_MODE"
+
+    BALANCED_GOVERNANCE_MODE:
+      PolicyLayerTarget: 3
+      ActivationPreconditions: []
+      FallbackMode: "STRICT_CONSTRAINT_MODE"
+
+    STRICT_CONSTRAINT_MODE:
+      PolicyLayerTarget: 1
+      ActivationPreconditions:
+        - Metric: "Sovereignty_AU"
+          Operator: "<"
+          Threshold: 0.980
+      MandateOverrides:
+        - Key: "MaxParallelProcesses"
+          Value: 16

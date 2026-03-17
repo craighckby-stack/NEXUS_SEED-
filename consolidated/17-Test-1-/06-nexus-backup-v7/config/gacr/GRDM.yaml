@@ -1,0 +1,29 @@
+GRDM_V1_0:
+  metadata:
+    asset_owner: [GAX, CRoT]
+    governance_version: V98.0
+    description: Defines mandatory, certified steps for Resilience/Recovery Protocol (RRP) activation upon CRITICAL failure.
+
+  RRP_POLICY_ID: RRP-CORE-001
+
+  critical_failure_trigger_points:
+    - S2_POLICY_VETO
+    - S3_STABILITY_VETO
+    - S4_PROVENANCE_TRUST
+    - S4_5_CONTEXT_ATTESTATION
+    - S6_RESOURCE_CHECK
+    - S8_FINALITY_CERT
+
+  certified_recovery_sequence:
+    1: STATE_ISOLATION_LOCK:
+      actor: CRoT
+      action: Lock CISM for modification prevention and integrity check.
+    2: FAILURE_TRACE_ATTESTATION:
+      actor: CRoT
+      action: Cryptographically sign CISM state prior to rollback (Non-repudiable failure log).
+    3: SAFE_ROLLBACK:
+      actor: SGS
+      action: Roll back to last confirmed, fully attested CISM checkpoint (Checkpoint N-1).
+    4: RE_INITIALIZATION_VETO_ONLY:
+      actor: GAX
+      action: Initiate GSEP-C pipeline in a read-only, veto-enforced monitoring mode until manual intervention or certified patch (PEUP) is applied.

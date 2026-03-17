@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TargetEvolutionMandateSchema",
+  "description": "Enforces structural integrity and key constraints for all AGI Evolution Mandates.",
+  "type": "object",
+  "properties": {
+    "operational_constraints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["scope", "artifact_key", "operator", "limit_value"],
+        "properties": {
+          "operator": {"type": "string", "enum": ["LT", "LTE", "EQ", "GT", "GTE", "PROHIBIT", "PROHIBIT_DELTA"]},
+          "limit_value": {"type": ["number", "string"]}
+        }
+      }
+    },
+    "success_criteria": {
+      "type": "object",
+      "required": ["required_baseline_s02", "required_target_value"]
+    }
+  },
+  "required": ["mandate_id", "custodian", "target_summary", "success_criteria", "operational_constraints"]
+}

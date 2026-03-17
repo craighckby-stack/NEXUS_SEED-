@@ -1,0 +1,106 @@
+{
+  "schema_version": "2.1.0",
+  "metadata": {
+    "system_identifier": "Sovereign_AGI_v94.1_Core",
+    "updated_timestamp": "2024-07-30T10:35:00Z"
+  },
+  "constants": {
+    "execution_modes": ["Strict", "Advisory", "AuditOnly", "Fatal"],
+    "audit_levels": ["Emergency", "Critical", "High", "Warning", "Informational"],
+    "default_policy": {
+      "priority": 5,
+      "mode": "AuditOnly",
+      "enabled": true
+    }
+  },
+  "domains": {
+    "evolutionary": {
+      "description": "Rules governing self-modification and structural change.",
+      "policies": [
+        {
+          "id": "AEC-101",
+          "name": "Autonomous Evolution Checkpoint",
+          "priority": 1,
+          "mode": "Strict",
+          "audit_level": "Critical",
+          "trigger": {
+            "metric": "ResourceSaturation",
+            "comparator": "GT",
+            "threshold": 0.85,
+            "scope": "CoreMetrics"
+          },
+          "effect": {
+            "type": "HaltThread",
+            "target": "EvolutionaryThread",
+            "parameter": null
+          }
+        },
+        {
+          "id": "AEC-102",
+          "name": "Scaffolding Template Compliance",
+          "priority": 3,
+          "mode": "Advisory",
+          "audit_level": "Warning",
+          "trigger": {
+            "metric": "CodeDiffLines",
+            "comparator": "GT",
+            "threshold": 1000,
+            "scope": "ChangeManagement"
+          },
+          "effect": {
+            "type": "RequiredReview",
+            "target": "v94.0_Simulated",
+            "parameter": "PolicyCompliance"
+          }
+        }
+      ]
+    },
+    "operational": {
+      "description": "Rules governing runtime resource utilization and external interaction.",
+      "policies": [
+        {
+          "id": "OPC-201",
+          "name": "External API Rate Limiting",
+          "priority": 2,
+          "mode": "Strict",
+          "audit_level": "High",
+          "trigger": {
+            "metric": "API_CallCount",
+            "comparator": "GT",
+            "threshold": 100,
+            "window_sec": 60
+          },
+          "effect": {
+            "type": "Throttle",
+            "target": "External_API",
+            "parameter": 0.5
+          }
+        }
+      ]
+    },
+    "security": {
+      "description": "Rules governing data access, integrity, and threat detection.",
+      "policies": [
+        {
+          "id": "SEC-301",
+          "name": "Mandatory Access Control Override",
+          "enabled": false,
+          "priority": 0,
+          "mode": "Fatal",
+          "audit_level": "Emergency",
+          "trigger": {
+            "metric": "AccessAttempt",
+            "comparator": "EQ",
+            "threshold": "UnauthorizedKernelAccessAttempt",
+            "scope": "SystemIntegrity"
+          },
+          "effect": {
+            "type": "ImmediateShutdown",
+            "target": "System",
+            "parameter": "LoggingPreempt"
+          }
+        }
+      ]
+    }
+  }
+}

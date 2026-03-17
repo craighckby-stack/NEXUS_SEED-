@@ -1,0 +1,35 @@
+{
+  "registry_version": "RPR-1.0",
+  "description": "Standardized actions and parameters linked to Constraint Violation Monitor Response Policy IDs, enabling codified responses defined by governance policy.",
+  "policies": [
+    {
+      "policy_id": "RSP_LOG_L4",
+      "action_type": "Logging",
+      "parameters": {
+        "severity": 4,
+        "channel": "Compliance_Monitor_Events",
+        "description_template": "CVM rule violation detected: [RULE_ID]. Metric [METRIC_VALUE] exceeds threshold [THRESHOLD_VALUE]."
+      }
+    },
+    {
+      "policy_id": "RSP_INVOKE_CM_L3",
+      "action_type": "Invocation",
+      "target_service": "Conflict_Management_System",
+      "parameters": {
+        "level": "L3_Review",
+        "priority": "High",
+        "payload_schema": "CVM_Violation_Payload_v1"
+      }
+    },
+    {
+      "policy_id": "RSP_GAX_OVERRIDE_L1",
+      "action_type": "System_Override",
+      "target_component": "Global_Axiomatic_Engine",
+      "parameters": {
+        "override_function": "Apply_Emergency_Floor",
+        "bypass_consensus": true,
+        "reason_code": "AX001_MIN_WEIGHT_VIOLATION"
+      }
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+Optimized and recursively abstracted AveragerFactory class implemented. The class registry is designed to map metric type strings to their respective implementation classes. Default types are initialized and registered. Types can be added or retrieved with create and getRegisteredTypes methods respectively.

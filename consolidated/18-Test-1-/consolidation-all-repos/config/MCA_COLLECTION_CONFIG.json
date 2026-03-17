@@ -1,0 +1,21 @@
+{
+  "agent_id": "MCA_V1.1",
+  "collection_interval_ms": 5000,
+  "aggregation_window_seconds": 60,
+  "metrics_to_monitor": [
+    {
+      "metric_id": "S-01",
+      "source_endpoint": "/api/metrics/system_fidelity",
+      "evaluation_type": "AVERAGE"
+    },
+    {
+      "metric_id": "S-02",
+      "source_endpoint": "/api/metrics/stability_deviation",
+      "evaluation_type": "PEAK_DEVIATION"
+    }
+  ],
+  "alerting_integration": {
+    "system": "Telemetry_Bus",
+    "topic": "MEC_VIOLATIONS"
+  }
+}

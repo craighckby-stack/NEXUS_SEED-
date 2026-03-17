@@ -1,0 +1,42 @@
+{
+  "GSEP_version": "v94.1",
+  "simulation_id": "SE-2024-Q3-ALPHA-001",
+  "runtime": {
+    "seed": 1701,
+    "priority_level": "CRITICAL_PATH",
+    "termination_criteria": {
+      "max_steps": 5000000,
+      "max_runtime_sec": 86400,
+      "min_target_performance_index": 0.985,
+      "budget_limit": "GSEP_resource_affinity.json::HighPriority_A100_Cluster"
+    },
+    "checkpointing": {
+      "frequency_steps": 50000,
+      "save_optimized_format": true
+    }
+  },
+  "environment": {
+    "type": "MetacognitiveLoopV3",
+    "state_space_dim": 512,
+    "observation_mode": "HybridTensors",
+    "perturbation_schedule": {
+      "enabled": true,
+      "interval_steps": 10000,
+      "intensity_metric": "ShannonEntropy"
+    }
+  },
+  "agents": {
+    "population_size": 16,
+    "architecture": "TransformerV4.2",
+    "policy_config": {
+      "learning_rate": 0.00005,
+      "scheduler": "CosineDecayWarmup",
+      "gradient_clipping": 0.5
+    }
+  },
+  "logging": {
+    "metrics_target": "SovereignAnalytics/Metrics-v94.1",
+    "verbosity_level": "INFO",
+    "data_sampling_rate": 0.01
+  }
+}

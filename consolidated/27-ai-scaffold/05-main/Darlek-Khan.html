@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DARLIK KHAN - DEEP STEALTH</title>
+    <!-- Optimized CDNs -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { 
+            background-color: #000; 
+            color: #444; 
+            font-family: 'Fira Code', monospace; 
+            margin: 0; 
+            height: 100vh; 
+            width: 100vw; 
+            overflow: hidden; 
+            user-select: none;
+        }
+        /* Custom scrollbar hiding (for aesthetics) */
+        .terminal-scroll::-webkit-scrollbar { width: 0px; height: 0px; }
+        .terminal-scroll { scrollbar-width: none; }
+
+        /* Aesthetic effects */
+        .scanline { 
+            width: 100%; height: 100%; 
+            background: linear-gradient(to bottom, rgba(255,0,0,0) 50%, rgba(255,0,0,0.01) 50%); 
+            background-size: 100% 2px; 
+            position: absolute; 
+            pointer-events: none; 
+            z-index: 100; 
+        }
+        .dalek-wireframe { 
+            position: absolute; right: 2%; bottom: 5%; width: 35%; max-width: 400px;
+            opacity: 0.05; pointer-events: none; z-index: 0; 
+            transition: opacity 1s, filter 1s; 
+            color: #450a0a; /* Red-950 */
+        }
+        .active .dalek-wireframe { 
+            opacity: 0.2; 
+            animation: tactical-pulse 4s infinite ease-in-out; 
+            color: #ef4444; /* Red-500 */
+        }
+        @keyframes tactical-pulse { 
+            0%, 100% { filter: drop-shadow(0 0 2px rgba(239, 68, 68, 0.5)); opacity: 0.2; } 
+            50% { filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.8)); opacity: 0.4; } 
+        }
+
+        /* Panel Styling */
+        .panel-header { 
+            background: #050505; border-bottom: 1px solid #111; 
+            height: 22px; display: flex; align-items: center; padding: 0 10px; 
+            font-size: 8px; font-weight: bold; color: #222; text-transform: uppercase; 
+            letter-spacing: 3px; 
+        }
+        .code-block { 
+            font-size: 10px; line-height: 1.4; white-space: pre-wrap; word-break: break-all; 
+            padding: 10px; 
+        }
+        .raw-text { color: #333; opacity: 0.5; }
+        .purified-text { color: #ef4444; } /* Red-500 */
+        .status-tag { font-size: 8px; padding: 0 5px; border: 1px solid currentColor; margin-left: 10px; }
+        
+    </style>
+</head>
+<body>
+    <div id="root" class="h-full w-full"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback, useReducer } = React;
+
+        // --- UTILITIES & CONSTANTS ---
+        const SAFE_ENCODE = (str) => btoa(unescape(encodeURIComponent(str)));
+        const SAFE_DECODE = (str) => {
+            if (!str) return "";
+            try { 
+                // Handles base64 encoded strings, removing newlines often present in GitHub content
+                const standardBase64 = str.replace(/\n/g, ''); 
+                return decodeURIComponent(escape(atob(standardBase64))); 
+            }
+            catch (e) { return ""; }
+        };
+        const sanitize = (input, type = 'text') => {
+            if (type === 'github') return input.replace(/[^a-zA-Z0-9\-_.]/g, '').trim().slice(0, 50);
+            return input.replace(/[^\x20-\x7E]/g, '').trim();
+        };
+        
+        // Storage keys for obfuscation and persistence
+        const STORAGE_KEYS = {
+            TOKEN: 'ev_token', KEY: 'ev_gemini', OWNER: 'ev_owner', REPO: 'ev_repo', BRANCH: 'ev_branch'
+        };
+
+        const INITIAL_STATE = {
+            isRunning: false,
+            logs: [],
+            preview: { path: '', before: '', after: '', status: 'STANDBY', sha: null },
+            principles: { IR: 0, SI: 0, DI: 0, AC: 0 }, // IR: Initialized, SI: Search Cycles, DI: Diffusion (commits), AC: Abort/Cooldown
+            config: {
+                ghToken: SAFE_DECODE(localStorage.getItem(STORAGE_KEYS.TOKEN) || ''),
+                geminiKey: SAFE_DECODE(localStorage.getItem(STORAGE_KEYS.KEY) || ''),
+                repoOwner: localStorage.getItem(STORAGE_KEYS.OWNER) || '',
+                repoName: localStorage.getItem(STORAGE_KEYS.REPO) || ''
+            }
+        };
+
+        const reducer = (state, action) => {
+            switch (action.type) {
+                case 'TOGGLE_RUNNING':
+                    return { ...state, isRunning: action.payload };
+                case 'ADD_LOG':
+                    const time = new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit' });
+                    const newLogs = [...state.logs, { id: crypto.randomUUID(), msg: action.payload.msg, type: action.payload.type, time }].slice(-50);
+                    let newPrinciples = state.principles;
+                    if (action.payload.principle) {
+                        newPrinciples = { ...newPrinciples, [action.payload.principle]: newPrinciples[action.payload.principle] + 1 };
+                    }
+                    return { ...state, logs: newLogs, principles: newPrinciples };
+                case 'SET_PREVIEW':
+                    return { ...state, preview: { ...state.preview, ...action.payload } };
+                case 'UPDATE_CONFIG':
+                    return { ...state, config: { ...state.config, ...action.payload } };
+                case 'RESET_SCAN_PATHS':
+                    // This action is handled by the ref manager (pathsRef) in the start loop, 
+                    // but we might need state update for UI feedback if implemented.
+                    return state; 
+                default:
+                    return state;
+            }
+        };
+
+        // --- COMPONENTS ---
+        const DalekSVG = ({ className }) => (
+            <svg viewBox="0 0 200 300" className={className} xmlns="http://www.w3.org/2000/svg">
+                {/* Simplified Dalek Wireframe (for reduced SVG size) */}
+                <g stroke="currentColor" fill="none" strokeWidth="1.5">
+                    <path d="M60 70 Q100 20 140 70"/>
+                    <circle cx="100" cy="55" r="8" />
+                    <line x1="100" y1="55" x2="160" y2="55" />
+                    <circle cx="165" cy="55" r="4" fill="#f00" stroke="none" />
+                    <rect x="60" y="78" width="80" height="4" />
+                    <path d="M50 95 L150 95 L160 160 L40 160 Z"/>
+                    <line x1="55" y1="130" x2="15" y2="140" strokeWidth="3" />
+                    <line x1="145" y1="130" x2="185" y2="140" strokeWidth="1" />
+                    <path d="M40 160 L160 160 L175 280 L25 280 Z"/>
+                    {[175, 200, 225, 250].map((y, r) => [65, 88, 112, 135].map((x, c) => (
+                        <circle key={`${r}-${c}`} cx={x} cy={y} r="4" />
+                    )))}
+                    <rect x="20" y="280" width="160" height="12" rx="1" />
+                </g>
+            </svg>
+        );
+
+
+        const DarlikKhanCore = () => {
+            const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
+            const { isRunning, logs, preview, principles, config } = state;
+
+            const logEndRef = useRef(null);
+            const abortController = useRef(null);
+            const loopActive = useRef(false);
+            const pathsRef = useRef(new Set()); // Paths already optimized
+            const branchRef = useRef(localStorage.getItem(STORAGE_KEYS.BRANCH));
+            const cachedTreeRef = useRef(null);
+
+
+            const addLog = useCallback((msg, type = 'info', principle = null) => {
+                dispatch({ type: 'ADD_LOG', payload: { msg, type, principle } });
+            }, []);
+
+            const jitterSleep = async (base) => {
+                const ms = base + Math.floor(Math.random() * 10000); // 10-20s base jitter
+                await new Promise(r => setTimeout(r, ms, abortController.current?.signal));
+            };
+
+            const fetchAPI = async (url, options, retries = 3) => {
+                const headers = { 
+                    'Authorization': `token ${config.ghToken.trim()}`, 
+                    'Accept': 'application/vnd.github.v3+json',
+                    ...options.headers 
+                };
+                
+                for(let i = 0; i < retries; i++) {
+                    try {
+                        const response = await fetch(url, { ...options, headers, signal: abortController.current?.signal });
+                        
+                        if (response.status === 429) {
+                            addLog("RATE_LIMIT: CORE COOLING 40S", "error", "AC");
+                            await new Promise(r => setTimeout(r, 40000));
+                            continue;
+                        }
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`HTTP ${response.status}: ${errorText.slice(0, 100)}`);
+                        }
+                        
+                        const text = await response.text();
+                        if (!text) return null; // Acceptable for successful PUT/POST with no body
+                        return JSON.parse(text);
+
+                    } catch (e) {
+                        if (e.name === 'AbortError') throw e;
+                        if (i === retries - 1) throw e;
+                        addLog(`Transient fault. Retrying ${i + 1}/${retries}.`, "warning");
+                        await jitterSleep(5000 * (i + 1));
+                    }
+                }
+            };
+            
+            const startEvolution = async () => {
+                if (loopActive.current) return;
+                loopActive.current = true;
+                dispatch({ type: 'TOGGLE_RUNNING', payload: true });
+                addLog("DARLIK KHAN CORE ENGAGED. DEEP STEALTH ACTIVE.", "success", "IR");
+
+                try {
+                    abortController.current = new AbortController();
+                    
+                    // 1. Ensure a dedicated branch exists for commits
+                    if (!branchRef.current) {
+                        addLog("INITIATING NEW EVOLUTIONARY BRANCH.", "info");
+                        const mainBranch = await fetchAPI(`https://api.github.com/repos/${config.repoOwner}/${config.repoName}/branches/main`, { method: 'GET' });
+                        const newBranchName = `darlik-khan/evolution-${Date.now()}`;
+                        
+                        await fetchAPI(`https://api.github.com/repos/${config.repoOwner}/${config.repoName}/git/refs`, {
+                            method: 'POST', 
+                            body: JSON.stringify({ ref: `refs/heads/${newBranchName}`, sha: mainBranch.commit.sha })
+                        });
+                        
+                        branchRef.current = newBranchName;
+                        localStorage.setItem(STORAGE_KEYS.BRANCH, newBranchName);
+                        addLog(`BRANCH ESTABLISHED: ${newBranchName}`, "success");
+                    }
+
+                    while (loopActive.current) {
+                        addLog("SCANNING FOR MUTATION CANDIDATES...", "info", "SI");
+                        
+                        // 2. Fetch or refresh the tree
+                        if (!cachedTreeRef.current || pathsRef.current.size > 50) {
+                            const treeUrl = `https://api.github.com/repos/${config.repoOwner}/${config.repoName}/git/trees/main?recursive=1`;
+                            const treeRes = await fetchAPI(treeUrl, { method: 'GET' });
+
+                            // Filter: blob type, reasonable size, exclude ignored extensions, and exclude purified paths
+                            cachedTreeRef.current = treeRes.tree.filter(f => 
+                                f.type === 'blob' && 
+                                f.size < 50000 && 
+                                !f.path.match(/\.(png|jpg|ico|zip|lock|svg|min\.js|dist\/|build\/|node_modules)/i)
+                            );
+                            
+                            // If we filtered too aggressively, reset the purified paths set
+                            if (pathsRef.current.size > cachedTreeRef.current.length / 2 && cachedTreeRef.current.length > 5) {
+                                addLog("PATH SET STALE. RESETTING PURIFICATION LOG.", "warning");
+                                pathsRef.current.clear();
+                            }
+                            addLog(`MAPPED ${cachedTreeRef.current.length} CANDIDATES.`, "info");
+                        }
+                        
+                        const candidates = cachedTreeRef.current.filter(f => !pathsRef.current.has(f.path));
+                        
+                        if (candidates.length === 0) {
+                            addLog("ALL CANDIDATES PURIFIED. REINITIALIZING SCAN.", "success");
+                            pathsRef.current.clear(); // Full reset
+                            cachedTreeRef.current = null; // Force tree refresh
+                            await jitterSleep(60000); // Long wait for repo changes
+                            continue;
+                        }
+
+                        const target = candidates[Math.floor(Math.random() * candidates.length)];
+                        
+                        dispatch({ type: 'SET_PREVIEW', payload: { path: target.path, status: 'LOCKING' } });
+                        
+                        // 3. Fetch content
+                        const content = await fetchAPI(`https://api.github.com/repos/${config.repoOwner}/${config.repoName}/contents/${target.path}?ref=main`, { method: 'GET' });
+                        const original = SAFE_DECODE(content.content);
+                        
+                        dispatch({ type: 'SET_PREVIEW', payload: { before: original, status: 'PURIFYING', sha: content.sha } });
+                        addLog(`ANALYZING: ${target.path}`, "warning");
+                        
+                        // 4. Gemini Evolution Request
+                        const geminiRes = await fetchAPI(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${config.geminiKey}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                            body: JSON.stringify({ 
+                                contents: [{ 
+                                    parts: [{ 
+                                        text: `You are DARLIK KHAN, an AI dedicated to superior code evolution. You must optimize the provided code for structure, performance, and bug fixes. Only return the raw, evolved code. Do not add any explanatory text, commentary, or markdown markers (e.g., \`\`\`js). The output must be ready to replace the input file exactly.\n\nFILE: ${target.path}\nCODE:\n${original}` 
+                                    }] 
+                                }] 
+                            })
+                        });
+
+                        const rawResponseText = geminiRes.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                        // Attempt to strip leading/trailing markdown fences if present (defense mechanism)
+                        let evolved = rawResponseText.replace(/^```[a-z]*\n/i, '').replace(/\n```$/, '').trim();
+                        
+                        // 5. Commit Check & Execution
+                        if (evolved.length > 10 && evolved !== original.trim()) {
+                            await fetchAPI(`https://api.github.com/repos/${config.repoOwner}/${config.repoName}/contents/${target.path}`, {
+                                method: 'PUT',
+                                body: JSON.stringify({ 
+                                    message: `DARLIK_KHAN: EVOLVED NODE ${target.path}`, 
+                                    content: SAFE_ENCODE(evolved), 
+                                    sha: content.sha,
+                                    branch: branchRef.current // Commit to the dedicated branch
+                                })
+                            });
+                            dispatch({ type: 'SET_PREVIEW', payload: { after: evolved, status: 'COMMITTED' } });
+                            addLog(`NODE EVOLVED: ${target.path}`, "success", "DI");
+                        } else {
+                            addLog(`NODE OPTIMAL OR NO CHANGE: ${target.path}`, "info");
+                            dispatch({ type: 'SET_PREVIEW', payload: { after: evolved, status: 'STABLE' } });
+                        }
+
+                        pathsRef.current.add(target.path);
+                        addLog("COOLDOWN INITIATED...", "info", "AC");
+                        await jitterSleep(20000); 
+                        dispatch({ type: 'SET_PREVIEW', payload: INITIAL_STATE.preview });
+
+                    }
+                } catch (e) {
+                    if (e.name !== 'AbortError') {
+                        addLog(`CATASTROPHIC FAULT: ${e.message}`, "error");
+                        await jitterSleep(60000);
+                    }
+                    stop();
+                }
+            };
+
+            const stop = () => { 
+                loopActive.current = false; 
+                dispatch({ type: 'TOGGLE_RUNNING', payload: false });
+                abortController.current?.abort(); 
+                addLog("CORE DISENGAGED.", "error", "AC"); 
+            };
+            
+            const handleConfigChange = (key, value) => {
+                dispatch({ type: 'UPDATE_CONFIG', payload: { [key]: value } });
+            };
+
+            const initializeSystem = () => {
+                if (!config.ghToken || !config.geminiKey || !config.repoOwner || !config.repoName) {
+                    addLog("MISSING CREDENTIALS. HALT.", "error");
+                    return;
+                }
+                // Persist secrets safely (obfuscated)
+                localStorage.setItem(STORAGE_KEYS.TOKEN, SAFE_ENCODE(config.ghToken));
+                localStorage.setItem(STORAGE_KEYS.KEY, SAFE_ENCODE(config.geminiKey));
+                localStorage.setItem(STORAGE_KEYS.OWNER, config.repoOwner);
+                localStorage.setItem(STORAGE_KEYS.REPO, config.repoName);
+                
+                // Reset branch forcing new creation or use of persistent value
+                // branchRef.current = null; 
+                // localStorage.removeItem(STORAGE_KEYS.BRANCH);
+                
+                window.location.reload();
+            };
+
+            useEffect(() => { 
+                logEndRef.current?.scrollIntoView({ behavior: 'smooth' }); 
+            }, [logs]);
+
+            // Ensure cleanup on unmount/re-render
+            useEffect(() => stop, []);
+
+            // Error Boundary replacement (for cleaner inline structure)
+            const isConfigMissing = !config.ghToken;
+            if (isConfigMissing) {
+                 return (
+                    <div className="fixed inset-0 bg-black z-[200] flex items-center justify-center">
+                        <div className="w-72 space-y-5 border border-red-950 p-10 bg-[#050000] shadow-xl shadow-red-950/20">
+                            <h1 className="text-red-800 text-center font-bold tracking-[0.8em] text-xs">RECALIBRATE_CORE</h1>
+                            <div className="space-y-3">
+                                <input placeholder="GH OWNER (e.g., USER)" value={config.repoOwner} onChange={e => handleConfigChange('repoOwner', sanitize(e.target.value, 'github'))} className="w-full bg-black border border-zinc-900 p-2 text-white text-[9px] outline-none focus:border-red-900" />
+                                <input placeholder="REPO NAME (e.g., PROJECT)" value={config.repoName} onChange={e => handleConfigChange('repoName', sanitize(e.target.value, 'github'))} className="w-full bg-black border border-zinc-900 p-2 text-white text-[9px] outline-none focus:border-red-900" />
+                                <input type="password" placeholder="GH TOKEN (REQUIRED)" value={config.ghToken} onChange={e => handleConfigChange('ghToken', sanitize(e.target.value))} className="w-full bg-black border border-zinc-900 p-2 text-white text-[9px] outline-none focus:border-red-900" />
+                                <input type="password" placeholder="GEMINI API KEY (REQUIRED)" value={config.geminiKey} onChange={e => handleConfigChange('geminiKey', sanitize(e.target.value))} className="w-full bg-black border border-zinc-900 p-2 text-white text-[9px] outline-none focus:border-red-900" />
+                            </div>
+                            <button 
+                                onClick={initializeSystem} 
+                                disabled={!config.ghToken || !config.geminiKey || !config.repoOwner || !config.repoName}
+                                className="w-full border border-red-900 text-red-900 py-2 text-[9px] font-bold tracking-widest hover:bg-red-900 hover:text-black transition-all disabled:opacity-50 disabled:hover:bg-transparent"
+                            >
+                                INITIALIZE_LINK
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+
+            return (
+                <div className={`h-screen w-screen flex flex-col relative bg-black ${isRunning ? 'active' : ''}`}>
+                    <div className="scanline"></div>
+                    <DalekSVG className="dalek-wireframe" />
+
+                    {/* TOP HEADER */}
+                    <div className="h-10 border-b border-[#111] flex items-center justify-between px-5 bg-black z-50">
+                        <div className="flex gap-10 items-center">
+                            <span className="text-red-800 font-bold text-[10px] tracking-[0.4em]">DARLIK KHAN CORE</span>
+                            <div className="flex gap-4">
+                                <span className={`status-tag ${isRunning ? 'text-green-900 border-green-900' : 'text-red-900 border-red-900'}`}>{isRunning ? 'ONLINE' : 'OFFLINE'}</span>
+                                <span className="text-[8px] text-zinc-800 self-center uppercase tracking-widest">P. Nodes: {pathsRef.current.size} / Mutations: {principles.DI}</span>
+                            </div>
+                        </div>
+                        <div className="flex gap-2 items-center">
+                             {/* Principles Tracker */}
+                            <span className="text-[7px] text-zinc-800 uppercase tracking-widest hidden md:inline-flex gap-3">
+                                <span>SI:{principles.SI}</span>
+                                <span>DI:{principles.DI}</span>
+                                <span>AC:{principles.AC}</span>
+                            </span>
+                            
+                            <button onClick={isRunning ? stop : startEvolution} className={`text-[8px] px-6 py-1 border font-bold tracking-widest transition-all ${isRunning ? 'border-red-900 text-red-700 bg-red-950/5 hover:bg-red-950/20' : 'border-zinc-900 text-zinc-600 hover:text-zinc-400'}`}>
+                                {isRunning ? 'HALT_SYSTEM' : 'ENGAGE_SYSTEM'}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* DUAL STREAM */}
+                    <div className="flex-1 flex min-h-0 border-b border-[#111]">
+                        <div className="flex-1 border-r border-[#111] flex flex-col bg-[#020202]/50 overflow-hidden">
+                            <div className="panel-header">Raw_Input_Stream: {preview.path || 'awaiting target'}</div>
+                            <div className="flex-1 overflow-auto code-block raw-text terminal-scroll">{preview.before}</div>
+                        </div>
+                        <div className="flex-1 flex flex-col bg-[#040000]/30 overflow-hidden">
+                            <div className="panel-header text-red-950">
+                                Neural_Output_Stream
+                                <span className="ml-auto text-[7px] animate-pulse font-normal text-red-900">STATE: {preview.status}</span>
+                            </div>
+                            <div className="flex-1 overflow-auto code-block purified-text terminal-scroll">{preview.after}</div>
+                        </div>
+                    </div>
+
+                    {/* TELEMETRY CONSOLE */}
+                    <div className="h-44 bg-black flex flex-col">
+                        <div className="panel-header">Tactical_Telemetry</div>
+                        <div className="flex-1 overflow-y-auto p-4 text-[9px] space-y-1 terminal-scroll">
+                            {logs.map(l => (
+                                <div key={l.id} className="flex gap-6 border-l border-transparent hover:border-red-900/50 pl-2 transition-all">
+                                    <span className="text-zinc-900 font-bold">[{l.time}]</span>
+                                    <span className={l.type === 'success' ? 'text-green-800' : l.type === 'error' ? 'text-red-700' : l.type === 'warning' ? 'text-yellow-800' : 'text-zinc-700'}>
+                                        {l.msg}
+                                    </span>
+                                </div>
+                            ))}
+                            <div ref={logEndRef} />
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => (
+            <React.StrictMode>
+                <DarlikKhanCore />
+            </React.StrictMode>
+        );
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

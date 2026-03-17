@@ -1,0 +1,35 @@
+{
+  "spec_name": "Federated Decentralized Learning Specification (FDL-S)",
+  "version": "1.0.0-rc3",
+  "metadata": {
+    "protocol_purpose": "Enforce secure, efficient, and auditable parameter synchronization across autonomous agents.",
+    "required_encoding": "Protobuf v3 with optional FlatBuffers optimization for zero-copy deserialization"
+  },
+  "data_types": {
+    "tensor_serialization": {
+      "format": "Protocol Buffer Blob (PBB)",
+      "compression": "Zstd (Level 5)",
+      "precision": "FP16 or BF16 (Mandatory)",
+      "checksum": "CRC-64/ISO"
+    },
+    "model_artifact": {
+      "architecture_hash": "SHA3-512 (Deterministic Schema Hash)",
+      "checkpoint_state": "Merkle Tree Root Hash",
+      "fields": ["architecture_hash", "parameter_root", "epoch_id"]
+    },
+    "delta_update": {
+      "type": "Sparse Parameter Delta (SPD)",
+      "efficiency_constraint": "Minimum 90% sparsity required for transmission",
+      "security_signature": "ECDSA-P384"
+    }
+  },
+  "message_catalog": {
+    "MSG_001_WEIGHT_REQUEST": {"payload": ["artifact_id", "version_range", "latency_budget_ms"], "ttl": 3000},
+    "MSG_002_WEIGHT_SUBMISSION": {"payload": ["delta_update", "proof_of_contribution"], "security_level": "L2 (Authenticated & Signed)"}
+  },
+  "governance": {
+    "consensus_mechanism": "N-Stake Weighted Average (NAW) with reputation decay",
+    "conflict_resolution": "Deterministic State Reversion (via DAG Checkpointing)",
+    "required_latency_ms": 75
+  }
+}

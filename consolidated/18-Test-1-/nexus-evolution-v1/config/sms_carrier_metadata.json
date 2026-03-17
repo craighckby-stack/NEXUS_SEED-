@@ -1,0 +1,42 @@
+{
+  "version": "1.0",
+  "description": "Centralized metadata for all SMS carriers, referenced by routing policies.",
+  "profiles": [
+    {
+      "id": "TWLIO_DEDICATED_US",
+      "carrier_name": "Twilio Dedicated",
+      "region_support": ["US"],
+      "base_cost_per_message_usd": 0.015,
+      "service_level": "Premium",
+      "estimated_delivery_rate": 0.999,
+      "current_status": "operational"
+    },
+    {
+      "id": "VNG_PREMIUM_GLOBAL",
+      "carrier_name": "Vonage Premium",
+      "region_support": ["*"],
+      "base_cost_per_message_usd": 0.018,
+      "service_level": "High Priority",
+      "estimated_delivery_rate": 0.995,
+      "current_status": "operational"
+    },
+    {
+      "id": "AWS_SNS_STANDARD",
+      "carrier_name": "AWS SNS",
+      "region_support": ["*"],
+      "base_cost_per_message_usd": 0.045,
+      "service_level": "Backup/Utility",
+      "estimated_delivery_rate": 0.95,
+      "current_status": "operational"
+    },
+    {
+      "id": "NXM_STANDARD_EU_BULK",
+      "carrier_name": "Nexmo Bulk EU",
+      "region_support": ["EU"],
+      "base_cost_per_message_usd": 0.009,
+      "service_level": "Bulk/Marketing",
+      "estimated_delivery_rate": 0.97,
+      "current_status": "operational"
+    }
+  ]
+}

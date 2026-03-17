@@ -1,0 +1,64 @@
+{
+  "version": "3.0.0",
+  "meta": {
+    "description": "Defines core constraints, entity schemas, validation rules, and optimization hints for PIM data.",
+    "last_updated": "2024-06-20T09:30:00Z"
+  },
+  "constraints": {
+    "Required": {"type": "Presence", "value": true},
+    "Unique": {"type": "Uniqueness"},
+    "PositiveOrZero": {"type": "Range", "min": 0},
+    "AlphanumericDash": {"type": "Format", "pattern": "^[a-zA-Z0-9\\-]+"}
+  },
+  "entities": {
+    "Product": {
+      "schema_id": "pim.Product.v2",
+      "fields": {
+        "sku": { 
+          "dataType": "String", 
+          "maxLength": 64,
+          "indexing": "PrimaryKey",
+          "validation_rules": ["Required", "Unique", "AlphanumericDash"]
+        },
+        "price_usd": { 
+          "dataType": "Decimal", 
+          "precision": 2,
+          "validation_rules": ["Required", "PositiveOrZero"]
+        },
+        "category_uuid": { 
+          "dataType": "UUID", 
+          "reference": "Category", 
+          "on_delete": "Restrict",
+          "indexing": "ForeignIndex",
+          "validation_rules": ["Required"]
+        }
+      },
+      "policies_applied": ["ECommerce_Standard", "Localization_EN_US"]
+    }
+  },
+  "policies": {
+    "ECommerce_Standard": {
+      "severity": "Error",
+      "rules": [
+        {
+          "field": "Product.price_usd", 
+          "trigger": "if($.lifecycle.state == 'published')",
+          "validation_rule": "Required"
+        },
+        {
+          "field": "Product.description_long", 
+          "validation_rule": {
+            "type": "Dependency", 
+            "or": ["description_short", "description_bullet_points"]
+          }
+        }
+      ]
+    },
+    "Localization_EN_US": {
+      "severity": "Warning",
+      "rules": [
+        {"field": "Product.title_en_us", "validation_rule": {"type": "MaxLength", "value": 255}}
+      ]
+    }
+  }
+}

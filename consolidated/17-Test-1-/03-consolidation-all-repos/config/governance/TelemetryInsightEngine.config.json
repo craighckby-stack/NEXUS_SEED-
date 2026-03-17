@@ -1,0 +1,45 @@
+{
+  "engineName": "TelemetryInsightEngine_v94.1",
+  "status": "Active",
+  "resourceAllocation": {
+    "maxCPUUtilization": "75%",
+    "memoryFootprintLimitMB": 2048,
+    "priorityTier": "GovernanceCritical"
+  },
+  "dataSources": [
+    { "sourceId": "CoreExecutionLog", "schemaVersion": "v4.0" },
+    { "sourceId": "SelfCorrectionPipeline", "schemaVersion": "v2.1" },
+    { "sourceId": "ModuleAPI_LatencyMetrics", "schemaVersion": "v1.5" }
+  ],
+  "samplingStrategy": {
+    "type": "DifferentialCriticality",
+    "defaultRate": 0.05,
+    "criticalityOverrides": [
+      { "eventRegex": ".*ERROR|FATAL.*", "rate": 1.0, "bufferPolicy": "ImmediateFlush" },
+      { "eventRegex": "PerformanceMetric:Latency>100ms", "rate": 0.5 },
+      { "eventRegex": "GovernancePolicyViolation", "rate": 1.0 }
+    ],
+    "adaptiveAdjustmentEnabled": true
+  },
+  "insightModels": [
+    {
+      "modelId": "AnomalyDetection_Bayesian",
+      "triggerThreshold": 0.95,
+      "lookbackWindow": "4h",
+      "modelPath": "models/telemetry/bayesian_anomaly_v94.pkl"
+    },
+    {
+      "modelId": "PerformanceBottleneck_RootCause",
+      "triggerThreshold": "SeverityHigh",
+      "lookbackWindow": "30m"
+    }
+  ],
+  "governanceActionHooks": {
+    "enabled": true,
+    "targetQueue": "Sovereign_Refactoring_Queue",
+    "insightMapping": {
+      "HighAnomaly": "TriggerAutomatedPolicyReview",
+      "PerformanceBottleneck": "GenerateOptimizationScaffold"
+    }
+  }
+}

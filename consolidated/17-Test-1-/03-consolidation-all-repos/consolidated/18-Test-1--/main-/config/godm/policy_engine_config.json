@@ -1,0 +1,24 @@
+{
+  "supported_operators": {
+    "StringEquals": {
+      "type": "string",
+      "handler": "builtin:str_eq"
+    },
+    "NumericLessThan": {
+      "type": "number",
+      "handler": "builtin:num_lt"
+    },
+    "IpAddress": {
+      "type": "cidr",
+      "handler": "plugin:ip_evaluator_v1.check"
+    },
+    "TimeBefore": {
+      "type": "timestamp",
+      "handler": "builtin:time_eval"
+    }
+  },
+  "context_mapping": {
+    "resource:tags": "DynamoDB.PolicyContext",
+    "request:sourceIp": "RequestContext.IP"
+  }
+}

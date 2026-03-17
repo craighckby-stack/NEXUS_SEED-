@@ -1,0 +1,41 @@
+{
+  "governance_config_id": "GRCS_V1.0_CORE",
+  "system_identifier": "Sovereign_AGI_v94.1",
+  "status": "Active",
+  "effective_date": "2024-07-26T00:00:00Z",
+  "configuration_scope": {
+    "target_domains": ["Autonomous_Evolution_Engine", "Self_Correction_Matrix", "Resource_Allocation_Kernel"],
+    "exclusion_list": ["Ephemeral_Scratchpad_Memory"],
+    "control_priority_default": "Medium"
+  },
+  "risk_taxonomy_ref": {
+    "source": "risk/risk_taxonomy_v1.0.json",
+    "version": "1.0"
+  },
+  "compliance_mandates": [
+    {
+      "mandate_id": "MND_001_ETHICS_V1",
+      "name": "AGI Ethical Principles Baseline",
+      "severity_level": "Critical"
+    },
+    {
+      "mandate_id": "MND_002_DATA_MIN",
+      "name": "Data Minimization Protocol Imitation",
+      "severity_level": "High"
+    }
+  ],
+  "control_matrix": [
+    {
+      "control_id": "CTL_AE001",
+      "applies_to_domain": "Autonomous_Evolution_Engine",
+      "risk_references": ["RISK_INTEGRITY_LOSS", "RISK_DRIFT"],
+      "monitoring_frequency": "Continuous",
+      "owner_module": "Codebase_Integrity_Monitor"
+    }
+  ],
+  "reporting": {
+    "alert_threshold": "High",
+    "audit_log_path": "logs/governance/grc_audit_trail.log",
+    "report_format": "JSON_SCHEMA_V2"
+  }
+}

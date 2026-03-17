@@ -1,0 +1,19 @@
+AIA_ROLLBACK_POLICY_VERSION: 1.0
+
+# Mandates configuration for the Atomic Execution & Orchestration Registrar (AEOR)
+# regarding authorized state reversal paths in compliance with AIA standards.
+
+AEOR_ROLLBACK_ACCESS:
+  LOCK_TIMEOUT_MS: 30000
+  AUTH_CRYPTO_KEY_ID: 'K_AEOR_REV_V971'
+  EXECUTION_ENVIRONMENT: 'GSEP/Stage4/PostCommit'
+
+STATE_CAPTURE_REQUIREMENTS:
+  MINIMUM_RETAIN_VERSION: 5
+  ATTESTATION_SOURCES:
+    - D-01
+    - MCR
+  
+DEPLOYMENT_ISOLATION_MAPPING:
+  C04_AUDIT_REQUIRED: true
+  ROLLBACK_SCOPE: 'SERVICE_LEVEL_IMMUTABILITY'

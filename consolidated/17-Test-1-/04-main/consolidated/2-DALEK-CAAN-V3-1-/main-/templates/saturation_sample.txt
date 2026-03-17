@@ -1,0 +1,22 @@
+# DALEK_CAAN SATURATION GUIDELINES
+
+These guidelines define the "Theoretical Ideas" and "Saturation Constraints" 
+that the Siphon Engine must adhere to during the mutation process.
+
+## 1. Architectural Constraints
+- **Immutability**: Prefer immutable data structures. Never mutate function arguments.
+- **Error Handling**: Every asynchronous operation must be wrapped in a try/catch block with specific error logging.
+- **Type Safety**: Use strict TypeScript types. Avoid `any` at all costs. Use `unknown` if the type is truly dynamic.
+
+## 2. Coding Style
+- **Naming**: Use PascalCase for classes, camelCase for variables/functions, and UPPER_SNAKE_CASE for constants.
+- **Documentation**: Every public method must have a JSDoc comment explaining its purpose and parameters.
+- **Modularity**: No file should exceed 300 lines. If it does, split it into sub-modules.
+
+## 3. Performance Targets
+- **Lazy Loading**: Defer heavy computations until absolutely necessary.
+- **Memoization**: Use `useMemo` or custom caching for expensive derived data.
+
+## 4. Security
+- **Sanitization**: All user-provided input must be sanitized before being used in database queries or UI rendering.
+- **Secrets**: Never hardcode API keys or tokens. Use environment variables.

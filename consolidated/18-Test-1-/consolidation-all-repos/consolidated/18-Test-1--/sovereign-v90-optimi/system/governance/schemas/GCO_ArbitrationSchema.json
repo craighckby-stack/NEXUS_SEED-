@@ -1,0 +1,32 @@
+{
+  "schema_id": "GCO_ArbitrationSchema",
+  "version": "1.0",
+  "purpose": "Defines the structure for L4 Commitment Arbitration Input and Output data logging.",
+  "inputs": {
+    "u_norm_score": {
+      "type": "float",
+      "required": true
+    },
+    "r_g_score": {
+      "type": "float",
+      "required": true
+    }
+  },
+  "outputs": {
+    "decision": {
+      "type": "enum",
+      "values": ["APPROVED", "DENIED", "PENDING_GSEP"]
+    },
+    "timestamp_utc": {
+      "type": "string:datetime",
+      "format": "ISO8601"
+    },
+    "thresholds_applied": {
+      "ref": "GTCM",
+      "used_constants": ["COMMITMENT_UTILITY_MIN", "GOVERNANCE_RISK_MAX"]
+    },
+    "justification_log": {
+      "type": "string"
+    }
+  }
+}

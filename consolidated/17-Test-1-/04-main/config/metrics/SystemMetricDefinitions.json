@@ -1,0 +1,26 @@
+{
+  "systemVersion": "v94.1",
+  "description": "Canonical definitions and retrieval methods for all governance metrics used in EPB and RiskSchemas.",
+  "metrics": [
+    {
+      "metricId": "dependency_change_count",
+      "type": "integer",
+      "unit": "count",
+      "description": "The count of external dependencies whose configuration or version is altered.",
+      "derivationSource": "VCS_DIFF_ENGINE"
+    },
+    {
+      "metricId": "safety_critical_module_impact",
+      "type": "boolean",
+      "description": "Flag indicating if the change touches a module flagged as safety-critical.",
+      "derivationSource": "CODE_MAPPER_SERVICE"
+    },
+    {
+      "metricId": "data_sensitivity_level",
+      "type": "enum",
+      "allowedValues": ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+      "description": "Sensitivity classification of data handled.",
+      "derivationSource": "DATA_CLASSIFICATION_MAPPER"
+    }
+  ]
+}

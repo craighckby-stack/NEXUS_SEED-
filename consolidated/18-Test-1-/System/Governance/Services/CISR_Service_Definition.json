@@ -1,0 +1,19 @@
+{
+  "service_id": "CertifiedIntermediateStateRegistry (CISR)",
+  "role": "Custodian of Certified State Maps (CISM)",
+  "purpose": "Ensure immutable, hash-locked availability of all CISM snapshots required for GEDM validation and subsequent stage execution.",
+  "interface": {
+    "RegisterStateSnapshot": {
+      "input": ["IntermediateStateMap", "VerifierSignature"],
+      "output": ["CISM_Reference_Pointer ($M$)", "RootHash"],
+      "constraints": ["Requires consensus signature for certification.", "Must generate a Merkle root hash for immutability locking."]
+    },
+    "RetrieveReference": {
+      "input": ["StateUID", "ExpectedRootHash"],
+      "output": "CISM_Reference_Pointer ($M$)",
+      "security_mandate": "Verify requested RootHash against registered hash prior to returning pointer."
+    }
+  },
+  "integration_point": "GEDM requires $M$ from CISR prior to any verification cycle.",
+  "integrity_guarantee": "The CISR is the definitive source of Attested, Immutable State data for the entire Governance layer."
+}

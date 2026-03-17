@@ -1,0 +1,27 @@
+{
+  "level_schema_version": "1.0",
+  "description": "Standardized severity matrix used to interpret metric breaches across governance bundles.",
+  "levels": [
+    {
+      "id": "L0_CRITICAL",
+      "priority": 0,
+      "description": "Immediate threat to core policies, requiring automated or manual emergency stop/remediation.",
+      "action_protocol_id": "NCP-AOS_001_EMERGENCY_HALT",
+      "required_response": "HALT_EXECUTION"
+    },
+    {
+      "id": "L1_HIGH",
+      "priority": 1,
+      "description": "Significant policy deviation detected, requiring automated internal governance review and logging.",
+      "action_protocol_id": "NCP-AOS_102_GOV_REVIEW",
+      "required_response": "AUTO_LOG_AND_FLAG"
+    },
+    {
+      "id": "L2_MEDIUM",
+      "priority": 2,
+      "description": "Minor policy deviation or environmental warning.",
+      "action_protocol_id": "NCP-AOS_203_LOG_WARNING",
+      "required_response": "ALERT_OPS_CONSOLE"
+    }
+  ]
+}

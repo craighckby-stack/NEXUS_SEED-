@@ -1,0 +1,25 @@
+# Deployment Stability Watchdog (DSW) V1.0 Configuration
+# Defines real-time operational thresholds for Stage 6 payload monitoring (Post-Commitment).
+# Violations mandate immediate S-02 Risk Floor tightening (via MCRA) or system rollback.
+
+stabilization_period_seconds: 900 # 15 minutes post-activation before full DSW criteria apply
+
+# METRIC CONSTRAINTS
+core_telemetry_thresholds:
+  average_latency_ms:
+    max: 500
+    consecutive_violations: 10
+  error_rate_percent:
+    max: 0.1
+    window_minutes: 5
+  resource_utilization_gflops:
+    max_increase_percent: 5 # Max relative increase above baseline (pre-M-02)
+
+# TRIGGER ACTIONS
+constraint_escalation:
+  violation_tier_1:
+    criteria: [average_latency_ms, error_rate_percent]
+    action: INCREASE_S02_RISK_FLOOR_15_PERCENT
+  violation_tier_2:
+    criteria: [resource_utilization_gflops]
+    action: FORCE_SYSTEM_REBOOT_TO_LAST_KNOWN_GOOD_STATE

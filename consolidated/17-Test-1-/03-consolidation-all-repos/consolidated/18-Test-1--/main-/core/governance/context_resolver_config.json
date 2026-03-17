@@ -1,0 +1,23 @@
+{
+  "resolver_version": "1.0.0",
+  "default_context": "Routine_Operations",
+  "context_definitions": [
+    {
+      "context_name": "Emergency_Response",
+      "priority_level": 900,
+      "dynamic_overrides": {
+        "S-01_Efficacy_Score": {"weight_multiplier": 1.15},
+        "S-02_Risk_Exposure": {"tolerance_override": 0.10} 
+      },
+      "description": "Prioritizes operational stability and speed; temporarily loosens acceptable risk thresholds."
+    },
+    {
+      "context_name": "High_Load_Stress_Test",
+      "priority_level": 550,
+      "dynamic_overrides": {
+        "S-01_Efficacy_Score": {"required_pass_score_override": 85.0}
+      },
+      "description": "Requires higher Efficacy baseline adherence to confirm resilience during non-critical high load testing."
+    }
+  ]
+}

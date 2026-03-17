@@ -1,0 +1,19 @@
+{
+  "GMIP_VERSION": "V2.0",
+  "STANDARD_ID": "MCS-V1.2",
+  "HASHING_ALGORITHM": "SHA3-256",
+  "CANONICALIZATION_IMPLEMENTATION": "JSON_CANONICAL_STANDARD_RFC8785",
+  "MANIFEST_FIELDS_INCLUSION_LIST": [
+    "schemaId",
+    "policyDefinitions",
+    "vetoGates",
+    "resourceControls"
+  ],
+  "METADATA_EXCLUSION_FOR_HASHING": [
+    "timestamp_local",
+    "signer_identity",
+    "MAS",
+    "deployment_target"
+  ],
+  "REASONING": "Provides a deterministic specification for Manifest Root Hash ($M_H$) generation, ensuring inter-agent consistency (GAX/CRoT) and preventing hash mismatches that would break the Manifest Hash Chain (MHC)."
+}

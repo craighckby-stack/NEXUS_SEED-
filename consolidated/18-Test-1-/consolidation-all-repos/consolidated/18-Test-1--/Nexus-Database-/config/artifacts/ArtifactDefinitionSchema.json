@@ -1,0 +1,22 @@
+{
+  "artifact_types": {
+    "L0_Proposal": {
+      "description": "Initial evolutionary proposal.",
+      "hash_algorithm": "SHA-256",
+      "required_fields": ["goal", "metrics_target"]
+    },
+    "L1_C-FRAME": {
+      "description": "Conceptual Framework artifact.",
+      "hash_algorithm": "SHA-256",
+      "required_fields": ["design_spec", "risks"]
+    },
+    "L5_Commitment": {
+      "description": "Final system commitment artifact, requiring signing.",
+      "hash_algorithm": "SHA-384",
+      "required_fields": ["binary_hash", "signature", "validator_list"],
+      "policy": "immutable"
+    }
+    // ... other types L2, L3, L4
+  },
+  "schema_version": "1.0"
+}

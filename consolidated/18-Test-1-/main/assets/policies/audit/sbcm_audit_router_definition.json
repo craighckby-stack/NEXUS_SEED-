@@ -1,0 +1,30 @@
+{
+  "router_version": "v1.0",
+  "sinks": {
+    "AUDIT_LOG_STREAM": {
+      "endpoint": "https://logstream.sovereign.ai/audit",
+      "protocol": "HTTP/2",
+      "batch_size": 100,
+      "max_latency_ms": 500
+    },
+    "SECURITY_EVENTS": {
+      "endpoint": "udp://10.0.0.5:514",
+      "protocol": "SYSLOG_CEF",
+      "encryption": "TLS1.3",
+      "rate_limit_per_s": 5000
+    },
+    "TELEMETRY_DATALAKE": {
+      "endpoint": "kafka://telemetry-bus-9",
+      "topic": "sbcm_raw_telemetry",
+      "retention_days": 90,
+      "compression": "ZSTD"
+    }
+  },
+  "fallback_storage": {
+    "LOCAL_DISK": {
+      "path": "/var/log/sbcm/failover",
+      "max_disk_usage_gb": 10,
+      "upload_on_recovery": true
+    }
+  }
+}

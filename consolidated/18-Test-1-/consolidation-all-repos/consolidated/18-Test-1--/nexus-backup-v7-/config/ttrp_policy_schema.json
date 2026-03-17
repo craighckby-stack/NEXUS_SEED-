@@ -1,0 +1,140 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://gsep.ai/schemas/ttrp_policy_v2.1.json",
+  "type": "object",
+  "title": "Telemetry Transport and Retention Policy (TTRP) Schema v2.1 (Enhanced Operational Rigor)",
+  "description": "Defines modular policies for handling, routing, and retaining diagnostic and forensic telemetry, introducing explicit storage tiering and latency controls.",
+  "required": [
+    "TRANSPORT_CONFIGURATION",
+    "RETENTION_POLICIES"
+  ],
+  "definitions": {
+    "RateLimitingAction": {
+      "type": "string",
+      "enum": [
+        "DROP",
+        "SAMPLE",
+        "DEGRADE_PAYLOAD",
+        "BUFFER"
+      ],
+      "description": "Action taken when the rate limit is exceeded."
+    },
+    "RateLimitingPolicy": {
+      "type": "object",
+      "properties": {
+        "MAX_TPS": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum transactions per second allowed."
+        },
+        "ON_EXCEED": {
+          "$ref": "#/definitions/RateLimitingAction"
+        }
+      },
+      "required": [
+        "MAX_TPS",
+        "ON_EXCEED"
+      ],
+      "additionalProperties": false
+    },
+    "TransportEndpoint": {
+      "type": "object",
+      "properties": {
+        "URI": {
+          "type": "string",
+          "format": "uri",
+          "description": "Target endpoint URI."
+        },
+        "AUTH_METHOD": {
+          "type": "string",
+          "enum": [
+            "TLS_CLIENT_CERT",
+            "OAUTH2_JWT",
+            "API_KEY_ROTATING"
+          ],
+          "description": "Required mechanism for endpoint authentication."
+        },
+        "MAX_LATENCY_MS": {
+          "type": "integer",
+          "minimum": 10,
+          "description": "Maximum tolerated end-to-end transport latency before queueing or policy failure."
+        }
+      },
+      "required": [
+        "URI",
+        "AUTH_METHOD"
+      ],
+      "additionalProperties": false
+    },
+    "RetentionRule": {
+      "type": "object",
+      "properties": {
+        "HOT_STORAGE_DAYS": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Retention period in primary, immediately-accessible storage (days). 0 moves data directly to cold."
+        },
+        "COLD_STORAGE_DAYS": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Total required retention period, encompassing the hot storage phase (days)."
+        },
+        "MAX_VOLUME_MB_PER_DAY": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Optional hard cap on total daily ingress volume retained for cost control. 0 means unlimited."
+        }
+      },
+      "required": [
+        "COLD_STORAGE_DAYS"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "TRANSPORT_CONFIGURATION": {
+      "type": "object",
+      "description": "Settings for secure transmission, defining standard targets and default constraints.",
+      "properties": {
+        "CRITICAL_TRANSPORT_TARGET": {
+          "description": "Configuration for high-availability, low-latency critical data transport.",
+          "$ref": "#/definitions/TransportEndpoint"
+        },
+        "STANDARD_TRANSPORT_TARGET": {
+          "description": "Configuration for standard throughput-optimized data transport.",
+          "$ref": "#/definitions/TransportEndpoint"
+        },
+        "DEFAULT_RATE_LIMIT": {
+          "description": "Default rate limit policy applied to all streams not explicitly configured otherwise.",
+          "$ref": "#/definitions/RateLimitingPolicy"
+        },
+        "ENFORCE_E2E_ENCRYPTION": {
+          "type": "boolean",
+          "description": "If TRUE, mandates end-to-end encryption for all payloads (ACVD requirement)."
+        }
+      },
+      "required": [
+        "CRITICAL_TRANSPORT_TARGET",
+        "STANDARD_TRANSPORT_TARGET",
+        "DEFAULT_RATE_LIMIT",
+        "ENFORCE_E2E_ENCRYPTION"
+      ],
+      "additionalProperties": false
+    },
+    "RETENTION_POLICIES": {
+      "type": "object",
+      "description": "Map defining mandatory retention requirements by telemetry priority level (e.g., FORENSIC, DIAGNOSTIC).",
+      "patternProperties": {
+        "^[A-Z0-9_]+$": {
+          "$ref": "#/definitions/RetentionRule"
+        }
+      },
+      "required": [
+        "FORENSIC",
+        "DIAGNOSTIC"
+      ],
+      "minProperties": 2
+    }
+  },
+  "additionalProperties": false
+}

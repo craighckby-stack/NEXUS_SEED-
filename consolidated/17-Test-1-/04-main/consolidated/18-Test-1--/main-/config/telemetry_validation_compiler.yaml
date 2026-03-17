@@ -1,0 +1,24 @@
+telemetry_validation:
+  compiler_engine: Sovereign.AjvCompiler.v1.2
+  source_directory: "protocol/"
+  target_cache_directory: "runtime_cache/compiled_validators/"
+  compiler_mode: high_speed_production
+  
+  # List of protocols requiring low-latency compilation
+  schemas_to_compile:
+    - name: MPAM_Validator
+      schema_ref: "telemetry_validation_schemas.json#/schemas/MPAM_Event"
+    - name: SGS_Validator
+      schema_ref: "telemetry_validation_schemas.json#/schemas/SGS_Event"
+    - name: ADTM_Validator
+      schema_ref: "telemetry_validation_schemas.json#/schemas/ADTM_Event"
+  
+  compilation_flags:
+    # Optimized for fast runtime checks
+    optimize_for_speed: true
+    remove_additional_properties: true
+    use_defaults: true
+    coerce_types: true
+    strict_uri_format: true
+
+validation_service_binding: DIAL_001_INGRESS_BUFFER

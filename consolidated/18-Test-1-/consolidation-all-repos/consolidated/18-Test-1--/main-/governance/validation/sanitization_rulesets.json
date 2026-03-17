@@ -1,0 +1,23 @@
+{
+  "ruleset_manifest_version": "V1.0",
+  "description": "Centralized registry for data cleaning and transformation rules used by the EDIS layer.",
+  "rulesets": [
+    {
+      "id": "CostNormalization_R4",
+      "purpose": "Standard normalization and cleaning for raw resource cost forecast data.",
+      "pipeline": [
+        {"step": "TYPE_CASTING", "params": {"fields": ["unit_cost", "volume"], "target": "float64"}},
+        {"step": "RANGE_CHECK", "params": {"field": "unit_cost", "min": 0.01, "max": 1000000.0, "mode": "FLAG"}},
+        {"step": "OUTLIER_SMOOTHING", "params": {"field": "unit_cost", "method": "Z-score", "threshold": 3.5, "fill": "Median"}},
+        {"step": "TIME_ALIGNMENT", "params": {"target_frequency": "WEEKLY", "aggregation_method": "SUM"}}
+      ]
+    },
+    {
+      "id": "VectorCleaning_R1",
+      "purpose": "Basic cleaning for operational risk vectors, handles missing values.",
+      "pipeline": [
+        {"step": "NULL_IMPUTATION", "params": {"strategy": "ZERO", "fields": ["risk_score_a", "risk_score_b"]}}
+      ]
+    }
+  ]
+}

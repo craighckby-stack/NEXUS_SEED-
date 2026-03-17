@@ -1,0 +1,31 @@
+{
+  "trigger_map_id": "T1_CRITICAL_INFRASTRUCTURE",
+  "description": "Maps telemetry events and anomaly scores to prioritized mitigation strategies defined in MP_1.1 for autonomous activation.",
+  "trigger_definitions": [
+    {
+      "trigger_name": "CORE_ANOMALY_OVERLOAD",
+      "condition_logic": "System.AnomalyScore > 0.95 OR Scheduler.BlockedThreads > 5",
+      "severity": "CRITICAL",
+      "target_strategy_id": "System_Pause_Self_Diagnosis",
+      "debounce_ms": 60000
+    },
+    {
+      "trigger_name": "MEMORY_LEAK_EVIDENCE",
+      "condition_logic": "Memory.Consumption.Delta > 0.3 * Baseline AND Uptime > 300",
+      "severity": "HIGH",
+      "target_strategy_id": "State_Rollback_Request",
+      "debounce_ms": 5000
+    },
+    {
+      "trigger_name": "L1_PATCHING_REQUIRED",
+      "condition_logic": "Self_Evolution_Module.ErrorCount > 3 AND System.ReliabilityIndex < 0.99",
+      "severity": "MODERATE",
+      "target_strategy_id": "L1_Self_Correction_Patch",
+      "debounce_ms": 1000
+    }
+  ],
+  "default_escalation": {
+    "strategy_id": "LOG_AND_ALERT",
+    "threshold": "LOW"
+  }
+}

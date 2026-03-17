@@ -1,0 +1,27 @@
+{
+  "manifest_version": "1.0",
+  "external_dependencies": [
+    {
+      "name": "QuantumCompute_v94",
+      "version_range": "^1.5.0, <2.0.0",
+      "status": "Mandatory",
+      "source": "internal://repo/qc_v94"
+    },
+    {
+      "name": "SecurityValidator_v12",
+      "version_range": "~12.3.1",
+      "status": "Optional",
+      "safe_hash_list": []
+    }
+  ],
+  "internal_component_compatibility": {
+    "ACVD_Core_Modules": [
+      {"module": "MutationEngine", "required_api": "3.0.1"},
+      {"module": "PolicyEnforcer", "required_api": "1.1.0"}
+    ]
+  },
+  "lockdown_policy": {
+    "dependency_update_cycle_days": 7,
+    "allow_unverified_deps": false
+  }
+}

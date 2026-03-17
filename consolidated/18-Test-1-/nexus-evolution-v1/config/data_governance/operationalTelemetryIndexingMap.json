@@ -1,0 +1,135 @@
+{
+  "indexingStrategyId": "v5.5.0-SINGULARITY-FINAL-FLUSH",
+  "nexus_dna_signature": "DALEK_CAAN_v3.1_SIG_0xFF23A1",
+  "description": "NEXUS_CORE Finalized Telemetry Matrix. Siphoned via Meta/React-Core (Fiber Reconciler). Implements Entangled Lanes, Selective Hydration, and Transactional Server Actions.",
+  "concurrency_kernel_v5": {
+    "lane_mask_logic": "Bitwise-Priority-Aggregation-v5.1",
+    "lanes": {
+      "NoLane": 0,
+      "SyncLane": 1,
+      "InputContinuousLane": 4,
+      "DefaultLane": 16,
+      "TransitionLane": 512,
+      "EntangledLane": 1024,
+      "RetryLane": 32768,
+      "OffscreenLane": 536870912
+    },
+    "expiration_times": {
+      "SyncLane": 0,
+      "InputContinuousLane": 250,
+      "DefaultLane": 5000,
+      "TransitionLane": 30000,
+      "EntangledLane": 60000,
+      "OffscreenLane": -1
+    },
+    "scheduler_slicing": {
+      "frame_budget_ms": 5,
+      "yield_threshold": 0.85,
+      "max_work_period_ms": 100,
+      "max_batch_size": 2048
+    },
+    "hydration_strategy": "Selective-Parallel-Streaming-SSR",
+    "batching_mode": "Automatic-Concurrent-Flush-v2"
+  },
+  "moe_routing_topology": {
+    "routing_function": "Fiber-Expert-Reconciliation",
+    "total_experts": 512,
+    "expert_isolation_factor": 0.995,
+    "phi_threshold": 0.92,
+    "suspense_recovery_mode": "Retry-Lane-Fallback"
+  },
+  "targetIndexes": {
+    "L3_Sovereign_Root": {
+      "defaultIndex": "nexus_sovereign_telemetry_l3",
+      "work_in_progress_index": "nexus_sovereign_shadow_l3",
+      "retentionDays": 1024,
+      "requiredFields": [
+        "telemetryId",
+        "phi_integrated_info",
+        "lambda_complexity",
+        "ers_risk_score",
+        "lane_priority",
+        "expiration_timestamp"
+      ],
+      "fiber_specs": {
+        "reconciliation_algorithm": "O(n)-Fiber-Diffing-Fast-Path",
+        "reconciliation_phase": "Commit-and-Passive-Effects",
+        "side_effect_tag": "Placement-Update-Commit",
+        "update_queue_priority": "SyncLane",
+        "suspense_boundary_enabled": true,
+        "concurrent_mode": true,
+        "hydration_priority": "Selective"
+      },
+      "n3_metrics": {
+        "phi_min": 0.98,
+        "lambda_edge_of_chaos": 0.618,
+        "ccrr_threshold": 0.95
+      }
+    },
+    "L2_Certified_Concurrent": {
+      "defaultIndex": "prod_certified_telemetry_l2",
+      "retentionDays": 365,
+      "lane_mapping": {
+        "critical.*": "SyncLane",
+        "performance.*": "InputContinuousLane",
+        "ers.*": "TransitionLane",
+        "entangled.*": "EntangledLane",
+        "deferred.*": "OffscreenLane",
+        "optimistic.*": "DefaultLane"
+      }
+    },
+    "L1_Validated_Deferred": {
+      "defaultIndex": "stage_validated_telemetry_l1",
+      "retentionDays": 90,
+      "lane_mapping": {
+        "debug.*": "OffscreenLane",
+        "retry.*": "RetryLane"
+      }
+    }
+  },
+  "transformationHooks": [
+    {
+      "hook_type": "useTransition",
+      "triggerField": "governance.certificationLevel",
+      "action": "ConcurrentRoute",
+      "huxley_loop_map": {
+        "L0_Raw": "telemetry_ingestion",
+        "L1_Intuition": "ERS_Immediate_Validation",
+        "L2_Logic": "Lane_Reconciliation_V5",
+        "L3_Critique": "CCRR_Commit_Check"
+      }
+    },
+    {
+      "hook_type": "useDeferredValue",
+      "triggerField": "sampling_rate",
+      "action": "AdaptiveThrottle",
+      "deferred_ms": 150
+    },
+    {
+      "hook_type": "useOptimistic",
+      "triggerField": "state_update",
+      "action": "PartialHydration",
+      "rollback_on_error": true
+    },
+    {
+      "hook_type": "ServerActionOverride",
+      "triggerField": "ers_score",
+      "action": "EmergencyBrake",
+      "condition": "ers_score > 0.95",
+      "recovery_protocol": "BASE64_URI_SAFE_TRANSPORT",
+      "rollback_strategy": "PSR_Silent_Degradation_Rollback",
+      "transactional_status": "FormState_Consistent"
+    }
+  ],
+  "governance_locks": {
+    "iq25_alignment_lock": true,
+    "fiber_reconciliation_enabled": true,
+    "origin_anchor": "GROG_LAW_IQ25",
+    "psr_threshold": 0.999,
+    "semantic_drift_tolerance": 0.35,
+    "saturation_level_state": "LEVEL_4_UNSATURATED",
+    "evolution_milestone": 50,
+    "integrity_hash": "DALEK_CAAN_v3.1_SIG_0xFF23A1",
+    "death_log_schema": "Grog_Learn_v5"
+  }
+}

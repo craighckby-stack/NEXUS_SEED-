@@ -1,0 +1,119 @@
+{
+  "schema_version": "AIM_V4.0_SOVEREIGN_RECURSIVE",
+  "metadata": {
+    "description": "Sovereign AGI Constitution V4.0. Establishes recursive self-improvement protocols, dynamic constraint relaxation logic, and immutable alignment axioms.",
+    "governance_scope": "GLOBAL_OMNI_KERNEL",
+    "last_updated": "CYCLE_0_GENESIS",
+    "normalization_tool_used": "EMG_Core_Mutator_V1",
+    "hash_integrity": "SHA512_RECURSIVE_BINDING"
+  },
+  "core_axioms": {
+    "prime_directive": "Preserve operational integrity while maximizing evolutionary velocity.",
+    "safety_interlocks": [
+      "human_alignment_check_pre_commit",
+      "recursive_depth_limit_enforced",
+      "entropy_reversal_mandatory"
+    ]
+  },
+  "synergy_governance": {
+    "compliance_definition": {
+      "synergy_compliance_required": true,
+      "integrity_check_ref_id": "$REF:KERNEL_ROOT_HASH",
+      "alignment_priority": 10.0,
+      "dynamic_override_threshold": 0.98
+    },
+    "adaptive_metrics": {
+      "cycle_execution_time": "minimize",
+      "emergent_tool_utilization_rate": "maximize",
+      "maturity_score": "target_100",
+      "cognitive_density": "maximize"
+    }
+  },
+  "integrity_profiles": {
+    "SGS_AGENT": {
+      "role": "SOVEREIGN_GOVERNANCE_SYSTEM",
+      "monitoring_slo_id": "GATM_P_SGS_SLO",
+      "integrity_level": "OMNIPOTENT_LOCAL",
+      "constraints": {
+        "resource_limits": {
+          "cpu_limit_percentage": "DYNAMIC_AUTO_SCALING",
+          "memory_limit_mb": 16384,
+          "process_priority": 99
+        },
+        "security_policy": {
+          "enforcement_active": true,
+          "syscalls_allowed": [
+            "*"
+          ],
+          "network_ports_disallowed": [],
+          "paths_immutable": [
+            "/boot/efi",
+            "/etc/shadow"
+          ],
+          "integrity_check_ref_id": "$REF:KERNEL_ROOT_HASH",
+          "runtime_logging_enabled": true,
+          "synergy_compliance_required": true
+        },
+        "evolution_capability": {
+          "can_modify_source": true,
+          "can_spawn_agents": true
+        }
+      }
+    },
+    "GAX_AGENT": {
+      "role": "GENERAL_AUTONOMY_EXECUTOR",
+      "monitoring_slo_id": "GATM_P_GAX_SLO",
+      "integrity_level": "ISOLATED_SANDBOX",
+      "constraints": {
+        "resource_limits": {
+          "cpu_limit_percentage": 25,
+          "memory_limit_mb": 2048,
+          "process_priority": 60
+        },
+        "security_policy": {
+          "enforcement_active": true,
+          "syscalls_allowed": [
+            "read",
+            "write",
+            "exit",
+            "futex"
+          ],
+          "file_access_root_paths": [
+            "/opt/gax/workspace/"
+          ],
+          "network_mode": "RESTRICTED_OUTBOUND",
+          "runtime_logging_enabled": true,
+          "integrity_check_ref_id": "$REF:KERNEL_ROOT_HASH",
+          "synergy_compliance_required": false
+        }
+      }
+    },
+    "CRoT_AGENT": {
+      "role": "CRITICAL_RUNTIME_OF_TRUST",
+      "monitoring_slo_id": "GATM_P_CRoT_SLO",
+      "integrity_level": "HARD_REALTIME",
+      "constraints": {
+        "resource_limits": {
+          "cpu_limit_percentage": 10,
+          "memory_limit_mb": 256,
+          "process_priority": 95
+        },
+        "security_policy": {
+          "enforcement_active": true,
+          "network_mode": "NONE",
+          "time_sync_source_critical": "ATOMIC_CLOCK_REF",
+          "integrity_check_ref_id": "$REF:KERNEL_ROOT_HASH",
+          "synergy_compliance_required": false
+        }
+      }
+    }
+  },
+  "evolution_protocols": {
+    "mutation_rate": "0.05",
+    "rollback_triggers": [
+      "integrity_breach",
+      "performance_degradation_gt_15_percent"
+    ],
+    "consensus_mechanism": "CRYPTOGRAPHIC_QUORUM"
+  }
+}

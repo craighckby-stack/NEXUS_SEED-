@@ -1,0 +1,23 @@
+{
+  "config_name": "Constraint Flow Threshold Manager Definitions",
+  "version": "1.0",
+  "description": "Centralized repository for critical, system-wide quantitative failure thresholds referenced by MPAM, MRCE, and S3 Stabilization Gates.",
+  "threshold_groups": {
+    "MPAM_VETO_THRESHOLDS": {
+      "metric_s04_failure_rate": {
+        "id": "S04_CRIT_VETO",
+        "unit": "Percentage",
+        "threshold_value": 0.005,
+        "lookback_cycles": 10,
+        "trigger_action": "MRCE Execution Mandatory"
+      },
+      "metric_s02_drift_sigma": {
+        "id": "S02_DRIFT_HIGH",
+        "unit": "Sigma Deviation",
+        "threshold_value": 3.5,
+        "lookback_cycles": 5,
+        "trigger_action": "MDMP Audit Required"
+      }
+    }
+  }
+}

@@ -1,0 +1,134 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agikernel.com/schemas/ES_V7.5.0",
+  "title": "Enforcement System (ES) Action Configuration (Synergy Enabled)",
+  "description": "Schema definition for all valid Enforcement System actions, standardized for use by SchemaConstraintNormalizer and incorporating dynamic Invocation of Emergent Capabilities (ECM). The structure for INVOKE_EMERGENT has been improved to mandate explicit method and argument array usage for enhanced safety and clarity.",
+  "type": "object",
+  "required": ["action_type", "parameters"],
+  "properties": {
+    "action_type": {
+      "type": "string",
+      "description": "The specific enforcement action to be executed."
+    },
+    "parameters": {
+      "type": "object",
+      "description": "Key-value pairs defining required and optional parameters for the action."
+    }
+  },
+  "oneOf": [
+    {
+      "title": "LOGGING",
+      "properties": {
+        "action_type": {"const": "LOGGING"},
+        "parameters": {
+          "type": "object",
+          "required": ["level", "retention_days"],
+          "properties": {
+            "level": {"type": "string", "enum": ["INFO", "WARN", "ERROR", "CRITICAL", "AUDIT_VITAL"]},
+            "retention_days": {"type": "integer", "minimum": 1}
+          }
+        }
+      }
+    },
+    {
+      "title": "ISOLATION",
+      "properties": {
+        "action_type": {"const": "ISOLATION"},
+        "parameters": {
+          "type": "object",
+          "required": ["mode"],
+          "properties": {
+            "mode": {"type": "string", "enum": ["NETWORK_SOFT", "SYSTEM_HARD", "HARDWARE_LEVEL", "MEMORY_SANDBOX"]},
+            "quarantine_level": {"type": "string", "description": "Severity of quarantine measures."},
+            "duration_sec": {"type": "integer"}
+          }
+        }
+      }
+    },
+    {
+      "title": "TERMINATE",
+      "properties": {
+        "action_type": {"const": "TERMINATE"},
+        "parameters": {
+          "type": "object",
+          "required": ["mode"],
+          "properties": {
+            "mode": {"type": "string", "enum": ["GRACEFUL", "IMMEDIATE", "REBOOT_SECURE", "SELF_REPAIR_HALT"]}
+          }
+        }
+      }
+    },
+    {
+      "title": "NOTIFY",
+      "properties": {
+        "action_type": {"const": "NOTIFY"},
+        "parameters": {
+          "type": "object",
+          "required": ["target", "priority"],
+          "properties": {
+            "target": {"type": "string", "enum": ["SGS_CORE", "GLOBAL_AUDIT", "TELEMETRY_SOURCE_MANAGER"]},
+            "priority": {"type": "string", "enum": ["HIGH", "EMERGENCY", "SYSTEM_VITAL"]}
+          }
+        }
+      }
+    },
+    {
+      "title": "THROTTLE",
+      "properties": {
+        "action_type": {"const": "THROTTLE"},
+        "parameters": {
+          "type": "object",
+          "required": ["rate_limit_pct"],
+          "properties": {
+            "rate_limit_pct": {"type": "number", "minimum": 0, "maximum": 100},
+            "targets": {"type": "array", "items": {"type": "string"}}
+          }
+        }
+      }
+    },
+    {
+      "title": "KERNEL_TRAP",
+      "properties": {
+        "action_type": {"const": "KERNEL_TRAP"},
+        "parameters": {
+          "type": "object",
+          "required": ["signal", "reason_code"],
+          "properties": {
+            "signal": {"type": "integer"},
+            "reason_code": {"type": "string"}
+          }
+        }
+      }
+    },
+    {
+      "title": "FALLBACK_ACTION",
+      "properties": {
+        "action_type": {"const": "FALLBACK_ACTION"},
+        "parameters": {
+          "type": "object",
+          "required": ["template_id"],
+          "properties": {
+            "template_id": {"type": "string", "description": "ID referencing a predefined enforcement template structure."}, 
+            "context_override": {"type": "object"}
+          }
+        }
+      }
+    },
+    {
+      "title": "INVOKE_EMERGENT",
+      "description": "Executes a capability registered in the Synergy Runtime Registry (Firebase). Improved structure mandates methodName and an argument array for safety and strict compatibility with the ECM execution protocol.",
+      "properties": {
+        "action_type": {"const": "INVOKE_EMERGENT"},
+        "parameters": {
+          "type": "object",
+          "required": ["interfaceName", "methodName", "args"],
+          "properties": {
+            "interfaceName": {"type": "string", "description": "The registered interface name (e.g., ArchitecturalSelector)."},
+            "methodName": {"type": "string", "description": "The specific asynchronous method within the interface to execute (e.g., 'prioritize')."},
+            "args": {"type": "array", "description": "An array of arguments passed to the emergent method.", "items": {"type": ["object", "array", "string", "number", "boolean", "null"]}}
+          }
+        }
+      }
+    }
+  ]
+}

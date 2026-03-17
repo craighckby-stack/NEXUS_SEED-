@@ -1,0 +1,62 @@
+{
+  "manifest_version": "2.0.0-V94.1",
+  "architectural_status": "L5_Operational",
+  "cryptographic_algorithms": {
+    "hashing": {
+      "BLAKE3_512_P1": {
+        "name": "BLAKE3",
+        "output_bits": 512,
+        "efficiency_tier": "P1_HighPerformance"
+      },
+      "BLAKE3_256_P1": {
+        "name": "BLAKE3",
+        "output_bits": 256,
+        "efficiency_tier": "P1_HighPerformance"
+      },
+      "SHA3_512_P3": {
+        "name": "SHA3",
+        "output_bits": 512,
+        "efficiency_tier": "P3_Legacy",
+        "deprecation_target": "2025-Q4"
+      }
+    },
+    "signing": {
+      "ED25519_HS": {
+        "name": "ED25519",
+        "key_type": "ECC_HighSpeed",
+        "pqc_readiness": "Monitoring"
+      },
+      "SLH_DSA_PQC": {
+        "name": "SLH-DSA (Optimized for Dilithium-R3)",
+        "key_type": "PQC_Required",
+        "pqc_readiness": "Mandatory_Future"
+      }
+    }
+  },
+  "usage_mapping": {
+    "system_sealing": "BLAKE3_512_P1",
+    "state_integrity_check": "BLAKE3_256_P1",
+    "transaction_sequencing": "BLAKE3_256_P1",
+    "core_signing_primary": "ED25519_HS",
+    "core_signing_pqc_target": "SLH_DSA_PQC"
+  },
+  "integrity_targets": {
+    "verified_components": [
+      "ISB_Bootstrap_Module",
+      "ECVM_Execution_Core"
+    ],
+    "critical_datasets": [
+      "Psi_Final_Ledger",
+      "Key_Policy_Manifest"
+    ]
+  },
+  "policy_standards": {
+    "default_key_rotation": {
+      "time_unit": "DAYS",
+      "duration": 90,
+      "standard_id": "PST_90D_V1"
+    },
+    "minimum_ecc_key_size_bits": 256,
+    "pqc_migration_target_date": "2026-Q1"
+  }
+}

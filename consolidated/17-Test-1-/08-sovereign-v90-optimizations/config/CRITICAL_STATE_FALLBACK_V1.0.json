@@ -1,0 +1,18 @@
+{
+  "fallback_mode": "DIAGNOSTIC",
+  "enabled": true,
+  "max_fallback_duration_cycles": 10,
+  "default_llm": {
+    "provider": "Gemini",
+    "model": "2.5-Flash",
+    "temperature": 0.1,
+    "max_retries": 5
+  },
+  "recovery_targets": [
+    "/core/kernel_init.js",
+    "/governance/blacklist_manager.js",
+    "/architecture/manifest.json"
+  ],
+  "stagnation_protocol_active": true,
+  "system_integrity_check_interval": 3
+}

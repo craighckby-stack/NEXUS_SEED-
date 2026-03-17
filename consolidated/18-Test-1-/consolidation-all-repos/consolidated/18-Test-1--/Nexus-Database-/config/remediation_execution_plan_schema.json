@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agi.sovereign/schemas/remediation_execution_plan_schema.json",
+  "title": "Sovereign AGI Remediation Execution Plan",
+  "description": "Schema for the generated, runtime-specific execution plan object, derived from a static Playbook and dynamic inputs.",
+  "type": "object",
+  "required": ["plan_id", "playbook_reference", "target_instance", "runtime_inputs", "execution_timeline"],
+  "properties": {
+    "plan_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique ID for this specific execution attempt."
+    },
+    "playbook_reference": {
+      "type": "string",
+      "description": "The ID of the Playbook from the catalog being executed."
+    },
+    "target_instance": {
+      "type": "object",
+      "required": ["asset_id", "connection_uri"],
+      "description": "The specific asset or resource targeted by this plan.",
+      "properties": {
+        "asset_id": {"type": "string"},
+        "connection_uri": {"type": "string", "format": "uri"},
+        "current_os": {"type": "string"}
+      }
+    },
+    "runtime_inputs": {
+      "type": "object",
+      "description": "Dynamic variables required by the playbook steps (e.g., CVE ID, patched version string, specific port).
+       This ensures separation of static playbook logic and dynamic execution data."
+    },
+    "execution_timeline": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["step_index", "step_action", "step_params"],
+        "properties": {
+          "step_index": {"type": "integer"},
+          "step_action": {"type": "string"},
+          "step_params": {"type": "object", "description": "Final resolved parameters after template processing."}, 
+          "estimated_duration": {"type": "integer", "description": "Estimated time in seconds.", "minimum": 1}
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

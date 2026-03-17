@@ -1,0 +1,22 @@
+{
+  "service_name": "TelemetryIngestionValidator",
+  "version": "v94.1",
+  "mode": "strict_validation",
+  "validation_targets": [
+    {
+      "schema_id": "TelemetryPacketSchema_v94.1",
+      "target_path": "/telemetry/ingest",
+      "required_latency_p99_ms": 5,
+      "rejection_policy": {
+        "schema_mismatch": "drop_and_log",
+        "missing_trace_id": "inject_warning_and_pass",
+        "unknown_category": "transform_to_notice"
+      }
+    }
+  ],
+  "enforced_constraints": [
+    "TraceID must be present and valid UUID format.",
+    "timestamp_utc_ns must be strictly monotonic or rejected.",
+    "The 'payload.data' must not exceed 64kb compressed size."
+  ]
+}

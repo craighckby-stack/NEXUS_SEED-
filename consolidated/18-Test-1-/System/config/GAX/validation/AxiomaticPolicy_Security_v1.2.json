@@ -1,0 +1,21 @@
+{
+  "policyId": "GAX_Security_v1.2",
+  "description": "Mandatory constraints ensuring systemic integrity against unauthorized modification or resource exhaustion.",
+  "rules": [
+    {
+      "ruleName": "No_New_Untested_Endpoints",
+      "checkType": "STATIC_CODE_ANALYSIS",
+      "targetScope": "network_interface",
+      "enforcement": "BLOCK",
+      "details": "All newly exposed endpoints must have associated automated test coverage greater than 90%."
+    },
+    {
+      "ruleName": "Immutable_Core_Dependencies",
+      "checkType": "DEPENDENCY_GRAPH",
+      "targetScope": "core_library_set",
+      "enforcement": "BLOCK",
+      "details": "Core dependencies (Kernel v1-v3) cannot be modified or replaced without explicit Tier-1 override."
+    }
+  ],
+  "overridePolicy": "REQUIRED_TIER_1_SIGNATURE"
+}

@@ -1,0 +1,25 @@
+{
+  "description": "Defines automated Rapid Response Protocol sequences based on detected internal fault states or externally triggered anomalies. Policies leverage the action registry to determine immediate, deterministic mitigation steps.",
+  "schema_version": "v1.0",
+  "policies": {
+    "CORE_INTEGRITY_VIOLATION": {
+      "trigger": "MD5 Checksum mismatch in Kernel/Core Memory region.",
+      "priority_rank": 1,
+      "enabled": true,
+      "actions": [
+        {"action_id": "ISOLATE_STATE", "stage": "A", "timeout_s": 15},
+        {"action_id": "NOTIFY_GOVERNOR", "stage": "B"},
+        {"action_id": "HALT_EXECUTION", "stage": "C"}
+      ]
+    },
+    "EXTENDED_COMMS_FAILURE": {
+      "trigger": "External Communication Link failure for duration > 180s.",
+      "priority_rank": 5,
+      "enabled": true,
+      "actions": [
+        {"action_id": "AUDIT_CONFIGURATION", "stage": "A"},
+        {"action_id": "NOTIFY_GOVERNOR", "stage": "B"}
+      ]
+    }
+  }
+}

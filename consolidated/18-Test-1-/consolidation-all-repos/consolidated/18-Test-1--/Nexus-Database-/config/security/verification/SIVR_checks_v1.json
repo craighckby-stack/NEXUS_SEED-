@@ -1,0 +1,27 @@
+{
+  "registry_id": "SIVR_V1",
+  "description": "System Integrity Verification Registry: Definitions for reusable validation checks mandated by SIHM manifests.",
+  "checks": {
+    "ISOLATION_VERIFY_SIM": {
+      "type": "STATE_MONITORING",
+      "target_kernel": "SecurityControllerL0",
+      "check_method": "STATE_GETTER",
+      "parameters": {"state_flag": "SIM_ACTIVE", "override_lock": "TRUE"},
+      "expected_output_format": "BOOLEAN"
+    },
+    "COMM_ACK_VERIFY": {
+      "type": "NETWORK_TRANSACTION",
+      "target_service": "NotarySubsystemInterface",
+      "check_method": "LOOKUP_TRANSACTION_ID",
+      "parameters": {"log_id_source": "$STEP_020_OUTPUT$"},
+      "expected_output_format": "STATUS_CODE_2XX"
+    },
+    "MEMORY_STATE_CLEAN": {
+      "type": "RESOURCE_VALIDATION",
+      "target_scope": "VolatileStorageUnit",
+      "check_method": "DIFFERENTIAL_SCAN",
+      "parameters": {"threshold": "0.05_PCTG_FREE"},
+      "expected_output_format": "STATUS_FOOTPRINT_NOMINAL"
+    }
+  }
+}

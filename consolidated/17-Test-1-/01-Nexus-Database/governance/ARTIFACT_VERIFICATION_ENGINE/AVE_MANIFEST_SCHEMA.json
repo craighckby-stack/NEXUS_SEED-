@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.agi/ave_manifest_v1.json",
+  "title": "AVE Proposal Manifest",
+  "description": "Schema defining the complete set of signed artifacts required for PLST S4_PRE_INGRESS transition.",
+  "type": "object",
+  "properties": {
+    "P_ID": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Canonical Proposal Identifier."
+    },
+    "Originator_ID": {
+      "type": "string",
+      "description": "Submitting Sovereign Agent Identifier."
+    },
+    "Proposal_Payload_Hash": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{64}$|^[0-9a-fA-F]{40}$",
+      "description": "The hash of the final executable artifact, locked since S0 or S3_REWORK."
+    },
+    "Target_SCI_Budget": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Maximum computational budget (in SCI units) allocated."
+    },
+    "Approvals": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "properties": {
+          "Agent_ID": {"type": "string"},
+          "Signature": {"type": "string"}
+        },
+        "required": ["Agent_ID", "Signature"]
+      },
+      "description": "Signatures proving N>=2 peer review completion (S1)."
+    },
+    "Audit_Package": {
+      "type": "object",
+      "properties": {
+        "Audit_ID": {"type": "string"},
+        "Audit_Hash_Signature": {"type": "string", "description": "Cryptographic hash of the finalized audit report."
+        },
+        "Verification_Timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["Audit_ID", "Audit_Hash_Signature", "Verification_Timestamp"]
+    },
+    "Transition_Log_Root_Hash": {
+      "type": "string",
+      "description": "Merkle Root hash of the PLST Transition Log, verifying sequence and immutability up to S4."
+    }
+  },
+  "required": [
+    "P_ID",
+    "Originator_ID",
+    "Proposal_Payload_Hash",
+    "Target_SCI_Budget",
+    "Approvals",
+    "Audit_Package",
+    "Transition_Log_Root_Hash"
+  ],
+  "additionalProperties": false
+}

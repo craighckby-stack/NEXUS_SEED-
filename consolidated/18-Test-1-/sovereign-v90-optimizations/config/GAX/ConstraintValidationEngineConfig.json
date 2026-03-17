@@ -1,0 +1,67 @@
+{
+  "ValidationEngineConfig": {
+    "version": "3.1.0",
+    "metadata": {
+      "description": "Configuration for the GAX Constraint Validation Engine, focused on performance, dynamic context resolution, and integration with emergent capabilities."
+    },
+    "core": {
+      "defaultMode": "Strict",
+      "fallbackStrictness": "FailFast",
+      "enableValidationGroups": true,
+      "lazyLoadModules": true,
+      "adaptiveRuleLoading": true,
+      "failureThresholdForAdaptiveBlacklist": 50
+    },
+    "performance": {
+      "ruleCompilationStrategy": "JIT",
+      "maxParallelValidations": 128,
+      "compilationCache": {
+        "enabled": true,
+        "ttlSeconds": 7200,
+        "storageType": "Redis"
+      },
+      "precompiledSchemas": [
+        "User",
+        "Product",
+        "AgentBehaviorModel"
+      ]
+    },
+    "schemaSources": {
+      "sourceDirectory": "./rules/schemas",
+      "emergentSourceDirectory": "../emergent/validation_patterns",
+      "defaultFileFormat": "yaml",
+      "ruleAdapters": [
+        "GAX_JoiAdapter",
+        "GAX_ZodAdapter",
+        "GAX_EmergentAdapter"
+      ]
+    },
+    "customValidators": [
+      {
+        "name": "DatabaseExistenceCheck",
+        "path": "@GAX/validators/DatabaseIntegrityValidator.js",
+        "loadPriority": 100
+      },
+      {
+        "name": "EmergentPatternSynthesizer",
+        "path": "@emergent/validators/PatternSynthesizer.js",
+        "loadPriority": 50
+      }
+    ],
+    "contextResolution": {
+      "enabled": true,
+      "resolverPath": "@core/context/ValidationContextResolver.js",
+      "contextMap": {
+        "HTTP_POST:/api/v1/*": "creation_api",
+        "JOB_TYPE:BILLING_CYCLE": "batch_processing",
+        "INTERNAL:AGI_CORE_UPDATE": "system_governance"
+      }
+    },
+    "metricsAndObservability": {
+      "enabled": true,
+      "loggingLevel": "High",
+      "integrationTarget": "Prometheus",
+      "logFailedValidationsOnly": true
+    }
+  }
+}

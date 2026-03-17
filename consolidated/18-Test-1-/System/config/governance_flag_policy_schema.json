@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agi.sovereign/config/governance_flag_policy_schema.json",
+  "title": "Sovereign AGI Governance Flag Policy Definition Schema (v94.1)",
+  "description": "Schema defining operational policies for the Integrity Halt Sentinel (IHS). Policies are indexed by FlagType and AxiomID for O(1) retrieval efficiency and define explicit primary and escalation remediation strategies.",
+  "type": "object",
+  "required": ["policies", "policy_version"],
+  "$defs": {
+    "ActionPlanIdentifier": {
+      "type": "string",
+      "pattern": "^P[0-9]{3}_[A-Z_]+$",
+      "description": "Identifier for a prescribed remediation playbook (e.g., P001_ROLLBACK_SAFE)."
+    },
+    "FlagAxiomPolicyMapping": {
+      "type": "object",
+      "required": ["severity", "primary_action_plan", "is_ih_mandatory"],
+      "description": "Specific remediation plan attributes linked to a unique FSL (Flag/Axiom) pairing.",
+      "properties": {
+        "severity": {
+          "type": "string",
+          "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL", "INTEGRITY_HALT"],
+          "description": "Categorized severity of the policy breach for prioritization."
+        },
+        "primary_action_plan": {
+          "$ref": "#/$defs/ActionPlanIdentifier",
+          "description": "The initial, prescribed action to mitigate the detected state."
+        },
+        "escalation_action_plan": {
+          "$ref": "#/$defs/ActionPlanIdentifier",
+          "description": "The action plan to execute if the primary action fails after max_retries. If omitted, escalation is direct system notification/halt."
+        },
+        "is_ih_mandatory": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, IHS must enforce a system halt (Integrity Halt), overriding contextual overrides."
+        },
+        "max_retries": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 3,
+          "description": "Maximum attempts to execute the primary_action_plan before escalating to escalation_action_plan or notification."
+        }
+      }
+    }
+  },
+  "properties": {
+    "metadata": {
+        "type": "object",
+        "description": "Auditing and configuration metadata.",
+        "properties": {
+            "created_by": {"type": "string"},
+            "last_updated": {"type": "string", "format": "date-time"}
+        }
+    },
+    "policy_version": {
+      "type": "string",
+      "description": "Semantic version of the governance policy set."
+    },
+    "policies": {
+      "type": "object",
+      "description": "Nested map of governance policies, indexed first by FSL_FlagType and then by FSL_AxiomID.",
+      "propertyNames": {
+        "$ref": "./governance_flag_state_schema.json#/$defs/FSL_FlagType"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "description": "A map of policies specific to a single FSL Flag Type, keyed by FSL_AxiomID.",
+        "propertyNames": {
+          "$ref": "./governance_flag_state_schema.json#/$defs/FSL_AxiomID"
+        },
+        "additionalProperties": {
+          "$ref": "#/$defs/FlagAxiomPolicyMapping"
+        }
+      }
+    }
+  }
+}

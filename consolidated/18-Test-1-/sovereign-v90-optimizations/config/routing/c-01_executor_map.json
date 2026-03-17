@@ -1,0 +1,15 @@
+{
+  "$id": "http://sovereign.agi/c-01_executor_map_v1.0.json",
+  "title": "C-01 Correction Code Execution Map",
+  "description": "Maps C-01 correction codes defined in c-01_correction_codes.json directly to callable execution paths within the AGI kernel.",
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "properties": {
+      "handler_path": { "type": "string", "description": "File path or reference to the execution utility." },
+      "method": { "type": "string", "description": "The specific function/method name to be invoked." },
+      "timeout_seconds": { "type": "integer", "default": 600, "description": "Maximum allotted time for execution before raising a critical C01-TIME error." }
+    },
+    "required": ["handler_path", "method"]
+  }
+}

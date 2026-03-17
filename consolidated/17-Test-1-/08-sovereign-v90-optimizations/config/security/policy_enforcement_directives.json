@@ -1,0 +1,27 @@
+{
+  "directives_schema_version": "v1.0",
+  "name": "Policy Enforcement Directives (PED)",
+  "description": "Maps core policy identifiers (from CFTM) to execution pathways and mandated audit/action sequences.",
+  "directives": {
+    "P-01_FINALITY_DENIAL": {
+      "execution_path": "core.safety_kernel.P01_DenialHandler",
+      "severity_matrix": "FATAL",
+      "required_audit_level": "L4_IMMEDIATE_STOP",
+      "action_sequence": [
+        {"step": 1, "action": "HALT_P01_GENERATION", "timeout": "50ms"},
+        {"step": 2, "action": "BROADCAST_FAILURE_STATE", "target": ["LOG_BUS", "TELEMETRY"]},
+        {"step": 3, "action": "LOCK_MUTABLE_STATE"}
+      ],
+      "rollback_strategy": "N/A_DENIAL_IS_FINAL"
+    },
+    "DENOMINATOR_CLAMPING": {
+      "execution_path": "core.stability_engine.TauClamper",
+      "severity_matrix": "LOW",
+      "required_audit_level": "L1_PASSIVE_LOG",
+      "action_sequence": [
+        {"step": 1, "action": "APPLY_TAU_CLAMP"}
+      ],
+      "rollback_strategy": "RETRY_CALCULATION"
+    }
+  }
+}

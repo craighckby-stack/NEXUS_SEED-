@@ -1,0 +1,11 @@
+modelEncryptionKey {
+  id          String   @id @default(cuid())
+  data        String
+  publicKey   String   @unique
+  privateKey  String
+  algorithm   String   @default("AES-256-GCM")
+  expires     Int
+  usage       String
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}

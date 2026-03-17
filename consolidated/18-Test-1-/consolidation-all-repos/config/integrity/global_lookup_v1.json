@@ -1,0 +1,12 @@
+{
+  "lookup_id": "global_integrity_lookups_v1.0",
+  "description": "Configuration for integrity lookups and mutable constraint values, allowing easy updates without changing core schema.",
+  "GlobalLookups": {
+    "SupportedRegions": ["us-east-1", "eu-central-1", "ap-southeast-2"],
+    "SupportedGPUTypes": ["nvidia-t4", "a100-80gb", "none"],
+    "MaxAllowableMCISCount": 500
+  },
+  "Constraints": {
+    "ImageIDPattern": "^img-[a-f0-9]{8}-[a-z0-9]{4}$"
+  }
+}

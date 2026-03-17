@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://dmw.ai/policy/schema",
+  "title": "DMW Policy Configuration Schema and Context Definition",
+  "context_keys": [
+    {"key": "user.role", "type": "string", "description": "User access role."}, 
+    {"key": "environment.type", "type": "string", "description": "Deployment environment (e.g., Production, Staging)."},
+    {"key": "metadata.public", "type": "boolean", "description": "Resource public visibility flag."}
+  ],
+  "supported_operators": [
+    "EQUALS", "NOT_EQUALS", "GREATER_THAN", "LESS_THAN", "CONTAINS", "STARTS_WITH", "AND", "OR"
+  ],
+  "condition_schema": {
+    "type": "object",
+    "properties": {
+      "operator": {"type": "string", "enum": ["AND", "OR"]},
+      "operands": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "operator": {"type": "string"}, 
+            "key": {"type": "string"}, 
+            "value": {"type": ["string", "boolean", "number"]}
+          },
+          "required": ["operator", "key", "value"]
+        }
+      }
+    }
+  }
+}

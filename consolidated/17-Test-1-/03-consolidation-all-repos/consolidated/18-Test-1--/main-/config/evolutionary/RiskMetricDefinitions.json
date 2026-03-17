@@ -1,0 +1,22 @@
+{
+  "metric_definitions": {
+    "test_rigor_score": {
+      "description": "A composite score reflecting test coverage depth, complexity coverage, and integration test density.",
+      "calculation_method": "Weighted_Average(C1, C2, C3)",
+      "weight_mapping": {
+        "unit_test_coverage": 0.5,
+        "integration_success_rate": 0.3,
+        "fuzzing_passes": 0.2
+      }
+    },
+    "static_analysis_severity": {
+      "description": "Score derived from the maximum severity detected by SA tools (e.g., Sonar, Bandit), normalized to 0-1.",
+      "normalization": "Linear_Scale_0_1(Critical: 1.0, High: 0.7, Medium: 0.4, Low: 0.1)",
+      "critical_threshold_exit": 0.85
+    },
+    "deployment_complexity": {
+      "description": "Measure of blast radius based on affected services/components.",
+      "calculation_method": "Count(AffectedServices) / Max(TotalServices)"
+    }
+  }
+}

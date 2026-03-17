@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agi.sovereign/governance/M-02_Intent_Execution_Log_Schema.json",
+  "title": "AGI Intent Execution Log Schema",
+  "description": "Schema for logging the outcome, metrics, and traceability of an executed Intent (M-01).",
+  "type": "object",
+  "properties": {
+    "execution_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "intent_ref_id": {
+      "type": "string",
+      "description": "Link back to the original Intent ID (M-01)."
+    },
+    "start_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "end_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["SUCCESS", "FAILED", "TIMEOUT", "POLICY_REJECTED"]
+    },
+    "resource_metrics": {
+      "type": "object",
+      "properties": {
+        "cpu_cycles": { "type": "number" },
+        "memory_peak_mb": { "type": "number" },
+        "tokens_used": { "type": "integer" }
+      }
+    },
+    "output": {
+      "type": ["object", "string", "null"],
+      "description": "Serialized result or output from the component call."
+    },
+    "error_detail": {
+      "type": "string",
+      "description": "Detailed traceback or rejection reason if status is not SUCCESS."
+    },
+    "governance_audit": {
+      "type": "object",
+      "properties": {
+        "policy_applied": { "type": "array", "items": { "type": "string" }},
+        "sandbox_level": { "type": "string" }
+      }
+    }
+  },
+  "required": ["execution_id", "intent_ref_id", "start_time", "status"]
+}

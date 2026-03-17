@@ -1,0 +1,18 @@
+{
+  "description": "Maps high-level governance references (map_ref) to specific execution commands, runtimes, and libraries.",
+  "mappings": {
+    "MapRef_DMPA": {
+      "description": "Data Minimization Principle Adherence Check (GDPR)",
+      "runner_type": "Containerized_Python_3.10",
+      "entrypoint": "/compliance/bin/run_minimization_check.py",
+      "required_libraries": ["PyGRC:v2.1"],
+      "data_interface_mode": "Read_Only"
+    },
+    "MapRef_ASC": {
+      "description": "AuthN/AuthZ Standard Compliance Check (ISO 27001)",
+      "runner_type": "Knative_Serverless",
+      "entrypoint": "ComplianceEngine/CheckOAuth2Scope",
+      "timeout_ms": 5000
+    }
+  }
+}

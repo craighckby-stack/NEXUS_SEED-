@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Single Cycle Example</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: monospace; background: #000; color: #888; padding: 20px; }
+        button { background: #dc2626; color: white; border: none; padding: 10px 20px; cursor: pointer; }
+        .log { margin-top: 20px; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>Single Evolution Cycle</h1>
+    <button onclick="startEvolution()">Start Single Cycle</button>
+    <div id="log" class="log"></div>
+    
+    <script>
+        async function startEvolution() {
+            const log = document.getElementById('log');
+            log.innerHTML = '<p>Starting single evolution cycle...</p>';
+            
+            // Add your single cycle logic here
+            await new Promise(r => setTimeout(r, 1000));
+            log.innerHTML += '<p>✓ Cycle complete</p>';
+        }
+    </script>
+</body>
+</html>

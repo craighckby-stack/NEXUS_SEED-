@@ -1,0 +1,42 @@
+{
+  "SAG_VERSION": "V94.3",
+  "generic_config_schema_path": "schema/SAG/GenericAgentConfig.schema.json",
+  "manifests": [
+    {
+      "path": "config/GAX/UtilityFunctionRegistry.yaml",
+      "agent": "GAX",
+      "is_schema": false,
+      "requires_version_check": true
+    },
+    {
+      "path": "config/GAX/FinalityThresholdConfig.yaml",
+      "agent": "GAX",
+      "is_schema": false,
+      "requires_version_check": true
+    },
+    {
+      "path": "config/GAX/PolicyCorrectionSchema.yaml",
+      "agent": "GAX",
+      "is_schema": false,
+      "requires_version_check": true
+    },
+    {
+      "path": "config/SGS/ExecutionContextVerificationManifest.yaml",
+      "agent": "SGS",
+      "is_schema": false,
+      "requires_version_check": true
+    },
+    {
+      "path": "config/SGS/TargetEvolutionMandateManifest.yaml",
+      "agent": "SGS",
+      "is_schema": false,
+      "requires_version_check": true
+    },
+    {
+      "path": "schema/governance/Governance_State_Manifest.schema.json",
+      "agent": "CRoT",
+      "is_schema": true,
+      "requires_version_check": false
+    }
+  ]
+}

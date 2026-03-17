@@ -1,0 +1,28 @@
+{
+  "system_id": "SAG_GOVERNANCE_CORE",
+  "dse_commitment_level": 94.1,
+  "dqh_enabled": true,
+  "heartbeat_interval_ms": 500,
+  "quorum_definition": {
+    "minimum_nodes": 7,
+    "required_consensus_percentage": 0.80,
+    "failure_threshold_count": 3
+  },
+  "monitored_vectors": [
+    {
+      "vector_id": "Operational_Liveness",
+      "metric_endpoint": "/v1/metrics/liveness_proof",
+      "max_acceptable_latency_ms": 100,
+      "rollback_trigger_threshold": 0.15,
+      "description": "Liveness metric exceeding acceptable latency limit."
+    },
+    {
+      "vector_id": "Utility_Axiom_Integrity",
+      "metric_endpoint": "/v1/metrics/axiomatic_delta",
+      "max_acceptable_deviation_rate": 0.01,
+      "rollback_trigger_threshold": 0.05,
+      "description": "Monitors immediate post-deployment fluctuation in key utility axioms."
+    }
+  ],
+  "reason": "The Manifest confirms the validity of the state transition *before* commitment. A dedicated DSE Deviation Quorum Heartbeat (DQH) component is necessary to provide real-time, post-commitment verification, actively monitoring operational metrics and utility axioms immediately following a state transition (Psi_N+1) to ensure system stability and detect immediate, unexpected divergence requiring swift rollback protocols. This configuration file defines the monitoring parameters for this critical layer."
+}

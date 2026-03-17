@@ -1,0 +1,25 @@
+{
+  "manifestId": "SECPM-V1.0",
+  "governanceOwnerId": "GACR-CORE",
+  "description": "Security Mechanism Parameter Manifest. Defines operational configuration for high-assurance cryptographic and authentication primitives referenced by GEIDM.",
+  "parameters": {
+    "MFA_Hardware_Token": {
+      "mechanismType": "TOTP_Based",
+      "issuerName": "Sovereign_Trust_Authority_V1",
+      "keyRotationPolicy": "6 months",
+      "enforcementModule": "SovereignGate_AuthEngine"
+    },
+    "CRoT_Derived_Key": {
+      "mechanismType": "HMAC_SHA384_Derivation",
+      "rootAnchorId": "CRoT-PHYSICAL-ASIC-001",
+      "derivationPolicyId": "CRoT-POL-KEY-007",
+      "keyLifetime_s": 3600
+    },
+    "TLS_MTLS_Certificate_Fixed": {
+      "mechanismType": "PKI_X509",
+      "caChainUri": "/pki/gacr_intermediate_ca.pem",
+      "requiredKeyUsage": ["clientAuth", "serverAuth"],
+      "revocationCheck": "OCSP_Strict"
+    }
+  }
+}

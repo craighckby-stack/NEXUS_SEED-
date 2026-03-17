@@ -1,0 +1,13 @@
+{
+  "sync_method": "Chain-Anchored Ticker (CAT)",
+  "max_drift_tolerance_ms": 10,
+  "sync_interval_s": 5,
+  "dependent_components": [
+    "PIM",
+    "RTOM",
+    "AASS"
+  ],
+  "failure_mode": {
+    "exceeded_drift_threshold": "P-M01 Temporal Fault"
+  }
+}

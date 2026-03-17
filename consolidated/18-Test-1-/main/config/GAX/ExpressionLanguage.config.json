@@ -1,0 +1,28 @@
+{
+  "languageName": "GAX_Expr_Core_v2",
+  "version": "2.0.0",
+  "executionPolicy": "SANDBOXED_RESTRICTED",
+  "TypeSystem": {
+    "coercionPolicy": "STRICT_WITH_SAFE_UPCASTS",
+    "runtimeValidationLevel": "HIGH_ASSURANCE"
+  },
+  "SupportedOperators": {
+    "Arithmetic": ["+", "-", "*", "/", "%", "**"],
+    "Relational": ["==", "!=", "<", ">", "<=", ">=", "IS_NULL", "IS_TYPE"],
+    "Logical": ["AND", "OR", "NOT", "XOR"],
+    "NullCoalescing": ["??"]
+  },
+  "SupportedFunctions": {
+    "Math": ["SUM", "MIN", "MAX", "ABS", "SQRT", "ROUND", "POWER", "LOG"],
+    "ControlFlow": ["IF", "SWITCH", "GUARD"],
+    "Collection": ["MAP", "FILTER", "REDUCE", "LENGTH"],
+    "System": ["NOW", "ENV", "LOOKUP"]
+  },
+  "EngineLimits": {
+    "variableNamingPattern": "^[A-Z][a-zA-Z0-9_]*$",
+    "maxComplexityScore": 75,
+    "maxExecutionDepth": 25,
+    "timeoutMs": 500,
+    "memoizationLimit": 100
+  }
+}

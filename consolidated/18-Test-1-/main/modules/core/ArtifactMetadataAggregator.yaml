@@ -1,0 +1,13 @@
+ArtifactMetadataAggregator:
+  version: 1.0
+  purpose: Standardize and encapsulate mandatory contextual metadata for all GSEP artifacts (Locks).
+  input_schema:
+    - ArtifactHash: string (The primary hash/Lock of the artifact)
+    - GSEPStage: integer (0-6)
+    - ParentArtifactID: string (Hash/ID of the previous stage's Primary Artifact Commitment)
+    - TimestampUTC: string (Irreversible, verifiable time stamp)
+    - ResponsibleAgentID: string (Identity of the G-LEX module committing the artifact)
+  output_format: ContextualLockedPackage (CLP)
+  integration_points:
+    - Pre-Commitment hook for MCR.
+    - Post-Generation stage for IDSM, PSIM, PSR, DSCM.

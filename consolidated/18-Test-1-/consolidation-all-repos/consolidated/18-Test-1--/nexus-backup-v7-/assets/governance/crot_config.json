@@ -1,0 +1,23 @@
+{
+  "provider_id": "CRoT_MASTER_ENDPOINT_V1",
+  "description": "Configuration for Core Root of Trust (CRoT) Hash Retrieval Service.",
+  "service_type": "REMOTE_ATTESTATION",
+  "endpoints": {
+    "primary": {
+      "url": "https://trust.agi-core/v95/hashes",
+      "protocol": "HTTPS/JWT",
+      "timeout_ms": 3000
+    },
+    "fallback": {
+      "url": "tcp://secure.local_tee:4444",
+      "protocol": "TEE_CHANNEL",
+      "timeout_ms": 500
+    }
+  },
+  "security_parameters": {
+    "signature_algorithm": "ECC_P521",
+    "verification_key_id": "KID-AGI-V95-ROOT",
+    "certificate_expiry_threshold_days": 15
+  },
+  "data_format": "MANIFEST_HASH_LIST"
+}

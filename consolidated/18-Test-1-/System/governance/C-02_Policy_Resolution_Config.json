@@ -1,0 +1,31 @@
+{
+  "resolver_engine": {
+    "version": "1.2.0",
+    "conflict_resolution_strategy": "PriorityOverride",
+    "default_priority_tiebreaker": "CreationTimestamp(Newest)",
+    "enforcement_modes": {
+      "Kernel": "StrictSynchronous",
+      "Runtime API": "AsynchronousQueued",
+      "Module": "CachedDelayedEvaluation"
+    }
+  },
+  "policy_caching": {
+    "enabled": true,
+    "ttl_seconds": 300,
+    "max_size_mb": 50
+  },
+  "monitoring_hooks": [
+    {
+      "event": "PolicyConflict",
+      "action": "RaisePriority10Alert"
+    },
+    {
+      "event": "EnforcementFailure",
+      "action": "FallbackRoutine(Self-Isolate)"
+    }
+  ],
+  "required_preprocessors": [
+    "ConditionExpressionValidator",
+    "DirectivePayloadSchemaChecker"
+  ]
+}

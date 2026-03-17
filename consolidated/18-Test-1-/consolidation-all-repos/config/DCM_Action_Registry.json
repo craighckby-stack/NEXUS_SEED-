@@ -1,0 +1,32 @@
+{
+  "registry_version": "1.0.0",
+  "last_updated": "2024-10-27T10:00:00Z",
+  "actions": {
+    "DCM_SYSTEM_RESET": {
+      "name": "System_Hard_Reset",
+      "scope": "CORE_CRITICAL",
+      "handler_path": "handlers/core/SystemResetHandler.js",
+      "execution_type": "SYNCHRONOUS",
+      "status": "ACTIVE",
+      "schema": {
+        "input": ["force_mode", "reason", "context_id"],
+        "output": ["success", "timestamp"]
+      },
+      "max_timeout_ms": 500
+    },
+    "FIN_PROCESS_TRANSACTION": {
+      "name": "Process_Financial_Transaction",
+      "scope": "FINANCE",
+      "handler_path": "handlers/finance/TransactionProcessor.msvc",
+      "execution_type": "ASYNCHRONOUS_EXTERNAL",
+      "status": "ACTIVE",
+      "schema": {
+        "input": ["user_id", "amount", "currency", "transaction_type", "idempotency_key"],
+        "output": ["transaction_id", "status_code", "settlement_time"]
+      },
+      "rate_limit_key": "finance:transaction:limit",
+      "retry_policy": "exponential_backoff",
+      "is_idempotent": true
+    }
+  }
+}

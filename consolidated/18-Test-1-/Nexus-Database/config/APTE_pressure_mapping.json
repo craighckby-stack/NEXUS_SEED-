@@ -1,0 +1,26 @@
+{
+  "service_id": "APTE_PressureMapper_V1.0",
+  "description": "Configuration for translating raw metric observations against APTE policy constraints (V3.0) into abstract system pressure signals.",
+  "map_targets": [
+    {
+      "source_manifest_domain": "Stability",
+      "constraint_path": "actionable_constraints.reconfiguration_pressure",
+      "metric_field_key": "trigger_metric",
+      "output_signal": "SystemInstabilityPressure",
+      "pressure_levels": [
+        { "level": "CRITICAL", "condition": ">", "value_factor": 2.0 },
+        { "level": "HIGH", "condition": ">", "value_factor": 1.0 },
+        { "level": "LOW", "condition": "<", "value_factor": 0.5 }
+      ]
+    },
+    {
+      "source_manifest_domain": "Global",
+      "constraint_path": "autonomy_control_gates.GAX_Limits",
+      "metric_field_key": "metric",
+      "output_signal": "AutonomyBreachSignal",
+      "pressure_levels": [
+        { "level": "BREACH", "condition": ">", "value_key": "tau_normalization_max" }
+      ]
+    }
+  ]
+}

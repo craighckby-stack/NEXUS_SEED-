@@ -1,0 +1,25 @@
+{
+  "component_name": "MaintainabilityMetricsAggregator",
+  "description": "Configuration for the Maintainability Metrics Aggregator (MMAT), responsible for analyzing code evolution deltas against maintainability standards (e.g., complexity, cyclomatic flow) and reporting a composite Maintainability Index (MI) score.",
+  "status": "ACTIVE_PENDING_DEPLOYMENT",
+  "validation_pipeline_hook": "PRE_GAX_COMMIT_VALIDATION",
+  "metrics_enabled": {
+    "cyclomatic_complexity": true,
+    "halstead_volume": true,
+    "code_duplication_factor": true,
+    "api_interface_diffusion_ratio": false
+  },
+  "composite_index_parameters": {
+    "target_index": "Maintainability Index (MI)",
+    "weights": {
+      "normalized_complexity": 0.40,
+      "normalized_volume": 0.30,
+      "code_cohesion_score": 0.30
+    },
+    "MI_calculation_method": "Internal_V2.1"
+  },
+  "reporting_thresholds": {
+    "MI_delta_warning_level": -2.0,
+    "complexity_spike_factor_rejection": 2.0
+  }
+}

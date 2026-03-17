@@ -1,0 +1,31 @@
+# Policy Correction Safety Schema (PCSS) V1.0
+# Mandatory artifact for the GAX agent to derive safe, attested policy corrections during RRP.
+
+metadata:
+  schema_version: 1.0
+  custodian: GAX
+  enforcement_target: VRRM remediation actions
+
+# Constraints applied when modifying PVLM, MPAM, or ADTM due to an RRP failure (Ref 3.2)
+policy_correction_axioms:
+
+  # 1. Non-Degradation Constraint (NDE):
+  # Utility baseline (S02) protection must not be reduced below the historical certified median.
+  NDE_rule:
+    affected_artifact: MPAM
+    change_type: bounds_check
+    constraint: utility_floor >= historic_median_S02
+
+  # 2. Scope Minimization Constraint (SMC):
+  # Changes must be localized to the veto artifact responsible for the failure (Veto Stage S(i)).
+  SMC_rule:
+    affected_artifact: PVLM, MPAM, ADTM
+    change_type: specificity
+    constraint: correction_scope <= 5% of manifest entries
+
+  # 3. Certification Finality Anchor (CFA):
+  # Any proposed correction must pass a dry-run test within the CPES Sandbox (S6.7) prior to VRRM finalization.
+  CFA_rule:
+    dependency: S6.7 CPES
+    required_status: S8 P-01 PASS
+    constraint: test_pre_commit: true

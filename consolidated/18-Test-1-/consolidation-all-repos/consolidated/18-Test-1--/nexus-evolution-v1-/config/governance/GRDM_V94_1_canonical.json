@@ -1,0 +1,40 @@
+{
+  "schema_version": "94.2.0",
+  "governance_mode": "ADAPTIVE_AUTONOMOUS",
+  "policy_definitions": {
+    "code_evolution": {
+      "base_threshold": 0.95,
+      "risk_category": "P2_High",
+      "dynamic_factor": "stability_index"
+    },
+    "resource_allocation": {
+      "base_threshold": 0.90,
+      "risk_category": "P3_Medium",
+      "dynamic_factor": "load_variance"
+    },
+    "external_communication": {
+      "base_threshold": 0.98,
+      "risk_category": "P1_Critical",
+      "dynamic_factor": "security_context"
+    }
+  },
+  "risk_matrix": {
+    "P1_Critical": {
+      "escalation_path": "Human_Review_Level_3",
+      "adaptation_policy": "STRICT_CONTEXTUAL",
+      "max_threshold_override": 0.999,
+      "required_non_repudiation": true
+    },
+    "P2_High": {
+      "escalation_path": "Audit_Trail_Priority_1",
+      "adaptation_policy": "MODERATE_CONTEXTUAL",
+      "max_threshold_override": 0.97
+    },
+    "P3_Medium": {
+      "escalation_path": "Standard_Logging",
+      "adaptation_policy": "MINIMAL_CONTEXTUAL",
+      "max_threshold_override": 0.90
+    }
+  },
+  "runtime_constraints_reference": "config/governance/runtime_constraints.json"
+}

@@ -1,0 +1,28 @@
+{
+  "service_id": "SVC_RIVS_004",
+  "component_name": "Rollback Image Validation Service",
+  "mission": "Ensure cryptographic integrity and non-repudiation of all stored critical state manifests.",
+  "key_management": {
+    "signing_key_alias": "CSRL_Manifest_Signer_KMS_ID_001",
+    "verification_policy": "P-MULTI-SIG-V3",
+    "required_quorum_keys": 3,
+    "authorized_key_vault_groups": ["OPS_L4_CRITICAL", "AGI_TRUST_ROOT"]
+  },
+  "rotation_schedule": {
+    "policy_id": "RIVS_P_30D_HARD",
+    "frequency_days": 30,
+    "immediate_rotation_triggers": [
+      "SIGNATURE_BREACH",
+      "KEY_COMPROMISE_REPORTED"
+    ]
+  },
+  "manifest_structure_requirements": {
+    "required_fields": [
+      "merkle_root_hash",
+      "timestamp_utc",
+      "component_list_hash",
+      "gpe_state_config_hash"
+    ],
+    "hashing_algorithm": "SHA3-512"
+  }
+}

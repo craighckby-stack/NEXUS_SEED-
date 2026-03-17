@@ -1,0 +1,31 @@
+{
+  "description": "Validated Baseline Configuration Hash Registry (CHR). Keys serve as standardized Component Identifiers (CID) for efficient indexing during C-ICR validation.",
+  "version": "v94.1.0-BASE",
+  "integrity_algorithm": "SHA256",
+  "metadata": {
+    "generated_timestamp": "[RUNTIME_TIMESTAMP]",
+    "commit_id": "[SOURCE_CONTROL_COMMIT_ID]"
+  },
+  "registry": {
+    "CID_GSEP_FLOW": {
+      "path": "config/gsep_c_flow.json",
+      "description": "Governing System Execution Protocol - Flow Configuration",
+      "hash": "[GENERATE_RUNTIME_HASH]"
+    },
+    "CID_DARM": {
+      "path": "config/dial_analysis_map.json",
+      "description": "Dialect Analysis Resource Map",
+      "hash": "[GENERATE_RUNTIME_HASH]"
+    },
+    "CID_RRP_MANIFEST": {
+      "path": "config/rrp_manifest.json",
+      "description": "Role Restriction Protocol Manifest",
+      "hash": "[GENERATE_RUNTIME_HASH]"
+    },
+    "CID_SMC_SCHEMA": {
+      "path": "governance/smc_schema.json",
+      "description": "System Monitoring & Control Data Schema",
+      "hash": "[GENERATE_RUNTIME_HASH]"
+    }
+  }
+}

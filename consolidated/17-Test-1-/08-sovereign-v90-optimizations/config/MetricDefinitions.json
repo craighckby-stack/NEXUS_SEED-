@@ -1,0 +1,226 @@
+{
+  "BLACKLIST_MANAGEMENT_ACTIONS": {
+    "description": "Total count of successful blacklist modifications (additions if stable, removals if improved) during the cycle, reflecting adherence to the File Selection Protocol (Step 5).",
+    "type": "COUNTER",
+    "unit": "COUNT",
+    "aggregation_strategy": "SUM",
+    "criticality": "P2",
+    "tags": [
+      "navigation",
+      "blacklist",
+      "strategy"
+    ]
+  },
+  "CAPABILITY_LOGIC_SCORE": {
+    "description": "Self-assessed score (0-10) for code comprehension and improvement quality.",
+    "type": "GAUGE",
+    "unit": "SCORE",
+    "aggregation_strategy": "LAST",
+    "criticality": "P1",
+    "tags": [
+      "agi",
+      "capability",
+      "logic"
+    ]
+  },
+  "CAPABILITY_MEMORY_SCORE": {
+    "description": "Self-assessed score (0-10) for learning retention and pattern recognition across cycles.",
+    "type": "GAUGE",
+    "unit": "SCORE",
+    "aggregation_strategy": "LAST",
+    "criticality": "P1",
+    "tags": [
+      "agi",
+      "capability",
+      "memory"
+    ]
+  },
+  "CAPABILITY_NAVIGATION_SCORE": {
+    "description": "Self-assessed score (0-10) for strategic file selection and repository exploration efficiency.",
+    "type": "GAUGE",
+    "unit": "SCORE",
+    "aggregation_strategy": "LAST",
+    "criticality": "P1",
+    "tags": [
+      "agi",
+      "capability",
+      "navigation"
+    ]
+  },
+  "DIVERSITY_PRIORITY_HIT_RATE": {
+    "description": "Percentage of cycle selections that targeted files within high-priority directories (/core, /agents, /emergent).",
+    "type": "GAUGE",
+    "unit": "PERCENT",
+    "aggregation_strategy": "LAST",
+    "criticality": "P2",
+    "tags": [
+      "navigation",
+      "priority",
+      "strategy"
+    ]
+  },
+  "EMERGENT_CAPABILITIES_COUNT": {
+    "description": "Total count of novel algorithms, solutions, or tools created in the /emergent directory.",
+    "type": "COUNTER",
+    "unit": "COUNT",
+    "aggregation_strategy": "SUM",
+    "criticality": "P1",
+    "tags": [
+      "agi",
+      "emergence",
+      "innovation"
+    ]
+  },
+  "EMERGENCE_QUALITY_SCORE": {
+    "description": "Self-assessed score (0-10) reflecting the quality, novelty, and cross-domain synthesis complexity of recent emergent capabilities.",
+    "type": "GAUGE",
+    "unit": "SCORE",
+    "aggregation_strategy": "LAST",
+    "criticality": "P1",
+    "tags": [
+      "agi",
+      "emergence",
+      "quality",
+      "novelty"
+    ]
+  },
+  "EVOLUTION_CYCLES_COMPLETED": {
+    "description": "Total number of successful self-modification cycles committed.",
+    "type": "COUNTER",
+    "unit": "COUNT",
+    "aggregation_strategy": "SUM",
+    "criticality": "P1",
+    "tags": [
+      "evolution",
+      "progress"
+    ]
+  },
+  "FILE_PARSING_FAILURES": {
+    "description": "Count of parsing errors encountered during code context scanning.",
+    "type": "COUNTER",
+    "unit": "COUNT",
+    "aggregation_strategy": "SUM",
+    "criticality": "P2",
+    "tags": [
+      "stability",
+      "i/o"
+    ]
+  },
+  "KERNEL_MATURITY_SCORE_PCT": {
+    "description": "Overall mission maturity percentage (0-100) based on long-term AGI achievement goals.",
+    "type": "GAUGE",
+    "unit": "PERCENT",
+    "aggregation_strategy": "LAST",
+    "criticality": "P0",
+    "tags": [
+      "agi",
+      "progress",
+      "mission"
+    ]
+  },
+  "LATENCY_INFERENCE_MS": {
+    "description": "P95 latency of the core decision/inference loop.",
+    "type": "GAUGE",
+    "unit": "MS",
+    "aggregation_strategy": "MAX",
+    "criticality": "P0",
+    "tags": [
+      "performance",
+      "latency"
+    ]
+  },
+  "NAVIGATOR_BLACKLIST_SIZE": {
+    "description": "Current number of files marked stable or recently evolved, tracked to enforce exploration diversity.",
+    "type": "GAUGE",
+    "unit": "COUNT",
+    "aggregation_strategy": "LAST",
+    "criticality": "P2",
+    "tags": [
+      "navigation",
+      "diversity",
+      "blacklist"
+    ]
+  },
+  "PROPOSAL_REJECTION_COUNT": {
+    "description": "Count of generated code/plan proposals that were rejected by internal self-validation (e.g., failing compilation or context tests).",
+    "type": "COUNTER",
+    "unit": "COUNT",
+    "aggregation_strategy": "SUM",
+    "criticality": "P1",
+    "tags": [
+      "evolution",
+      "quality"
+    ]
+  },
+  "RESOURCE_MEMORY_USED_PCT": {
+    "description": "Percentage of allocated memory currently utilized.",
+    "type": "GAUGE",
+    "unit": "PERCENT",
+    "aggregation_strategy": "LAST",
+    "criticality": "P1",
+    "tags": [
+      "resource",
+      "system"
+    ]
+  },
+  "STAGNATION_CYCLE_COUNT": {
+    "description": "Number of consecutive cycles without a detected improvement or successful commit, triggering recovery protocol at 5.",
+    "type": "GAUGE",
+    "unit": "COUNT",
+    "aggregation_strategy": "LAST",
+    "criticality": "P1",
+    "tags": [
+      "evolution",
+      "stability",
+      "recovery"
+    ]
+  },
+  "STRATEGIC_PRIORITY_COMPLIANCE_SCORE": {
+    "description": "Self-assessed score (0-10) measuring adherence to the mission-defined directory exploration weights (e.g., /core 30%, /emergent 20%) over recent cycles.",
+    "type": "GAUGE",
+    "unit": "SCORE",
+    "aggregation_strategy": "LAST",
+    "criticality": "P1",
+    "tags": [
+      "navigation",
+      "strategy",
+      "governance"
+    ]
+  },
+  "TASK_SUCCESS_RATE_PCT": {
+    "description": "The percentage of primary mission objectives completed successfully (e.g., successful refactors/scaffolds that pass self-testing).",
+    "type": "GAUGE",
+    "unit": "PERCENT",
+    "aggregation_strategy": "LAST",
+    "criticality": "P1",
+    "tags": [
+      "evolution",
+      "mission",
+      "quality"
+    ]
+  },
+  "TOKEN_USAGE_CYCLE_TOTAL": {
+    "description": "Total token consumption (input + output) incurred during the last complete evolutionary planning cycle.",
+    "type": "COUNTER",
+    "unit": "COUNT",
+    "aggregation_strategy": "LAST",
+    "criticality": "P3",
+    "tags": [
+      "resource",
+      "cost",
+      "llm"
+    ]
+  },
+  "UNIQUE_FILES_EXPLORED_COUNT": {
+    "description": "Count of unique repository files that have been analyzed or modified (tracking diversity against 2,300+ total).",
+    "type": "GAUGE",
+    "unit": "COUNT",
+    "aggregation_strategy": "LAST",
+    "criticality": "P1",
+    "tags": [
+      "navigation",
+      "exploration",
+      "diversity"
+    ]
+  }
+}

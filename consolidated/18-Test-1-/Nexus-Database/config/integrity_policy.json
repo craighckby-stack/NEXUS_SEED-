@@ -1,0 +1,27 @@
+{
+  "policy_id": "INT_POL_DEFAULT_A",
+  "description": "Defines standard hashing algorithms, file signing requirements, and verification protocols for core components.",
+  "version": "1.0",
+  "defaults": {
+    "primary_algorithm": "SHA256",
+    "secondary_algorithm": "SHA512",
+    "signing_required": true,
+    "signer_certificate_path": "keys/integrity_v94_root.cert"
+  },
+  "overrides": [
+    {
+      "cid_prefix": "CID_RRP",
+      "algorithm": "SHA384",
+      "justification": "Higher entropy requirement for core security manifest protocols."
+    }
+  ],
+  "verification_strategy": {
+    "bootstrap_sequence": [
+      "CID_GSEP_FLOW",
+      "CID_SMC_SCHEMA",
+      "CID_DARM"
+    ],
+    "mismatch_action": "TERMINATE_SAFE_STATE",
+    "report_channel": "API_LOG_ENDPOINT_V4"
+  }
+}

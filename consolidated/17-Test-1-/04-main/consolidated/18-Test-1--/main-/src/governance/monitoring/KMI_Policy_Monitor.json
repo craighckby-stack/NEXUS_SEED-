@@ -1,0 +1,32 @@
+{
+  "monitor_id": "KMI_LIFECYCLE_MONITOR_v1",
+  "targets": ["KMI-2024.B"],
+  "alerting_rules": [
+    {
+      "rule_name": "Key_Expiration_Proximity_Alert",
+      "field": "operational_policy.expiration",
+      "threshold_days": 90,
+      "severity": "Warning",
+      "route": "Governance_Channel_L5"
+    },
+    {
+      "rule_name": "Rotation_Due_Alert",
+      "field": "operational_policy.next_rotation_due",
+      "threshold_days": 30,
+      "severity": "Critical",
+      "route": "Crypto_Ops_Channel_L3"
+    },
+    {
+      "rule_name": "CRL_Unreachable_Alert",
+      "field": "trust_anchors.*.check_status",
+      "status_match": "Failure",
+      "retries": 5,
+      "severity": "Immediate",
+      "route": "System_Security_NOC"
+    }
+  ],
+  "enforcement_actions": {
+    "max_unreachable_days": 7,
+    "action": "Trigger_Automated_Revocation_Audit"
+  }
+}

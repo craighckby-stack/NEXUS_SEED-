@@ -1,0 +1,43 @@
+{
+  "version": "2.0",
+  "description": "Defines modular metrics and profiles for Autonomous Code Evolution (ACE).",
+  "definitions": {
+    "BASE_METRICS": [
+      { "id": "M_EXEC_LATENCY_P95", "unit": "ms", "type": "temporal" },
+      { "id": "M_RESOURCE_USAGE", "unit": "cu", "type": "resource" },
+      { "id": "M_CODE_COMPLEXITY", "unit": "score", "type": "static" },
+      { "id": "M_TEST_COVERAGE_DELTA", "unit": "%", "type": "static" }
+    ],
+    "DERIVED_METRICS": [
+      { 
+        "id": "D_FITNESS_SCORE", 
+        "formula": "(1 / M_EXEC_LATENCY_P95) * (M_TEST_COVERAGE_DELTA + 1)",
+        "weight": 1.0
+      }
+    ]
+  },
+  "profiles": {
+    "P_PRODUCTION_STABILITY": {
+      "target_metric": "D_FITNESS_SCORE",
+      "optimization_goal": "maximize",
+      "oracles": [
+        { 
+          "id": "O_LATENCY_CRITICAL", 
+          "metric": "M_EXEC_LATENCY_P95", 
+          "condition": "less_than", 
+          "value": 150, 
+          "violation_type": "penalty",
+          "penalty_factor": 0.6 
+        },
+        { 
+          "id": "O_NO_REGRESSION", 
+          "metric": "M_TEST_COVERAGE_DELTA", 
+          "condition": "greater_than_or_equal", 
+          "value": 0.0, 
+          "violation_type": "reward",
+          "reward_factor": 0.1 
+        }
+      ]
+    }
+  }
+}

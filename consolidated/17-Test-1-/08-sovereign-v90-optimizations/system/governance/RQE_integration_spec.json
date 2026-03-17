@@ -1,0 +1,24 @@
+{
+  "service_id": "RiskQuantificationEngine",
+  "description": "Defines interface and metrics for real-time calculation and propagation of the operational risk index, essential for governing autonomous control tiers.",
+  "status": "Mandatory_Service",
+  "endpoints": [
+    {
+      "name": "CalculateIndex",
+      "method": "POST",
+      "input_schema_ref": "risk/schema/input_metrics.json",
+      "output_field": "risk_index_score (float)",
+      "latency_sla_ms": 50
+    },
+    {
+      "name": "RegisterAnomaly",
+      "method": "PUT",
+      "input_schema_ref": "risk/schema/anomaly_report.json"
+    }
+  ],
+  "metrics_monitored": [
+    "compute_utilization_anomaly",
+    "external_data_taint_score",
+    "policy_deviation_rate"
+  ]
+}

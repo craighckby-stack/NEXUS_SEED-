@@ -1,0 +1,19 @@
+{
+  "policy_id": "V94_INTEGRITY_FAIL_RESPONSE",
+  "schema_version": "V1.0.0",
+  "default_action": "LOG_AND_ALERT_CRITICAL",
+  "asset_failure_policies": [
+    {
+      "asset_code": "HETM",
+      "description": "Host Environment T&M failure suggests critical root compromise.",
+      "on_failure_action": "QUARANTINE_ISOLATE_SHUTDOWN_HARD",
+      "escalation_group": "LEVEL_1_SOC"
+    },
+    {
+      "asset_code": "PVLM",
+      "description": "Policy Validator failure indicates compromise of core decision mechanism.",
+      "on_failure_action": "BLOCK_ALL_API_ACCESS",
+      "fallback_policy": "EXECUTE_PRECOMPILED_SAFE_STATE"
+    }
+  ]
+}

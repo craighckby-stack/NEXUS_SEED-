@@ -1,0 +1,27 @@
+{
+  "manifest_version": "1.0",
+  "title": "Critical Configuration Hash Sources",
+  "description": "List of files that MUST be included in the Configuration Hash Registry (CHR) for core integrity validation (S00 C-ICR). Defined here to decouple file list evolution from the core generation protocol specification (CHR_GEN_SPEC_V2.0).",
+  "files": [
+    {
+      "path": "config/gsep_c_flow.json",
+      "description": "General System Execution Plan: Core flow definition."
+    },
+    {
+      "path": "config/acvm.json",
+      "description": "Autonomous Capability Validation Matrix configuration."
+    },
+    {
+      "path": "governance/smc_schema.json",
+      "description": "System Mortality Control schema definition."
+    },
+    {
+      "path": "config/dial_analysis_map.json",
+      "description": "Diagnostic Analysis Mapping configuration."
+    },
+    {
+      "path": "config/rrp_manifest.json",
+      "description": "Regulatory Review Protocol manifest."
+    }
+  ]
+}

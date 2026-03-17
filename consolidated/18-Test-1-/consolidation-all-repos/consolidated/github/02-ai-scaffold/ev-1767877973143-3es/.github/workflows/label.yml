@@ -1,0 +1,34 @@
+name: Automatic Labeler based on File Changes
+
+on:
+  # Optimization Focus: Run the labeler when the PR is created or updated,
+  # not when it is already manually labeled (which saves unnecessary runs).
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  # Essential permissions for the standard labeler action
+  contents: read
+  pull-requests: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      # Optimization: Minimal setup required. Use recommended checkout action.
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        # Optimization: Fetch only the necessary commits to determine file changes (depth: 1)
+        with:
+          fetch-depth: 1
+
+      # Functional Optimization: Utilize the dedicated action for path-based labeling.
+      # This is far more efficient and robust than custom scripting.
+      - name: Apply Labels
+        uses: actions/labeler@v5
+        with:
+          # The GITHUB_TOKEN handles authentication for labeling.
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+# NOTE: This workflow requires a configuration file at .github/labeler.yml 
+# defining which paths correspond to which labels (e.g., 'documentation', 'frontend', etc.).

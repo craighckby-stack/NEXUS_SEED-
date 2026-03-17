@@ -1,0 +1,27 @@
+{
+  "event_namespace": "GVDM",
+  "default_sink": "kafka:metrics_pipeline_v1",
+  "alerts": [
+    {
+      "event_key": "Velocity_Threshold_Breach",
+      "description": "Indicates that the defined anomaly_thresholds (relative std dev or min change) have been exceeded.",
+      "severity": "CRITICAL",
+      "action_trigger": ["LOG", "METRIC_EMIT", "NOTIFICATION"],
+      "throttle_window_s": 60
+    },
+    {
+      "event_key": "Storage_Reindex_Triggered",
+      "description": "Fired when the storage load hits the 'reindex_trigger_load' threshold (0.85).",
+      "severity": "WARNING",
+      "action_trigger": ["LOG", "METRIC_EMIT"],
+      "throttle_window_s": 3600
+    },
+    {
+      "event_key": "Stale_Data_Pruned",
+      "description": "Confirmed execution of automatic data pruning based on stale_age_days policy.",
+      "severity": "INFO",
+      "action_trigger": ["LOG"],
+      "throttle_window_s": 86400
+    }
+  ]
+}

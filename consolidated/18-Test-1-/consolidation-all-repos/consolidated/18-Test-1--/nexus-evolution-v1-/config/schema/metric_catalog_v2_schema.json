@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.agi/schema/metric_catalog_v2.json",
+  "title": "S02 Metric Catalog Schema V2",
+  "type": "object",
+  "properties": {
+    "catalog_id": { "type": "string" },
+    "version": { "type": "string" },
+    "description": { "type": "string" },
+    "definitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["metric_id", "metric_name", "data_type", "source", "calculation", "normalization", "fallback_policy"],
+        "properties": {
+          "metric_id": { "type": "string", "pattern": "^[A-Z0-9_]{5,}" },
+          "metric_name": { "type": "string" },
+          "metric_type": { "type": "string", "enum": ["TIME_SERIES_DEVIATION", "RATIO_AGGREGATION", "RAW_INPUT"] },
+          "data_type": { "type": "string", "enum": ["FLOAT", "INTEGER", "BOOLEAN"] },
+          "source": { "type": "object", "required": ["module", "key"] },
+          "calculation": {
+            "type": "object",
+            "required": ["method", "config"],
+            "properties": {
+              "method": { "type": "string" },
+              "config": { "type": "object" }
+            }
+          },
+          "normalization": {
+            "type": "object",
+            "required": ["rule", "config"],
+            "properties": {
+              "rule": { "type": "string" },
+              "config": { "type": "object" }
+            }
+          },
+          "fallback_policy": {
+            "type": "object",
+            "required": ["strategy", "value"]
+          }
+        }
+      }
+    }
+  },
+  "required": ["catalog_id", "version", "definitions"]
+}

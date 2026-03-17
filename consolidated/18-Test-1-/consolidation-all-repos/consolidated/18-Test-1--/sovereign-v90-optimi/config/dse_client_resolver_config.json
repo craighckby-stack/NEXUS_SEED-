@@ -1,0 +1,14 @@
+{
+  "resolver_id": "DSE-CLIENT-V1",
+  "description": "Configuration for resolving DSE schemas via API calls.",
+  "endpoint_template": "https://api.dse.sov-agi.net/schemas/{domain}/{id}/version/{version}",
+  "parameters": [
+    {"key": "{domain}", "source": "schema_entry.domain", "description": "The functional domain (CORE, EXECUTION, etc.)."},
+    {"key": "{id}", "source": "schema_entry.id", "description": "The unique system identifier for the schema."},
+    {"key": "{version}", "source": "schema_entry.version", "description": "The required semantic version."}
+  ],
+  "validation_strategy": {
+    "fetch_required": true,
+    "integrity_check_algorithm": "SHA-256"
+  }
+}

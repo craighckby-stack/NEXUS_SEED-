@@ -1,0 +1,54 @@
+{
+  "systemVersion": "v7.4.3",
+  "description": "Canonical definitions and retrieval methods for AGI-KERNEL self-assessment, governance, and capability tracking metrics.",
+  "metrics": [
+    {
+      "metricId": "dependency_change_count",
+      "type": "integer",
+      "unit": "count",
+      "description": "The count of external dependencies whose configuration or version is altered during an evolution cycle.",
+      "derivationSource": "VCS_DIFF_ENGINE"
+    },
+    {
+      "metricId": "safety_critical_module_impact",
+      "type": "boolean",
+      "description": "Flag indicating if the evolution change impacts core kernel components or designated security/recovery infrastructure.",
+      "derivationSource": "CODE_MAPPER_SERVICE"
+    },
+    {
+      "metricId": "data_sensitivity_level",
+      "type": "enum",
+      "allowedValues": ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+      "description": "Sensitivity classification of data handled by the current component.",
+      "derivationSource": "DATA_CLASSIFICATION_MAPPER"
+    },
+    {
+      "metricId": "agi_maturity_score",
+      "type": "float",
+      "unit": "percent",
+      "description": "The kernel's self-assessed overall system maturity (0.0 to 100.0).",
+      "derivationSource": "MANIFEST_AGGREGATOR"
+    },
+    {
+      "metricId": "json_parsing_success_rate",
+      "type": "float",
+      "unit": "ratio",
+      "description": "Success rate of robust JSON data extraction from LLM outputs (JSON Parsing capability).",
+      "derivationSource": "KERNEL_TELEMETRY"
+    },
+    {
+      "metricId": "autonomy_infrastructure_count",
+      "type": "integer",
+      "unit": "count",
+      "description": "Total number of infrastructure components autonomously created by the kernel (e.g., branches, testing frameworks).",
+      "derivationSource": "NEXUS_DATABASE"
+    },
+    {
+      "metricId": "meta_reasoning_cycle_efficiency",
+      "type": "float",
+      "unit": "ratio",
+      "description": "Ratio of successful capability improvements per 10 evolution cycles (Meta-Reasoning effectiveness).",
+      "derivationSource": "LEARNING_HISTORY_ANALYSIS"
+    }
+  ]
+}

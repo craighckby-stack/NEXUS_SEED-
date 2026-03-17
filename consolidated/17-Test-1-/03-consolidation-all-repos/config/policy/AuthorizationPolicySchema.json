@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SMC Authorization Policy Schema",
+  "description": "Defines the global governance rules and required thresholds for state transitions in the Sovereign AGI core.",
+  "type": "object",
+  "properties": {
+    "minimum_signature_threshold": {
+      "type": "integer",
+      "description": "The minimum number of valid, required role signatures necessary to authorize a non-exempt transition.",
+      "minimum": 1
+    },
+    "required_roles": {
+      "type": "array",
+      "description": "List of high-level roles whose signatures are considered valid toward meeting the governance threshold (e.g., 'Core_Maintainer', 'Security_Auditor').",
+      "items": { "type": "string" }
+    },
+    "exempt_transitions": {
+      "type": "array",
+      "description": "List of state transitions that are exempt from the global signature threshold requirement (e.g., 'Error -> Panic', 'Init -> Idle'). Format: 'STATE_A -> STATE_B'.",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["minimum_signature_threshold", "required_roles", "exempt_transitions"]
+}

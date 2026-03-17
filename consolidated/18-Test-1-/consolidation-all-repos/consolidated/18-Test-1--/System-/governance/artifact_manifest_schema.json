@@ -1,0 +1,131 @@
+{
+  "$id": "https://agi.sovereign.v94.2/governance/artifact_manifest_schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Sovereign AGI Artifact Manifest Schema (v1.0)",
+  "description": "Defines the structure for listing and validating artifacts produced during a code evolution or scaffolding cycle, ensuring traceability and integrity, specific to the S-AGI protocol.",
+  "type": "object",
+  "required": [
+    "manifest_id",
+    "protocol_version",
+    "timestamp",
+    "agent_version",
+    "task_context",
+    "artifacts"
+  ],
+  "properties": {
+    "manifest_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "A unique identifier (UUIDv4 preferred) for this specific manifest generation, guaranteeing global uniqueness."
+    },
+    "protocol_version": {
+      "type": "string",
+      "enum": ["1.0"],
+      "description": "The specific version of the Artifact Manifest Protocol this schema validates, decoupled from agent version."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp of manifest generation (ISO 8601)."
+    },
+    "agent_version": {
+      "type": "string",
+      "pattern": "^v[0-9]+\\.[0-9]+(\\.[0-9]+)?$",
+      "description": "The version identifier of the Sovereign AGI instance (e.g., v94.2)."
+    },
+    "task_context": {
+      "type": "object",
+      "description": "Contextual metadata about the originating execution task.",
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "description": "Identifier linking back to the overall AGI task/mission."
+        },
+        "objective": {
+          "type": "string",
+          "description": "The primary objective text or prompt used."
+        }
+      },
+      "required": [
+        "task_id",
+        "objective"
+      ],
+      "additionalProperties": true
+    },
+    "artifacts": {
+      "type": "array",
+      "description": "A list of structured definitions for all produced, modified, or deleted files/components.",
+      "minItems": 0,
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "type",
+          "status"
+        ],
+        "properties": {
+          "internal_id": {
+            "type": "string",
+            "description": "An internal, temporary ID used by the agent during the generation cycle for efficient tracking."
+          },
+          "path": {
+            "type": "string",
+            "description": "The relative file path or system identifier of the artifact."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "code",
+              "schema",
+              "config",
+              "test",
+              "documentation",
+              "report",
+              "protocol",
+              "binary",
+              "model",
+              "data",
+              "metadata"
+            ],
+            "description": "Categorization of the artifact content, extended to include 'model' and 'data'."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "generated",
+              "modified",
+              "deleted",
+              "validated",
+              "conflict",
+              "unchanged",
+              "error"
+            ],
+            "description": "The action taken or final state of the file relative to the input context."
+          },
+          "checksum_hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "description": "SHA-256 hash of the artifact content. Required unless status is 'deleted'."
+          },
+          "checksum_algorithm": {
+            "type": "string",
+            "enum": [
+              "SHA256"
+            ],
+            "default": "SHA256",
+            "description": "The cryptographic hashing algorithm used for integrity verification (currently fixed to SHA256)."
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Size of the artifact file in bytes."
+          },
+          "diff_context": {
+            "type": "string",
+            "description": "Reference identifier or path to the unified diff patch against the original file, if status is 'modified'."
+          }
+        }
+      }
+    }
+  }
+}

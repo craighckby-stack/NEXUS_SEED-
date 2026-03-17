@@ -1,0 +1,25 @@
+{
+  "version": "V94.1",
+  "GTCM_UUID": "5a3b7d1c-8e4f-4d0a-9e1b-7c5e2d9f8a3c",
+  "policy_status": "active",
+  "metrics": [
+    {
+      "id": "S-01_Utility_Min",
+      "target_agent": "SDR",
+      "threshold_type": "minimum",
+      "value": 0.85,
+      "description": "Minimum required score for Efficacy Projection (S-01)."
+    },
+    {
+      "id": "S-02_Exposure_Max",
+      "target_agent": "HMC",
+      "threshold_type": "maximum",
+      "value": 0.10,
+      "description": "Maximum tolerable score for Risk Synthesis (S-02)."
+    }
+  ],
+  "AOC_Veto_Status": {
+    "S-03": false,
+    "reason": "No compliance breach detected."
+  }
+}

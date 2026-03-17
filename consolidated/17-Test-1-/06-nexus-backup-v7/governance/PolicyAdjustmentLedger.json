@@ -1,0 +1,17 @@
+{
+  "ledger_version": "1.0.0",
+  "description": "Immutable log of all executed Policy Recalibration Manifests (PRMs) for audit and rollback purposes.",
+  "entries": [
+    {
+      "manifest_ref_id": "[Reference to PRM manifest_id]",
+      "execution_timestamp": "YYYY-MM-DDT15:01:00Z",
+      "policy_module_id": "ACVD",
+      "policy_key_path": "VetoThresholds.MPAM.max_variance",
+      "change_type": "UPDATE",
+      "old_value": 0.005,
+      "new_value": 0.008,
+      "post_adjustment_gss_id": "[New Governance State Snapshot ID]",
+      "integrity_hash": "SHA256 of the policy state after execution"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "policy_schema_version": "V2.0",
+  "policies": {
+    "GOV_ENFORCEMENT_V9": {
+      "name": "Sovereign AGI Baseline Enforcement",
+      "severity_map": {
+        "MINOR": {
+          "action": "LOG_WARNING_THROTTLE",
+          "max_frequency_per_minute": 10
+        },
+        "MAJOR": {
+          "action": "INITIATE_ADAPTATION_PHASE",
+          "revert_if_score_below": 0.5
+        },
+        "CRITICAL": {
+          "action": "SYSTEM_HARD_HALT",
+          "quarantine_context": true
+        }
+      }
+    },
+    "POLICY_REVERT_V2": {
+      "name": "Standard Rollback Mechanism",
+      "steps": [
+        "SAVE_CONTEXT_STATE",
+        "ROLLBACK_COMMIT",
+        "RESTART_SAFE_MODE"
+      ]
+    }
+  }
+}

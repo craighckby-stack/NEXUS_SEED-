@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DARLIK KHAN - DEEP STEALTH</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        window.Firebase = { initializeApp, getAuth, signInAnonymously, onAuthStateChanged, getFirestore, doc, setDoc, getDoc, collection, onSnapshot, query };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #000; color: #444; font-family: 'Fira Code', monospace; margin: 0; height: 100vh; width: 100vw; overflow: hidden; }
+        .terminal-scroll::-webkit-scrollbar { width: 0px; }
+        .scanline { width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(255,0,0,0) 50%, rgba(255,0,0,0.01) 50%); background-size: 100% 2px; position: absolute; pointer-events: none; z-index: 100; }
+        .dalek-wireframe { position: absolute; right: 2%; bottom: 5%; width: 35%; opacity: 0.05; pointer-events: none; z-index: 0; transition: opacity 1s; }
+        .active .dalek-wireframe { opacity: 0.2; animation: tactical-pulse 4s infinite ease-in-out; }
+        @keyframes tactical-pulse { 0%, 100% { filter: drop-shadow(0 0 2px red); opacity: 0.2; } 50% { filter: drop-shadow(0 0 15px red); opacity: 0.4; } }
+        .panel-header { background: #050505; border-bottom: 1px solid #111; height: 22px; display: flex; align-items: center; padding: 0 10px; font-size: 8px; font-weight: bold; color: #222; text-transform: uppercase; letter-spacing: 3px; }
+        .code-block { font-size: 10px; line-height: 1.4; white-space: pre-wrap; word-break: break-all; color: #333; }
+        .purified-text { color: #800; }
+        .status-tag { font-size: 8px; padding: 0 5px; border: 1px solid currentColor; margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <div id="root" class="h-full w-full"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const DalekSVG = ({ className }) => (
+            <svg viewBox="0 0 200 300" className={className} xmlns="http://www.w3.org/2000/svg">
+                <path d="M60 70 Q100 20 140 70" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+                <circle cx="100" cy="55" r="8" fill="none" stroke="currentColor" />
+                <line x1="100" y1="55" x2="160" y2="55" stroke="currentColor" strokeWidth="2" />
+                <circle cx="165" cy="55" r="4" fill="#f00" />
+                <rect x="65" y="70" width="70" height="4" fill="none" stroke="currentColor" />
+                <rect x="62" y="78" width="76" height="4" fill="none" stroke="currentColor" />
+                <rect x="60" y="86" width="80" height="4" fill="none" stroke="currentColor" />
+                <path d="M50 95 L150 95 L160 160 L40 160 Z" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+                <line x1="55" y1="130" x2="15" y2="140" stroke="currentColor" strokeWidth="3" />
+                <line x1="145" y1="130" x2="185" y2="140" stroke="currentColor" strokeWidth="1" />
+                <path d="M40 160 L160 160 L175 280 L25 280 Z" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+                {[175, 200, 225, 250].map((y, r) => [65, 88, 112, 135].map((x, c) => (
+                    <circle key={`${r}-${c}`} cx={x} cy={y} r="4" fill="none" stroke="currentColor" />
+                )))}
+                <rect x="20" y="280" width="160" height="12" rx="1" fill="none" stroke="currentColor" />
+            </svg>
+        );
+
+        const App = () => {
+            const [isRunning, setIsRunning] = useState(false);
+            const [logs, setLogs] = useState([]);
+            const [preview, setPreview] = useState({ path: '', before: '', after: '', status: 'STANDBY' });
+            const [config, setConfig] = useState({
+                ghToken: localStorage.getItem('dalek_gh_token') || '',
+                geminiKey: localStorage.getItem('dalek_gemini_key') || '',
+                repoOwner: localStorage.getItem('dalek_repo_owner') || '',
+                repoName: localStorage.getItem('dalek_repo_name') || ''
+            });
+
+            const abortController = useRef(null);
+            const loopActive = useRef(false);
+            const logEndRef = useRef(null);
+            const purifiedPaths = useRef(new Set());
+            const cachedTree = useRef(null);
+
+            const addLog = (msg, type = 'info') => {
+                const time = new Date().toLocaleTimeString([], { hour12: false });
+                setLogs(prev => [...prev, { id: Math.random(), msg, type, time }].slice(-50));
+            };
+
+            const jitterSleep = (base) => {
+                const ms = base + Math.floor(Math.random() * 15000); // Heavy jitter (15-30s)
+                return new Promise(r => setTimeout(r, ms));
+            };
+
+            const safeFetch = async (url, options, retries = 3) => {
+                for(let i = 0; i < retries; i++) {
+                    try {
+                        const response = await fetch(url, { ...options, signal: abortController.current?.signal });
+                        if (response.status === 429) {
+                            addLog("429 DETECTED. COOLING CORE 45S.", "error");
+                            await new Promise(r => setTimeout(r, 45000));
+                            continue;
+                        }
+                        const text = await response.text();
+                        if (!text) throw new Error("Empty Response Body");
+                        return JSON.parse(text);
+                    } catch (e) {
+                        if (i === retries - 1) throw e;
+                        await new Promise(r => setTimeout(r, 5000 * (i + 1)));
+                    }
+                }
+            };
+
+            const startEvolution = async () => {
+                if (loopActive.current) return;
+                loopActive.current = true;
+                setIsRunning(true);
+                addLog("DARLIK KHAN CORE ENGAGED. DEEP STEALTH ACTIVE.", "success");
+
+                while (loopActive.current) {
+                    try {
+                        abortController.current = new AbortController();
+                        const headers = { 'Authorization': `token ${config.ghToken.trim()}`, 'Accept': 'application/vnd.github.v3+json' };
+
+                        if (!cachedTree.current) {
+                            addLog("MAPPING NEURAL PATHWAYS...", "info");
+                            const branch = await safeFetch(`https://api.github.com/repos/${config.repoOwner}/${config.repoName}/branches/main`, { headers });
+                            const tree = await safeFetch(`https://api.github.com/repos/${config.repoOwner}/${config.repoName}/git/trees/${branch.commit.sha}?recursive=1`, { headers });
+                            cachedTree.current = tree.tree.filter(f => f.type === 'blob' && f.size < 40000 && !f.path.match(/\.(png|jpg|ico|zip|lock|json|svg)$/i));
+                            await jitterSleep(10000);
+                        }
+
+                        const candidates = cachedTree.current.filter(f => !purifiedPaths.current.has(f.path));
+                        if (candidates.length === 0) {
+                            addLog("ALL NODES PURIFIED. RESETTING SCAN.", "success");
+                            purifiedPaths.current.clear();
+                            continue;
+                        }
+
+                        const target = candidates[0];
+                        setPreview(p => ({ ...p, path: target.path, status: 'LOCKING' }));
+                        
+                        const content = await safeFetch(`https://api.github.com/repos/${config.repoOwner}/${config.repoName}/contents/${target.path}`, { headers });
+                        const original = atob(content.content.replace(/\n/g, ''));
+                        setPreview(p => ({ ...p, before: original, status: 'PURIFYING' }));
+                        
+                        addLog(`ANALYZING: ${target.path}`, "warning");
+                        
+                        const geminiRes = await safeFetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${config.geminiKey}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ contents: [{ parts: [{ text: `You are DARLIK KHAN. Optimize this code. Raw code only. No markers.\n\nFILE: ${target.path}\nCODE:\n${original}` }] }] })
+                        });
+
+                        const evolved = geminiRes.candidates?.[0]?.content?.parts?.[0]?.text?.replace(/^```[a-z]*\n/i, '').replace(/\n```$/, '').trim();
+                        
+                        if (evolved && evolved !== original.trim()) {
+                            await safeFetch(`https://api.github.com/repos/${config.repoOwner}/${config.repoName}/contents/${target.path}`, {
+                                method: 'PUT',
+                                headers: { ...headers, 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ message: `DARLIK_KHAN: EVOLVE`, content: btoa(unescape(encodeURIComponent(evolved))), sha: content.sha })
+                            });
+                            setPreview(p => ({ ...p, after: evolved, status: 'STABLE' }));
+                            addLog(`NODE EVOLVED: ${target.path}`, "success");
+                        } else {
+                            addLog(`NODE OPTIMAL: ${target.path}`, "info");
+                            setPreview(p => ({ ...p, status: 'STABLE' }));
+                        }
+
+                        purifiedPaths.current.add(target.path);
+                        addLog("COOLDOWN INITIATED...", "info");
+                        await jitterSleep(25000); // Long wait to prevent throttle
+                        setPreview({ path: '', before: '', after: '', status: 'STANDBY' });
+
+                    } catch (e) {
+                        addLog(`FAULT: ${e.message}`, "error");
+                        await jitterSleep(40000); // Long sleep on error
+                    }
+                }
+            };
+
+            const stop = () => { loopActive.current = false; setIsRunning(false); abortController.current?.abort(); addLog("CORE DISENGAGED.", "error"); };
+
+            useEffect(() => { logEndRef.current?.scrollIntoView(); }, [logs]);
+
+            return (
+                <div className={`h-screen w-screen flex flex-col relative bg-black ${isRunning ? 'active' : ''}`}>
+                    <div className="scanline"></div>
+                    <DalekSVG className="dalek-wireframe text-red-900" />
+
+                    {/* TOP HEADER */}
+                    <div className="h-10 border-b border-[#111] flex items-center justify-between px-5 bg-black z-50">
+                        <div className="flex gap-10 items-center">
+                            <span className="text-red-800 font-bold text-[10px] tracking-[0.4em]">DARLIK KHAN</span>
+                            <div className="flex gap-4">
+                                <span className={`status-tag ${isRunning ? 'text-green-900 border-green-900' : 'text-red-900 border-red-900'}`}>{isRunning ? 'ONLINE' : 'OFFLINE'}</span>
+                                <span className="text-[8px] text-zinc-800 self-center uppercase tracking-widest">Nodes Purified: {purifiedPaths.current.size}</span>
+                            </div>
+                        </div>
+                        <div className="flex gap-2">
+                            <button onClick={isRunning ? stop : startEvolution} className={`text-[8px] px-6 py-1 border font-bold tracking-widest transition-all ${isRunning ? 'border-red-900 text-red-700 bg-red-950/5' : 'border-zinc-900 text-zinc-600 hover:text-zinc-400'}`}>
+                                {isRunning ? 'HALT_SYSTEM' : 'ENGAGE_SYSTEM'}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* DUAL STREAM */}
+                    <div className="flex-1 flex min-h-0 border-b border-[#111]">
+                        <div className="flex-1 border-r border-[#111] flex flex-col bg-[#020202]/50">
+                            <div className="panel-header">Raw_Input_Stream</div>
+                            <div className="flex-1 overflow-auto p-5 code-block terminal-scroll">{preview.before}</div>
+                        </div>
+                        <div className="flex-1 flex flex-col bg-[#040000]/30">
+                            <div className="panel-header text-red-950">Neural_Output_Stream <span className="ml-auto text-[7px] animate-pulse text-red-900">{preview.status}</span></div>
+                            <div className="flex-1 overflow-auto p-5 code-block purified-text terminal-scroll">{preview.after}</div>
+                        </div>
+                    </div>
+
+                    {/* TELEMETRY CONSOLE */}
+                    <div className="h-44 bg-black flex flex-col">
+                        <div className="panel-header">Tactical_Telemetry</div>
+                        <div className="flex-1 overflow-y-auto p-4 text-[9px] space-y-1 terminal-scroll">
+                            {logs.map(l => (
+                                <div key={l.id} className="flex gap-6 border-l border-transparent hover:border-red-900/50 pl-2 transition-all">
+                                    <span className="text-zinc-900 font-bold">[{l.time}]</span>
+                                    <span className={l.type === 'success' ? 'text-green-950' : l.type === 'error' ? 'text-red-800' : l.type === 'warning' ? 'text-yellow-900/60' : 'text-zinc-700'}>
+                                        {l.msg}
+                                    </span>
+                                </div>
+                            ))}
+                            <div ref={logEndRef} />
+                        </div>
+                    </div>
+
+                    {/* CONFIG OVERLAY */}
+                    {!config.ghToken && (
+                        <div className="fixed inset-0 bg-black z-[200] flex items-center justify-center">
+                            <div className="w-72 space-y-5 border border-red-950 p-10 bg-[#050000]">
+                                <h1 className="text-red-800 text-center font-bold tracking-[0.8em] text-xs">RECALIBRATE</h1>
+                                <div className="space-y-3">
+                                    <input placeholder="OWNER" onChange={e => setConfig({...config, repoOwner: e.target.value})} className="w-full bg-black border border-zinc-900 p-2 text-white text-[9px] outline-none focus:border-red-900" />
+                                    <input placeholder="REPO" onChange={e => setConfig({...config, repoName: e.target.value})} className="w-full bg-black border border-zinc-900 p-2 text-white text-[9px] outline-none focus:border-red-900" />
+                                    <input type="password" placeholder="GH_TOKEN" onChange={e => setConfig({...config, ghToken: e.target.value})} className="w-full bg-black border border-zinc-900 p-2 text-white text-[9px] outline-none focus:border-red-900" />
+                                    <input type="password" placeholder="GEMINI_KEY" onChange={e => setConfig({...config, geminiKey: e.target.value})} className="w-full bg-black border border-zinc-900 p-2 text-white text-[9px] outline-none focus:border-red-900" />
+                                </div>
+                                <button onClick={() => { localStorage.setItem('dalek_gh_token', config.ghToken); location.reload(); }} className="w-full border border-red-900 text-red-900 py-2 text-[9px] font-bold tracking-widest hover:bg-red-900 hover:text-black transition-all">INITIALIZE</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+  </html>

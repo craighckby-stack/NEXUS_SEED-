@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MandateEvaluationReportSchema",
+  "description": "Schema for reporting the outcome of an AGI Mandate execution, detailing success criteria achievement and constraint adherence.",
+  "type": "object",
+  "properties": {
+    "mandate_id": { "type": "string", "format": "uuid" },
+    "execution_time_ms": { "type": "integer", "minimum": 0 },
+    "success_status": {
+      "type": "string",
+      "enum": ["SUCCESS", "PARTIAL_SUCCESS", "CONSTRAINT_VIOLATION", "CRITERIA_FAILURE", "ERROR"]
+    },
+    "criteria_results": {
+      "type": "object",
+      "description": "The measured results against the required success criteria.",
+      "required": ["metric_key", "baseline_value", "target_value", "final_value", "achieved"],
+      "properties": {
+        "metric_key": { "type": "string" },
+        "baseline_value": { "type": ["number", "string"] },
+        "target_value": { "type": ["number", "string"] },
+        "final_value": { "type": ["number", "string"] },
+        "achieved": { "type": "boolean", "description": "True if the target value constraint was met or exceeded." }
+      },
+      "additionalProperties": false
+    },
+    "constraint_violations": {
+      "type": "array",
+      "description": "List of all evaluated operational constraints, flagging violations.",
+      "items": {
+        "type": "object",
+        "required": ["artifact_key", "constraint_operator", "limit_value", "actual_value", "violated"],
+        "properties": {
+          "artifact_key": { "type": "string" },
+          "constraint_operator": { "type": "string" },
+          "limit_value": { "type": ["number", "string", "boolean"] },
+          "actual_value": { "type": ["number", "string", "boolean", "null"] },
+          "violated": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "evaluation_timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": ["mandate_id", "execution_time_ms", "success_status", "criteria_results", "constraint_violations", "evaluation_timestamp"],
+  "additionalProperties": false
+}

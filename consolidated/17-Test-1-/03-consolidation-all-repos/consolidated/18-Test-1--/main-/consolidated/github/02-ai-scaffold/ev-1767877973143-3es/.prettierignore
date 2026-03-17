@@ -1,0 +1,41 @@
+# Dependencies & Lock Files
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
+vendor/
+
+# Build Outputs & Cache Directories
+dist/
+build/
+out/
+.cache/
+.next/
+.nuxt/
+.parcel-cache/
+.turbo/
+coverage/
+tmp/
+target/
+public/
+
+# Logs & Debug
+logs/
+*.log
+npm-debug.log*
+lerna-debug.log
+
+# IDE & OS Configuration
+.DS_Store
+Thumbs.db
+__MACOSX/
+.vscode/
+.idea/
+
+# Sensitive & Volatile Files
+.env*
+.venv/
+
+# Compiled/Minified Assets
+*.min.*

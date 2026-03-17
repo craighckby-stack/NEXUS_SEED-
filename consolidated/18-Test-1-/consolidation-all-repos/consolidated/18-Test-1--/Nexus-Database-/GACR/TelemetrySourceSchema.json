@@ -1,0 +1,19 @@
+{
+  "$id": "GACR/TelemetrySourceSchema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Telemetry Aggregation Output Schema",
+  "description": "Defines the required structure for data ingested by the Constraint Validator from the Aggregator.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "constraint_id": { "type": "string", "description": "Reference to the governing constraint." },
+      "monitor_id": { "type": "string" },
+      "timestamp_ms": { "type": "integer", "format": "int64", "description": "Aggregation timestamp." },
+      "metric_value": { "type": ["number", "string", "boolean"], "description": "The extracted metric value." },
+      "data_type": { "type": "string", "enum": ["GAUGE", "COUNTER", "BOOLEAN", "HISTOGRAM"] },
+      "source_metadata": { "type": "object", "additionalProperties": true, "description": "Raw metadata about the data collection." }
+    },
+    "required": ["constraint_id", "monitor_id", "timestamp_ms", "metric_value", "data_type"]
+  }
+}

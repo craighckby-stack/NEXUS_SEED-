@@ -1,0 +1,50 @@
+{
+  "asset_id": "VRRP-V1.0",
+  "asset_type": "VRRM_REMEDIATION_PLANS",
+  "schema_version": "1.0",
+  "remediation_profiles": [
+    {
+      "profile_id": "VRRP-2A",
+      "description": "Response for Critical Axiomatic Policy Breach (GCM_2_1)",
+      "mandates": [
+        {
+          "action": "STATE_QUARANTINE",
+          "target_asset": "CISM",
+          "parameters": {"reason_code": "AXIOMATIC_BREACH"}
+        },
+        {
+          "action": "CONFIG_ROLLBACK",
+          "target_asset": "PVLM",
+          "parameters": {"version_hash": "LAST_GACMS_CERTIFIED"}
+        }
+      ]
+    },
+    {
+      "profile_id": "VRRP-2B",
+      "description": "Response for High Model Stability Degradation (GCM_2_2)",
+      "mandates": [
+        {"action": "MODEL_RETRAINING_MANDATE", "target_asset": "CMR", "parameters": {}},
+        {
+          "action": "METRIC_LOCKDOWN",
+          "target_asset": "MPAM",
+          "parameters": {"duration_minutes": 720}
+        }
+      ]
+    },
+    {
+      "profile_id": "VRRP-2C",
+      "description": "Response for Moderate Adaptive Behavior Violation (GCM_2_3)",
+      "mandates": [
+        {"action": "INPUT_STREAM_PAUSE", "target_asset": "S1", "parameters": {}},
+        {
+          "action": "ADTM_ADJUSTMENT",
+          "target_asset": "ADTM",
+          "parameters": {
+            "override_path": "HEURISTICS_A/MINIMUM_THRESHOLDS_ENABLED",
+            "value": true
+          }
+        }
+      ]
+    }
+  ]
+}

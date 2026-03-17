@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agi.sovereign/schemas/v94/ArtifactResolverConfig.json",
+  "title": "ArtifactResolverConfig",
+  "description": "Configuration for resolving AGI artifact references, including generators, template sources, and processor hooks.",
+  "type": "object",
+  "properties": {
+    "templateRepositories": {
+      "type": "object",
+      "description": "Maps logical template source identifiers to physical storage locations (e.g., Git URLs, local paths).",
+      "additionalProperties": {
+        "type": "string",
+        "format": "uri"
+      }
+    },
+    "generatorDefinitions": {
+      "type": "object",
+      "description": "Maps generator IDs (used in ArtifactStructuralDefinition.pipeline.generatorReference) to executable modules/classes.",
+      "patternProperties": {
+        "^[a-zA-Z0-9/._-]+$": {
+          "type": "object",
+          "properties": {
+            "modulePath": {
+              "type": "string",
+              "description": "Internal path to the AGI module responsible for generation."
+            },
+            "defaultTemplateRepoId": {
+              "type": "string",
+              "description": "ID of the primary template repository this generator uses."
+            }
+          },
+          "required": ["modulePath", "defaultTemplateRepoId"]
+        }
+      }
+    },
+    "hookDefinitions": {
+      "type": "object",
+      "description": "Maps hook function references (used in ArtifactStructuralDefinition.pipeline.hooks) to specific execution endpoints.",
+      "additionalProperties": {
+        "type": "string",
+        "description": "Function/Script endpoint path."
+      }
+    }
+  },
+  "required": ["templateRepositories", "generatorDefinitions"]
+}

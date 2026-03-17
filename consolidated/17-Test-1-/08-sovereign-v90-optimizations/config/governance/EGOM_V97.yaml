@@ -1,0 +1,26 @@
+## Emergency Governance Override Module (EGOM) V97.0 Configuration
+
+# EGOM handles mandatory governance conflicts, deadlocks, or critical failure states 
+# requiring rapid triage, potentially initiating an auditable Human-in-the-Loop (HIL) review cycle 
+# before GSEP Stage 1 (M-01 Intent Generation) can proceed.
+
+active: true
+stage_scope: 0.5
+enforcement_mechanism: HIL_VETO_QUEUE_V2
+
+policy_violation_thresholds:
+  S-03_CONCURRENT_FAILURE_LIMIT: 3 # Number of consecutive C-15 S-03 veto flags allowed before EGOM triggers.
+  C11_RISK_BREACH_SEVERITY: 0.95 # S-02 Risk Floor (C-11) is breached beyond this absolute ceiling (Max=1.0).
+  RSAM_LOCKDOWN_REQUIRED: true # If RSAM detects structural corruption in GRS, EGOM must activate.
+
+override_protocols:
+  protocol_1_name: Policy_Deadlock_Mitigation
+  protocol_1_trigger_components: [C-15, CRM, GRS]
+  protocol_1_hmi_timeout_ms: 180000 # 3 minutes for HIL acknowledgement
+  protocol_1_post_hmi_action: [GCO_RESTART, SRM_PAUSE, D-01_LOG_FULL_STATE]
+
+# Mandated HIL Signalling Interface
+hil_interface:
+  active: true
+  endpoint: "https://governance.aoc/v97/hmi/override_signal"
+  attestation_required: true # Must be cryptographically signed by an approved external authority.

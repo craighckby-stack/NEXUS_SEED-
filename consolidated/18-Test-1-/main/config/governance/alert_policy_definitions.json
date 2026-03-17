@@ -1,0 +1,17 @@
+{
+  "ALERT_P95_VIOLATION": {
+    "priority": "P1",
+    "channels": ["monitor_dashboard", "engineering_pager"],
+    "escalation": [{"delay": "5m", "target": "CoreSystems Lead"}]
+  },
+  "ALERT_STAGNATION": {
+    "priority": "P3",
+    "channels": ["evolution_reports"],
+    "escalation": []
+  },
+  "ALERT_EAS_DEGRADATION": {
+    "priority": "P0",
+    "channels": ["safety_override_mechanism", "emergency_log"],
+    "auto_action": "throttle_api_access"
+  }
+}

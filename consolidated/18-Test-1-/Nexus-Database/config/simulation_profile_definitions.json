@@ -1,0 +1,29 @@
+{
+  "description": "Concrete parameter definitions for GTCM simulation fidelity profiles, detailing resource usage and logging requirements.",
+  "profiles": {
+    "high_critical": {
+      "resource_scaling_factor": 4.0,
+      "logging_level": "DEBUG_DEEP",
+      "latency_target_ms": 10,
+      "required_data_streams": ["core_telemetry", "tertiary_validation_stream"]
+    },
+    "medium_severe": {
+      "resource_scaling_factor": 2.5,
+      "logging_level": "INFO_DETAILED",
+      "latency_target_ms": 50,
+      "required_data_streams": ["core_telemetry"]
+    },
+    "standard_default": {
+      "resource_scaling_factor": 1.0,
+      "logging_level": "INFO",
+      "latency_target_ms": 200,
+      "required_data_streams": ["system_metrics"]
+    },
+    "low_minimal": {
+      "resource_scaling_factor": 0.5,
+      "logging_level": "WARN",
+      "latency_target_ms": 500,
+      "required_data_streams": []
+    }
+  }
+}

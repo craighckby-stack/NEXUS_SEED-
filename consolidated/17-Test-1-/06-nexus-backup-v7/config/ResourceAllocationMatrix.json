@@ -1,0 +1,28 @@
+{
+  "MatrixID": "RAME_V94_1",
+  "Description": "Defines runtime limits based on task attributes to prevent resource contention.",
+  "DefaultLimits": {
+    "Tokens_Per_Cycle": 8192,
+    "Runtime_Memory_MB": 10240
+  },
+  "AllocationRules": [
+    {
+      "scope": "CORE",
+      "priority_min": 3,
+      "multiplier": 1.5,
+      "description": "High priority Core evolution receives a 50% buffer over defaults."
+    },
+    {
+      "scope": "ADAPTER",
+      "priority_min": 4,
+      "multiplier": 2.0,
+      "description": "Urgent, high-risk external interface creation tasks receive double resources."
+    },
+    {
+      "scope": "CONFIG",
+      "priority_min": 1,
+      "multiplier": 1.05,
+      "description": "Configuration updates are crucial but inherently lightweight."
+    }
+  ]
+}

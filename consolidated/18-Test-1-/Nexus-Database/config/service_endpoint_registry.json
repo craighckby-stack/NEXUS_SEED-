@@ -1,0 +1,19 @@
+{
+  "serviceId": "SOV-AGI-v94.1",
+  "registryVersion": "1.0.0",
+  "endpoints": [
+    {
+      "contractName": "StatusQuery",
+      "serviceName": "OperationalMonitor",
+      "uri": "tcp://localhost:9000/api/v1/status",
+      "interfacePortRef": "primaryPort"
+    },
+    {
+      "contractName": "ConfigUpdate",
+      "serviceName": "ConfigurationManagement",
+      "uri": "tcp://127.0.0.1:9000/api/v1/config",
+      "interfacePortRef": "primaryPort"
+    }
+  ],
+  "telemetryUri": "tcp://localhost:9001/telemetry"
+}

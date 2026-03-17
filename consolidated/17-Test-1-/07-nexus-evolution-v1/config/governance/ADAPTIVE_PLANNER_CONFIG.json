@@ -1,0 +1,18 @@
+{
+  "planner_version": "V94.1.ASP.1",
+  "input_dependencies": [
+    "SDR_OperationalMetrics",
+    "RETV_ComplianceFailures",
+    "PSR_SimulationEfficacyData"
+  ],
+  "synthesis_constraints": {
+    "minimum_trust_threshold_S01": 0.95,
+    "maximum_risk_index_S02": 0.10,
+    "adaptive_cycle_wait_epochs": 1000
+  },
+  "output_format": "AIA_Proposal_Schema",
+  "failure_handling": {
+    "trigger": "RETV_ComplianceFailures > 5",
+    "fallback_action": "Activate_Manual_Override_L4"
+  }
+}

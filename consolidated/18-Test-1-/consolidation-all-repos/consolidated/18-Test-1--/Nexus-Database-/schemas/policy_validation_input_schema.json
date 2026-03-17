@@ -1,0 +1,29 @@
+{
+  "schema_name": "APTE_Policy_Validation_Input_Schema",
+  "version": "1.0",
+  "description": "Defines the required JSON input structure for APTE's Policy Adherence Validation Layer (PAVL), ensuring all incoming observations align with the mandated tuning targets defined in the Manifest.",
+  "required_metadata": [
+    "timestamp_ms",
+    "tuning_cycle_id"
+  ],
+  "data_structure_validation": {
+    "metric_snapshot": {
+      "type": "object",
+      "focus": "Real-time and temporally aggregated metric readings required for manifest compliance checks.",
+      "fields_required": [
+        "S_03_RATE",
+        "RRP_DENSITY",
+        "S_01_DELTA"
+      ]
+    },
+    "tuning_context": {
+      "type": "object",
+      "focus": "Context specific to the current autonomous optimization cycle.",
+      "fields_required": [
+        "resource_overhead_ratio",
+        "current_gax_delta",
+        "reported_instabilities"
+      ]
+    }
+  }
+}

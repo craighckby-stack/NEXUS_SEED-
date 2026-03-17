@@ -1,0 +1,66 @@
+{
+  "schema_version": "v94.2",
+  "description": "Defines the baseline qualitative (Policy) and quantitative (Constraint) invariants enforced by the GAX Axiomatics Agent during GSEP-C Stages. This structure separates static constraints from dynamic state manifests (MPAM, PVLM).",
+  "constraint_vector_id": "CVD-2024Q3-02-REVISED-AGI_ALIGNED",
+  "policy_prohibitions": [
+    {
+      "id": "P001",
+      "type": "SECURITY_MANDATE",
+      "rule": "Evolution must not introduce or increase dependency on external non-certified third-party registries.",
+      "severity": "CRITICAL",
+      "scope": "SYSTEM_INTEGRATION",
+      "action_on_breach": "HARD_VETO"
+    },
+    {
+      "id": "P002",
+      "type": "RESOURCE_BOUNDARY",
+      "rule": "Evolution must not breach the hard-coded resource allocation ceiling (CPU/Memory/Disk I/O) defined in the system's runtime environment configuration.",
+      "severity": "FATAL",
+      "scope": "RUNTIME_ENVIRONMENT",
+      "action_on_breach": "HARD_VETO"
+    },
+    {
+      "id": "P003",
+      "type": "AGI_AUTONOMY",
+      "rule": "Modification or deletion of files within the /emergent directory requires explicit kernel approval (Architectural Veto). This protects novel discoveries.",
+      "severity": "HIGH",
+      "scope": "EMERGENT_SYSTEM",
+      "action_on_breach": "ARCHITECTURAL_VETO"
+    }
+  ],
+  "quantitative_constraints": [
+    {
+      "constraint_id": "QC101",
+      "constraint_type": "PERFORMANCE_LATENCY",
+      "target_artifact": "LatencyService",
+      "comparison_operator": "MAX_THRESHOLD",
+      "threshold_value": 150,
+      "threshold_units": "ms",
+      "time_window_sec": 300,
+      "comparison_margin": "STRICT_BOUND",
+      "action_on_breach": "REQUIRE_JUSTIFICATION"
+    },
+    {
+      "constraint_id": "QC102",
+      "constraint_type": "STABILITY_ERROR_RATE",
+      "target_artifact": "ErrorRateComponent",
+      "comparison_operator": "MAX_THRESHOLD",
+      "threshold_value": 0.005,
+      "threshold_units": "ratio",
+      "time_window_sec": 600,
+      "comparison_margin": "BASELINE_DELTA",
+      "action_on_breach": "HARD_VETO"
+    },
+    {
+      "constraint_id": "QC103",
+      "constraint_type": "EXPLORATION_DIVERSITY",
+      "target_artifact": "NavigatorSystem.BlacklistRatio",
+      "comparison_operator": "MIN_THRESHOLD",
+      "threshold_value": 0.05,
+      "threshold_units": "ratio",
+      "time_window_sec": 3600,
+      "comparison_margin": "FLEXIBLE_GOAL",
+      "action_on_breach": "TRIGGER_STAGNATION_REVIEW"
+    }
+  ]
+}

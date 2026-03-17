@@ -1,0 +1,17 @@
+# Core Failure Thresholds Manifest (CFTM) V1.0
+# REQUIRED INPUTS for Governance Axioms (GAX) 2.0 and Finality Gate (L7)
+
+metadata:
+  version: 1.0
+  description: Defines mandatory quantitative safety and normalization thresholds.
+
+thresholds:
+  # Tau Normalization Factor (tau_norm):
+  # Used in the Core Objective Function (COF) to normalize the denominator (Risk).
+  # Prevents division by zero or near-zero risk values.
+  tau_normalization_factor: 1.0e-6
+
+  # Epsilon Minimum Safety Margin (epsilon_min):
+  # The minimum required buffer by which S-01 (Efficacy) must exceed S-02 (Risk) 
+  # to achieve P-01 certification, guaranteeing adequate systemic safety margin.
+  epsilon_minimum_margin: 0.05

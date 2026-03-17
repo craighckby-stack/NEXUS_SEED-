@@ -1,0 +1,39 @@
+{
+  "protocol": "DSE_V94.1",
+  "artifact_schema_version": "1.0.0",
+  "description": "Defines structural and cryptographic requirements for key artifacts referenced in the GSEP matrix.",
+  "artifacts": {
+    "S01_CSR": {
+      "produced_by": "S01",
+      "storage_layer": "Immutable Ledger Segment",
+      "schema_type": "JSON/JWS",
+      "required_fields": [
+        "actor_signature",
+        "payload_hash",
+        "commitment_vector_index"
+      ],
+      "cryptographic_requirement": "ECDSA P-384 Signed"
+    },
+    "S07_ECVM": {
+      "produced_by": "S07",
+      "storage_layer": "Execution Cache",
+      "schema_type": "CBOR/Map",
+      "required_fields": [
+        "telemetry_vectors",
+        "validation_nonce",
+        "time_to_live"
+      ],
+      "cryptographic_requirement": "SHA3-256 Merkle Rooted"
+    },
+    "S08_TEMM": {
+      "produced_by": "S08",
+      "storage_layer": "Monitor Data Store",
+      "schema_type": "JSON",
+      "required_fields": [
+        "execution_drift_metrics",
+        "system_load_factors"
+      ],
+      "cryptographic_requirement": "None (Telemetry)"
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/draft/2020-12/schema#",
+  "$id": "http://dse-protocol/constraint_runtime_manifest_schema.json",
+  "title": "DSE Constraint Logic Runtime Manifest",
+  "description": "Maps a verified Constraint Logic Hash to its deployment artifact and execution environment definition, ensuring deterministic execution of constraints.",
+  "type": "object",
+  "$defs": {
+    "ExecutionEnvironment": {
+      "type": "object",
+      "description": "Defines the requirements for the sandboxed execution environment.",
+      "properties": {
+        "platform_id": {
+          "type": "string",
+          "description": "Identifier for the standardized DSE runtime platform version/profile."
+        },
+        "required_libraries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Specific non-standard dependencies or modules required by the constraint logic."
+        },
+        "entry_point": {
+          "type": "string",
+          "description": "The specific function, method, or file to invoke within the deployment artifact."
+        }
+      },
+      "required": [
+        "platform_id",
+        "entry_point"
+      ]
+    }
+  },
+  "properties": {
+    "logic_hash": {
+      "$ref": "./artifact_manifest_schema.json#/$defs/SHA256Hash",
+      "description": "The SHA256 hash (ID) of the deterministic constraint logic/code payload."
+    },
+    "runtime_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for this specific deployment/runtime configuration."
+    },
+    "container_image_reference": {
+      "type": "string",
+      "description": "Pointer to the certified, immutable execution environment image (e.g., Docker registry tag/digest or content address)."
+    },
+    "execution_details": {
+      "$ref": "#/$defs/ExecutionEnvironment"
+    }
+  },
+  "required": [
+    "logic_hash",
+    "runtime_id",
+    "container_image_reference",
+    "execution_details"
+  ],
+  "additionalProperties": false
+}

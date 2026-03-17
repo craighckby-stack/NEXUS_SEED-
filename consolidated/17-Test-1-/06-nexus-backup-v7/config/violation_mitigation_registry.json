@@ -1,0 +1,26 @@
+{
+  "registry_version": "v1.0",
+  "description": "Defines executable actions and associated severity levels mapped to specific trigger IDs utilized by Autonomous Agents (e.g., ISVA, OSVA).",
+  "mitigation_triggers": {
+    "IH_P-M02_TRIGGER_REJECT_IMMEDIATE": {
+      "severity": "CRITICAL",
+      "action_sequence": ["LOG_FATAL", "HALT_PROCESSING", "RESPOND_400_BAD_INPUT"],
+      "incident_handler_target": "P-M02"
+    },
+    "LOG_WARNING_M03_QUARANTINE_RETRY": {
+      "severity": "MINOR",
+      "action_sequence": ["LOG_WARN", "QUARANTINE_INPUT_STATE", "INITIATE_BACKOFF_RETRY"],
+      "incident_handler_target": "N/A"
+    },
+    "IH_P-M05_SECURITY_ALERT": {
+      "severity": "SECURITY",
+      "action_sequence": ["LOG_CRITICAL_SECURITY", "LOCKDOWN_INGRESS_PORT", "INITIATE_NETWORK_SCAN_M05"],
+      "incident_handler_target": "P-M05_SEC"
+    },
+    "IH_P-M06_TRIGGER_QUARANTINE_ANALYSIS": {
+      "severity": "HIGH",
+      "action_sequence": ["LOG_INFO", "ISOLATE_INPUT", "ASYNC_MALFORM_ANALYSIS_QUEUE"],
+      "incident_handler_target": "P-M06"
+    }
+  }
+}

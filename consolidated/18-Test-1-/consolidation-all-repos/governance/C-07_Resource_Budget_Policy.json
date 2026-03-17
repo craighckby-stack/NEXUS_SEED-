@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agi.sovereign/schemas/v94/ResourceBudgetPolicy.json",
+  "title": "Sovereign AGI Resource Budget Policy (C-07)",
+  "description": "Defines resource limits (time, memory, IO count) based on estimated action costs (M-02 cost_metric), used by the Planner (M-03) and Execution Engine to manage and constrain execution time/resources.",
+  "type": "object",
+  "properties": {
+    "default_timeout_ms": {
+      "type": "integer",
+      "default": 5000,
+      "description": "The standard maximum runtime allowed for an action with an unclassified or simple cost profile."
+    },
+    "complexity_limits": {
+      "type": "object",
+      "description": "Specific resource ceilings applied based on the M-02 cost_metric classification.",
+      "properties": {
+        "O(1)": {
+          "type": "object",
+          "description": "Budget for constant-time complexity actions.",
+          "properties": { "max_cpu_cycles": { "type": "integer" }, "max_memory_mb": { "type": "integer" } },
+          "additionalProperties": false
+        },
+        "O(N)": {
+          "type": "object",
+          "description": "Budget for linear complexity actions.",
+          "properties": { "max_cpu_cycles": { "type": "integer" }, "max_memory_mb": { "type": "integer" } },
+          "additionalProperties": false
+        },
+        "HEAVY_COMPUTATION": {
+          "type": "object",
+          "description": "Budget for highly resource-intensive actions (e.g., deep learning inference).",
+          "properties": { "max_gpu_seconds": { "type": "integer" }, "max_io_ops": { "type": "integer" } },
+          "additionalProperties": false
+        }
+      },
+      "required": ["O(1)", "O(N)", "HEAVY_COMPUTATION"],
+      "additionalProperties": true
+    },
+    "emergency_shutdown_thresholds": {
+      "type": "object",
+      "description": "Global resource thresholds that trigger system intervention.",
+      "properties": {
+        "memory_percentage_critical": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.95 },
+        "consecutive_error_count": { "type": "integer", "default": 10 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["default_timeout_ms", "complexity_limits"]
+}

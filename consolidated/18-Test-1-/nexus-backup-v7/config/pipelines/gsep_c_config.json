@@ -1,0 +1,26 @@
+{
+  "pipeline_id": "GSEP-C",
+  "description": "Configuration for the Governing State Evolution Processor - Consensus pipeline.",
+  "resource_allocation": {
+    "cpu_limit": "4 Cores",
+    "memory_limit": "16 GB",
+    "concurrency": 8
+  },
+  "rate_limits": {
+    "max_stps_per_minute": 60,
+    "priority_override_factor": 2
+  },
+  "accepted_commands": [
+    "CREATE_FILE",
+    "DELETE_FILE",
+    "APPLY_PATCH",
+    "SET_CONFIGURATION",
+    "EXECUTE_TEST"
+  ],
+  "verification_steps": [
+    "SCHEMA_VALIDATION",
+    "PROVENANCE_CHECK",
+    "STATE_LOCK_ACQUISITION",
+    "SANDBOX_EXECUTION"
+  ]
+}

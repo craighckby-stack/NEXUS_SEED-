@@ -1,0 +1,29 @@
+{
+  "description": "Library defining safe, deterministic constants and mathematical functions available for use within Metric Synthesis Template (MST) derivations.",
+  "metadata": {
+    "version": "DSL_FUNCTIONS V1.0",
+    "security_level": "L5_CRITICAL"
+  },
+  "constants": [
+    {"name": "PI", "value": 3.14159265359},
+    {"name": "EULER", "value": 2.71828182845},
+    {"name": "RISK_CAP", "value": 1.0, "note": "Maximum allowable risk score."}
+  ],
+  "functions": [
+    {
+      "name": "SafeSigmoid",
+      "signature": "(X)",
+      "purpose": "Applies a bounded activation curve for risk normalization."
+    },
+    {
+      "name": "WeightedAvg",
+      "signature": "(Value1, Weight1, Value2, Weight2)",
+      "purpose": "Calculates a safe weighted average between variables."
+    },
+    {
+      "name": "NormalizedDifference",
+      "signature": "(Current, Projected, MaxValue)",
+      "purpose": "Calculates normalized gain/loss, bounded by MaxValue."
+    }
+  ]
+}

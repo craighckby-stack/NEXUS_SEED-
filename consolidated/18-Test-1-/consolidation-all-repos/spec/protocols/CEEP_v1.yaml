@@ -1,0 +1,24 @@
+# CERTIFIED EXECUTION ENVIRONMENT PROTOCOL (CEEP) V1.0
+
+# METADATA
+protocol_id: CEEP_V1
+version: 1.0
+standard: SGS V95.3
+affected_stages: [L3, L6]
+authority_reliance: CRoT (Attestation Signing)
+
+# 1.0 PROTOCOL DEFINITION
+The Certified Execution Environment Protocol (CEEP) mandates that any computational stage (L3, L6) critical for S-Metric generation or confidence modeling must execute within an attested, verified runtime container (VRC). CEEP ensures that external oracles and simulation environments are untampered.
+
+# 2.0 ATTESTATION FLOW
+
+## 2.1 PRE-EXECUTION REQUIREMENTS
+1. VRC Image Hashing: The container image and configuration file (`ceep_config.json`) must be hashed.
+2. CRoT Request: Submit the VRC hash and the current GAX Engine configuration state to CRoT for attestation.
+3. Certified Seal Receipt: CRoT returns a time-bound, cryptographically signed Certified Execution Seal (CES).
+
+## 2.2 EXECUTION START
+Execution for L3/L6 may only proceed if the CES is successfully validated against the CRoT public key, confirming the runtime environment integrity.
+
+# 3.0 POST-EXECUTION NON-REPUDIATION
+Upon completion of L3/L6, all resulting artifacts (S-Metrics, simulation logs) must be signed using the VRC's attested private key derived during execution setup. This signature links the output directly back to the integrity-certified environment, supporting the NRALS record in L8.

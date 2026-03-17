@@ -1,0 +1,12 @@
+{
+  "registry_endpoint": "https://registry.agi.sovereign/v1/schemas",
+  "auth_mechanism": "JWT_SERVICE_ACCOUNT",
+  "caching": {
+    "enabled": true,
+    "ttl_seconds": 86400
+  },
+  "fallback": {
+    "type": "LOCAL_FILE_SYSTEM",
+    "path": "/var/agi/schemas/fallback"
+  }
+}

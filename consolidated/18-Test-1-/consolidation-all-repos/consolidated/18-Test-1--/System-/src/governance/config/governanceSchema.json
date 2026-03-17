@@ -1,0 +1,37 @@
+{
+  "schemaName": "GovernanceParameterSchema",
+  "version": "1.0.0",
+  "description": "Defines the required structure and constraints for all Governance-critical parameters for automatic validation.",
+  "structure": {
+    "requiredFields": ["group", "type", "unit", "range", "default", "scope", "severity", "description", "source_module"],
+    "fieldTypes": {
+      "group": "string",
+      "type": {
+        "type": "string",
+        "enum": ["integer", "float", "string", "boolean"]
+      },
+      "unit": "string",
+      "range": "array",
+      "default": ["integer", "float", "string", "boolean"],
+      "scope": {
+        "type": "string",
+        "enum": ["runtime", "boot", "immutable_boot"]
+      },
+      "severity": {
+        "type": "string",
+        "enum": ["LOW", "MEDIUM", "HIGH", "CATASTROPHIC"]
+      },
+      "source_module": "string",
+      "description": "string"
+    },
+    "constraints": {
+      "range": {
+        "length": 2,
+        "validationFunction": "checkRangeDataTypeMatchesType"
+      },
+      "default": {
+        "validationFunction": "checkDefaultDataTypeMatchesType"
+      }
+    }
+  }
+}

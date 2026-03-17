@@ -1,0 +1,28 @@
+{
+  "config_version": "CVM-1.0",
+  "target_manifest_id": "SBCM-2024-001",
+  "description": "Configuration settings for the Constraint Violation Monitor (CVM) responsible for tracking compliance against the SBCM limits.",
+  "monitoring_rules": [
+    {
+      "constraint_path": "governed_areas.temporal_evolution_limits.max_architectural_drift.limit",
+      "metric": "Current_Drift_Rate",
+      "thresholds": {
+        "warning": 0.8,
+        "alert": 0.95,
+        "violation": 1.0
+      },
+      "action_on_alert": "Log_L4_Severity_Event",
+      "action_on_violation": "Invoke_L3_CM_Review"
+    },
+    {
+      "constraint_path": "governed_areas.axiomatic_parameters.objective_weighting.minimum_weight",
+      "metric": "Current_AX001_Weight_Ratio",
+      "thresholds": {
+        "warning_margin": 0.005,
+        "alert_margin": 0.001,
+        "violation_ratio": 1.0
+      },
+      "action_on_violation": "Immediate_GAX_Override"
+    }
+  ]
+}

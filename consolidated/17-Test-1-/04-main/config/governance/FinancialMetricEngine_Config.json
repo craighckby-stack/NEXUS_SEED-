@@ -1,0 +1,29 @@
+{
+  "engineId": "FME_V1",
+  "description": "Configuration for real-time tracking and constraint enforcement for financial boundaries defined in GFRM policy.",
+  "dataSource": "Telemetry/ResourceKernel/ComputeUsage",
+  "reportingIntervalMS": 5000,
+  "monitoredMetrics": [
+    "Total_CPU_Hours",
+    "Aggregated_GPU_TFLOPS",
+    "External_API_Credits"
+  ],
+  "costIntegrationModule": {
+    "providerRatesPath": "config/financial/external_provider_rates.json",
+    "currency": "USD"
+  },
+  "constraintTriggers": [
+    {
+      "policyRef": "dailyComputeUSD",
+      "thresholdTriggerPercent": 90,
+      "action": "Throttle_Exploration_Resource_Pools",
+      "severity": "Warning"
+    },
+    {
+      "policyRef": "externalAPICostUSD",
+      "thresholdTriggerPercent": 100,
+      "action": "Immediate_Rate_Limit_External_API_Calls",
+      "severity": "Critical"
+    }
+  ]
+}

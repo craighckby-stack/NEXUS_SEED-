@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.1.0",
+  "stage_id": "S09_CPR_ConstraintPlanningResolution",
+  "stage_handler": "processing.cpr_processor",
+  "artifact_inputs": [
+    {
+      "type": "TEMM",
+      "identifier": "TemporalEntropyMappingMetrics",
+      "path": "artifact_cache/temm_s08.json"
+    },
+    {
+      "type": "ECVM",
+      "identifier": "ErrorCorrectingVMMetrics",
+      "path": "artifact_cache/ecvm_s07.json"
+    },
+    {
+      "type": "CSR",
+      "identifier": "ConstraintStageReportBaseline",
+      "path": "artifact_cache/csr_s01.json"
+    }
+  ],
+  "system_configs": {
+    "acvm_core_path": "config/acvm_core_constraints.json",
+    "resolution_policy": "STRICT_MAX_SAT",
+    "max_iterations": 500
+  },
+  "output": {
+    "type": "CPR_Metrics",
+    "path": "output/s09_cpr_metrics.json",
+    "format": "json"
+  }
+}

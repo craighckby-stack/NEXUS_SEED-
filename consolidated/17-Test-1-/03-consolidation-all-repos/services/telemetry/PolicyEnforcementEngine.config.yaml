@@ -1,0 +1,19 @@
+service:
+  name: TelemetryVettingEnforcementEngine
+  version: 1.0.0
+  input_queue: telemetry_raw_ingest_queue
+  output_queue: telemetry_vetted_pipeline
+  
+policy_loading:
+  spec_source: config/governance/TelemetryVettingSpec.json
+  refresh_interval_seconds: 300
+  failure_mode: FAIL_SECURELY # Reject all unknown data types if policy load fails
+  
+security:
+  data_leak_alert_threshold: 50 # Failures per minute
+  pii_signature_scanning_enabled: true
+  session_salt_key_path: /vault/keys/session_salts.key
+  
+performance:
+  worker_pool_size: 16
+  batch_size_events: 500

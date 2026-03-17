@@ -1,0 +1,17 @@
+{
+  "grammar_name": "Sovereign_PDL_v2_1",
+  "schema_version": "2.1.0",
+  "description": "Defines the formal grammar rules, terminal symbols, and production rules for PDL version 2.1, designed for dynamic loading by PDLEngineKernel.",
+  "specification_format": "EBNF_augmented_JSON",
+  "rules": {
+    "program": ["statement*"],
+    "statement": ["definition | operation | conditional"],
+    "definition": ["KW_DEFINE", "identifier", "assignment"],
+    "terminal_symbols": {
+      "KW_DEFINE": "DEFINE",
+      "KW_IF": "IF",
+      "INT": "/[0-9]+/"
+    }
+  },
+  "integrity_checksum": "SHA256_PLACEHOLDER_FOR_BUILD_SYSTEM"
+}

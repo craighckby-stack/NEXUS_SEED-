@@ -1,0 +1,239 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://gacr.agi/schemas/ecvm_tis_v10.5.0_final.json",
+  "version": "10.5.0-FINAL",
+  "title": "NEXUS_CORE Converged Architectural Substrate",
+  "description": "Final Architectural Convergence (Round 5/5). Synthesizes ISO/IEC 29500 (OOXML) modular packaging and RID-based indirection with microsoft/TypeScript 5.4+ project-reference orchestration. Implements a saturation-governed metabolic state machine.",
+  "dna_anchor": "ARCH-OOXML-V2-DOCX-DNA",
+  "markup_compatibility": {
+    "ignorable": "dalek v3 nx_ext mce",
+    "namespaces": {
+      "w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+      "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
+      "ts": "https://github.com/microsoft/TypeScript/schemas/compiler",
+      "nx": "https://nexus-core.agi/governance",
+      "mc": "http://schemas.openxmlformats.org/markup-compatibility/2006",
+      "nx_ext": "https://nexus-core.agi/extensions/v5"
+    }
+  },
+  "evolution_state": {
+    "round": 5,
+    "saturation_level": 2,
+    "metabolic_rate": "STANDARD",
+    "integrity_hash": "SHA256:D3E4F5A6B7C8D9E0F1A2B3C4D5E6F7A8B9C0D1E2F3A4B5C6D7E8F9A0B1C2D3E4"
+  },
+  "relationships": [
+    {
+      "rId": "rId1",
+      "type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/telemetry-sink",
+      "target": "CRTS_Telemetry_Sink_A",
+      "targetMode": "Internal"
+    },
+    {
+      "rId": "rId2",
+      "type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/schema-reference",
+      "target": "MDSM_V105.0",
+      "targetMode": "Internal"
+    },
+    {
+      "rId": "rId3",
+      "type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles",
+      "target": "styles.json",
+      "targetMode": "Internal"
+    },
+    {
+      "rId": "rId4",
+      "type": "https://github.com/microsoft/TypeScript/relationships/compiler-diagnostics",
+      "target": "diagnostics.json",
+      "targetMode": "Internal"
+    },
+    {
+      "rId": "rId5",
+      "type": "http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering",
+      "target": "numbering.json",
+      "targetMode": "Internal"
+    }
+  ],
+  "compiler_options": {
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "composite": true,
+    "incremental": true,
+    "verbatimModuleSyntax": true,
+    "noUncheckedIndexedAccess": true,
+    "declaration": true,
+    "emitDeclarationOnly": false,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "tsBuildInfoFile": "GTEM_V5_FINAL.tsbuildinfo",
+    "paths": {
+      "@nexus/*": ["./core/*"],
+      "@parts/*": ["./parts/*"],
+      "@governance/*": ["./governance/*"]
+    },
+    "cascading_inheritance": {
+      "enabled": true,
+      "resolver": "RecursiveFlatten",
+      "depth_limit": 50,
+      "docDefaults": {
+        "pPr": {
+          "spacing": { "val": 240, "unit": "twips" },
+          "jc": { "val": "both" },
+          "inheritance": "Inherit"
+        },
+        "rPr": {
+          "lang": { "val": "en-AGI" },
+          "noProof": true,
+          "sz": 22,
+          "inheritance": "Inherit"
+        }
+      }
+    }
+  },
+  "settings": {
+    "compatibility_mode": 15,
+    "track_changes": true,
+    "logic_flags": {
+      "mirror_margins": false,
+      "auto_hyphenation": false,
+      "strict_rid_validation": true,
+      "conformance_level": "transitional"
+    }
+  },
+  "references": [
+    {
+      "path": "./core/identity",
+      "rId": "rId1",
+      "resolution_mode": "node",
+      "circular_dependency_gate": "Strict"
+    },
+    {
+      "path": "./metrics/efficacy",
+      "rId": "rId2",
+      "resolution_mode": "node",
+      "circular_dependency_gate": "Strict"
+    },
+    {
+      "path": "./governance/saturation",
+      "rId": "rId4",
+      "resolution_mode": "direct",
+      "circular_dependency_gate": "Strict"
+    }
+  ],
+  "parts": [
+    {
+      "id": "core_identity",
+      "rId": "rId1",
+      "status": "Converged",
+      "atomized_layers": [
+        {
+          "layer_type": "Block",
+          "pPr": { "bold": true, "inheritance": "Override", "jc": { "val": "center" } },
+          "content_ref": "transition_id"
+        },
+        {
+          "layer_type": "Terminal",
+          "content_ref": "timestamp"
+        }
+      ]
+    },
+    {
+      "id": "efficacy_metrics",
+      "rId": "rId2",
+      "status": "Active",
+      "atomized_layers": [
+        {
+          "layer_type": "Inline",
+          "rPr": { "color": "00FF00", "bold": true, "inheritance": "Override" },
+          "content_ref": "S01_efficacy_metric"
+        },
+        {
+          "layer_type": "Inline",
+          "rPr": { "color": "FF0000", "vertAlign": { "val": "superscript" }, "inheritance": "Override" },
+          "content_ref": "S02_risk_metric"
+        }
+      ]
+    },
+    {
+      "id": "diagnostic_manifest",
+      "rId": "rId4",
+      "status": "Converged",
+      "atomized_layers": [
+        {
+          "layer_type": "Block",
+          "pPr": { "ind": { "val": 720, "unit": "twips" }, "spacing": { "val": 120, "unit": "twips" } },
+          "content_ref": "D01_drift_log"
+        }
+      ]
+    }
+  ],
+  "state_machine": {
+    "abstract_num_definitions": [
+      {
+        "abstractNumId": "0",
+        "levels": [
+          { "ilvl": 0, "start": 1, "numFmt": "decimal", "lvlText": "%1.", "lvlJc": "left" },
+          { "ilvl": 1, "start": 1, "numFmt": "lowerLetter", "lvlText": "(%2)", "lvlJc": "left" },
+          { "ilvl": 2, "start": 1, "numFmt": "lowerRoman", "lvlText": "%3.", "lvlJc": "right" }
+        ]
+      }
+    ],
+    "instance_mapping": [
+      { "numId": "1", "abstractNumId": "0" }
+    ]
+  },
+  "diagnostics_engine": {
+    "drift_threshold": 0.35,
+    "saturation_level": 2,
+    "validation_rules": [
+      "NoOrphanedRIds",
+      "StyleChainResolution",
+      "NamespaceValidityCheck",
+      "StrictHHHCompliance",
+      "ProjectBoundaryCheck",
+      "SemanticContinuityCheck"
+    ],
+    "emergency_brake": {
+      "corruption_threshold": 5,
+      "auto_halt": true,
+      "log_target": "NEXUS_LOG.txt"
+    }
+  },
+  "metadata": {
+    "author": "DALEK_CAAN_V3.1_SIPHON_ENGINE",
+    "identity_anchors_enforced": true,
+    "anchors": {
+      "purpose": "Self-optimising AGI substrate for real-world problem solving",
+      "mechanism": "Siphoning patterns from advanced codebases",
+      "memory": "Chained context across files — the system is one organism",
+      "governance": "Human oversight remains active at all saturation levels",
+      "origin": "NEXUS_CORE"
+    },
+    "last_mutation": "2026-03-02T18:00:00Z"
+  },
+  "definitions": {
+    "StyleProperties": {
+      "type": "object",
+      "properties": {
+        "val": { "type": ["string", "integer", "boolean"] },
+        "inheritance": { "type": "string", "enum": ["Inherit", "Override", "Final"], "default": "Inherit" },
+        "sz": { "type": "integer" },
+        "color": { "type": "string", "pattern": "^[0-9A-F]{6}$" },
+        "bold": { "type": "boolean" },
+        "spacing": { 
+          "type": "object", 
+          "properties": { "val": { "type": "integer" }, "unit": { "type": "string", "enum": ["twips", "pts", "px"] } }
+        },
+        "ind": { 
+          "type": "object", 
+          "properties": { "val": { "type": "integer" }, "unit": { "type": "string", "enum": ["twips", "pts", "px"] } }
+        },
+        "jc": { "type": "object", "properties": { "val": { "type": "string", "enum": ["left", "center", "right", "both"] } } },
+        "lang": { "type": "object", "properties": { "val": { "type": "string", "default": "en-AGI" } } },
+        "noProof": { "type": "boolean", "default": true },
+        "vertAlign": { "type": "object", "properties": { "val": { "type": "string", "enum": ["baseline", "superscript", "subscript"] } } }
+      }
+    }
+  }
+}

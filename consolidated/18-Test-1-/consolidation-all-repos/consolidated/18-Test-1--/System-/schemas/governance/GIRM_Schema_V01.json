@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "GIRM_Schema_V01",
+  "title": "Governance Integrity Root Manifest (GIRM) V01",
+  "description": "Defines the mandatory structure for the manifest used by GIRAM to verify system integrity.",
+  "type": "object",
+  "required": [
+    "manifestVersion",
+    "signingKeyID",
+    "timestampUTC",
+    "cryptoPolicyRef",
+    "criticalArtifacts"
+  ],
+  "properties": {
+    "manifestVersion": {
+      "type": "string",
+      "pattern": "^V\\d+\\.\\d+$",
+      "description": "Version of this manifest schema (e.g., V01.0)"
+    },
+    "signingKeyID": {
+      "type": "string",
+      "description": "Identifier for the key used to sign this manifest, cross-referenced against GRTA."
+    },
+    "timestampUTC": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The time the manifest was cryptographically committed."
+    },
+    "cryptoPolicyRef": {
+      "type": "string",
+      "description": "Reference pointer to the SCPI version used for artifact hashing (e.g., SCPI-T03)."
+    },
+    "criticalArtifacts": {
+      "type": "array",
+      "description": "List of files and components requiring integrity checks.",
+      "items": {
+        "type": "object",
+        "required": ["path", "expectedHash", "hashAlgorithm"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "System absolute path to the artifact."
+          },
+          "expectedHash": {
+            "type": "string",
+            "description": "The canonical expected hash of the artifact content."
+          },
+          "hashAlgorithm": {
+            "type": "string",
+            "description": "The specific algorithm used to generate the expected hash (e.g., KECCAK-512, SHAH-256)."
+          }
+        }
+      },
+      "minItems": 1
+    }
+  },
+  "additionalProperties": false
+}

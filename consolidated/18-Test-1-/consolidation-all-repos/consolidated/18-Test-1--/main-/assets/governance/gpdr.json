@@ -1,0 +1,80 @@
+{
+  "schema_version": "2.0.0",
+  "description": "Governance Policy Definition Registry (GPDR) mapping GATM policy identifiers to structured enforcement actions and codified retry logic.",
+  "policy_definition_version": "PEDR_v1.1",
+  "policies": {
+    "P_HALT_AND_REPORT": {
+      "severity": "FATAL",
+      "scope": "CORE_EXECUTION",
+      "actions": [
+        {"type": "EXECUTION", "command": "KILL_PROCESS"},
+        {"type": "NOTIFICATION", "channel": "GOV", "level": "HIGH"}
+      ],
+      "retry_config": {
+        "strategy": "NONE"
+      }
+    },
+    "P_REPORT_AND_DEGRADE": {
+      "severity": "MINOR",
+      "scope": "SERVICE_BOUNDARY",
+      "actions": [
+        {"type": "LOGGING", "level": "WARNING"},
+        {"type": "FEATURE_MANAGEMENT", "command": "DISABLE", "feature_id": "S7"},
+        {"type": "NOTIFICATION", "channel": "GOV", "level": "MEDIUM"}
+      ],
+      "retry_config": {
+        "strategy": "TENTATIVE_BACKOFF",
+        "max_attempts": 3,
+        "initial_delay_ms": 100
+      }
+    },
+    "P_ROLLBACK_AND_ALERT": {
+      "severity": "CRITICAL",
+      "scope": "DATA_PERSISTENCE",
+      "actions": [
+        {"type": "DATABASE", "command": "ROLLBACK"},
+        {"type": "ALERT", "level": 9},
+        {"type": "NOTIFICATION", "channel": "SEC", "level": "HIGH"}
+      ],
+      "retry_config": {
+        "strategy": "IMMEDIATE_FAILOVER"
+      }
+    },
+    "P_TIMEOUT_AND_REVERT": {
+      "severity": "HIGH",
+      "scope": "STATE_MANAGEMENT",
+      "actions": [
+        {"type": "EXECUTION", "command": "STATE_REVERT"},
+        {"type": "NOTIFICATION", "channel": "OPS", "level": "MEDIUM"}
+      ],
+      "retry_config": {
+        "strategy": "DELAY_THEN_RETRY",
+        "delay_seconds": 30,
+        "max_attempts": 1
+      }
+    },
+    "P_RATE_LIMIT_QUEUE": {
+      "severity": "ADVISORY",
+      "scope": "INGRESS_CONTROL",
+      "actions": [
+        {"type": "QUEUE", "target": "INPUT_RRP"},
+        {"type": "NOTIFICATION", "channel": "OPS", "level": "LOW"}
+      ],
+      "retry_config": {
+        "strategy": "DELAY_UNTIL_WINDOW_OPENS"
+      }
+    },
+    "P_AUDIT_REVIEW_BLOCK": {
+      "severity": "LOCKDOWN",
+      "scope": "SECURITY_CORE",
+      "actions": [
+        {"type": "STATE_BLOCK", "transition": true},
+        {"type": "AUDIT", "command": "INITIATE_LOGGING"}
+      ],
+      "retry_config": {
+        "strategy": "MANUAL_OVERRIDE",
+        "governance_required": true
+      }
+    }
+  }
+}

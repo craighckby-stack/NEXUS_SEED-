@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "constraints_name": "RACS_Core_94.1",
+  "description": "Specification defining how computational and communication resources are dynamically prioritized and constrained across modules.",
+  "resource_classes": [
+    {
+      "name": "Computation_Critical",
+      "priority_rank": 10,
+      "sla_latency_ms": 50
+    },
+    {
+      "name": "Persistence_High",
+      "priority_rank": 5,
+      "sla_latency_ms": 500
+    },
+    {
+      "name": "Telemetry_Background",
+      "priority_rank": 1,
+      "sla_latency_ms": 2000
+    }
+  ],
+  "dynamic_allocation_rules": [
+    {
+      "trigger": "CORE_INTEGRITY_CHECK_FAIL",
+      "rule_action": "ELEVATE_PRIORITY_GROUP",
+      "target_group_rank": 10,
+      "duration_s": 30,
+      "justification": "Allocate all available cycles to recovery and isolation."
+    }
+  ]
+}

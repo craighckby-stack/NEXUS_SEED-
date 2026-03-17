@@ -1,0 +1,43 @@
+{
+  "schema_version": "94.1",
+  "manifest_id": "GRCS-V94.1",
+  "description": "Canonical JSON schema defining the required structure for CPES (S6.7) simulation outputs and S7 metric consumption, ensuring deterministic and validated input for the S8 Finality Certification.",
+  "required_fields": [
+    "certified_utility_S01",
+    "estimated_risk_S02",
+    "execution_fingerprint",
+    "context_attestation_commit_pass",
+    "resource_consumption_report",
+    "model_attestation_id"
+  ],
+  "schema": {
+    "type": "object",
+    "properties": {
+      "certified_utility_S01": {
+        "type": "number",
+        "description": "The computed efficacy metric based on CPES output. Must be a non-negative float."
+      },
+      "estimated_risk_S02": {
+        "type": "number",
+        "description": "The estimated cost or failure profile associated with the plan. Non-negative float."
+      },
+      "execution_fingerprint": {
+        "type": "string",
+        "description": "A cryptographic hash representing the attested state of the CEEP isolation environment."
+      },
+      "context_attestation_commit_pass": {
+        "type": "boolean",
+        "description": "Re-attestation that S4.5 (ECVM) context criteria were valid throughout simulation."
+      },
+      "resource_consumption_report": {
+        "type": "object",
+        "description": "Validated report detailing resource use (CPU/GPU/Memory/Time) during simulation."
+      },
+      "model_attestation_id": {
+        "type": "string",
+        "description": "The unique, attested ID of the model utilized from the CMR for this simulation."
+      }
+    },
+    "additionalProperties": false
+  }
+}

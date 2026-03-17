@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Autonomous Governance Configuration Schema (v94.1)",
+  "description": "Defines core trust metrics, risk classification thresholds, and operational governance policies.",
+  "type": "object",
+  "properties": {
+    "risk_classification": {
+      "type": "object",
+      "description": "Minimum Required Confidence (MRC) scores for modification classification (0.0 to 1.0). Enhanced from two to three risk tiers.",
+      "properties": {
+        "critical_architectural_change": {
+          "type": "number",
+          "minimum": 0.88,
+          "description": "Highest safety barrier. Required for core system, security, or foundational logic changes."
+        },
+        "major_feature_implementation": {
+          "type": "number",
+          "minimum": 0.70,
+          "description": "Required for significant component integration or major functionality updates."
+        },
+        "minor_utility_mutation": {
+          "type": "number",
+          "minimum": 0.55,
+          "description": "Required for utility fixes, dependency updates, or low-risk optimizations."
+        }
+      },
+      "required": [
+        "critical_architectural_change",
+        "major_feature_implementation",
+        "minor_utility_mutation"
+      ]
+    },
+    "trust_metric_composition": {
+      "type": "object",
+      "description": "Weighted influence of various sources contributing to the Autonomous Trust Metric (ATM) score.",
+      "properties": {
+        "historic_reliability_score": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Weight based on the historical success rate and failure rate profile of similar code modifications."
+        },
+        "semantic_compatibility_score": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Weight based on integration testing results and semantic delta analysis."
+        },
+        "formal_verification_impact": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Weight based on static analysis, proof completeness, and compliance checks."
+        },
+        "resource_allocation_stability": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Weight based on anticipated resource usage deviation (CPU/memory/latency) relative to historical baselines."
+        }
+      },
+      "required": [
+        "historic_reliability_score",
+        "semantic_compatibility_score",
+        "formal_verification_impact",
+        "resource_allocation_stability"
+      ]
+    },
+    "override_policy": {
+      "type": "object",
+      "description": "Policies governing emergency deployment protocols and required manual intervention floors.",
+      "properties": {
+        "emergency_bypass_threshold": {
+          "type": "number",
+          "minimum": 0.95,
+          "maximum": 1.0,
+          "description": "The minimum ATM score required to bypass explicit human review/rollback mechanisms during critical operational failure remediation."
+        },
+        "manual_review_floor": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 0.60,
+          "description": "Any proposed modification generating an ATM score below this floor MUST trigger a mandatory human architectural review."
+        }
+      },
+      "required": [
+        "emergency_bypass_threshold",
+        "manual_review_floor"
+      ]
+    }
+  },
+  "required": [
+    "risk_classification",
+    "trust_metric_composition",
+    "override_policy"
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.1",
+  "profiles": {
+    "base": {
+      "defaultRegion": "us-east-1",
+      "timeoutSeconds": 300,
+      "maxRetries": 3,
+      "loggingLevel": "INFO",
+      "requiredContextKeys": [
+        "COMMIT_HASH",
+        "BUILD_ID"
+      ]
+    },
+    "development": {
+      "inherits": "base",
+      "targetInfrastructure": "EphemeralSandbox",
+      "verificationStrategy": "smoke_test",
+      "resourceScaling": 0.1,
+      "notificationChannel": "slack:alerts-dev"
+    },
+    "staging": {
+      "inherits": "base",
+      "targetInfrastructure": "PersistentTestCluster",
+      "verificationStrategy": "integration_test_suite",
+      "preflightChecks": [
+        "security_scan_minor",
+        "dependency_check"
+      ],
+      "resourceScaling": 0.5,
+      "dataSeedingRequired": true,
+      "deploymentStrategy": "RollingUpdate"
+    },
+    "production": {
+      "inherits": "base",
+      "targetInfrastructure": "ProductionMain",
+      "verificationStrategy": "full_e2e_regression",
+      "preflightChecks": [
+        "security_scan_major",
+        "compliance_audit"
+      ],
+      "resourceScaling": 1.0,
+      "approvalGates": [
+        "CISO_L2",
+        "PlatformOwner"
+      ],
+      "deploymentStrategy": "Canary5Percent",
+      "notificationChannel": "slack:alerts-critical"
+    }
+  }
+}

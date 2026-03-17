@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "SCPI_Config_Schema_V01",
+  "title": "Secure Cryptographic Policy Interface (SCPI) Configuration V01",
+  "description": "Defines the mandatory parameters and constraints for cryptographic operations within a specific SCPI version, referenced by GIRM.",
+  "type": "object",
+  "required": [
+    "policyID",
+    "minimumKeyStrengthBits",
+    "allowedHashConfigurations"
+  ],
+  "properties": {
+    "policyID": {
+      "type": "string",
+      "pattern": "^SCPI-T\\d+$",
+      "description": "The specific identifier for this cryptographic policy version (must match GIRM's cryptoPolicyRef)."
+    },
+    "minimumKeyStrengthBits": {
+      "type": "integer",
+      "minimum": 128,
+      "description": "The minimum required bit strength for any private signing key used with this policy."
+    },
+    "allowedHashConfigurations": {
+      "type": "array",
+      "description": "List of approved hashing algorithms and their configuration requirements.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["algorithm", "minOutputLengthHex", "maxOutputLengthHex"],
+        "properties": {
+          "algorithm": {
+            "$ref": "#/definitions/HashAlgorithm"
+          },
+          "minOutputLengthHex": {
+            "type": "integer",
+            "description": "Minimum hash output length required, in hex characters."
+          },
+          "maxOutputLengthHex": {
+            "type": "integer",
+            "description": "Maximum hash output length allowed, in hex characters."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "definitions": {
+    "HashAlgorithm": {
+      "type": "string",
+      "enum": ["SHA3-512", "KECCAK-512", "SHA-256", "BLAKE3", "ED25519"],
+      "description": "Approved cryptographic algorithms for integrity and signature checks."
+    }
+  },
+  "additionalProperties": false
+}

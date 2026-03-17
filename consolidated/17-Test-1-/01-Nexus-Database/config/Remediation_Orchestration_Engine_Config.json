@@ -1,0 +1,25 @@
+{
+  "routing_config": {
+    "CODE_PATCH": {
+      "service_name": "PatchGeneratorService",
+      "endpoint": "/api/v1/generate_patch",
+      "required_metadata_keys": ["repository", "branch", "source_path"]
+    },
+    "INFRA_CHANGE": {
+      "service_name": "IaCExecutionService",
+      "endpoint": "/v2/apply_manifest",
+      "required_metadata_keys": ["infrastructure_stack_id", "template_override"]
+    },
+    "CONFIGURATION_UPDATE": {
+      "service_name": "ConfigService",
+      "endpoint": "/api/v1/update_config",
+      "required_metadata_keys": ["system_id", "configuration_key", "new_value"]
+    },
+    "VERIFICATION_CHECK": {
+      "service_name": "VerificationRunnerService",
+      "endpoint": "/internal/run_test",
+      "required_metadata_keys": ["test_suite_id", "target_system"]
+    }
+  },
+  "default_owner": "Sovereign AGI Core Remediation Engine"
+}

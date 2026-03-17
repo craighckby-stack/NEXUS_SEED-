@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:sovereign:schema:config:OperationalTelemetryPolicySchema",
+  "title": "Operational Telemetry Policy Configuration",
+  "description": "Defines the sampling rates, buffering limits, and aggregation policies for generating Certified Operational Telemetry (COTS). Used to balance data fidelity, network load, and storage costs.",
+  "type": "object",
+  "properties": {
+    "default_sample_rate": {
+      "type": "number",
+      "minimum": 0.0001,
+      "maximum": 1.0,
+      "description": "The default probability (0.0 to 1.0) of logging a telemetry point if no specific policy matches."
+    },
+    "buffer_size_mb": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Maximum size of the local in-memory telemetry buffer before flushing to the persistence layer."
+    },
+    "agent_specific_policies": {
+      "type": "array",
+      "description": "Overrides for specific agents that require higher fidelity tracking or lower overhead.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "agent_source_pattern": {
+            "type": "string",
+            "description": "Regex pattern matching the target COTS agent_source (e.g., SGS-.* or RQL-Cache)."
+          },
+          "sampling_probability": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0,
+            "description": "The specific sampling probability for matched agents."
+          },
+          "priority_level": {
+            "type": "integer",
+            "enum": [1, 2, 3],
+            "description": "Priority for flushing: 1 (High/Critical), 3 (Low/Background)."
+          }
+        },
+        "required": ["agent_source_pattern", "sampling_probability", "priority_level"]
+      }
+    }
+  },
+  "required": ["default_sample_rate", "buffer_size_mb"]
+}

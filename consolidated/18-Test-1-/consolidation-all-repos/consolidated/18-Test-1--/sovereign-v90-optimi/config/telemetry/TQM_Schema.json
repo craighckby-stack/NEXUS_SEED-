@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.agi/schemas/TQM_Schema.json",
+  "title": "Telemetry Quality Manifest Schema",
+  "description": "Defines critical fidelity bounds for TIVS validation.",
+  "type": "object",
+  "properties": {
+    "max_latency_ms": {
+      "type": "integer",
+      "description": "Maximum permissible age of the freshest data point (milliseconds)."
+    },
+    "source_non_repudiation_required": {
+      "type": "boolean",
+      "description": "Must ingress feeds carry verifiable cryptographic signatures."
+    },
+    "sensor_variance_tolerance_pct": {
+      "type": "number",
+      "description": "Maximum percentage deviation allowed between redundant sensor feeds."
+    },
+    "required_sources_online": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Mandatory list of active data sources required for TQM satisfaction."
+    }
+  },
+  "required": ["max_latency_ms", "source_non_repudiation_required", "required_sources_online"]
+}

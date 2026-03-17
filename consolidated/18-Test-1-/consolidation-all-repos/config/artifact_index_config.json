@@ -1,0 +1,208 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Sovereign AGI Artifact Index Configuration v94.1",
+  "description": "Defines the persistence strategy, schema mapping, and indexing parameters for all Artifact Manifests. Optimized for multi-modal retrieval and distributed systems.",
+  "type": "object",
+  "properties": {
+    "engine_configuration": {
+      "type": "object",
+      "description": "Configuration dictating the storage engine type and connection parameters.",
+      "properties": {
+        "engine_type": {
+          "type": "string",
+          "enum": [
+            "DYNAMODB_GLOBAL",
+            "POSTGRES_HYPERTABLE",
+            "S3_ARCHIVE_ONLY",
+            "VECTOR_DATABASE"
+          ],
+          "description": "The primary persistence engine used for indexing. Added VECTOR_DATABASE for specialized semantic retrieval."
+        },
+        "default_region": {
+          "type": "string",
+          "description": "Cloud region for the primary storage target."
+        },
+        "table_name": {
+          "type": "string",
+          "description": "The specific table/bucket name in the storage engine."
+        },
+        "read_capacity_units": {
+          "type": "integer",
+          "default": 50,
+          "minimum": 1,
+          "description": "Provisioned RCU/Target throughput hint, relevant for managed services."
+        }
+      },
+      "required": [
+        "engine_type",
+        "table_name"
+      ]
+    },
+    "key_schema": {
+      "type": "array",
+      "description": "Defines the primary key structure (Partition/Sort attributes). Order matters for composite keys.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "field_name": {
+            "type": "string",
+            "description": "The path to the attribute in the artifact manifest (e.g., 'artifact_uuid')."
+          },
+          "key_role": {
+            "type": "string",
+            "enum": [
+              "PARTITION",
+              "SORT"
+            ],
+            "description": "Replaces HASH/RANGE for generalization."
+          },
+          "data_type": {
+            "type": "string",
+            "enum": [
+              "STRING",
+              "NUMBER",
+              "BINARY",
+              "DATETIME",
+              "BOOLEAN",
+              "JSONB"
+            ],
+            "description": "Extended type hints for better mapping across storage engines."
+          }
+        },
+        "required": [
+          "field_name",
+          "key_role",
+          "data_type"
+        ]
+      },
+      "minItems": 1
+    },
+    "secondary_indexes": {
+      "type": "array",
+      "description": "Definitions for secondary indices (GSI/LSI/Standard SQL indices).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "index_name": {
+            "type": "string"
+          },
+          "index_fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of fields to index. Supports dot notation."
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "GLOBAL",
+              "LOCAL",
+              "STANDARD"
+            ],
+            "default": "STANDARD",
+            "description": "Defines the type of index (e.g., GSI/LSI in DynamoDB or standard index in SQL).
+"
+          },
+          "is_unique": {
+            "type": "boolean",
+            "default": false
+          },
+          "projection": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "KEYS_ONLY",
+                  "INCLUDE",
+                  "ALL"
+                ]
+              },
+              "included_attributes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "index_name",
+          "index_fields",
+          "scope"
+        ]
+      }
+    },
+    "vector_indexes": {
+      "type": "array",
+      "description": "Definitions for specialized vector similarity search indexes (e.g., HNSW, IVFPQ).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "vector_field_name": {
+            "type": "string",
+            "description": "The field containing the vector embedding (e.g., 'embeddings.summary_v3')."
+          },
+          "index_algorithm": {
+            "type": "string",
+            "enum": [
+              "HNSW",
+              "IVF",
+              "FLAT"
+            ],
+            "default": "HNSW"
+          },
+          "vector_dimension": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Expected dimension of the vector."
+          },
+          "metric": {
+            "type": "string",
+            "enum": [
+              "COSINE",
+              "EUCLIDEAN",
+              "DOT_PRODUCT"
+            ]
+          },
+          "algorithm_parameters": {
+            "type": "object",
+            "description": "Tuning parameters specific to the selected algorithm (e.g., HNSW 'M', 'efConstruction')."
+          }
+        },
+        "required": [
+          "vector_field_name",
+          "vector_dimension",
+          "index_algorithm"
+        ]
+      }
+    },
+    "data_lifecycle": {
+      "type": "object",
+      "description": "Policies governing Time-to-Live (TTL) and data partitioning/archiving.",
+      "properties": {
+        "ttl_enabled": {
+          "type": "boolean"
+        },
+        "archive_after_days": {
+          "type": "integer",
+          "minimum": 30
+        },
+        "partition_field": {
+          "type": "string",
+          "description": "The field used for sharding or partitioning data (e.g., 'timestamp_utc' or 'objective_id'). Enum restriction removed for flexibility."
+        }
+      },
+      "required": [
+        "ttl_enabled"
+      ]
+    }
+  },
+  "required": [
+    "engine_configuration",
+    "key_schema",
+    "secondary_indexes"
+  ]
+}

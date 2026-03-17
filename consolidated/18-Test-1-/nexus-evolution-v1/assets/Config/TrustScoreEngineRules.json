@@ -1,0 +1,22 @@
+{
+  "engine_name": "DynamicTrustScoringEngine_V1",
+  "base_score_range": [0, 1000],
+  "threat_level_modifiers": {
+    "HIGH_ADVERSARY_DETECTED": {
+      "path_depth_penalty_multiplier": 2.0,
+      "crl_freshness_minimum_hours": 1
+    },
+    "LOW_RESOURCE_MODE": {
+      "crl_fetch_interval_override_seconds": 21600,
+      "cache_miss_max_score_reduction": 50
+    }
+  },
+  "temporal_degradation": {
+    "unverified_anchor_degradation_score_per_hour": 10,
+    "max_degradation_score": 300
+  },
+  "anomaly_detection": {
+    "enable_dynamic_weight_adjustment": true,
+    "confidence_threshold_percent": 90
+  }
+}

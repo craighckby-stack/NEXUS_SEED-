@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://api.sovereign.ai/v94/schemas/schemas.json",
+  "title": "Centralized Schema Definition Container",
+  "description": "A centralized file holding various application schemas (SystemConfig, API Payload) and reusable definitions ($defs).",
+  "type": "object",
+  "properties": {
+    "SystemConfig": {
+      "type": "object",
+      "description": "Schema for the primary operational configuration file.",
+      "properties": {
+        "version": { "$ref": "#/$defs/SchemaVersion" },
+        "deployment_mode": { "type": "string", "enum": ["production", "staging", "development"] },
+        "database_url": { "type": "string", "format": "uri" },
+        "feature_flags": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["version", "deployment_mode", "database_url"],
+      "additionalProperties": false
+    },
+    "RequestPayload": {
+      "type": "object",
+      "description": "Schema for standard AGI execution requests.",
+      "properties": {
+        "context": { "type": "string" },
+        "prompt": { "type": "string" },
+        "timeout_ms": { "type": "integer", "minimum": 100, "maximum": 60000 }
+      },
+      "required": ["prompt", "timeout_ms"]
+    }
+  },
+  "$defs": {
+    "SchemaVersion": {
+      "type": "string",
+      "description": "Application schema version identifier (e.g., v94.1.0)",
+      "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "MetadataFields": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "timestamp"]
+    }
+  }
+}

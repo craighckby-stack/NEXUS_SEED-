@@ -1,0 +1,36 @@
+{
+  "strategy_schema_version": "1.0.0",
+  "description": "Defines executable handlers and parameters for integrity failure remediation strategies.",
+  "strategies": {
+    "TRIGGER_QUARANTINE_PROTOCOL": {
+      "handler_type": "METHOD_CALL",
+      "module": "security.integrity_engine",
+      "method": "initiate_quarantine",
+      "priority": 10,
+      "execution_policy": "SYNCHRONOUS_BLOCKING"
+    },
+    "REPORT_AND_SEAL": {
+      "handler_type": "EXECUTION_SCRIPT",
+      "path": "/usr/sbin/security/seal_system.sh",
+      "timeout_ms": 5000,
+      "priority": 10,
+      "execution_policy": "SYNCHRONOUS_CRITICAL"
+    },
+    "ROLLBACK_AND_ASYNC_ANALYSIS": {
+      "handler_type": "ORCHESTRATION",
+      "steps": [
+        {"action": "ROLLBACK_LAST_COMMIT", "fail_on_error": true},
+        {"action": "SUBMIT_ASYNC_JOB", "target_queue": "ANALYSIS_Q"}
+      ],
+      "priority": 5,
+      "execution_policy": "ASYNCHRONOUS_RECOVERY"
+    },
+    "METRICS_AND_ALERT": {
+      "handler_type": "API_CALL",
+      "endpoint": "/api/v1/metrics/alert",
+      "payload_template": {"severity": "{failure.severity_level}", "mode": "{failure.display_name}"},
+      "priority": 1,
+      "execution_policy": "NON_BLOCKING"
+    }
+  }
+}

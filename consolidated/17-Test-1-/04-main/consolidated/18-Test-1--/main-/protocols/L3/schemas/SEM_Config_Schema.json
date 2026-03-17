@@ -1,0 +1,40 @@
+{
+  "$id": "http://sovereign.agi/schemas/L3/SEM_Config_Schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SEM Configuration Schema (SCS)",
+  "description": "Schema defining mandatory parameters for deterministic environment sealing (SFM must conform).",
+  "type": "object",
+  "required": ["L3_RunID", "DeterministicMandate", "ResourceIsolationMatrix", "ExecutionTimeConstraintLock", "ICM_ProvenanceHash"],
+  "properties": {
+    "L3_RunID": {
+      "type": "string",
+      "description": "Unique identifier for the L3 execution session."
+    },
+    "DeterministicMandate": {
+      "type": "boolean",
+      "const": true,
+      "description": "Must be true to enable SEM enforcement."
+    },
+    "ResourceIsolationMatrix": {
+      "type": "object",
+      "description": "Hard resource limits for CPU, Memory, I/O.",
+      "required": ["CPU_MaxCores", "Memory_MaxMB", "IO_MaxMBPS"],
+      "properties": {
+        "CPU_MaxCores": {"type": "integer", "minimum": 1},
+        "Memory_MaxMB": {"type": "integer", "minimum": 1024},
+        "IO_MaxMBPS": {"type": "number", "minimum": 0}
+      }
+    },
+    "ExecutionTimeConstraintLock": {
+      "type": "integer",
+      "description": "Maximum execution duration allowed, in seconds (CTL-01).",
+      "minimum": 10
+    },
+    "ICM_ProvenanceHash": {
+      "type": "string",
+      "format": "sha256",
+      "description": "Expected SHA256 hash of the pre-validated Input Chain Manifest (ICM)."
+    }
+  },
+  "additionalProperties": false
+}

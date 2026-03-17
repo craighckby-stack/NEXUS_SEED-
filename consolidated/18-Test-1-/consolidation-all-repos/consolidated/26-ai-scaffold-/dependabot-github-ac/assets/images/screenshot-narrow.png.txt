@@ -1,0 +1,4 @@
+This is a placeholder for screenshot-narrow.png
+Recommended for PWA screenshots: 750x1334 pixels
+Format: PNG
+Purpose: narrow device screenshots

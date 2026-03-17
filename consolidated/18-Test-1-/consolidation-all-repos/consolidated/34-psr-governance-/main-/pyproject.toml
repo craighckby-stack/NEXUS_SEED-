@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "psr-governance"
+version = "1.0.0"
+description = "Governance framework for self-modifying systems. Keep your adaptive AI production-ready."
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Craig Huckerby"},
+]
+keywords = [
+    "self-modifying",
+    "adaptive-systems",
+    "governance",
+    "performance-testing",
+    "chaos-engineering",
+    "ml-governance",
+    "ai-safety",
+    "regression-testing",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.urls]
+Homepage = "https://github.com/craighckby-stack/psr-governance"
+Documentation = "https://github.com/craighckby-stack/psr-governance#readme"
+Repository = "https://github.com/craighckby-stack/psr-governance"
+"Bug Tracker" = "https://github.com/craighckby-stack/psr-governance/issues"
+
+[project.optional-dependencies]
+dev = [
+    "pylint>=3.0.0",
+    "bandit>=1.7.0",
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"psr_governance" = ["*.py"]
+
+[tool.black]
+line-length = 100
+target-version = ['py38']
+
+[tool.isort]
+profile = "black"
+line_length = 100

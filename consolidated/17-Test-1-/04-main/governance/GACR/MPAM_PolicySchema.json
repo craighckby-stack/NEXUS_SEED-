@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "MPAM_PolicySchema_v2.1.0",
+  "title": "Multi-Purpose Access Management (MPAM) Schema",
+  "type": "object",
+  "properties": {
+    "policyDomain": {
+      "type": "string"
+    },
+    "domainId": {
+      "type": "string",
+      "pattern": "^[A-Z0-9_-]+$"
+    },
+    "version": {
+      "type": "string"
+    },
+    "schemaHash": {
+      "type": "string",
+      "description": "Integrity hash for policy validation."
+    },
+    "status": {
+      "enum": ["DRAFT", "PRODUCTION", "ARCHIVED"]
+    },
+    "policyRules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ruleId", "priority", "effect", "target", "condition"],
+        "properties": {
+          "ruleId": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 100
+          },
+          "effect": {
+            "enum": ["ALLOW", "DENY", "AUDIT"]
+          },
+          "target": {
+            "type": "object",
+            "description": "Defines the principal/resource combination the rule applies to."
+          },
+          "condition": {
+            "type": "object",
+            "description": "Complex nested logical evaluation criteria."
+          }
+        }
+      }
+    }
+  },
+  "required": ["policyDomain", "domainId", "version", "schemaHash", "policyRules"]
+}

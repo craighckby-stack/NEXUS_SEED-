@@ -1,0 +1,103 @@
+{
+  "description": "Governance Dependency & Execution Constraint Manifest (GDECM) - Defines the certified, PCTM-enforced operational requirements and mandated sequential flow for the GSEP-C stages.",
+  "schema_version": "V94.1.1",
+  "flow_enforcement": "SEQUENTIAL_INDEXED",
+  "stages": {
+    "S0": {
+      "execution_sequence": 0,
+      "agent_lead": "CRoT/SGS",
+      "stage_type": "INITIATION_TERMINAL",
+      "requirements": {
+        "assets": ["HETM", "GVDM", "PCSIM"],
+        "input_manifest": []
+      },
+      "constraints": {},
+      "outputs": ["CRoT_Host_Attestation", "CISM_Initial_Snapshot"]
+    },
+    "S1": {
+      "execution_sequence": 1,
+      "agent_lead": "SGS",
+      "stage_type": "INPUT_VALIDATION",
+      "requirements": {
+        "assets": ["SDVM"],
+        "input_manifest": ["Raw_System_Input"]
+      },
+      "constraints": {},
+      "outputs": ["Validated_Input", "CISM_Stage_Update"]
+    },
+    "S2": {
+      "execution_sequence": 2,
+      "agent_lead": "GAX",
+      "stage_type": "POLICY_ENFORCEMENT",
+      "requirements": {
+        "assets": ["PVLM"],
+        "input_manifest": ["Validated_Input"]
+      },
+      "constraints": {
+        "exit_veto_target": "S3",
+        "veto_condition_type": "Mandatory_Success"
+      },
+      "outputs": ["S2_Permit"]
+    },
+    "S3": {
+      "execution_sequence": 3,
+      "agent_lead": "CRoT",
+      "stage_type": "SECURITY_CRITICAL",
+      "requirements": {
+        "assets": ["CEM"],
+        "input_manifest": ["S2_Permit"]
+      },
+      "constraints": {},
+      "outputs": ["Runtime_Security_Context"]
+    },
+    "S4": {
+      "execution_sequence": 4,
+      "agent_lead": "PCTM",
+      "stage_type": "COMPUTATIONAL_ALLOCATION",
+      "requirements": {
+        "assets": ["CALM"],
+        "input_manifest": ["Runtime_Security_Context"]
+      },
+      "constraints": {},
+      "outputs": ["Initial_Budget_Context"]
+    },
+    "S5": {
+      "execution_sequence": 5,
+      "agent_lead": "GCS",
+      "stage_type": "STATE_INTEGRATION",
+      "requirements": {
+        "assets": ["PCTM", "PCSIM"],
+        "input_manifest": ["Initial_Budget_Context"]
+      },
+      "constraints": {},
+      "outputs": ["Integrated_State_Vector"]
+    },
+    "S6": {
+      "execution_sequence": 6,
+      "agent_lead": "SGS/TIVS",
+      "stage_type": "TELEMETRY_HARVEST",
+      "requirements": {
+        "assets": ["TQM", "GTB_Feed", "STDM"],
+        "input_manifest": ["Validated_Input", "Integrated_State_Vector"]
+      },
+      "constraints": {
+        "data_fidelity": {
+          "module": "TQM",
+          "threshold": "CRITICAL_99.9%"
+        }
+      },
+      "outputs": ["Vetted_Telemetry", "Computational_Budget_Check"]
+    },
+    "S6.7": {
+      "execution_sequence": 7,
+      "agent_lead": "SGS/CRoT",
+      "stage_type": "METRIC_REPORTING",
+      "requirements": {
+        "assets": ["CMR", "GRCS"],
+        "input_manifest": ["Validated_Input", "Vetted_Telemetry", "Computational_Budget_Check"]
+      },
+      "constraints": {},
+      "outputs": ["S01_System_Health_Metric", "S02_Governance_Compliance_Metric"]
+    }
+  }
+}

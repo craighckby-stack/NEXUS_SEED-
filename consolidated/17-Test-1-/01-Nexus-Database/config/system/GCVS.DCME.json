@@ -1,0 +1,30 @@
+{
+  "version": "V94.3",
+  "description": "Declarative constraints for PVLM, CFTM, ADTM, and MPAM cross-validation.",
+  "constraints": [
+    {
+      "id": "C94.1.001",
+      "type": "AxiomaticConsistency",
+      "source_manifest": "PVLM",
+      "target_manifest": "CFTM",
+      "rule": "PVLM.ProhibitionSet.is_disjoint_from(CFTM.HardFailureSet)",
+      "check_mechanism": "FormalLogicSolver"
+    },
+    {
+      "id": "C94.1.002",
+      "type": "BoundaryViolation",
+      "source_manifest": "ADTM",
+      "target_manifest": "CFTM",
+      "rule": "ADTM.MaxDriftTolerance < CFTM.EpsilonRiskBound * 0.95",
+      "check_mechanism": "NumericRangeCheck"
+    },
+    {
+      "id": "C94.1.003",
+      "type": "BoundaryViolation",
+      "source_manifest": "MPAM",
+      "target_manifest": "CFTM",
+      "rule": "MPAM.AttestationFailureRate < CFTM.EpsilonRiskBound * 0.01",
+      "check_mechanism": "NumericThresholdCheck"
+    }
+  ]
+}

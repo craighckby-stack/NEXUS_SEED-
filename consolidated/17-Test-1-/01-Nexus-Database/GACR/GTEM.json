@@ -1,0 +1,24 @@
+{
+  "manifest_id": "GTEM_V97.1",
+  "description": "Mandatory telemetry structure and transport constraints for GRTS protocol.",
+  "signature_required": true,
+  "telemetry_format_specification": {
+    "required_fields": [
+      "transition_id",
+      "timestamp",
+      "S01_efficacy_metric",
+      "S02_risk_metric",
+      "S03_veto_signal"
+    ],
+    "checksum_algorithm": "SHA3-256",
+    "encoding": "JSON_L"
+  },
+  "transport_constraints": [
+    {
+      "endpoint_id": "CRTS_Telemetry_Sink_A",
+      "protocol": "HTTPS/TLS_1_3",
+      "max_latency_ms": 500
+    }
+  ],
+  "cgv_schema_reference": "MDSM_V97.1"
+}

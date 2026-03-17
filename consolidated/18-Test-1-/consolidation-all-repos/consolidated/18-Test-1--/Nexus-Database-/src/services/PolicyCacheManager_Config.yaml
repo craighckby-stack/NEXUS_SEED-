@@ -1,0 +1,9 @@
+service_name: PolicyCacheManager
+version: v1.1.0
+protocol: DeltaSync_v2
+cache_refresh:
+  sync_interval_ms: 100
+  data_source_priority: ['LocalRAM', 'ConsensusDB', 'RemoteAuthority']
+storage:
+  max_memory_mb: 256
+  eviction_policy: LFU

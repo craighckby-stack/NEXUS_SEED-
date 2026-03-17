@@ -1,0 +1,38 @@
+{
+  "manifest_id": "GTCM_V94_1",
+  "description": "Governance Threshold Configuration Manifest (GTCM). Specifies mandatory arbitration and operational constraints enforced by TAA.",
+  "metadata": {
+    "DATA_VERSION": "2.0.0",
+    "SCHEMA_VERSION": "1.1.0",
+    "unit_normalization": "Decimal (0.0 to 1.0) unless unit is specified in configuration entry."
+  },
+  "constraints": {
+    "THRESHOLD": {
+      "operational_utility_min": {
+        "value": 0.65,
+        "unit": "Normalized Decimal",
+        "description": "Minimum required utility score for autonomous decision execution."
+      },
+      "stability_ratio_min": {
+        "value": 3.0,
+        "unit": "Ratio (Dimensionless)",
+        "alias": "sdr_hmc_score_min",
+        "description": "Minimum required score for system decision robustness."
+      }
+    },
+    "LIMIT": {
+      "systemic_exposure_max": {
+        "value": 0.20,
+        "unit": "Normalized Decimal",
+        "description": "Maximum allowed systemic risk exposure or resource commitment."
+      }
+    },
+    "ARBITRATION": {
+      "priority_one_tolerance_delta": {
+        "value": 0.05,
+        "unit": "Absolute Change",
+        "description": "Maximum absolute variance allowed in P01 metrics before triggering mandatory governance review."
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "metric_schema_version": "1.0",
+  "safety_index_triggers": {
+    "warning_threshold": 0.80,
+    "critical_threshold": 0.70,
+    "mode_switch_target": "critical_task"
+  },
+  "resource_pressure_alerts": {
+    "memory_utilization_percent_warning": 75,
+    "syscall_burst_violation_count_trigger": 3,
+    "system_wide_latency_ms_critical": 500
+  },
+  "violation_counters": {
+    "max_p3_violations_per_hour_before_escalation": 10,
+    "p1_violation_triggers_emergency_mode": 1
+  }
+}

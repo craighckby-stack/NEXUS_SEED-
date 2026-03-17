@@ -1,0 +1,31 @@
+# Rollback and Recovery Protocol (RRP) Specification V1.0
+# Defines the mandatory recovery state and actions for every GSEP-C halt condition.
+
+schema_version: 1.0
+protocol_mandate: RRP_EXECUTION_IMMEDIATE_ON_HALT
+
+rollback_definitions:
+  RRP:SCHEMA_FAIL:
+    trigger_layer: PRE
+    recovery_state: SYSTEM_IDLE
+    action_type: LOG_AND_REJECT
+    artifact_rollback: RAW_PAYLOAD
+
+  RRP:POLICY_VETO:
+    trigger_layer: L1
+    recovery_state: SYSTEM_IDLE
+    action_type: GOVERNANCE_REJECTION_AND_PVLM_REPORT
+    artifact_rollback: VIC
+
+  RRP:SIM_DIVERGE:
+    trigger_layer: L2
+    recovery_state: SYSTEM_IDLE
+    action_type: REQUEUE_FOR_ANALYSIS
+    artifact_rollback: VIC
+    diagnostic_hook: Simulation_Metrics_Dump
+
+  RRP:FINALITY_BREACH:
+    trigger_layer: L7
+    recovery_state: SYSTEM_IDLE
+    action_type: LOG_CRITICAL_FAILURE
+    artifact_rollback: PRE_L7_STATE

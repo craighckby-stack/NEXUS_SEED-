@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-2020-12/schema#",
+  "$id": "http://sovereign.agi/schema/config/governance/DSE_Policy_Constraints_v94.1.json",
+  "title": "DSE Policy Constraints (Mandatory Thresholds)",
+  "description": "Mandatory governance parameters defining the minimum acceptable performance and stability metrics required for a successful P-01 PASS and state commitment. Used by the Auditor Core to validate DSE_Commitment_Summary_Manifest artifacts.",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Configuration version identifier.",
+      "const": "V94.1"
+    },
+    "mandatory_metrics": {
+      "type": "object",
+      "description": "Required minimum performance metrics for DSE commitment (P-01 floor values).",
+      "properties": {
+        "temm_minimum": {
+          "type": "number",
+          "description": "Minimum required Target Evolution Momentum Metric (TEMM). Manifest TEMM must be >= this value.",
+          "exclusiveMinimum": 0
+        },
+        "ufrm_minimum": {
+          "type": "number",
+          "description": "Minimum required Underlying Functional Resilience Metric (UFRM). Manifest UFRM must be >= this value.",
+          "minimum": 0
+        },
+        "cftm_epsilon_floor": {
+          "type": "number",
+          "description": "Minimum acceptable Commitment Finality Threshold Margin (CFTM Epsilon). Manifest CFTM must be > this value to ensure a safety margin.",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "temm_minimum",
+        "ufrm_minimum",
+        "cftm_epsilon_floor"
+      ],
+      "additionalProperties": false
+    },
+    "system_veto_logic_hash": {
+      "type": "string",
+      "description": "Cryptographic hash of the immutable Veto Logic Set (VLS) against which the epoch was verified.",
+      "pattern": "^[0-9a-fA-F]{64}$"
+    }
+  },
+  "required": [
+    "version",
+    "mandatory_metrics",
+    "system_veto_logic_hash"
+  ],
+  "additionalProperties": false
+}

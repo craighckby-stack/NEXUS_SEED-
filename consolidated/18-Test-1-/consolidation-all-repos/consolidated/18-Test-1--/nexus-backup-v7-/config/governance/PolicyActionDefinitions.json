@@ -1,0 +1,30 @@
+{
+  "definitionsVersion": "1.0.1",
+  "description": "Centralized definitions for automated policy enforcement actions. Defines the execution type and default parameter schema for each policy ID.",
+  "policies": {
+    "P_CRITICAL_HALT_REVERSION": {
+      "name": "Critical System Halt and Rollback",
+      "enforcementType": "SYSTEM_HALT",
+      "defaultActionConfig": {
+        "rollbackDepth": 1,
+        "reportingLevel": "ERROR"
+      }
+    },
+    "P_DEGRADATION_AUDIT": {
+      "name": "Quality Degradation Audit Trigger",
+      "enforcementType": "FLAG_AUDIT",
+      "defaultActionConfig": {
+        "auditor": "SystemDefault",
+        "mutationLock": false
+      }
+    },
+    "P_THROTTLE_RATE_LIMITER": {
+      "name": "Resource Consumption Throttling",
+      "enforcementType": "DYNAMIC_THROTTLE",
+      "defaultActionConfig": {
+        "factor": 0.8,
+        "durationMs": 30000
+      }
+    }
+  }
+}

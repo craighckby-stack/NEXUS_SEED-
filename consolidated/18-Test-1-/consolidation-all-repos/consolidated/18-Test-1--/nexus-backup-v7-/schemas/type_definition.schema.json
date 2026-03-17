@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agi.sovereign/schemas/v94.3/type_definition.schema.json",
+  "title": "Sovereign AGI Module Custom Type Definition (v94.3)",
+  "description": "Defines reusable, complex data structures (types) for AGI modules, allowing formal typing of interfaces and data contracts.",
+  "type": "object",
+  "required": ["type_name", "type_schema"],
+  "properties": {
+    "type_name": {
+      "type": "string",
+      "description": "The canonical name of the type within the module."
+    },
+    "module_origin": {
+      "type": "string",
+      "description": "Optional: Explicitly tracks which module owns this definition."
+    },
+    "description": {
+      "type": "string"
+    },
+    "type_schema": {
+      "type": "object",
+      "description": "The JSON Schema definition for this custom type. May use $ref to other canonical types or basic types defined in Module Interface schemas."
+    }
+  }
+}

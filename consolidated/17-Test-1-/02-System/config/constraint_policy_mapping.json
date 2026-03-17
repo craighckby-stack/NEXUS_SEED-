@@ -1,0 +1,24 @@
+{
+  "rule_map": {
+    "Required": {
+      "validator": "FieldPresence",
+      "engine": "Internal",
+      "message_key": "ERR_FIELD_MISSING"
+    },
+    "Unique": {
+      "validator": "UniquenessCheck",
+      "engine": "Database",
+      "entity": "$$.entity"
+    },
+    "Format:AlphanumericDash": {
+      "validator": "RegexMatch",
+      "engine": "Joi",
+      "pattern": "/^[a-zA-Z0-9-]+$/"
+    },
+    "Dependency:*": {
+      "validator": "CrossFieldDependency",
+      "engine": "Internal"
+    }
+  },
+  "severity_levels": ["Error", "Warning", "Informational"]
+}

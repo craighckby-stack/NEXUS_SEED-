@@ -1,0 +1,3 @@
+// The functionality previously located in src/config/securitySetup.js has been decomposed. 
+// 1. Raw constants and synchronous dependencies were extracted into MasterKeyPolicyRegistryKernel (see plugin output).
+// 2. The key retrieval and validation logic (`getMasterEncryptionKey`, `initializeSecurityChecks`) is now implemented within a dedicated, injectable component, the MasterKeyValidatorKernel, which relies on Dependency Injection for environment access (IEnvironmentAccessKernel) and validation tools (ICryptographicKeyValidatorToolKernel).

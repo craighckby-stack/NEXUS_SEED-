@@ -1,0 +1,40 @@
+{
+  "$schema": "./config.schema.json",
+  "gpr_config": {
+    "description": "Configuration settings for the Governance Parameter Registry (GPR) integration.",
+    "service": {
+      "endpoint": "${GPR_ENDPOINT:https://governance.svc/v1/parameters}",
+      "fetch_strategy": {
+        "version_strategy": "LATEST_GOVERNED",
+        "schema_validation_enabled": true,
+        "base_namespace": "GPR",
+        "default_read_context": "GLOBAL"
+      },
+      "resilience": {
+        "cache_ttl_seconds": 3600,
+        "cache_jitter_percent": 15,
+        "request_timeout_ms": 5000,
+        "max_retries": 3,
+        "rate_limit_awareness": true
+      },
+      "security": {
+        "authentication": {
+          "mode": "IAM_TOKEN",
+          "scope": "gpr:read_config"
+        }
+      }
+    },
+    "critical_parameter_sets": [
+      {
+        "id": "efficacy_weights",
+        "path": "EFCY:WEIGHTS",
+        "load_stage": "STARTUP"
+      },
+      {
+        "id": "risk_controls",
+        "path": "RISK:CONTROLS",
+        "load_stage": "STARTUP"
+      }
+    ]
+  }
+}

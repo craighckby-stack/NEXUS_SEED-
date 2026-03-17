@@ -1,0 +1,25 @@
+{
+  "description": "Defines the mandatory artifacts, verification steps, and approval authorities required for each Governance, Evolution, Scaffolding Protocol (GSEP) level.",
+  "gsep_matrix": {
+    "L0": {
+      "name": "Automated Delta Check",
+      "required_artifacts": ["SST_Diff_Manifest", "L0_Safety_Check"],
+      "approval_authority": "AGI_AUTONOMOUS"
+    },
+    "L1": {
+      "name": "Audit and Contextual Review",
+      "required_artifacts": ["L0_Results", "SBC_Context_Log"],
+      "approval_authority": "AGI_AUTONOMOUS_PLUS_HUMAN_AUDIT"
+    },
+    "L4": {
+      "name": "Critical Evolutionary Review",
+      "required_artifacts": ["Performance_Delta_Report", "Risk_Assessment_Summary", "S-Metrics_Payload"],
+      "approval_authority": "EXTERNAL_COMMITTEE_MAJORITY"
+    }
+  },
+  "metric_descriptions": {
+    "S-01": "Semantic Coherence Score (Measures structural integrity)",
+    "S-02": "Operational Drift Index (Measures execution divergence)",
+    "S-03": "Critical Resource Utilization Trend (Measures resource allocation change)"
+  }
+}

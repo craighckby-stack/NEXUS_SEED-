@@ -1,0 +1,69 @@
+{
+  "metadata": {
+    "version": "v94.2-TEST-2",
+    "description": "Indexed map defining essential system artifacts for immediate preflight validation and secure retrieval, aligned with SOVEREIGN v94.2 Integration Protocol."
+  },
+  "artifact_map": {
+    "TVCR": {
+      "name": "Trusted Validator Configuration Register",
+      "criticality": "BLOCKING",
+      "retrieval": {
+        "type": "CACHE",
+        "parameters": {
+          "key": "V_Registry",
+          "namespace": "ArtifactCache"
+        },
+        "fallback_strategy": "DATABASE"
+      },
+      "validation": {
+        "schema_id": "VCS-44A",
+        "freshness_ttl_seconds": 3600,
+        "integrity_check": {
+          "type": "MIN_COUNT",
+          "value": 1,
+          "message": "Configuration register must contain at least one entry."
+        }
+      }
+    },
+    "ADEP": {
+      "name": "Autonomous Deployment Plan",
+      "criticality": "CRITICAL",
+      "retrieval": {
+        "type": "DATABASE",
+        "parameters": {
+          "key": "AD_Planner",
+          "namespace": "SystemDB",
+          "consistency_level": "STRONG"
+        }
+      },
+      "validation": {
+        "schema_id": "ADS-22B",
+        "freshness_ttl_seconds": 600,
+        "integrity_check": {
+          "type": "HASH_COMPARE",
+          "algorithm": "SHA256"
+        }
+      }
+    },
+    "SHEP": {
+      "name": "System Health Endpoint Pointers",
+      "criticality": "ADVISORY",
+      "retrieval": {
+        "type": "SERVICE_CALL",
+        "parameters": {
+          "endpoint": "/v1/health/endpoints",
+          "service_name": "DiscoveryService",
+          "timeout_ms": 500
+        }
+      },
+      "validation": {
+        "schema_id": "HES-10C",
+        "freshness_ttl_seconds": 120,
+        "integrity_check": {
+          "type": "RESPONSE_CODE",
+          "expected": 200
+        }
+      }
+    }
+  }
+}

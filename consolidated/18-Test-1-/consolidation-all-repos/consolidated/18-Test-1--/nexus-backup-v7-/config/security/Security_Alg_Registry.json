@@ -1,0 +1,26 @@
+{
+  "registry_id": "Active_Security_Algorithms_V1",
+  "description": "Central registry defining currently permissible cryptographic algorithms and their operational status, mandated by governance policies (e.g., GIRM_S02). This resource is used by cryptographic modules to check compliance before deployment or manifest signing.",
+  "current_hash_standard": "SHA3-512",
+  "current_minimum_signature_strength": "RSA-4096_PKCS1_PSS",
+  "algorithms": [
+    {
+      "name": "RSA-4096",
+      "status": "APPROVED",
+      "purpose": ["SIGNATURE", "ENCRYPTION"],
+      "policy_source": "GIRM_Management_S02"
+    },
+    {
+      "name": "Ed25519",
+      "status": "APPROVED",
+      "purpose": ["SIGNATURE"],
+      "policy_source": "GIRM_Management_S02"
+    },
+    {
+      "name": "SHA3-384",
+      "status": "DEPRECATED_SCHEDULED",
+      "deprecation_date": "2025-10-01T00:00:00Z",
+      "policy_source": "GIRM_Management_S02"
+    }
+  ]
+}

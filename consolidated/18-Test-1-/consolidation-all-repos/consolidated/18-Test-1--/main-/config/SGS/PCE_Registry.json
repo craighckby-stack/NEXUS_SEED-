@@ -1,0 +1,12 @@
+{
+  "SAG_Version_Required": "V94.3",
+  "GENERIC_CONFIG_SCHEMA_PATH": "schema/SAG/GenericAgentConfig.schema.json",
+  "MANIFEST_REGISTRY": [
+    {"path": "config/GAX/UtilityFunctionRegistry.yaml", "agent": "GAX", "is_schema": false, "requires_version_check": true},
+    {"path": "config/GAX/FinalityThresholdConfig.yaml", "agent": "GAX", "is_schema": false, "requires_version_check": true},
+    {"path": "config/GAX/PolicyCorrectionSchema.yaml", "agent": "GAX", "is_schema": false, "requires_version_check": true},
+    {"path": "config/SGS/ExecutionContextVerificationManifest.yaml", "agent": "SGS", "is_schema": false, "requires_version_check": true},
+    {"path": "config/SGS/TargetEvolutionMandateManifest.yaml", "agent": "SGS", "is_schema": false, "requires_version_check": true},
+    {"path": "schema/governance/Governance_State_Manifest.schema.json", "agent": "CRoT", "is_schema": true, "requires_version_check": false}
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agi.sovereign/schemas/AxiomaticValidationReportSchema_v2.0.json",
+  "title": "Axiomatic Change Validation Report Schema",
+  "description": "Defines the immutable structure for the outcome audit log of an Axiomatic Change Validation run.",
+  "type": "object",
+  "required": ["change_id", "validation_status", "execution_timestamp", "results"],
+  "properties": {
+    "change_id": {
+      "type": "string"
+    },
+    "validation_status": {
+      "type": "string",
+      "enum": ["APPROVED", "REJECTED_BLOCKED", "APPROVED_WITH_WARNINGS"]
+    },
+    "execution_timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "total_assertions_run": {
+      "type": "integer"
+    },
+    "results": {
+      "type": "array",
+      "description": "Detailed result of each axiom check.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "axiom_id": {"type": "string"},
+          "status": {"type": "string", "enum": ["PASSED", "FAILED", "SKIPPED"]},
+          "details": {"type": "string", "description": "Detailed reason for failure or override justification."},
+          "triggered_failure_mode": {"type": "string", "enum": ["BLOCK_MERGE", "WARN_AND_LOG", "AUTO_REFACTOR", "NONE"]}
+        },
+        "required": ["axiom_id", "status"]
+      }
+    }
+  }
+}

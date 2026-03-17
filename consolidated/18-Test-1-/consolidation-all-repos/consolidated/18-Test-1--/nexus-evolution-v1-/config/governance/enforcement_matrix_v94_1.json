@@ -1,0 +1,27 @@
+{
+  "matrix_version": "94.1",
+  "governance_mode": "ADAPTIVE_P3",
+  "enforcement_mappings": [
+    {
+      "catalog_id": "C-MEM-P",
+      "threshold_breach": 0.95,
+      "severity_escalation": "L0_CRITICAL",
+      "action_sequence": [
+        "LOG_P1_ALERT",
+        "INITIATE_RESOURCE_SHEDDING",
+        "HARD_HALT_REQUIRED"
+      ],
+      "cooldown_period_s": 60
+    },
+    {
+      "catalog_id": "P-DMI",
+      "violation_type": "Unauthorized Write",
+      "severity_escalation": "S0_STRICT",
+      "action_sequence": [
+        "ISOLATE_CALLER_PROCESS",
+        "EXECUTE_QUARANTINE_MUTATOR"
+      ],
+      "cooldown_period_s": 0
+    }
+  ]
+}

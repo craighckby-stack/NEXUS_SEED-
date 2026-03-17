@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.agi/schemas/PLST_ProposalSchema.json",
+  "title": "Proposal Tracker Entry Schema",
+  "description": "Schema defining the mandatory metadata and state integrity requirements for a tracked Governance Proposal (PLST V2.0).",
+  "type": "object",
+  "properties": {
+    "P_ID": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Canonical UUID assigned at State S0."
+    },
+    "Current_State": {
+      "type": "string",
+      "enum": [
+        "S0", "S1", "S2", "S3_IN_PROGRESS", "S3_PASS", "S3_REMEDIATION", 
+        "S4_PRE_INGRESS", "S5_EXECUTION", "S_REJECT", "S_ARCHIVED"
+      ],
+      "description": "Current State ID within the PLST V2.0 lifecycle."
+    },
+    "Originator_ID": {
+      "type": "string",
+      "pattern": "^AGI-[0-9a-fA-F]{4}$",
+      "description": "Identifier of the submitting Sovereign Agent."
+    },
+    "Required_Approvals": {
+      "type": "integer",
+      "minimum": 2,
+      "description": "Minimum peer agent approvals required for S1 transition."
+    },
+    "Audit_ID": {
+      "type": "string",
+      "description": "External Audit Contract/Service Identifier, required if Current_State >= S2."
+    },
+    "Audit_Hash": {
+      "type": "string",
+      "description": "Cryptographic hash of the certified audit report, required if Current_State = S3_PASS."
+    },
+    "Target_SCI_Budget": {
+      "type": "number",
+      "minimum": 0.001,
+      "description": "Estimated computational budget (SCI units) for execution (GSEP-C L3)."
+    },
+    "Transition_Log": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": {"type": "string", "format": "date-time"},
+          "from_state": {"type": "string"},
+          "to_state": {"type": "string"},
+          "agent_id": {"type": "string"}
+        },
+        "required": ["timestamp", "to_state", "agent_id"]
+      },
+      "description": "Immutable chronological log of all state transitions."
+    }
+  },
+  "required": [
+    "P_ID",
+    "Current_State",
+    "Originator_ID",
+    "Required_Approvals",
+    "Target_SCI_Budget",
+    "Transition_Log"
+  ]
+}

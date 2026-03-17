@@ -1,0 +1,36 @@
+# SOVEREIGN ARCHITECTURAL GOVERNANCE (SAG)
+# Rollback Protocol (RRP) Specification V1.0
+# Purpose: Define deterministic procedure for restoring state Psi_N upon Integrity Halt (IH).
+
+protocol_id: RRP-01
+target_state: PSI_N
+activation_trigger: IH (Integrity_Halt)
+
+# --- 1. ACTIVATION & ISOLATION ---
+step_1_name: Immediate Execution Suspension
+step_1_agent: SGS
+step_1_action: Halt all active worker threads and detach network interface used for state modification (P3).
+step_1_confirmation: State Lock initiated.
+
+# --- 2. AUDIT & DIAGNOSTICS ---
+step_2_name: Trusted Event Stream Audit (TEDS Lookup)
+step_2_agent: GAX
+step_2_action: Parse TEDS from S01 up to the IH event to identify the last confirmed safe checkpoint (LCSC) and primary failure flag (PVLM/MPAM/ADTM/ECVM).
+step_2_output: FAILURE_CAUSE_FLAG
+
+# --- 3. STATE RESTORATION ---
+step_3_name: CRoT State Synchronization
+step_3_agent: CRoT
+step_3_action: Utilize the CSR hash defined in S01 to retrieve the validated source state (PSI_N) from the Immutable State Repository (ISR).
+step_3_confirmation: Hash verification against S01 CSR successful.
+
+step_4_name: Rollback Payload Application
+step_4_agent: SGS
+step_4_action: Atomically replace the current volatile state with PSI_N retrieved by CRoT. Verify integrity post-replacement.
+step_4_confirmation: State transition reverted to PSI_N.
+
+# --- 4. RE-INITIALIZATION ---
+step_5_name: System Reset and Reporting
+step_5_agent: CRoT/GAX
+step_5_action: Log RRP success (or failure) in TEDS. Flag the FAILURE_CAUSE_FLAG for mandatory human/AI analysis and resume from S00 startup.
+step_5_termination: SYSTEM_READY_FOR_RESTART

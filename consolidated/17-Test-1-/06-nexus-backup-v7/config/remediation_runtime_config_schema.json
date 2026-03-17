@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agi.sovereign/config/remediation_runtime_config_schema.json",
+  "title": "Remediation Runtime Environment Configuration Schema (v94.1)",
+  "description": "Defines physical constraints and runtime configurations for execution environments referenced by the Playbook Catalog, ensuring secure isolation and predictable resource allocation.",
+  "type": "object",
+  "required": ["environments"],
+  "properties": {
+    "environments": {
+      "type": "object",
+      "description": "A map defining different physical execution environments.",
+      "patternProperties": {
+        "^[A-Z_]+_ENV$": {
+          "$ref": "#/$defs/EnvironmentDefinition"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "ResourceLimits": {
+      "type": "object",
+      "required": ["cpu_milli", "memory_megabytes"],
+      "properties": {
+        "cpu_milli": {
+          "type": "integer",
+          "minimum": 10,
+          "description": "CPU share limits in millicores (1000 = 1 CPU core)."
+        },
+        "memory_megabytes": {
+          "type": "integer",
+          "minimum": 64,
+          "description": "Maximum RAM allocation in megabytes."
+        },
+        "disk_io_bps": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Disk I/O bandwidth limit in bytes per second."
+        }
+      }
+    },
+    "SecurityProfile": {
+      "type": "object",
+      "required": ["network_egress_allowance", "secret_access_level"],
+      "properties": {
+        "network_egress_allowance": {
+          "type": "string",
+          "enum": ["NONE", "WHITELISTED", "FULL_INTERNET"],
+          "description": "Control over network egress policy."
+        },
+        "secret_access_level": {
+          "type": "string",
+          "enum": ["ISOLATED", "READ_ONLY", "FULL_VAULT"],
+          "description": "Level of access granted to the system secret vault."
+        }
+      }
+    },
+    "EnvironmentDefinition": {
+      "type": "object",
+      "required": ["execution_platform", "limits", "security"],
+      "properties": {
+        "execution_platform": {
+          "type": "string",
+          "description": "The underlying execution technology (e.g., 'K8S_CONTAINER', 'FIRECRACKER_VM', 'LOCAL_PROCESS')."
+        },
+        "limits": {
+          "$ref": "#/$defs/ResourceLimits"
+        },
+        "security": {
+          "$ref": "#/$defs/SecurityProfile"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "agentName": "DQPM_Enforcement_Monitor",
+  "activationState": "ACTIVE",
+  "checkIntervalSeconds": 300,
+  "targets": [
+    {
+      "spec_ref": "performanceMetrics.coreLatencyMs.criticalFailureThreshold",
+      "action": "trigger_rollback",
+      "severity": 5
+    },
+    {
+      "spec_ref": "measurementProtocol.audit.failureCriteria",
+      "action": "execute_correctionStrategy",
+      "severity": 3
+    },
+    {
+      "spec_ref": "dataQuality.anomalyDetectionProfile",
+      "action": "isolate_data_stream",
+      "severity": 4
+    }
+  ],
+  "loggingEndpoint": "/v94/enforcement/metrics"
+}

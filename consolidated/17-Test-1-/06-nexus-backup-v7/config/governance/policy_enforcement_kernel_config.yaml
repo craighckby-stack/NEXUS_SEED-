@@ -1,0 +1,20 @@
+enforcement_kernel: "PolicyEnforcementKernel_v3"
+activation_mode: "LIVE_INTERCEPT"
+log_level: "HIGH_VERBOSITY"
+sampling_rate_hz: 50
+
+failure_responses:
+  BLOCK_AND_ROLLBACK:
+    logging: "CRITICAL"
+    notification_channel: "OPS_S1"
+    trigger_delay_ms: 50
+  WARNING_AND_REDUCED_SCOPE:
+    logging: "ALERT"
+    fallback_scope: "READ_ONLY_MODE"
+    escalation_timeout_min: 15
+
+integration_points:
+  - subsystem: "AEC_Module"
+    priority: 1
+  - subsystem: "ResourceAllocator"
+    priority: 2

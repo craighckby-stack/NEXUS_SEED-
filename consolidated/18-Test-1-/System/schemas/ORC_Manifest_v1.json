@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.agi/schemas/ORC_Manifest_v1.json",
+  "title": "Operational Readiness Confirmation Manifest",
+  "description": "Definitive structure for the Stage 6 audit output consumed by SSC-01 (Stage 7).",
+  "type": "object",
+  "required": [
+    "stage_6_commitment_hash",
+    "integrity_passed",
+    "timestamp",
+    "anomalies_detected"
+  ],
+  "properties": {
+    "stage_6_commitment_hash": {
+      "type": "string",
+      "description": "SHA3-512^2 hash commitment of the final Stage 6 artifacts.",
+      "pattern": "^[a-fA-F0-9]{128}$"
+    },
+    "integrity_passed": {
+      "type": "boolean",
+      "description": "Boolean flag indicating successful passage of all mandatory integrity checks (must be true to proceed to Stage 7)."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC timestamp of the completion of the Stage 6 audit."
+    },
+    "anomalies_detected": {
+      "type": "array",
+      "description": "List of detected D-02 anomalies or non-optimal operational flags. Empty array indicates E7.2 success.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "string" },
+          "severity": { "type": "string", "enum": ["CRITICAL", "WARNING", "INFORMATIONAL"] },
+          "details": { "type": "string" }
+        },
+        "required": ["code", "severity"]
+      }
+    }
+  },
+  "additionalProperties": false
+}

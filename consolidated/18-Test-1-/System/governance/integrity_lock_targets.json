@@ -1,0 +1,40 @@
+{
+  "system_integrity_targets": {
+    "description": "Defines all core files necessary for system integrity verification (CHR Manifest generation).",
+    "version_lock": "v94.1",
+    "targets": [
+      {
+        "path": "config/gsep_c_flow.json",
+        "purpose": "General System Execution Planning (GSEP) Control Flow configuration."
+      },
+      {
+        "path": "config/acvm.json",
+        "purpose": "Autonomous Configuration and Verification Matrix settings."
+      },
+      {
+        "path": "governance/smc_schema.json",
+        "purpose": "Self-Modification Control (SMC) governance schema."
+      },
+      {
+        "path": "config/dial_analysis_map.json",
+        "purpose": "Dialogue Intent & Abstraction Layer mapping."
+      },
+      {
+        "path": "protocol/fdls_spec.json",
+        "purpose": "Fundamental Decision Logic Specification."
+      },
+      {
+        "path": "protocol/chr_schema.json",
+        "purpose": "Configuration Hash Registry schema definition."
+      },
+      {
+        "path": "config/rrp_manifest.json",
+        "purpose": "Resource Requirements Plan manifest."
+      },
+      {
+        "path": "protocol/telemetry_spec.json",
+        "purpose": "System telemetry specification for external observers."
+      }
+    ]
+  }
+}

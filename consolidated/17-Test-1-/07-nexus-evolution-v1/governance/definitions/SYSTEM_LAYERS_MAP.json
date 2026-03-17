@@ -1,0 +1,26 @@
+{
+  "schema_id": "GOV_LAYER_MAP_V1.0",
+  "description": "Definitive mapping of Sovereign System Layer Codes to full Engine names and organizational roles.",
+  "layers": {
+    "L1_PVLM": {
+      "engine_name": "Principle & Veto Logic Module",
+      "role": "Critical Policy Enforcement",
+      "priority": 1
+    },
+    "L3_SCI": {
+      "engine_name": "Structural Cost Indexer",
+      "role": "Resource & Efficiency Management",
+      "priority": 3
+    },
+    "L6_MEE": {
+      "engine_name": "Macro Economic Evaluator",
+      "role": "Economic Modeling & Performance Measurement",
+      "priority": 6
+    },
+    "L7_VMO": {
+      "engine_name": "Viability Management Oracle",
+      "role": "Existential Risk Control",
+      "priority": 7
+    }
+  }
+}

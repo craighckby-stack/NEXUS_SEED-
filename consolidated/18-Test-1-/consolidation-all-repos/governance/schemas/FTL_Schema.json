@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereignagi.com/governance/schemas/FTL_Schema.json",
+  "title": "Failure Trace Log (FTL) Schema",
+  "description": "Defines the detailed immutable structure generated upon GSEP P-01 FAIL, referenced by the ASM for diagnostic analysis.",
+  "type": "object",
+  "required": ["ftl_id", "timestamp", "asm_tx_id", "failure_context", "diagnostic_trace"],
+  "properties": {
+    "ftl_id": {
+      "description": "The unique, immutable ID for this FTL entry, corresponding to ASM.ftl_reference.",
+      "type": "string",
+      "format": "uuid"
+    },
+    "timestamp": {
+      "description": "Time of failure logging.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "asm_tx_id": {
+      "description": "The tx_id of the associated Audit Summary Manifest (ASM).",
+      "type": "string",
+      "format": "uuid"
+    },
+    "failure_context": {
+      "description": "High-level summary of the execution context leading to failure.",
+      "type": "object",
+      "properties": {
+        "source_module": {"type": "string", "description": "Component or Module responsible for execution."}, 
+        "trigger_event": {"type": "string", "description": "The proximate action or input causing the fault."}, 
+        "severity_level": {"type": "integer", "minimum": 1, "maximum": 5, "description": "1 (Minor) to 5 (Critical Halt/Veto)."}
+      },
+      "required": ["source_module", "trigger_event", "severity_level"],
+      "additionalProperties": false
+    },
+    "diagnostic_trace": {
+      "description": "Detailed sequence of events and internal state required for fault analysis.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "level": {"type": "string", "enum": ["INFO", "WARNING", "ERROR", "FATAL"]},
+          "message": {"type": "string"},
+          "details": {"description": "Additional structured data payload.", "type": ["object", "string"]}
+        },
+        "required": ["level", "message"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://gsep.ai/schemas/ttrp_ingress_gatekeeper_config_v1.0.json",
+  "title": "Telemetry Ingress Gatekeeper (TIG) Configuration Schema",
+  "description": "Configuration mapping application services to TTRP rules (V2.0 policies) and defining service-specific ingestion parameters.",
+  "type": "object",
+  "additionalProperties": false,
+  "patternProperties": {
+    "^[a-z_]+_SERVICE$": {
+      "type": "object",
+      "description": "Ingestion configuration for a specific system service.",
+      "properties": {
+        "SERVICE_ID": {
+          "type": "string",
+          "description": "Unique identifier (source tag) for the emitting service."
+        },
+        "APPLIED_TTRP_VERSION": {
+          "type": "string",
+          "format": "regex",
+          "pattern": "^v[0-9]+\.[0-9]+$",
+          "description": "The specific TTRP policy version this service adheres to (e.g., 'v2.0')."
+        },
+        "DEFAULT_PRIORITY_LEVEL": {
+          "type": "string",
+          "description": "The default priority level (e.g., 'BASIC', 'DIAGNOSTIC') assigned if not explicitly set in the payload."
+        },
+        "ALLOWED_PRIORITIES": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "description": "List of all priority levels this service is permitted to submit (must align with defined TTRP retention policies)."
+        },
+        "MAX_BURST_RATE_TPS": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "A service-specific overriding transaction limit (optional, system limit applies otherwise)."
+        }
+      },
+      "required": ["SERVICE_ID", "APPLIED_TTRP_VERSION", "DEFAULT_PRIORITY_LEVEL", "ALLOWED_PRIORITIES"]
+    }
+  }
+}

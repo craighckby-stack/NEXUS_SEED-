@@ -1,0 +1,43 @@
+{
+  "description": "Central Registry and Operational Constraints for Predictive Constraint Sentinel (PCS) Escalation Actions.",
+  "active": true,
+  "version": "1.0.0",
+  "actions": {
+    "ACTION_LOG_PRIORITY": {
+      "display_name": "Log High-Priority PCS Event",
+      "type": "SYSTEM_NOTIFICATION",
+      "resource_cost_normalized": 0.01,
+      "cooldown_ms": 100,
+      "rate_limit": {
+        "max_per_minute": 60
+      }
+    },
+    "ACTION_REQUEST_TELEMETRY_SAMPLE": {
+      "display_name": "Request Enhanced Telemetry Sample",
+      "type": "DATA_ACQUISITION",
+      "resource_cost_normalized": 0.15,
+      "cooldown_ms": 5000,
+      "rate_limit": {
+        "max_per_hour": 120
+      }
+    },
+    "ACTION_REQUEST_NONCRITICAL_RELEASE": {
+      "display_name": "Request Non-Critical Resource Release",
+      "type": "RESOURCE_MUTATION",
+      "resource_cost_normalized": 0.05,
+      "cooldown_ms": 300000
+    },
+    "ACTION_NOTIFY_IH_WATCH": {
+      "display_name": "Notify Integrity Handler Watchdog",
+      "type": "SYSTEM_NOTIFICATION",
+      "resource_cost_normalized": 0.02,
+      "cooldown_ms": 60000
+    },
+    "ACTION_THROTTLE_INPUT_ACQUISITION": {
+      "display_name": "Throttle Input Pipeline (DHC)",
+      "type": "CONTROL_SURFACE_MUTATION",
+      "resource_cost_normalized": 0.10,
+      "cooldown_ms": 1000
+    }
+  }
+}

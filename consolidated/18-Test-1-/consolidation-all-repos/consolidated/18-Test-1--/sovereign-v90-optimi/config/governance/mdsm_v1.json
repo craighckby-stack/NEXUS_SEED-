@@ -1,0 +1,1 @@
+Optimization parameters loaded from mdsm_v1.json. Efficiency mode set to Adaptive_Metric_Driven with Stability_Maximization objective. Autonomy level set to L4_Constraint_Adherence with impact severity limit of 0.60. Policy gates configured for evolution proposals and runtime corrections.

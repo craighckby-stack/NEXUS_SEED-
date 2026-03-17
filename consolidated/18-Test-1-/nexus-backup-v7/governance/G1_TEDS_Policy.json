@@ -1,0 +1,14 @@
+{
+  "protocol_version": "v94.2",
+  "integration_phase": "TEST-2",
+  "mutation_parameters": {
+    "max_refactor_depth": 3,
+    "scaffolding_allowed": false,
+    "pruning_threshold": 5,
+    "target_kernel": "UNIFIER.js"
+  },
+  "immutable_ancestry_files": [
+    "/governance/G0_Rules.js",
+    "/core/kernel.js"
+  ]
+}

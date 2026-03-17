@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agi.sovereign/config/governance/GatingPolicyManifest.json",
+  "title": "Gating Policy Manifest",
+  "description": "Defines the mandatory integrity checks, thresholds, and configuration for different gate types necessary to achieve a passing audit report.",
+  "defaultIntegrityThreshold": 0.85,
+  "policyVersion": "V2.1",
+  "gateDefinitions": [
+    {
+      "gateIdentifier": "CI_Code_Security",
+      "requiredChecks": [
+        {"checkName": "SAST_Mandatory", "criticalityLevel": "CRITICAL"},
+        {"checkName": "SCA_Check", "criticalityLevel": "HIGH"}
+      ],
+      "metricTolerance": {
+        "minCoveragePercentage": 95,
+        "maxExecutionTimeMs": 5000
+      },
+      "failIfFindingSeverity": ["CRITICAL"]
+    }
+  ]
+}

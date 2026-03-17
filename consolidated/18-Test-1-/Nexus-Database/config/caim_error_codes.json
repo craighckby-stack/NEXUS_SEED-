@@ -1,0 +1,26 @@
+{
+  "CAIM_001": {
+    "code": "MISSING_SIGNATURE",
+    "level": "CRITICAL",
+    "description": "Mandatory cryptographic signature file (.sig) not found for the specified asset.",
+    "protocol_action": "RRP_FAIL_3A"
+  },
+  "CAIM_002": {
+    "code": "SDVM_TYPE_MISMATCH",
+    "level": "ERROR",
+    "description": "Structural Descriptor Validation Map (SDVM) type definition does not match actual resource structure.",
+    "protocol_action": "SIH_RETRY_1B"
+  },
+  "CAIM_003": {
+    "code": "CORRUPT_CHECKSUM",
+    "level": "CRITICAL",
+    "description": "Calculated hash of the asset does not match the signed manifest checksum.",
+    "protocol_action": "RRP_FAIL_4C"
+  },
+  "CAIM_004": {
+    "code": "ASSET_LOAD_TIMEOUT",
+    "level": "ERROR",
+    "description": "Asset retrieval or loading exceeded the predefined timeout threshold during RRP handshake.",
+    "protocol_action": "RRP_RETRY_2A"
+  }
+}

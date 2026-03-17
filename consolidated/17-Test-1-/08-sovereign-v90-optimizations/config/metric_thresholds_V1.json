@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0.0",
+  "system_id": "GACR_Core",
+  "baseline_metrics": {
+    "timestamp": "$BASELINE_CAPTURE_TIME$",
+    "CodeDensityMetric": {"baseline_value": 0.08, "unit": "D/SLOC"},
+    "TestCoverageMetric": {"baseline_value": 0.925, "unit": "%"}
+  },
+  "operational_thresholds": {
+    "PATCH_TRIGGER_CRITICAL": {
+      "TestCoverageDelta": {"operator": ">=", "value": 0.00, "description": "Non-negative delta required for hotfixes"},
+      "CodeDensityMetric": {"operator": "<", "value": 0.05, "description": "Ensuring complexity is low for patch releases"}
+    },
+    "MINOR_TRIGGER_MAJOR_EVOLUTION": {
+      "TestCoverageDelta": {"operator": ">", "value": 0.15},
+      "MinSecurityScore": {"operator": ">=", "value": 90}
+    },
+    "BLOCK_BUILD_ERROR": {
+      "TestCoverageDelta": {"operator": "<", "value": -0.05, "severity": "CRITICAL"}
+    }
+  },
+  "rating_mapping": {
+    "stability_rating": {
+      "source_metric": "System_Health_Index",
+      "tiers": [
+        {"max": 50, "level": "ALPHA"},
+        {"min": 51, "max": 90, "level": "BETA"},
+        {"min": 91, "level": "RELEASE"}
+      ]
+    }
+  }
+}

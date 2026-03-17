@@ -1,0 +1,26 @@
+{
+  "schema_version": "WSC-AE-V1.0",
+  "description": "Configuration for the Weighted Soft Constraint Aggregation Engine (WSC-AE), defining global scoring thresholds and mitigation strategies.",
+  "aggregation_parameters": {
+    "scoring_normalization_method": "LinearDecay",
+    "decay_rate_per_minute": 0.05,
+    "sustain_buffer_seconds": 15
+  },
+  "global_veto_thresholds": [
+    {
+      "level": "L1_Soft_Veto",
+      "aggregate_score_gte": 0.60,
+      "action": "Throttle_API_Traffic_L3",
+      "duration_minutes": 5
+    },
+    {
+      "level": "L2_Hard_Veto",
+      "aggregate_score_gte": 0.95,
+      "action": "System_Halt_L5_Interlock",
+      "duration_minutes": 30
+    }
+  ],
+  "metadata": {
+    "engine_owner": "AGI/Operational-Core/RTM-Synthesis-Engine"
+  }
+}

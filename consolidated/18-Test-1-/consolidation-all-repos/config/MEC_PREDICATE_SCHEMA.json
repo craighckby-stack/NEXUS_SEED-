@@ -1,0 +1,21 @@
+{
+  "schema_id": "MEC-PREDICATE-V1",
+  "description": "Standardized reference schema for Modular Execution Condition predicates.",
+  "predicates": [
+    {
+      "ref_id": "PREDICATE_THRESHOLD_EXCEED",
+      "logic_description": "A comparison of metric A against B, potentially incorporating system coefficients (e.g., scaling factor).",
+      "inputs": ["metric_key", "threshold_reference"]
+    },
+    {
+      "ref_id": "PREDICATE_GREATER_THAN",
+      "logic_description": "Simple A > B check.",
+      "inputs": ["metric_key", "threshold_reference"]
+    },
+    {
+      "ref_id": "PREDICATE_LESS_THAN",
+      "logic_description": "Simple A < B check.",
+      "inputs": ["metric_key", "threshold_reference"]
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "registry_version": "1.0.0",
+  "created_timestamp": "[ISO 8601 Timestamp of Creation]",
+  "policy_enforced": "EXECUTIVE_INTEGRITY",
+  "files": [
+    {
+      "path": "governance/hash_verification_engine_config.json",
+      "hash_sha256": "[Calculated Hash of HVE Config]",
+      "digital_signature": "[Cryptographic Signature]",
+      "last_modified": "[ISO 8601 Timestamp]",
+      "is_critical": true
+    },
+    {
+      "path": "core/logic/main_executor.py",
+      "hash_sha256": "[Calculated Hash of Main Logic File]",
+      "digital_signature": "[Cryptographic Signature]",
+      "last_modified": "[ISO 8601 Timestamp]",
+      "is_critical": true
+    }
+  ]
+}

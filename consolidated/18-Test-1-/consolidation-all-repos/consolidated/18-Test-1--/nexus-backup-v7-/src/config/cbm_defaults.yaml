@@ -1,0 +1,12 @@
+# CBM Defaults (S-02 Risk Mitigation Configuration)
+# These define the maximum resource ceilings for System State Transitions (SSTs).
+# They should be loaded by the Core component upon initialization.
+
+# Maximum size of the SST payload (proxy for I/O and serialization cost)
+max_size_bytes: 409600 # 400 KB
+
+# Maximum estimated depth (proxy for recursion or chain length)
+max_estimated_depth: 7
+
+# Normalized complexity score budget (higher value = higher allowed risk/computation)
+complexity_budget: 1.5

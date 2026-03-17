@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agi.sovereign/schemas/CMO_v2.json",
+  "title": "Configuration Manifest Oracle Definition Schema v2.0",
+  "type": "object",
+  "required": ["cmo_version", "manifest_id", "metadata", "modules"],
+  "properties": {
+    "cmo_version": {"type": "string", "pattern": "^2\\.\\d+$"},
+    "manifest_id": {"type": "string", "description": "Unique cryptographic identifier for the current configuration snapshot."},
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "creation_date": {"type": "string", "format": "date-time"},
+        "interface_mandate": {"type": "string"}
+      },
+      "required": ["creation_date", "interface_mandate"]
+    },
+    "modules": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "object",
+          "required": ["context", "schema_version", "configuration"],
+          "properties": {
+            "context": {
+              "type": "object",
+              "required": ["level_rank", "description"],
+              "properties": {
+                "level_rank": {"type": "integer", "minimum": 1, "maximum": 7},
+                "description": {"type": "string"}
+              }
+            },
+            "schema_version": {"type": "string", "description": "Version controlling the module's specific configuration structure."},
+            "notes": {"type": "string"},
+            "configuration": {"type": "object", "minProperties": 1, "description": "Standardized container for module-specific settings."}
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

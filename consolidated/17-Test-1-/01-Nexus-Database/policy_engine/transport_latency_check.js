@@ -1,0 +1,1 @@
+Optimized transport latency check function

@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign-agi.io/governance/pesm_v95.3.json",
+  "title": "Policy Evolution Schema Manifest (PESM)",
+  "description": "Defines the mandatory structural constraints for all GACR policy assets (PVLM, CFTM, SBCM, etc.) during PEUP updates.",
+  "type": "object",
+  "required": ["metadata", "policy_version", "schema_enforcement_date"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["asset_id", "agent_owner"],
+      "properties": {
+        "asset_id": {"type": "string", "description": "Canonical ID (e.g., PVLM, CFTM)"},
+        "agent_owner": {"type": "string", "enum": ["GAX", "SGS"], "description": "The Triumvirate component responsible for policy enforcement."}
+      }
+    },
+    "policy_version": {
+      "type": "string",
+      "pattern": "^v\\d+\\.\\d+$"
+    },
+    "schema_enforcement_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "schema_definition": {
+      "type": "object",
+      "description": "The actual JSON schema enforcing structural validity of the target GACR asset."
+    }
+  },
+  "additionalProperties": false
+}

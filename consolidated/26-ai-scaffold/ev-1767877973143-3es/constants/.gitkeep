@@ -1,0 +1,6 @@
+import os
+
+# Optimization: Ensure the directory exists robustly and create the placeholder 
+# file with 0 bytes, minimizing I/O overhead.
+os.makedirs('constants', exist_ok=True)
+open('constants/.gitkeep', 'w').close()

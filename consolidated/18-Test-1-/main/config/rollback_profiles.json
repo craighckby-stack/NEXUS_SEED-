@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "active_profile": "Stable_v94.0_P99",
+  "profiles": [
+    {
+      "profile_id": "Stable_v94.0_P99",
+      "timestamp": "2094-01-15T12:00:00Z",
+      "dependency_checksum": "0xABCD1234F0E9",
+      "external_lockfile_hash": "0xA3B2C1D0E5F4",
+      "metrics_validated": {
+        "uptime_days": 30,
+        "evolution_failure_rate": "<0.01%"
+      },
+      "description": "Last validated stable state before major evolutionary cycles started."
+    }
+  ],
+  "rollback_triggers": {
+    "max_consecutive_evolutionary_failures": 3,
+    "core_runtime_integrity_breach": true
+  }
+}

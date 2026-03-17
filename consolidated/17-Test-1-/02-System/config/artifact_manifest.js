@@ -1,0 +1,28 @@
+const ARTIFACT_MANIFEST = {
+  "description": "Canonical definition for artifacts referenced by the PIM and other GSEP-C components.",
+  "version": "v1.0.0",
+  "artifacts": {
+    "EMSU.EMS_HASH": {
+      "component": "EMSU",
+      "algorithm": "SHA3-512",
+      "verification_method": "P2P_Consensus"
+    },
+    "DRO.ECVM_SIGNATURE": {
+      "component": "DRO",
+      "algorithm": "ECC-P384",
+      "verification_method": "Component_Trust_Store"
+    },
+    "AASS.PSI_FINAL_HASH": {
+      "component": "AASS",
+      "algorithm": "Keccak-256",
+      "verification_method": "Immutable_Storage_Block"
+    },
+    "AASS.STATE_SEAL_CERTIFICATE": {
+      "component": "AASS",
+      "algorithm": "RSA-PSS-4096",
+      "verification_method": "External_Auditor_Key"
+    }
+  }
+};
+
+export default ARTIFACT_MANIFEST;

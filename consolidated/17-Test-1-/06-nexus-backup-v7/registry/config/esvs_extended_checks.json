@@ -1,0 +1,19 @@
+{
+  "profile_id": "ESVS_V2_INTEGRITY_PROFILE",
+  "description": "Configuration for extending ESVS verification beyond base OS metrics to file system integrity and sensitive environment variables.",
+  "enabled_checks": {
+    "file_hashes": [
+      {
+        "path": "./config/core/critical_system_config.yaml",
+        "hash_type": "sha256",
+        "mandatory": true,
+        "mode": "full_content_hash"
+      }
+    ],
+    "env_vars": [
+      "KUBERNETES_SERVICE_HOST",
+      "VAULT_ADDR",
+      "ESVS_PROFILE_ID" 
+    ]
+  }
+}

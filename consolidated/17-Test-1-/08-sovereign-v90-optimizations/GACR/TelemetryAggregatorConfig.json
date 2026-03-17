@@ -1,0 +1,74 @@
+{
+  "General": {
+    "ServiceName": "GACR.TelemetryAggregator",
+    "Environment": "${ENV:PRODUCTION}",
+    "ConfigVersion": 2.1,
+    "ReloadPolicy": "HotReload",
+    "ShardingKey": "source_id",
+    "AGI_TelemetryPriority": 90
+  },
+  "Ingestion": {
+    "Sources": [
+      {
+        "Name": "InternalMetrics",
+        "Type": "HTTP",
+        "Endpoint": "/api/v2/metrics",
+        "RateLimitPerMinute": 100000,
+        "SchemaValidationLevel": "Strict"
+      },
+      {
+        "Name": "TracingEvents",
+        "Type": "Kafka",
+        "Topic": "gacr.telemetry.traces",
+        "BufferSizeMB": 512,
+        "BackpressureStrategy": "DiscardOldest"
+      },
+      {
+        "Name": "SynergyKernelData",
+        "Type": "InternalPipe",
+        "Endpoint": "synergy.kernel.v750",
+        "SchemaValidationLevel": "ManifestConstrainted",
+        "PriorityLevel": "Critical"
+      }
+    ],
+    "MaxQueueDepthGB": 10
+  },
+  "Processing": {
+    "Pipeline": [
+      "SchemaEnforcement",
+      "AGIConstraintNormalization",
+      "DynamicFilter",
+      "PiiAnonymization",
+      "MetricsAggregation"
+    ],
+    "AdaptiveSampling": {
+      "Enabled": true,
+      "PolicyType": "Composite",
+      "TargetCPUUtilization": 0.75,
+      "MinSamplingRate": 0.001,
+      "MaxSamplingRate": 1.0,
+      "AGI_MaturityAdjustmentFactor": 0.05
+    },
+    "BatchingPolicy": {
+      "MaxEvents": 5000,
+      "MaxLatencyMS": 1000,
+      "CompressionAlgorithm": "Zstd"
+    }
+  },
+  "Export": {
+    "Destinations": [
+      {
+        "Name": "DataLakeArchive",
+        "Type": "S3",
+        "Bucket": "gacr-telemetry-archive-v2",
+        "Format": "Parquet",
+        "DeliveryGuarantee": "AtLeastOnce"
+      },
+      {
+        "Name": "RealtimeMonitoring",
+        "Type": "PrometheusPushGateway",
+        "URL": "http://monitor.gacr.internal:9091"
+      }
+    ]
+  }
+}

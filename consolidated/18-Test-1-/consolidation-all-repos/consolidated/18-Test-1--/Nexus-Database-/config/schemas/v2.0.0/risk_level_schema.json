@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://agi.sovereign/schemas/v2.0.0/risk_level_schema.json",
+  "title": "ATM Risk Level Configuration Schema",
+  "type": "object",
+  "properties": {
+    "levels": {
+      "type": "object",
+      "description": "Map of risk levels indexed by their unique ID.",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "severity_score": {"type": "integer", "minimum": 1},
+          "impact": {"type": "string"},
+          "enforcement_type": {
+            "type": "string",
+            "enum": ["HARD_HALT", "THROTTLE_50", "RESOURCE_REALLOCATE", "OBSERVE", "LOG_ONLY"]
+          },
+          "required_action": {"type": "string"},
+          "trust_penalty_multiplier": {"type": "number", "minimum": 0.0},
+          "notification_groups": {"type": "array", "items": {"type": "string"}},
+          "action_ttl_s": {"type": ["integer", "null"], "description": "Time to live for required action in seconds. 0 for immediate."}
+        },
+        "required": ["severity_score", "impact", "enforcement_type", "required_action", "trust_penalty_multiplier", "notification_groups"]
+      }
+    },
+    "default_risk_level": {"type": "string"},
+    "metadata": {"type": "object"}
+  },
+  "required": ["levels", "metadata", "default_risk_level"]
+}

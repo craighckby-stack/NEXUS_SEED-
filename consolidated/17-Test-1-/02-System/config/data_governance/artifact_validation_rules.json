@@ -1,0 +1,25 @@
+{
+  "description": "Defines mandatory runtime validation rules for sensitive or complex data artifacts, complementing the structural constraints defined in the Registry Schema.",
+  "validator_version": "1.0",
+  "validation_rules": {
+    "USER_CREDIT_SCORE": {
+      "check_format": "float",
+      "check_range": {
+        "min": 300.0,
+        "max": 850.0
+      },
+      "pii_handling": "ENCRYPT_ON_PERSISTENCE"
+    },
+    "RAW_IP_ADDRESS": {
+      "check_format": "ipv4_or_ipv6",
+      "pii_handling": "ANONYMIZE_ON_INGESTION",
+      "log_masking": true
+    },
+    "TRANSACTION_AMOUNT": {
+      "check_format": "float",
+      "check_unit": "USD",
+      "custom_validator": "validate_positive_value"
+    }
+  },
+  "default_ttl_policy": "STRICT_FAILURE"
+}

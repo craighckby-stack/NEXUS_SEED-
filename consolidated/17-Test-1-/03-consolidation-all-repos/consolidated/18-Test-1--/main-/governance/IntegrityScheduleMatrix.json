@@ -1,0 +1,22 @@
+{
+  "schedule_matrix_version": "1.0",
+  "schedule_purpose": "Defines periodic, recurring integrity verification tasks for live, operational models identified in SMIM_GOVERNANCE_CONFIG.",
+  "verification_slots": [
+    {
+      "slot_id": "S_DAILY_DRIFT_CHECK",
+      "frequency_cron": "0 0 * * *",
+      "target_tiers": ["CRITICAL_A", "CRITICAL_B"],
+      "verification_type_ref": "STATISTICAL_DRIFT_KS",
+      "data_window_hours": 24,
+      "report_level": "IMMEDIATE_ALERT_L3"
+    },
+    {
+      "slot_id": "S_WEEKLY_COMPLEXITY_AUDIT",
+      "frequency_cron": "0 0 * * 1",
+      "target_tiers": ["CRITICAL_A"],
+      "verification_type_ref": "COMPLEXITY_LIMIT_HARD",
+      "data_window_hours": 168,
+      "report_level": "WEEKLY_REPORT_L1"
+    }
+  ]
+}

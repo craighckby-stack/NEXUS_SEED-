@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.agi/schema/security/trmReasonCodes.json",
+  "title": "Triage & Response Management Reason Codes",
+  "description": "Standardized enumeration of TRM codes justifying automated security actions.",
+  "type": "string",
+  "enum": [
+    "TRM-001-MALWARE_DETECT",
+    "TRM-002-LATERAL_MOVEMENT",
+    "TRM-003-POLICY_VIOLATION",
+    "TRM-004-HIGH_VULNERABILITY",
+    "TRM-999-EMERGENCY_MANUAL"
+  ]
+}

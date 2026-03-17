@@ -1,0 +1,13 @@
+### COMPONENT: Transient Vetting Staging Unit (TVSU)
+
+**Pipeline Stage:** Pre-S6 Ingress
+
+**Function:** TVSU is the critical buffer layer responsible for synchronization, cryptographic preprocessing, and integrity verification of TIVS input artifacts prior to handing them off to the TIVS engine at S6.
+
+**Responsibilities:**
+1. **Input Synchronization:** Ensure time-synchronous receipt of GTB Feed, STDM, and TQM instances corresponding to the current SGS cycle.
+2. **Manifest Integrity Check:** Calculate and verify SHA/KZG hashes for STDM and TQM files against predefined integrity manifests, preventing TIVS from processing compromised or stale constraint definitions.
+3. **GTB Fingerprinting:** Apply initial cryptographic fingerprinting (e.g., Merkle Tree root calculation or verifiable hash chaining) to the incoming GTB feed segment to ensure immutability during transport to S6.
+4. **Data Liveness Assertion:** Validate timestamp coherence and confirm the temporal bounds of the GTB feed meet minimum freshness requirements.
+
+**Rationale:** Isolating manifest and feed preparation from the core TIVS logic (S6) maximizes TIVS execution efficiency. TVSU guarantees that TIVS always receives validated, synchronized, and pre-fingerprinted inputs, significantly reducing the surface area for data contamination related failures within Stage S6.

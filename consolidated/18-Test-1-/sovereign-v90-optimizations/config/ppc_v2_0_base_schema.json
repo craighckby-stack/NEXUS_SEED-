@@ -1,0 +1,33 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://gsep.ai/schemas/ppc_v2_0.json",
+    "title": "PPC-V2.0 Proposal Payload Contract",
+    "type": "object",
+    "required": ["proposal_id", "actor", "operation"],
+    "properties": {
+        "proposal_id": {
+            "type": "string",
+            "description": "Unique identifier for the proposal, often a hash or sequence ID.",
+            "pattern": "^[a-f0-9]{32,64}$"
+        },
+        "actor": {
+            "type": "object",
+            "description": "Metadata about the initiating actor.",
+            "properties": {
+                "role": {"type": "string", "enum": ["AGI", "SYSTEM", "HUMAN"]},
+                "identity": {"type": "string", "minLength": 1}
+            },
+            "required": ["role", "identity"]
+        },
+        "operation": {
+            "type": "object",
+            "description": "The details of the evolutionary task.",
+            "properties": {
+                "type": {"type": "string"},
+                "scope": {"type": "array", "items": {"type": "string"}}
+            },
+            "required": ["type", "scope"]
+        }
+    },
+    "additionalProperties": false
+}

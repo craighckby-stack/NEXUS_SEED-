@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/schema/mee.contract.schema.json",
+  "title": "MEE Service Contract Definition",
+  "type": "object",
+  "properties": {
+    "$schema": { "type": "string" },
+    "name": { "type": "string", "minLength": 3 },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "description": { "type": "string" },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "stability": { "type": "string", "enum": ["Experimental", "Beta", "GA"] },
+        "required_engine_version": { "type": "string" }
+      },
+      "required": ["stability"]
+    },
+    "capabilities": {
+      "type": "object",
+      "properties": {
+        "transactions": { "type": "boolean" },
+        "async_jobs": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "queue_priority": { "type": "string", "enum": ["low", "standard", "high"] }
+          },
+          "required": ["enabled"]
+        }
+      },
+      "required": ["transactions"]
+    },
+    "endpoints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string", "pattern": "^/[a-zA-Z0-9_/{}]+$" },
+          "method": { "type": "string", "enum": ["GET", "POST", "PUT", "DELETE"] },
+          "required_auth": { "type": "array", "items": { "type": "string" } },
+          "rate_limit_group": { "type": "string" }
+        },
+        "required": ["path", "method"]
+      }
+    },
+    "timeouts_ms": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z_]+$": { "type": "integer", "minimum": 100 }
+      },
+      "required": ["default_request"]
+    }
+  },
+  "required": ["$schema", "name", "version", "capabilities", "endpoints", "timeouts_ms"],
+  "additionalProperties": false
+}

@@ -1,0 +1,18 @@
+{
+  "engine_version": "V1.1.0",
+  "mode": "SynchronousPreFlight",
+  "error_policy": "HALT_ON_CRITICAL",
+  "logging_level": "WARN",
+  "schema_cache": {
+    "enabled": true,
+    "max_schemas": 50
+  },
+  "target_groups": {
+    "CORE_CONFIG": {
+      "priority": 100
+    },
+    "PROTOCOL_SPECIFICATION": {
+      "priority": 80
+    }
+  }
+}

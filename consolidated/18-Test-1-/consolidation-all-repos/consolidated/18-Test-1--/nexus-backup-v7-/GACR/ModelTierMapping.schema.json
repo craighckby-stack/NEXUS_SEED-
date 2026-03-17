@@ -1,0 +1,199 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "GACR/ModelTierMapping.schema.json",
+  "title": "Model Tier Mapping Configuration Schema [NEXUS_CORE v3.1 CONVERGED]",
+  "description": "Final evolution state: Siphoning AlphaCode competitive-logic clustering and OOXML-DocX Indirection Dependency Layer. Implements Hierarchical Semantic Serialization and Multi-Level State Machines for sub-50ms model tiering reconciliation.",
+  "type": "object",
+  "properties": {
+    "mc:Ignorable": {
+      "type": "string",
+      "default": "nx mce ac react fiber lanes scheduler w r ts_ref dalek_ext"
+    },
+    "namespaces": {
+      "type": "object",
+      "additionalProperties": { "type": "string", "format": "uri" },
+      "default": {
+        "nx": "https://nexus-core.agi/governance",
+        "mce": "http://schemas.openxmlformats.org/markup-compatibility/2006",
+        "ac": "https://alphacode.deepmind/logic/v2",
+        "react": "https://react.dev/core/reconciliation",
+        "fiber": "https://react.dev/core/fiber-tree",
+        "scheduler": "https://react.dev/core/scheduler",
+        "lanes": "https://react.dev/core/concurrent-lanes",
+        "w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
+        "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+      }
+    },
+    "mapping_version": {
+      "type": "string",
+      "enum": ["3.1.0-CONVERGED"],
+      "description": "Converged AlphaCode-DocX precision mapping with Recursive Cascading Property resolution."
+    },
+    "settings": {
+      "type": "object",
+      "properties": {
+        "cascading_inheritance": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean", "default": true },
+            "resolver": { "type": "string", "enum": ["RecursiveFlatten", "AtomizedSiphon"] },
+            "docDefaults": { "$ref": "#/$defs/tierProperties" }
+          }
+        },
+        "ac:selection_policy": {
+          "type": "object",
+          "properties": {
+            "sampling_mode": { "type": "string", "enum": ["ClusteredVerification", "HeuristicSynthesis"] },
+            "candidate_limit": { "type": "integer", "default": 1000000 },
+            "clustering_threshold": { "type": "number", "default": 0.95 },
+            "ac:solution_filtering": { "type": "boolean", "default": true }
+          }
+        },
+        "w:settings": {
+          "type": "object",
+          "properties": {
+            "nx:mirror_governance": { "type": "boolean", "default": true },
+            "mce:compatibility_mode": { "type": "string", "default": "v5.0" }
+          }
+        }
+      }
+    },
+    "abstract_tier_definitions": {
+      "type": "array",
+      "description": "Maps to OOXML abstractNum definitions. Defines the logic template for tiers.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "abstractNumId": { "type": "string" },
+          "name": { "type": "string" },
+          "multiLevelType": { "type": "string", "enum": ["hybridFiber", "competitive", "clustered"] },
+          "ac:problem_type": { "type": "string", "enum": ["Deterministic", "CompetitiveReasoning", "HeuristicSynthesis"] },
+          "levels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "ilvl": { "type": "integer" },
+                "tierPr": { "$ref": "#/$defs/tierProperties" },
+                "fiber:workTag": { "type": "string" },
+                "scheduler:priority": { "type": "string" }
+              },
+              "required": ["ilvl", "tierPr"]
+            }
+          }
+        },
+        "required": ["abstractNumId", "name", "levels"]
+      }
+    },
+    "tier_instance_mapping": {
+      "type": "array",
+      "description": "Maps to OOXML num definitions. Binds specific instances to abstract logic templates.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "numId": { "type": "string" },
+          "abstractNumId": { "type": "string" },
+          "rId": { "type": "string", "pattern": "^rId_[A-Z0-9]+$" },
+          "status": { "type": "string", "enum": ["CONVERGED", "SIPHONED"] },
+          "fiber:key": { "type": "string" },
+          "fiber:lanes": { "type": "string" },
+          "ac:pass_at_k": { "type": "number" },
+          "ac:cluster_id": { "type": "string" }
+        },
+        "required": ["numId", "abstractNumId", "rId"]
+      }
+    },
+    "logical_structure": {
+      "type": "object",
+      "description": "Atomized Semantic Tree following the Paragraph/Run/Terminal pattern.",
+      "properties": {
+        "body": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "enum": ["Block", "Inline"] },
+              "pStyle": { "type": "string" },
+              "rStyle": { "type": "string" },
+              "pPr": { "type": "object" },
+              "rPr": { "type": "object" },
+              "terminal": {
+                "type": "object",
+                "properties": {
+                  "is_field": { "type": "boolean" },
+                  "field_type": { "type": "string" },
+                  "value": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "relationships": {
+      "type": "array",
+      "description": "Indirection Dependency Layer (RID Mapping). Decouples logic from implementation.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "rId": { "type": "string" },
+          "type": { "type": "string", "format": "uri" },
+          "target": { "type": "string" },
+          "targetMode": { "type": "string", "enum": ["Internal", "External"] },
+          "rule": {
+            "type": "object",
+            "properties": {
+              "rule_id": { "type": "string" },
+              "criteria": {
+                "type": "object",
+                "properties": {
+                  "match_type": { "type": "string", "enum": ["exact_id", "tag_match", "ac_heuristic", "rel_indirection"] },
+                  "ac:competitive_score_min": { "type": "number" },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "key": { "type": "string" },
+                        "operator": { "type": "string" },
+                        "value": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "required": ["rId", "type", "target"]
+      }
+    }
+  },
+  "required": ["mapping_version", "abstract_tier_definitions", "tier_instance_mapping", "relationships"],
+  "$defs": {
+    "tierProperties": {
+      "type": "object",
+      "properties": {
+        "priority_level": { "type": "integer" },
+        "sla_target_ms": { "type": "integer" },
+        "redundancy_level": { "type": "string" },
+        "availability": { "type": "number" },
+        "nx:governance_mode": { "type": "string", "enum": ["Strict", "Adaptive"] },
+        "lanes:mask": { "type": "string" },
+        "scheduler:priority": { "type": "string" },
+        "react:memoize": { "type": "boolean" },
+        "ac:complexity_constraint": { "type": "string" },
+        "ac:memory_limit_mb": { "type": "integer" },
+        "w:rPr": {
+          "type": "object",
+          "properties": {
+            "w:sz": { "type": "integer" },
+            "w:b": { "type": "boolean" },
+            "w:noProof": { "type": "boolean" }
+          }
+        }
+      },
+      "required": ["priority_level", "sla_target_ms"]
+    }
+  }
+}

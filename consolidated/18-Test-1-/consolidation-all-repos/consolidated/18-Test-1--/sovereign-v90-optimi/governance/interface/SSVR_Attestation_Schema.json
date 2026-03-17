@@ -1,0 +1,36 @@
+{
+  "title": "SSVR Attestation Log Interface Definition",
+  "description": "Defines the mandatory structure for the SSVR attestation_log field, ensuring machine-verification of the consensus quorum.",
+  "type": "object",
+  "required": [
+    "quorum_threshold",
+    "successful_signers",
+    "cstl_transaction_id",
+    "timestamp_utc"
+  ],
+  "properties": {
+    "quorum_threshold": {
+      "type": "string",
+      "const": "2/3_GAS",
+      "description": "Defines the required minimum ratio (2/3) of Global Anchor Signers (GAS)."
+    },
+    "successful_signers": {
+      "type": "array",
+      "minItems": 1,
+      "description": "List of required cryptographic attestation proofs, exceeding the quorum threshold.",
+      "items": {
+        "type": "object",
+        "required": ["signer_id", "signature_proof"]
+      }
+    },
+    "cstl_transaction_id": {
+      "type": "string",
+      "description": "Unique reference hash to the immutable record in the Consensus State Transaction Log (CSTL)."
+    },
+    "timestamp_utc": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Time of successful commitment logging."
+    }
+  }
+}

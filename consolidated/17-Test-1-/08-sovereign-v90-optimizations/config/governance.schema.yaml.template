@@ -1,0 +1,42 @@
+# SAG CGR Utility Configuration Schema Template (Input for CSR Generation)
+# This YAML structure must be generated and cryptographically hashed by the CGR Utility
+# prior to Phase 1 (S00) to form the Config State Root (CSR).
+
+system_definition:
+  system_id: SAG_V99_2
+  timestamp: [EPOCH_TIME]
+  version: 99.2
+  hash_algorithm: SHA3-512
+
+axiomatic_constraints: # Populates ACVD
+  required_minimums:
+    UFRM: 0.85 # Utility Function Required Minimum baseline
+    CFTM_default: 0.00 # Constraint Failure Tolerance Modifier (default value)
+  logic_base:
+    # Define the rule set for P2/PVLM failure conditions
+    pre_validation_checks:
+      - check_type: dependency_verification
+        target: external_agents_status
+        requirement: all_active
+    # Define the rule set for P4/ADTM boundary violations
+    deviation_triggers:
+      - metric: resource_consumption_ratio
+        threshold: 0.95
+        trigger_flag: ADTM
+
+manifest_schema: # Populates FASV
+  manifest_id: ASM_V1_2
+  required_fields:
+    - field: state_delta_hash
+      type: string
+      immutable_after_S08: true
+    - field: governance_vector_map
+      type: map
+      required: true
+  optional_fields: []
+  
+trust_anchors:
+  allowed_signing_agents:
+    - CRoT_ID_001
+    - GAX_ID_002
+  

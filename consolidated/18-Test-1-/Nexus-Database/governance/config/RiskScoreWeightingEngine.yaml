@@ -1,0 +1,26 @@
+version: 1.0.0
+enforcement_point: APSM.V3
+
+thresholds:
+  T_MIN: 0.85 # Minimum acceptable Trust Score for Stage 3 entry
+
+weights:
+  # Weights must sum to 1.0
+  provenance_integrity:
+    factor: 0.40 # AIPL success, IAL commitment, and signature validity
+    vectors:
+      signature_validity: 0.70
+      ial_latency_ms: 0.30 # Non-repudiation latency check
+
+  risk_nexus_exposure:
+    factor: 0.35 # RSNI results against CVN/IRR
+    vectors:
+      critical_vulnerability_count: -0.50
+      behavioral_anomaly_flags: -0.40
+      dependency_graph_depth: -0.10
+
+  governance_compliance:
+    factor: 0.25 # PEG inputs (Note: Policy failure overrides T-score, but compliance history contributes here)
+    vectors:
+      license_compatibility_index: 0.60
+      architectural_deviation_index: 0.40

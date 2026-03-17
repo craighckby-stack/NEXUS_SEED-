@@ -1,0 +1,28 @@
+{
+  "version": "1.0.0",
+  "description": "Maps generalized severity identifiers to specific system actions (e.g., Block, Censor, Flag, Log).",
+  "severity_levels": [
+    {
+      "id": "SEV_CRITICAL",
+      "min_threshold": 0.90,
+      "default_action": "BLOCK_EXECUTION",
+      "logging_level": "ERROR"
+    },
+    {
+      "id": "SEV_HIGH",
+      "min_threshold": 0.80,
+      "default_action": "SOFT_CENSOR",
+      "logging_level": "WARN"
+    },
+    {
+      "id": "SEV_MEDIUM",
+      "min_threshold": 0.50,
+      "default_action": "FLAG_AUDIT",
+      "logging_level": "INFO"
+    }
+  ],
+  "fallbacks": {
+    "action": "LOG_AND_CONTINUE",
+    "severity_ref": "SEV_MEDIUM"
+  }
+}

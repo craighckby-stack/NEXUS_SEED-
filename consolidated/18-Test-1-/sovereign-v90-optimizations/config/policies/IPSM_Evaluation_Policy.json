@@ -1,0 +1,24 @@
+{
+  "policy_name": "IPSM_Runtime_Health_Evaluation",
+  "version": "1.0",
+  "description": "Defines the automatic thresholds and conditions for updating the 'system_status' based on real-time resource telemetry.",
+  "threshold_set": {
+    "DEGRADED": {
+      "trigger_conditions": [
+        {"metric": "resource_telemetry.cpu_load_percent", "operator": "GTE", "value": 75, "duration_s": 30},
+        {"metric": "resource_telemetry.memory_allocated_mb", "operator": "GTE_RATIO", "value": 0.85}
+      ],
+      "reset_conditions": [
+        {"metric": "resource_telemetry.cpu_load_percent", "operator": "LTE", "value": 60}
+      ]
+    },
+    "CRITICAL": {
+      "trigger_conditions": [
+        {"metric": "resource_telemetry.cpu_load_percent", "operator": "GTE", "value": 95, "duration_s": 10},
+        {"metric": "agent_management.total_supervised_processes", "operator": "EQ", "value": 0, "duration_s": 120, "note": "Loss of all supervised workloads."}
+      ],
+      "requires_manual_review": true
+    }
+  },
+  "evaluation_cadence_s": 5
+}

@@ -1,0 +1,32 @@
+{
+  "matrix_id": "STRUCTURAL_METRIC_CALCULATORS_V1",
+  "version": "1.0.0",
+  "description": "Defines the operational implementation details for structural cost metric calculations.",
+  "metrics_definition": {
+    "COMPUTATIONAL_COMPLEXITY_INDEX": {
+      "plugin": "complexity_analyzer_v3",
+      "parameters": {
+        "algorithm": "extended_cyclomatic_plus_mem",
+        "max_runtime_estimate_ms": 500
+      },
+      "baseline_config": {
+        "data_source": "CI_ARTIFACT_STORE",
+        "key_prefix": "complexity/index"
+      }
+    },
+    "AUDITABILITY_DEGRADATION_INDEX": {
+      "plugin": "telemetry_linter_v2",
+      "parameters": {
+        "required_annotations": ["@TelemetryPoint", "@Owner"],
+        "min_comment_density": 0.15
+      }
+    },
+    "DEPENDENCY_INERTIA_SCORE": {
+      "plugin": "dependency_graph_engine_v1",
+      "parameters": {
+        "scope": ["external", "internal_transitive"],
+        "max_fan_out": 10
+      }
+    }
+  }
+}

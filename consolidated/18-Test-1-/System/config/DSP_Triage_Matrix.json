@@ -1,0 +1,32 @@
+{
+  "description": "Defines the priority rules for mapping MIS payload metadata (Impact, Scope) to a simulation configuration key required by GTCM, implementing the Triage Rules Engine (TRE). Rules are processed sequentially by priority.",
+  "mapping_rules": [
+    {
+      "priority": 1,
+      "match_type": "ExactPair",
+      "impact": "critical",
+      "scope": "core",
+      "config_key": "high_critical"
+    },
+    {
+      "priority": 2,
+      "match_type": "ExactPair",
+      "impact": "critical",
+      "scope": "integration",
+      "config_key": "critical_integration"
+    },
+    {
+      "priority": 3,
+      "match_type": "ImpactFallback",
+      "impact_match": ["high", "critical"],
+      "config_key": "medium_high"
+    },
+    {
+      "priority": 4,
+      "match_type": "ImpactFallback",
+      "impact_match": ["medium"],
+      "config_key": "medium_default"
+    }
+  ],
+  "default_fallback_key": "low_default"
+}

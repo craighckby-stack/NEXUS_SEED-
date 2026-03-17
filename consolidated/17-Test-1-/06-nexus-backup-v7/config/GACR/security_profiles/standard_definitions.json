@@ -1,0 +1,13 @@
+{
+  "profileId": "SEC-P-HA-MFA-001",
+  "assuranceLevel": "High",
+  "description": "High Assurance Profile: Requires MFA Hardware Token + CRoT Derived Key for access.",
+  "mechanisms": [
+    {"type": "Primary", "definition": "MFA_Hardware_Token"},
+    {"type": "Secondary", "definition": "CRoT_Derived_Key"}
+  ],
+  "complianceMapping": [
+    "ISO27001:A.14.2.1",
+    "Internal-HARM-001"
+  ]
+}

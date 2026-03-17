@@ -1,0 +1,23 @@
+{
+  "manifest_id": "PRM-20240905-A1B2C3D4",
+  "manifest_version": "2.0.0",
+  "timestamp": "YYYY-MM-DDT15:00:00Z",
+  "status": "APPROVED",
+  "governance_snapshot_id": "[Governance State Snapshot version before failure]",
+  "failure_context": {
+    "dse_run_id": "[ID of failed DSE run]",
+    "tvcr_id": "[Corresponding TVCR ID]"
+  },
+  "failure_root_cause": "Axiomatic failure: Max Policy Adjustment Margin (MPAM) constraint breached due to external dependency shift.",
+  "approved_policy_adjustments": [
+    {
+      "adjustment_id": "ADJ-001",
+      "policy_module_id": "ACVD",
+      "policy_key_path": "VetoThresholds.MPAM.max_variance",
+      "old_value": 0.005,
+      "new_value": 0.008,
+      "justification_hash": "SHA256 of GAX approval memo"
+    }
+  ],
+  "execution_signature": "[Cryptographic Signature of GAX authorizing agent]"
+}

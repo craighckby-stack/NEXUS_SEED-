@@ -1,0 +1,27 @@
+{
+  "registry_version": "1.0.0",
+  "registry_id": "RollbackRegistry",
+  "description": "Catalogue of predefined, traceable system fallback mechanisms used by the Remediation Catalogue (DCM). This decouples high-level action sequences from specific reversion methodology details.",
+  "strategies": [
+    {
+      "strategy_code": "R-01_soft_rollback",
+      "target_type": "MODEL_SNAPSHOT",
+      "scope": "LOCAL_CONFIGURATION",
+      "parameters": {
+        "snapshot_source": "DCM_Primary_Store",
+        "snapshot_retention_days": 7
+      },
+      "audit_trail_required": true
+    },
+    {
+      "strategy_code": "R-02_hardware_reset",
+      "target_type": "INFRASTRUCTURE",
+      "scope": "NODE_GROUP",
+      "parameters": {
+        "dry_run_timeout_s": 60,
+        "parallel_limit": 5
+      },
+      "audit_trail_required": true
+    }
+  ]
+}

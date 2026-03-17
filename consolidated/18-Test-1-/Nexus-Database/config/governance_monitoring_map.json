@@ -1,0 +1,24 @@
+{
+  "schema_version": "GMM-V1.0",
+  "monitoring_agent_id": "GMA-941-RTM",
+  "policy_to_sensor_map": [
+    {
+      "policy_id": "PVL-101",
+      "trigger": "RESOURCE_OVERLOAD",
+      "sensor_source": "Telemetry/SystemLoad_L1",
+      "check_function": "IS_ABOVE_THRESHOLD",
+      "threshold_reference": "constraint_baselines.system_tolerance.adaptive_scaling_cap"
+    },
+    {
+      "policy_id": "PVL-202",
+      "trigger": "TRUST_DEVIATION_HIGH",
+      "sensor_source": "CTAL/TrustMetrics_Aggregated",
+      "check_function": "DEVIATION_FROM_MEAN",
+      "baseline_reference": "constraint_baselines.system_tolerance.minimum_viable_margin_epsilon"
+    }
+  ],
+  "runtime_metric_aggregation": {
+    "collection_frequency_ms": 500,
+    "max_buffer_size": 256
+  }
+}

@@ -1,0 +1,28 @@
+{
+    "description": "Configuration settings and operational parameters for the S09 Constraint Propagation Resolver (CPR) based on V2.0 Vector structure.",
+    "priority_mapping": {
+        "1": "CRITICAL_IMMEDIATE",
+        "5": "INFORMATIONAL_DEFERRED"
+    },
+    "complexity_mapping": {
+        "LOW_THRESHOLD": 0.35,
+        "MEDIUM_THRESHOLD": 0.70
+    },
+    "propagation_rules": {
+        "APPLY_CRITERIA": {
+            "min_stability_score": 0.3,
+            "required_priority_gte": 3
+        },
+        "QUARANTINE_CRITERIA": {
+            "required_justification": ["PVS", "TEMM"],
+            "max_stability_score": 0.65,
+            "min_complexity_rating": "MEDIUM"
+        }
+    },
+    "justification_source_definitions": {
+        "CSR": "Constraint State Register",
+        "ECVM": "Evolutionary Cycle Vector Matrix",
+        "TEMM": "Telemetry Monitoring Module",
+        "PVS": "Policy Violation Scanner"
+    }
+}

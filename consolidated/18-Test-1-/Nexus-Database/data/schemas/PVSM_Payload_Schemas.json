@@ -1,0 +1,26 @@
+{
+  "registry_id": "PSM_REG_1.0",
+  "description": "Definitive type and structural schemas for all PVSM input vectors.",
+  "schemas": {
+    "SystemIntegritySchema": {
+      "fields": {
+        "system_integrity": {"type": "float", "range": [0.0, 1.0], "required": true},
+        "resource_allocation": {"type": "integer", "min": 0, "required": true},
+        "resource_budget": {"type": "integer", "min": 0, "required": true}
+      }
+    },
+    "BoundaryValidationSchema": {
+      "fields": {
+        "tolerance_delta": {"type": "float", "positive": true, "precision": "E-9"},
+        "state_divergence": {"type": "float"},
+        "failure_threshold_epsilon": {"type": "float"}
+      }
+    },
+    "FlowControlSchema": {
+      "fields": {
+        "policy_chain": {"type": "array_of_strings", "min_length": 1},
+        "lock_configuration": {"type": "array_of_strings"}
+      }
+    }
+  }
+}

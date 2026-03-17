@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign-agi/governance_resilience_definition_manifest_schema.json",
+  "title": "Governance Resilience Definition Manifest (GRDM) Policy Schema",
+  "description": "Defines mandated recovery strategies based on stage ID and categorized failure types. This schema is critical for RTA Policy Constraint Resolution.",
+  "type": "object",
+  "properties": {
+    "manifest_version": {
+      "type": "string",
+      "description": "Version identifier for the attested manifest."
+    },
+    "default_strategy": {
+      "$ref": "#/definitions/RecoveryPolicy",
+      "description": "Policy applied if no specific vector match is found."
+    },
+    "policy_map": {
+      "type": "array",
+      "description": "List of specific failure vector mappings.",
+      "items": {
+        "type": "object",
+        "required": ["stage_id", "failure_vector", "policy"],
+        "properties": {
+          "stage_id": {
+            "type": "string",
+            "description": "The pipeline stage identifier (e.g., 'S3', 'GAX')."
+          },
+          "failure_vector": {
+            "type": "string",
+            "description": "Taxonomic failure classification (e.g., 'DATA_CORRUPTION', 'RESOURCE_EXHAUSTION')."
+          },
+          "min_severity": {
+            "type": "string",
+            "enum": ["L1", "L2", "L3"],
+            "description": "Minimum severity level required to trigger this policy."
+          },
+          "policy": {
+            "$ref": "#/definitions/RecoveryPolicy"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "RecoveryPolicy": {
+      "type": "object",
+      "required": ["strategy_type", "state_target"],
+      "properties": {
+        "strategy_type": {
+          "type": "string",
+          "enum": ["ROLLBACK_TO_LAST_COMMIT", "STATE_FREEZE_PAUSE", "HARD_REBOOT_FROM_ROOT"],
+          "description": "The specific mandated action type for the SGS Recovery Module."
+        },
+        "state_target": {
+          "type": "object",
+          "description": "Defines how the RST should be calculated based on the CISM snapshot.",
+          "required": ["checkpoint_identifier"],
+          "properties": {
+            "checkpoint_identifier": {
+              "type": "string",
+              "description": "E.g., 'LCC' (Last Certified Checkpoint), 'EPOCH_START', or specific state hash."
+            },
+            "lookback_depth_limit": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Optional: Defines how many steps/epochs back RTA is allowed to look."
+            }
+          }
+        }
+      }
+    }
+  }
+}

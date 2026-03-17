@@ -1,0 +1,19 @@
+{
+  "RegistryVersion": "v95.0.0",
+  "Description": "Centralized registry for defining mandatory cryptographic algorithms and standards referenced by Sovereign subsystems (e.g., SIPM, GSM, TVCR).",
+  "Protocols": {
+    "SGS/PQC-KEM-94B/ECDSA-P384": {
+      "Primary": "ECDSA-P384",
+      "PostQuantumCandidate": "KYBER768 (KEM)",
+      "MinimumKeyLength": 384,
+      "SecurityLevel": "High",
+      "Status": "Active"
+    },
+    "CRoT-I-SHA3-512": {
+      "Algorithm": "SHA3-512",
+      "OutputLengthBits": 512,
+      "CollisionResistanceLevel": "Extreme"
+    }
+  },
+  "RequiredAgilityPolicy": "AnnualReview"
+}

@@ -1,0 +1,107 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agi.sovereign/governance/GRDM_v2.0.json",
+  "title": "Governance Resilience Definition Manifest Schema (v2.0)",
+  "description": "Defines mandated policy boundaries, recovery targets, and consensus requirements for known failure vectors within the Sovereign AGI pipeline.",
+  "type": "object",
+  "properties": {
+    "manifest_id": {
+      "type": "string",
+      "description": "Unique identifier for this specific governance manifest instance (e.g., GRDM-Core-2024Q3)."
+    },
+    "version": {
+      "type": "string",
+      "description": "Schema version (Semantic Versioning expected, e.g., 2.0.1).",
+      "pattern": "^v?\\d+\\.\\d+(\\.\\d+)?$"
+    },
+    "default_policy": {
+      "type": "object",
+      "description": "Global policy fallback parameters.",
+      "properties": {
+        "rollback_level": {
+          "type": "string",
+          "enum": [
+            "S0_SYSTEM_RESET",
+            "LAST_COMMITTED_STATE",
+            "PREVIOUS_STABLE_RELEASE"
+          ],
+          "description": "Fallback state target identifier (must align with defined State Transition Graph IDs)."
+        },
+        "retry_max_attempts": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Maximum number of automated soft-retries allowed before policy execution."
+        },
+        "risk_assessment_timeout_ms": {
+          "type": "integer",
+          "minimum": 500,
+          "default": 5000,
+          "description": "Maximum time allowed for a Resilience Stability Test (RST) calculation before defaulting to IMMEDIATE_ROLLBACK."
+        }
+      },
+      "required": [
+        "rollback_level",
+        "retry_max_attempts"
+      ]
+    },
+    "failure_policies": {
+      "type": "array",
+      "description": "Specific recovery policies indexed by failure characteristics and pipeline stage.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "policy_name": {
+            "type": "string",
+            "description": "Human-readable name for the policy (e.g., Critical Planning Loop Divergence)."
+          },
+          "stage_id": {
+            "type": "string",
+            "description": "Pipeline stage identifier (e.g., S3_PLANNING).",
+            "pattern": "^S[0-9]+(_[A-Z0-9]+)?$"
+          },
+          "failure_vector_id": {
+            "type": "string",
+            "description": "Specific error classification ID. Must reference an external Failure Vector Taxonomy (e.g., FVT_MDRIFT_HIGH).",
+            "pattern": "^FVT_[A-Z0-9_]+$"
+          },
+          "mandated_rollback_target": {
+            "type": "string",
+            "description": "The target State ID for recovery commitment.",
+            "pattern": "^(S[0-9]+(_[A-Z0-9]+)?|LAST_COMMITTED_STATE)$"
+          },
+          "policy_attestation_threshold": {
+            "type": "number",
+            "description": "Minimum required GAX consensus score (0.0 to 1.0) to authorize the prescribed action.",
+            "default": 0.99,
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "on_failure_action": {
+            "type": "string",
+            "enum": [
+              "IMMEDIATE_ROLLBACK",
+              "ALERT_HUMAN_GOVERNANCE",
+              "RETRY_SAFE_MODE",
+              "SIH_CORE_HALT",
+              "DEGRADED_OPERATION"
+            ],
+            "description": "Action executed after Resilience Stability Test (RST) calculation."
+          }
+        },
+        "required": [
+          "stage_id",
+          "failure_vector_id",
+          "mandated_rollback_target",
+          "on_failure_action",
+          "policy_name"
+        ]
+      }
+    }
+  },
+  "required": [
+    "manifest_id",
+    "version",
+    "default_policy",
+    "failure_policies"
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "model_id": "STRUCTURAL_COST_MODEL_V2",
+  "version": "2.0.0",
+  "effective_date": "2024-07-25T00:00:00Z",
+  "global_policy": {
+    "violation_threshold": 0.15,
+    "aggregation_method": "WEIGHTED_SUM",
+    "evaluation_mode": "STRICT_HIERARCHICAL",
+    "constraint_enforcement": "PRE_MERGE_VALIDATION",
+    "description": "Rejection if aggregated weighted score exceeds threshold, OR if any P1 metric fails its absolute constraint."
+  },
+  "metrics": [
+    {
+      "metric_id": "COMPUTATIONAL_COMPLEXITY_INDEX",
+      "weight": 0.40,
+      "priority": "P1_CRITICAL",
+      "constraint": {
+        "type": "RELATIVE_MAX_INCREASE",
+        "value": 0.05,
+        "unit": "ratio_increase",
+        "baseline_source": "previous_successful_commit"
+      },
+      "description": "Quantifies algorithmic cost increase (e.g., cyclomatic complexity, memory footprint delta) relative to baseline."
+    },
+    {
+      "metric_id": "AUDITABILITY_DEGRADATION",
+      "weight": 0.30,
+      "priority": "P1_CRITICAL",
+      "constraint": {
+        "type": "ABSOLUTE_MAX_CHANGE",
+        "value": -0.05,
+        "unit": "ratio_change",
+        "direction": "negative_change_only"
+      },
+      "description": "Ensures transparency. Decrease (negative change) in the auditability score relative to baseline must not exceed this ratio. Increased weight from 0.25."
+    },
+    {
+      "metric_id": "DEPENDENCY_INERTIA_SCORE",
+      "weight": 0.20,
+      "priority": "P2_HIGH",
+      "constraint": {
+        "type": "ABSOLUTE_MAX",
+        "value": 0.80,
+        "unit": "score"
+      },
+      "description": "Measures future maintenance debt, external dependency friction, and internal coupling. Weight decreased from 0.35."
+    },
+    {
+      "metric_id": "EVOLUTION_FRICTION_PENALTY",
+      "weight": 0.10,
+      "priority": "P2_HIGH",
+      "is_active": true,
+      "constraint": {
+        "type": "RELATIVE_MAX_CHANGE",
+        "value": 0.10,
+        "unit": "penalty_ratio"
+      },
+      "description": "Tracks structural entropy (disorder, mutation rate) relative to codebase state machine history. Activated metric with dedicated weight."
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+# GTCM_Transition_Policy.yaml: Defines the allowed state transitions and required preconditions for all Governance Targets and Configuration Management (GTCM) states.
+schemaVersion: 1.0
+policyName: GTCM_Strict_Policy_v1
+
+# List of all available states referenced in the GTCM_State_Schema
+states:
+  - PENDING_APPROVAL
+  - ACTIVE
+  - PAUSED
+  - COMPLETED_SUCCESS
+  - COMPLETED_FAILED
+  - SUPERSEDED
+  - REVIEW_REQUIRED
+
+transitions:
+  # Defines the allowed target states and required preconditions/hooks for transition.
+  PENDING_APPROVAL:
+    - target: ACTIVE
+      precondition: ["Requires_Security_Approval", "Requires_Resource_Allocation_Confirm"]
+      on_success: "Log_Mandate_Activation"
+    - target: SUPERSEDED
+      precondition: ["Mandate_Conflict_High_Priority"]
+
+  ACTIVE:
+    - target: PAUSED
+      precondition: ["Requires_Human_Intervention", "Pause_Reason_Recorded"]
+    - target: COMPLETED_SUCCESS
+      precondition: ["Metrics_Target_Achieved", "Verification_Check_Passed"]
+    - target: COMPLETED_FAILED
+      precondition: ["Resource_Exhaustion", "Runtime_Violation_Limit"]
+    - target: REVIEW_REQUIRED
+      precondition: ["Periodic_Audit_Flag", "Threshold_Deviation"]
+
+  PAUSED:
+    - target: ACTIVE
+      precondition: ["Resolution_Confirmed", "Human_Approval_Received"]
+    - target: SUPERSEDED
+
+  REVIEW_REQUIRED:
+    - target: ACTIVE
+      precondition: ["Remediation_Plan_Deployed"]
+    - target: COMPLETED_FAILED
+      precondition: ["Resolution_Failure_Limit"]
+    - target: SUPERSEDED
+
+  # Terminal states have no further outgoing transitions defined by policy.
+  COMPLETED_SUCCESS: []
+  COMPLETED_FAILED: []
+  SUPERSEDED: []

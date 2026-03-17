@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agi.sovereign/config/governance_action_playbook_schema.json",
+  "title": "Governance Action Playbook Definition Schema",
+  "description": "Schema defining the structure and validation for executable action playbooks referenced by FSL Policies, ensuring remediation steps are clearly defined and verifiable.",
+  "type": "object",
+  "required": ["playbooks", "version"],
+  "$defs": {
+    "ActionStep": {
+      "type": "object",
+      "required": ["step_id", "module", "command"],
+      "properties": {
+        "step_id": {"type": "string", "description": "Unique identifier for this step within the playbook."},
+        "module": {"type": "string", "description": "The execution module responsible for running this step (e.g., system.rollbacker, network.quarantine)."},
+        "command": {"type": "string", "description": "The specific function or command to execute."},
+        "arguments": {"type": "object", "description": "JSON object defining required command arguments.", "default": {}},
+        "timeout_seconds": {"type": "integer", "minimum": 1, "default": 60}
+      }
+    },
+    "PlaybookDefinition": {
+      "type": "object",
+      "required": ["action_id", "name", "priority", "steps"],
+      "properties": {
+        "action_id": {
+          "$ref": "./governance_flag_policy_schema.json#/$defs/ActionPlanIdentifier",
+          "description": "The unique ID referencing this playbook from a governance policy."
+        },
+        "name": {"type": "string"},
+        "description": {"type": "string"},
+        "idempotency_guarantee": {
+          "type": "boolean",
+          "default": true,
+          "description": "If true, executing this playbook multiple times yields the same result state."
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Execution priority (lower is more critical)."
+        },
+        "steps": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/ActionStep"},
+          "description": "Ordered list of atomic steps to execute."
+        }
+      }
+    }
+  },
+  "properties": {
+    "version": {
+        "type": "string",
+        "description": "Version of the playbook set."
+    },
+    "playbooks": {
+      "type": "array",
+      "description": "List of defined operational playbooks.",
+      "items": {"$ref": "#/$defs/PlaybookDefinition"}
+    }
+  }
+}

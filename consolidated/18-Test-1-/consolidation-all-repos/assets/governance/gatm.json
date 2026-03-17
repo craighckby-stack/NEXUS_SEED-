@@ -1,0 +1,67 @@
+{
+  "schema_version": "3.0.0",
+  "data_version": "V95.4-A",
+  "description": "Normalized Governance Agent Threshold Manifest (GATM) v3.0. Defines operational policy targets, separated into governing constants and time-bound metrics, leveraging hierarchical categorization and a unified metrics structure for improved indexing and operational retrieval efficiency. Policy linkage utilizes standardized Policy IDs (P_*) referencing the GPDR.",
+  "governance_constants": {
+    "StateTransition_MandatoryReviewRatio": {
+      "value": 0.95,
+      "type": "RATIO",
+      "description": "Ratio (0.0-1.0) above which transition requires mandatory immediate governance review and audit logging.",
+      "policy_id": "P_AUDIT_REVIEW_BLOCK"
+    }
+  },
+  "metric_policy_targets": [
+    {
+      "target_id": "TGT_001_LATENCY_VETO",
+      "metric_id": "S2_VetoGate_MaxLatency",
+      "type": "LATENCY",
+      "domain": "execution_pathways",
+      "threshold": 50,
+      "unit": "ms",
+      "criticality": "HIGH",
+      "failure_policy": "P_HALT_AND_REPORT"
+    },
+    {
+      "target_id": "TGT_002_LATENCY_FINALI",
+      "metric_id": "S7_FinalityGate_MaxLatency",
+      "type": "LATENCY",
+      "domain": "execution_pathways",
+      "threshold": 150,
+      "unit": "ms",
+      "criticality": "MEDIUM",
+      "failure_policy": "P_REPORT_AND_DEGRADE"
+    },
+    {
+      "target_id": "TGT_003_LATENCY_COMMIT",
+      "metric_id": "S9_Commit_Timeout",
+      "type": "LATENCY",
+      "domain": "execution_pathways",
+      "threshold": 100,
+      "unit": "ms",
+      "criticality": "HIGH",
+      "failure_policy": "P_ROLLBACK_AND_ALERT"
+    },
+    {
+      "target_id": "TGT_004_LATENCY_ST",
+      "metric_id": "StateTransition_MaxDuration",
+      "type": "LATENCY",
+      "domain": "operational_health",
+      "threshold": 1000,
+      "unit": "ms",
+      "criticality": "MEDIUM",
+      "failure_policy": "P_TIMEOUT_AND_REVERT"
+    },
+    {
+      "target_id": "TGT_005_FREQUENCY_RRP",
+      "metric_id": "RRP_MaximumFrequency",
+      "type": "FREQUENCY",
+      "domain": "governance_cadence",
+      "threshold": 5,
+      "unit": "count",
+      "criticality": "LOW",
+      "enforcement_window": "7d",
+      "failure_policy": "P_RATE_LIMIT_QUEUE",
+      "description": "Limits Requests for Resource Provisioning (RRP) over a 7-day period."
+    }
+  ]
+}

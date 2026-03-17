@@ -1,0 +1,14 @@
+{
+  "source_id": "RSL-Primary-001",
+  "description": "Primary configuration for accessing Root Command Register (RCR) Revocation Status Lists (RSLs).",
+  "list_type": "DistributedMerkleProof",
+  "endpoint": "https://gov.trust/api/v4/rcr_rsl",
+  "fetch_policy": {
+    "frequency_ms": 60000,
+    "integrity_check_key_id": "CTG_Root_Key_v2"
+  },
+  "caching_policy": {
+    "max_age_s": 300,
+    "local_persistence_enabled": true
+  }
+}

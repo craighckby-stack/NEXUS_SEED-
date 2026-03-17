@@ -1,0 +1,36 @@
+{
+  "heuristic_id": "H_TEDS_V4_DYNAMIC_PROFILE_SELECTOR",
+  "version": "1.0",
+  "default_fallback": "adaptive_autonomy",
+  "rules": [
+    {
+      "rule_id": "R001_Evolutionary_Task",
+      "trigger_context": {
+        "task_type": ["code_generation", "code_refactoring", "dependency_management"],
+        "estimated_complexity": "high"
+      },
+      "assigned_profile": "critical_task",
+      "priority": 90
+    },
+    {
+      "rule_id": "R002_Routine_Scaffolding",
+      "trigger_context": {
+        "task_type": ["file_creation", "logging_analysis"],
+        "estimated_complexity": "low"
+      },
+      "assigned_profile": "adaptive_autonomy",
+      "priority": 50
+    },
+    {
+      "rule_id": "R003_High_Load_Mitigation",
+      "trigger_context": {
+        "system_load_avg": "> 80%",
+        "task_type": ["*"]
+      },
+      "assigned_profile": "adaptive_autonomy",
+      "override_if_not_critical": true,
+      "priority": 100
+    }
+  ],
+  "runtime_monitoring_interval_ms": 1000
+}

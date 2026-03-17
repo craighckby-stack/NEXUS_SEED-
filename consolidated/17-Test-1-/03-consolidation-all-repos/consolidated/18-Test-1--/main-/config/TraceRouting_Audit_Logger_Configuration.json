@@ -1,0 +1,24 @@
+{
+  "audit_service_name": "TraceRoutingAuditLogger",
+  "log_level": "INFO",
+  "data_retention_days": 90,
+  "indexing_keys": ["TraceID", "TargetService", "RouteDecision", "DecisionTimestamp"],
+  "sinks": [
+    {
+      "type": "Kafka",
+      "topic": "audit_l3_trace_routing_events",
+      "format": "AVRO_COMPRESSED"
+    },
+    {
+      "type": "CloudStorage",
+      "bucket": "sovereign-audit-logs-L3",
+      "frequency": "HOURLY_BATCH"
+    }
+  ],
+  "monitored_events": [
+    "ROUTE_SUCCESS_P1",
+    "ROUTE_FAILURE_P1",
+    "ROUTE_FAILURE_ALL",
+    "FALLBACK_ARCHIVE"
+  ]
+}

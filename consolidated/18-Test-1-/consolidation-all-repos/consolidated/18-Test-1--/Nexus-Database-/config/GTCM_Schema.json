@@ -1,0 +1,128 @@
+{
+  "schemaName": "GTCM_CoreDefinitionSchema",
+  "version": "2.1.0",
+  "description": "Defines the mandatory structure for all Global Task and Configuration Management (GTCM) unit entries, enforcing strict validation and dependency rules.",
+  "metaData": {
+    "compatibility": [
+      "v94.0",
+      "v94.1"
+    ],
+    "evolutionStrategy": "StrictValidationEnforced"
+  },
+  "definitions": {
+    "TaskExecutionUnit": {
+      "type": "object",
+      "properties": {
+        "unitId": {
+          "type": "string",
+          "description": "Unique identifier for the TEU (Task Execution Unit)."
+        },
+        "handlerPath": {
+          "type": "string",
+          "description": "Pointer to the executable logic (Module.Method format)."
+        },
+        "triggerType": {
+          "type": "string",
+          "enum": [
+            "EVENT",
+            "CRON",
+            "MANUAL",
+            "DEPENDENCY"
+          ],
+          "description": "How the unit is activated."
+        },
+        "contextFilter": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "DEVELOPMENT",
+              "PRODUCTION",
+              "SIMULATION",
+              "DEBUG"
+            ]
+          },
+          "description": "Contexts in which this unit is allowed to run."
+        },
+        "inputSchemaRef": {
+          "$ref": "#/definitions/SchemaReference",
+          "description": "Reference to the validation schema for runtime inputs."
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DependencyEntry"
+          },
+          "description": "List of prerequisite TaskExecutionUnits (for DAG scheduling)."
+        },
+        "configuration": {
+          "type": "object",
+          "description": "Specific parameters overriding global configuration."
+        }
+      },
+      "required": [
+        "unitId",
+        "handlerPath",
+        "triggerType",
+        "inputSchemaRef"
+      ]
+    },
+    "SchemaReference": {
+      "type": "string",
+      "description": "Internal URI or path to an external JSON schema definition."
+    },
+    "DependencyEntry": {
+      "type": "object",
+      "properties": {
+        "unitId": {
+          "type": "string"
+        },
+        "versionRange": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$|^\\*$",
+          "description": "Semantic version constraint for the dependency unit."
+        },
+        "failStrategy": {
+          "type": "string",
+          "enum": [
+            "HARD_FAIL",
+            "SOFT_CONTINUE"
+          ],
+          "default": "HARD_FAIL"
+        }
+      },
+      "required": [
+        "unitId"
+      ]
+    }
+  },
+  "systemTasks": {
+    "CORE_BOOTSTRAP_01": {
+      "unitId": "CORE_BOOTSTRAP_01",
+      "handlerPath": "System.CoreBootstrapper.init",
+      "triggerType": "MANUAL",
+      "contextFilter": [
+        "PRODUCTION",
+        "DEVELOPMENT"
+      ],
+      "inputSchemaRef": "schemas/runtime/Empty.json"
+    },
+    "DATA_REFLECT_STATE_10": {
+      "unitId": "DATA_REFLECT_STATE_10",
+      "handlerPath": "Data.Reflector.execute",
+      "triggerType": "CRON",
+      "contextFilter": [
+        "PRODUCTION",
+        "SIMULATION"
+      ],
+      "inputSchemaRef": "schemas/runtime/ReflectionPayload.json",
+      "dependencies": [
+        {
+          "unitId": "CORE_BOOTSTRAP_01",
+          "versionRange": "2.0.0",
+          "failStrategy": "HARD_FAIL"
+        }
+      ]
+    }
+  }
+}

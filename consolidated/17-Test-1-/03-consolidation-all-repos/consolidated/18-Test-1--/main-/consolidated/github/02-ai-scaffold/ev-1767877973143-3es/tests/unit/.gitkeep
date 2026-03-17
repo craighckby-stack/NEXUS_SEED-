@@ -1,0 +1,49 @@
+#ifndef UNIT_TEST_OPTIMIZATION_H
+#define UNIT_TEST_OPTIMIZATION_H
+
+// Evolved code for tests/unit/.gitkeep: Highly optimized assertion utility (C/C++)
+
+#include <stdio.h>
+#include <stdlib.h>
+
+// --- Optimization: Branch Prediction Hinting ---
+// Ensures the common path (assertion passes) is executed without pipeline stalls.
+#if defined(__GNUC__) || defined(__clang__)
+#define LIKELY(x)   __builtin_expect(!!(x), 1)
+#define UNLIKELY(x) __builtin_expect(!!(x), 0)
+#else
+#define LIKELY(x)   (x)
+#define UNLIKELY(x) (x)
+#endif
+
+/**
+ * @brief Optimized assertion macro.
+ * Executes fast path if the condition holds. On failure, logs details and exits.
+ * Uses UNLIKELY for maximum speed when the test passes.
+ */
+#define OPT_ASSERT(condition) \
+    do { \
+        if (UNLIKELY(!(condition))) { \
+            fprintf(stderr, "FAIL: %s:%d: %s\n", __FILE__, __LINE__, #condition); \
+            fflush(stderr); \
+            exit(1); \
+        } \
+    } while (0)
+
+// --- Optimization: Zero-overhead/Release-mode fast crash ---
+// If NDEBUG is defined (release build simulation), this forces an immediate, unrecoverable crash
+// without I/O or function calls, useful for ensuring critical assumptions hold in production checks
+// or extremely fast test harnesses.
+#ifdef NDEBUG
+#define ASSERT_CRITICAL(condition) \
+    do { \
+        if (UNLIKELY(!(condition))) { \
+            /* Force segmentation fault / immediate crash (most optimized way to halt) */ \
+            *(volatile int*)0 = 0; \
+        } \
+    } while (0)
+#else
+#define ASSERT_CRITICAL OPT_ASSERT
+#endif
+
+#endif // UNIT_TEST_OPTIMIZATION_H

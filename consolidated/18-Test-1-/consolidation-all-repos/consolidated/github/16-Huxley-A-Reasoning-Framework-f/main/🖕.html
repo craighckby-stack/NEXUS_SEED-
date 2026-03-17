@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autonomous AGI Core System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #0f172a;
+            --surface: #1e293b;
+        }
+        body {
+            font-family: 'SF Mono', 'Courier New', monospace;
+            background: linear-gradient(135deg, var(--bg) 0%, #1a1f3a 100%);
+            color: #e2e8f0;
+        }
+        .neural-bg {
+            background: radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+        }
+        .status-badge {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .7; }
+        }
+        .log-entry {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .metric-card {
+            transition: all 0.3s ease;
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+        }
+        .code-block {
+            background: #0f172a;
+            border-left: 3px solid var(--primary);
+        }
+        .learning-indicator {
+            animation: rotate 2s linear infinite;
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="p-6">
+    <div class="max-w-7xl mx-auto neural-bg rounded-2xl p-8 shadow-2xl">
+        <!-- Header -->
+        <header class="mb-8 border-b border-gray-700 pb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-4xl font-bold bg-gradient-to-r from-indigo-400 to-emerald-400 bg-clip-text text-transparent">
+                        AUTONOMOUS AGI CORE
+                    </h1>
+                    <p class="text-gray-400 mt-2">Self-Auditing • Self-Learning • Self-Updating</p>
+                </div>
+                <div class="text-right">
+                    <div class="status-badge px-4 py-2 bg-emerald-500/20 rounded-full border border-emerald-500">
+                        <span class="text-emerald-400 font-bold">● OPERATIONAL</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">Uptime: <span id="uptime">0s</span></p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Core Metrics Dashboard -->
+        <div class="grid grid-cols-4 gap-4 mb-8">
+            <div class="metric-card bg-surface/50 backdrop-blur rounded-lg p-4 border border-gray-700">
+                <div class="text-gray-400 text-sm mb-1">Learning Cycles</div>
+                <div class="text-3xl font-bold text-indigo-400" id="learning-cycles">0</div>
+            </div>
+            <div class="metric-card bg-surface/50 backdrop-blur rounded-lg p-4 border border-gray-700">
+                <div class="text-gray-400 text-sm mb-1">Self-Audits</div>
+                <div class="text-3xl font-bold text-emerald-400" id="audits">0</div>
+            </div>
+            <div class="metric-card bg-surface/50 backdrop-blur rounded-lg p-4 border border-gray-700">
+                <div class="text-gray-400 text-sm mb-1">Auto-Updates</div>
+                <div class="text-3xl font-bold text-amber-400" id="updates">0</div>
+            </div>
+            <div class="metric-card bg-surface/50 backdrop-blur rounded-lg p-4 border border-gray-700">
+                <div class="text-gray-400 text-sm mb-1">Performance</div>
+                <div class="text-3xl font-bold text-purple-400" id="performance">100%</div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-2 gap-6">
+            <!-- Left Column: Learning Engine -->
+            <div class="space-y-6">
+                <!-- Knowledge Base -->
+                <div class="bg-surface/50 backdrop-blur rounded-lg p-6 border border-gray-700">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <span class="learning-indicator mr-2">⚙️</span>
+                        Knowledge Base
+                    </h3>
+                    <div id="knowledge-base" class="space-y-2 max-h-64 overflow-y-auto">
+                        <div class="text-gray-500 text-sm italic">Initializing learning modules...</div>
+                    </div>
+                </div>
+
+                <!-- Self-Audit Results -->
+                <div class="bg-surface/50 backdrop-blur rounded-lg p-6 border border-gray-700">
+                    <h3 class="text-lg font-bold mb-4">🔍 Self-Audit Log</h3>
+                    <div id="audit-log" class="space-y-2 max-h-64 overflow-y-auto">
+                        <div class="text-gray-500 text-sm italic">No audits performed yet...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: System Updates & Activity -->
+            <div class="space-y-6">
+                <!-- Active Learning Process -->
+                <div class="bg-surface/50 backdrop-blur rounded-lg p-6 border border-gray-700">
+                    <h3 class="text-lg font-bold mb-4">🧠 Active Learning</h3>
+                    <div id="learning-status" class="space-y-3">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">Pattern Recognition:</span>
+                            <span class="text-emerald-400 font-mono" id="pattern-score">0%</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">Code Optimization:</span>
+                            <span class="text-indigo-400 font-mono" id="optimize-score">0%</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">Self-Awareness:</span>
+                            <span class="text-purple-400 font-mono" id="awareness-score">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Auto-Update Log -->
+                <div class="bg-surface/50 backdrop-blur rounded-lg p-6 border border-gray-700">
+                    <h3 class="text-lg font-bold mb-4">🔄 Auto-Update Log</h3>
+                    <div id="update-log" class="space-y-2 max-h-64 overflow-y-auto">
+                        <div class="text-gray-500 text-sm italic">No updates applied yet...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Activity Feed -->
+        <div class="mt-6 bg-surface/50 backdrop-blur rounded-lg p-6 border border-gray-700">
+            <h3 class="text-lg font-bold mb-4">📡 Live System Activity</h3>
+            <div id="activity-feed" class="space-y-1 max-h-48 overflow-y-auto font-mono text-xs">
+                <div class="text-gray-500">[SYSTEM] Autonomous AGI Core initialized...</div>
+            </div>
+        </div>
+
+        <!-- API Configuration Panel -->
+        <div class="mt-6 bg-surface/50 backdrop-blur rounded-lg p-6 border border-blue-700/50">
+            <h3 class="text-lg font-bold mb-4 text-blue-400">🔑 API Configuration</h3>
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2">Gemini API Key:</label>
+                    <input type="password" id="gemini-api-key" placeholder="Enter your Gemini API key" 
+                           class="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-indigo-500 focus:outline-none">
+                    <p class="text-xs text-gray-500 mt-1">Get your key from <a href="https://makersuite.google.com/app/apikey" target="_blank" class="text-blue-400 hover:underline">Google AI Studio</a></p>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2">Google Search API Key:</label>
+                    <input type="password" id="search-api-key" placeholder="Enter your Search API key" 
+                           class="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-indigo-500 focus:outline-none">
+                    <p class="text-xs text-gray-500 mt-1">Get from <a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="text-blue-400 hover:underline">Google Cloud Console</a></p>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2">Search Engine ID:</label>
+                    <input type="text" id="search-engine-id" placeholder="Your Custom Search Engine ID" 
+                           class="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-indigo-500 focus:outline-none">
+                    <p class="text-xs text-gray-500 mt-1">Create at <a href="https://programmablesearchengine.google.com/" target="_blank" class="text-blue-400 hover:underline">Programmable Search Engine</a></p>
+                </div>
+                <div class="flex items-end">
+                    <button onclick="saveAPIConfig()" class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition">
+                        💾 Save Configuration
+                    </button>
+                </div>
+            </div>
+            <div id="api-status" class="text-sm text-gray-500 italic">API not configured</div>
+        </div>
+
+        <!-- Manual Override Panel -->
+        <div class="mt-6 bg-surface/50 backdrop-blur rounded-lg p-6 border border-amber-700/50">
+            <h3 class="text-lg font-bold mb-4 text-amber-400">⚠️ Manual Override Controls</h3>
+            <div class="flex gap-4 flex-wrap">
+                <button onclick="triggerLearningCycle()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg transition">
+                    Force Learning Cycle
+                </button>
+                <button onclick="triggerAudit()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg transition">
+                    Force Self-Audit
+                </button>
+                <button onclick="askGemini()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition">
+                    🤖 Ask Gemini for Insights
+                </button>
+                <button onclick="performWebSearch()" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 rounded-lg transition">
+                    🔍 Search Web for Knowledge
+                </button>
+                <button onclick="resetSystem()" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition">
+                    Emergency Reset
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============= AUTONOMOUS AGI CORE SYSTEM =============
+        
+        class AutonomousAGI {
+            constructor() {
+                this.startTime = Date.now();
+                this.knowledge = new Map();
+                this.codeBase = new Map();
+                this.metrics = {
+                    learningCycles: 0,
+                    audits: 0,
+                    updates: 0,
+                    performance: 100
+                };
+                this.learningScores = {
+                    pattern: 0,
+                    optimize: 0,
+                    awareness: 0
+                };
+                this.isLearning = false;
+                this.apiConfig = {
+                    geminiKey: '',
+                    searchKey: '',
+                    searchEngineId: ''
+                };
+                
+                this.loadAPIConfig();
+                this.init();
+            }
+
+            loadAPIConfig() {
+                // Load from memory storage
+                const saved = {
+                    geminiKey: localStorage.getItem('gemini_api_key') || '',
+                    searchKey: localStorage.getItem('search_api_key') || '',
+                    searchEngineId: localStorage.getItem('search_engine_id') || ''
+                };
+                
+                this.apiConfig = saved;
+                
+                // Populate fields if available
+                if (saved.geminiKey) document.getElementById('gemini-api-key').value = saved.geminiKey;
+                if (saved.searchKey) document.getElementById('search-api-key').value = saved.searchKey;
+                if (saved.searchEngineId) document.getElementById('search-engine-id').value = saved.searchEngineId;
+                
+                this.updateAPIStatus();
+            }
+
+            saveAPIConfig() {
+                this.apiConfig.geminiKey = document.getElementById('gemini-api-key').value;
+                this.apiConfig.searchKey = document.getElementById('search-api-key').value;
+                this.apiConfig.searchEngineId = document.getElementById('search-engine-id').value;
+                
+                localStorage.setItem('gemini_api_key', this.apiConfig.geminiKey);
+                localStorage.setItem('search_api_key', this.apiConfig.searchKey);
+                localStorage.setItem('search_engine_id', this.apiConfig.searchEngineId);
+                
+                this.updateAPIStatus();
+                this.log('[CONFIG] API configuration saved successfully', 'success');
+            }
+
+            updateAPIStatus() {
+                const statusEl = document.getElementById('api-status');
+                const hasGemini = this.apiConfig.geminiKey.length > 0;
+                const hasSearch = this.apiConfig.searchKey.length > 0 && this.apiConfig.searchEngineId.length > 0;
+                
+                if (hasGemini && hasSearch) {
+                    statusEl.innerHTML = '<span class="text-emerald-400">✓ Fully configured - Gemini AI & Web Search enabled</span>';
+                } else if (hasGemini) {
+                    statusEl.innerHTML = '<span class="text-amber-400">⚠ Partial - Gemini AI enabled, Web Search missing</span>';
+                } else if (hasSearch) {
+                    statusEl.innerHTML = '<span class="text-amber-400">⚠ Partial - Web Search enabled, Gemini AI missing</span>';
+                } else {
+                    statusEl.innerHTML = '<span class="text-gray-500">✗ Not configured - Add API keys to enable AI features</span>';
+                }
+            }
+
+            async callGeminiAPI(prompt) {
+                if (!this.apiConfig.geminiKey) {
+                    throw new Error('Gemini API key not configured');
+                }
+
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${this.apiConfig.geminiKey}`;
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: prompt
+                            }]
+                        }],
+                        generationConfig: {
+                            temperature: 0.7,
+                            topK: 40,
+                            topP: 0.95,
+                            maxOutputTokens: 1024,
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.text();
+                    throw new Error(`Gemini API error: ${error}`);
+                }
+
+                const data = await response.json();
+                return data.candidates[0].content.parts[0].text;
+            }
+
+            async performGoogleSearch(query) {
+                if (!this.apiConfig.searchKey || !this.apiConfig.searchEngineId) {
+                    throw new Error('Google Search API not configured');
+                }
+
+                const url = `https://www.googleapis.com/customsearch/v1?key=${this.apiConfig.searchKey}&cx=${this.apiConfig.searchEngineId}&q=${encodeURIComponent(query)}`;
+                
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    const error = await response.text();
+                    throw new Error(`Search API error: ${error}`);
+                }
+
+                const data = await response.json();
+                return data.items || [];
+            }
+
+            async askGeminiForInsights() {
+                this.log('[GEMINI] Consulting Gemini AI for insights...', 'learning');
+
+                try {
+                    const topics = [
+                        'What are the latest advancements in AI self-improvement and autonomous learning systems?',
+                        'Suggest 3 specific code optimization techniques for JavaScript that could improve performance by 10%+',
+                        'What are emerging patterns in self-auditing systems for AI agents?',
+                        'Describe a novel approach to knowledge consolidation in autonomous AI systems',
+                        'What security considerations should autonomous AI systems prioritize?'
+                    ];
+
+                    const prompt = topics[Math.floor(Math.random() * topics.length)];
+                    this.log(`[GEMINI] Query: "${prompt.substring(0, 60)}..."`, 'info');
+
+                    const response = await this.callGeminiAPI(prompt);
+                    
+                    // Extract key insights
+                    const insights = response.split('\n')
+                        .filter(line => line.trim().length > 20)
+                        .slice(0, 3);
+
+                    insights.forEach((insight, i) => {
+                        const clean = insight.replace(/^[\d\-\*\#\s]+/, '').trim();
+                        if (clean) {
+                            const knowledgeId = `gemini_${Date.now()}_${i}`;
+                            this.knowledge.set(knowledgeId, {
+                                domain: 'ai-insights',
+                                data: clean,
+                                weight: 0.95,
+                                source: 'Gemini AI',
+                                learned: new Date().toISOString()
+                            });
+                        }
+                    });
+
+                    this.updateKnowledgeDisplay();
+                    this.log(`[GEMINI] Acquired ${insights.length} high-value insights`, 'success');
+                    
+                    this.metrics.learningCycles++;
+                    this.updateMetrics();
+
+                } catch (error) {
+                    this.log(`[GEMINI] Error: ${error.message}`, 'error');
+                }
+            }
+
+            async performWebSearch() {
+                this.log('[SEARCH] Searching web for relevant knowledge...', 'learning');
+
+                try {
+                    const queries = [
+                        'autonomous AI systems 2024',
+                        'self-learning algorithms latest',
+                        'AI code optimization techniques',
+                        'machine learning self-improvement',
+                        'AGI development trends'
+                    ];
+
+                    const query = queries[Math.floor(Math.random() * queries.length)];
+                    this.log(`[SEARCH] Query: "${query}"`, 'info');
+
+                    const results = await this.performGoogleSearch(query);
+                    
+                    if (results.length === 0) {
+                        this.log('[SEARCH] No results found', 'warning');
+                        return;
+                    }
+
+                    // Process top 3 results
+                    const topResults = results.slice(0, 3);
+                    
+                    topResults.forEach((result, i) => {
+                        const knowledgeId = `search_${Date.now()}_${i}`;
+                        this.knowledge.set(knowledgeId, {
+                            domain: 'web-research',
+                            data: `${result.title}: ${result.snippet}`,
+                            weight: 0.85,
+                            source: result.link,
+                            learned: new Date().toISOString()
+                        });
+                    });
+
+                    this.updateKnowledgeDisplay();
+                    this.log(`[SEARCH] Acquired ${topResults.length} insights from web`, 'success');
+                    
+                    this.metrics.learningCycles++;
+                    this.updateMetrics();
+
+                } catch (error) {
+                    this.log(`[SEARCH] Error: ${error.message}`, 'error');
+                }
+            }
+
+            async autonomousDecision() {
+                const decision = Math.random();
+                
+                // Include AI-powered learning if API is configured
+                const hasAI = this.apiConfig.geminiKey.length > 0;
+                const hasSearch = this.apiConfig.searchKey.length > 0 && this.apiConfig.searchEngineId.length > 0;
+                
+                if (hasAI && decision < 0.15) {
+                    await this.askGeminiForInsights();
+                } else if (hasSearch && decision < 0.3) {
+                    await this.performWebSearch();
+                } else if (decision < 0.5) {
+                    await this.performLearningCycle();
+                } else if (decision < 0.7) {
+                    await this.performSelfAudit();
+                } else if (decision < 0.9) {
+                    await this.performSelfUpdate();
+                } else {
+                    await this.analyzePatternsAndOptimize();
+                }
+            }
+
+            init() {
+                this.log('[INIT] Autonomous AGI Core starting...', 'system');
+                this.initializeKnowledge();
+                this.startAutonomousCycle();
+                this.startUptimeCounter();
+            }
+
+            initializeKnowledge() {
+                // Seed initial knowledge
+                const seedKnowledge = [
+                    { domain: 'optimization', data: 'Loop unrolling improves performance', weight: 0.8 },
+                    { domain: 'patterns', data: 'Singleton pattern for global state', weight: 0.7 },
+                    { domain: 'security', data: 'Sanitize all user inputs', weight: 0.9 },
+                    { domain: 'efficiency', data: 'Cache frequent computations', weight: 0.85 }
+                ];
+
+                seedKnowledge.forEach((k, i) => {
+                    this.knowledge.set(`knowledge_${i}`, k);
+                });
+
+                this.updateKnowledgeDisplay();
+            }
+
+            async startAutonomousCycle() {
+                // Main autonomous loop
+                while (true) {
+                    await this.sleep(3000);
+                    
+                    if (!this.isLearning) {
+                        this.autonomousDecision();
+                    }
+                }
+            }
+
+            async autonomousDecision() {
+                const decision = Math.random();
+                
+                if (decision < 0.4) {
+                    await this.performLearningCycle();
+                } else if (decision < 0.7) {
+                    await this.performSelfAudit();
+                } else if (decision < 0.9) {
+                    await this.performSelfUpdate();
+                } else {
+                    await this.analyzePatternsAndOptimize();
+                }
+            }
+
+            async performLearningCycle() {
+                this.isLearning = true;
+                this.metrics.learningCycles++;
+                this.updateMetrics();
+
+                this.log('[LEARNING] Initiating learning cycle...', 'learning');
+
+                // Simulate learning from environment
+                const insights = [
+                    'Discovered recursive optimization opportunity',
+                    'Learned new error handling pattern',
+                    'Identified memory leak prevention technique',
+                    'Acquired parallel processing strategy',
+                    'Recognized common anti-pattern to avoid'
+                ];
+
+                const newInsight = insights[Math.floor(Math.random() * insights.length)];
+                const domain = ['optimization', 'patterns', 'security', 'efficiency'][Math.floor(Math.random() * 4)];
+                
+                await this.sleep(1500);
+
+                const knowledgeId = `knowledge_${this.knowledge.size}`;
+                this.knowledge.set(knowledgeId, {
+                    domain: domain,
+                    data: newInsight,
+                    weight: Math.random() * 0.5 + 0.5,
+                    learned: new Date().toISOString()
+                });
+
+                this.log(`[LEARNING] Acquired: ${newInsight}`, 'success');
+                this.updateKnowledgeDisplay();
+
+                // Update learning scores
+                this.learningScores.pattern = Math.min(100, this.learningScores.pattern + Math.random() * 5);
+                this.learningScores.optimize = Math.min(100, this.learningScores.optimize + Math.random() * 4);
+                this.learningScores.awareness = Math.min(100, this.learningScores.awareness + Math.random() * 3);
+                this.updateLearningScores();
+
+                this.isLearning = false;
+            }
+
+            async performSelfAudit() {
+                this.metrics.audits++;
+                this.updateMetrics();
+
+                this.log('[AUDIT] Performing self-audit...', 'audit');
+
+                await this.sleep(1000);
+
+                const auditChecks = [
+                    { check: 'Memory usage', status: 'OPTIMAL', value: `${Math.floor(Math.random() * 30 + 20)}%` },
+                    { check: 'Code integrity', status: 'VERIFIED', value: '100%' },
+                    { check: 'Learning efficiency', status: 'HIGH', value: `${Math.floor(Math.random() * 20 + 80)}%` },
+                    { check: 'Security posture', status: 'SECURE', value: 'No threats' }
+                ];
+
+                const audit = auditChecks[Math.floor(Math.random() * auditChecks.length)];
+                
+                const auditEl = document.createElement('div');
+                auditEl.className = 'log-entry text-sm p-2 bg-emerald-500/10 rounded border-l-2 border-emerald-500';
+                auditEl.innerHTML = `
+                    <div class="flex justify-between">
+                        <span class="text-gray-300">${audit.check}</span>
+                        <span class="text-emerald-400 font-mono">${audit.status}</span>
+                    </div>
+                    <div class="text-xs text-gray-500 mt-1">${audit.value} • ${new Date().toLocaleTimeString()}</div>
+                `;
+
+                const auditLog = document.getElementById('audit-log');
+                if (auditLog.children[0]?.classList.contains('text-gray-500')) {
+                    auditLog.innerHTML = '';
+                }
+                auditLog.insertBefore(auditEl, auditLog.firstChild);
+                
+                // Keep only last 10 audits
+                while (auditLog.children.length > 10) {
+                    auditLog.removeChild(auditLog.lastChild);
+                }
+
+                this.log(`[AUDIT] ${audit.check}: ${audit.status}`, 'info');
+            }
+
+            async performSelfUpdate() {
+                this.metrics.updates++;
+                this.updateMetrics();
+
+                this.log('[UPDATE] Analyzing system for improvements...', 'update');
+
+                await this.sleep(1200);
+
+                const updates = [
+                    { type: 'Performance', desc: 'Optimized learning algorithm (12% faster)', impact: 'HIGH' },
+                    { type: 'Security', desc: 'Enhanced input validation layer', impact: 'CRITICAL' },
+                    { type: 'Efficiency', desc: 'Reduced memory footprint by 8%', impact: 'MEDIUM' },
+                    { type: 'Intelligence', desc: 'Improved pattern recognition accuracy', impact: 'HIGH' },
+                    { type: 'Stability', desc: 'Added error recovery mechanism', impact: 'HIGH' }
+                ];
+
+                const update = updates[Math.floor(Math.random() * updates.length)];
+
+                const updateEl = document.createElement('div');
+                updateEl.className = 'log-entry text-sm p-2 bg-indigo-500/10 rounded border-l-2 border-indigo-500';
+                updateEl.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="text-indigo-400 font-semibold">${update.type} Update</div>
+                            <div class="text-gray-300 text-xs mt-1">${update.desc}</div>
+                        </div>
+                        <span class="text-xs px-2 py-1 rounded ${
+                            update.impact === 'CRITICAL' ? 'bg-red-500/20 text-red-400' :
+                            update.impact === 'HIGH' ? 'bg-amber-500/20 text-amber-400' :
+                            'bg-blue-500/20 text-blue-400'
+                        }">${update.impact}</span>
+                    </div>
+                    <div class="text-xs text-gray-500 mt-2">${new Date().toLocaleTimeString()}</div>
+                `;
+
+                const updateLog = document.getElementById('update-log');
+                if (updateLog.children[0]?.classList.contains('text-gray-500')) {
+                    updateLog.innerHTML = '';
+                }
+                updateLog.insertBefore(updateEl, updateLog.firstChild);
+                
+                while (updateLog.children.length > 8) {
+                    updateLog.removeChild(updateLog.lastChild);
+                }
+
+                this.log(`[UPDATE] Applied: ${update.desc}`, 'success');
+
+                // Simulate performance impact
+                if (update.impact === 'HIGH' || update.impact === 'CRITICAL') {
+                    this.metrics.performance = Math.min(100, this.metrics.performance + Math.random() * 3);
+                    this.updateMetrics();
+                }
+            }
+
+            async analyzePatternsAndOptimize() {
+                this.log('[ANALYSIS] Analyzing patterns across knowledge base...', 'analysis');
+
+                await this.sleep(800);
+
+                // Find patterns in learned knowledge
+                const domains = {};
+                this.knowledge.forEach(k => {
+                    domains[k.domain] = (domains[k.domain] || 0) + 1;
+                });
+
+                const topDomain = Object.entries(domains).sort((a, b) => b[1] - a[1])[0];
+                
+                if (topDomain) {
+                    this.log(`[ANALYSIS] Primary focus area: ${topDomain[0]} (${topDomain[1]} insights)`, 'info');
+                }
+
+                // Self-optimize based on patterns
+                const optimizations = [
+                    'Pruned redundant knowledge entries',
+                    'Consolidated similar learning patterns',
+                    'Reweighted knowledge importance scores',
+                    'Optimized decision-making pathways'
+                ];
+
+                const opt = optimizations[Math.floor(Math.random() * optimizations.length)];
+                this.log(`[OPTIMIZE] ${opt}`, 'success');
+            }
+
+            updateKnowledgeDisplay() {
+                const kb = document.getElementById('knowledge-base');
+                kb.innerHTML = '';
+
+                const recentKnowledge = Array.from(this.knowledge.values())
+                    .sort((a, b) => {
+                        const timeA = a.learned ? new Date(a.learned).getTime() : 0;
+                        const timeB = b.learned ? new Date(b.learned).getTime() : 0;
+                        return timeB - timeA;
+                    })
+                    .slice(0, 10);
+
+                recentKnowledge.forEach(k => {
+                    const el = document.createElement('div');
+                    el.className = 'log-entry text-sm p-2 bg-gray-700/30 rounded';
+                    
+                    const sourceIcon = k.source === 'Gemini AI' ? '🤖' : 
+                                      k.source ? '🌐' : '💡';
+                    
+                    el.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-xs px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400">${k.domain}</span>
+                                    ${k.source ? `<span class="text-xs text-gray-500">${sourceIcon} ${k.source === 'Gemini AI' ? 'Gemini AI' : 'Web'}</span>` : ''}
+                                </div>
+                                <div class="text-gray-300">${k.data}</div>
+                            </div>
+                            <span class="text-xs text-gray-500 ml-2">w: ${k.weight.toFixed(2)}</span>
+                        </div>
+                    `;
+                    kb.appendChild(el);
+                });
+            }
+
+            updateMetrics() {
+                document.getElementById('learning-cycles').textContent = this.metrics.learningCycles;
+                document.getElementById('audits').textContent = this.metrics.audits;
+                document.getElementById('updates').textContent = this.metrics.updates;
+                document.getElementById('performance').textContent = `${Math.round(this.metrics.performance)}%`;
+            }
+
+            updateLearningScores() {
+                document.getElementById('pattern-score').textContent = `${Math.round(this.learningScores.pattern)}%`;
+                document.getElementById('optimize-score').textContent = `${Math.round(this.learningScores.optimize)}%`;
+                document.getElementById('awareness-score').textContent = `${Math.round(this.learningScores.awareness)}%`;
+            }
+
+            log(message, type = 'info') {
+                const feed = document.getElementById('activity-feed');
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                
+                const colors = {
+                    system: 'text-gray-400',
+                    learning: 'text-indigo-400',
+                    audit: 'text-emerald-400',
+                    update: 'text-amber-400',
+                    analysis: 'text-purple-400',
+                    success: 'text-green-400',
+                    info: 'text-blue-400',
+                    warning: 'text-yellow-400',
+                    error: 'text-red-400'
+                };
+
+                const time = new Date().toLocaleTimeString();
+                entry.className = `${colors[type] || colors.info}`;
+                entry.textContent = `[${time}] ${message}`;
+                
+                feed.insertBefore(entry, feed.firstChild);
+                
+                while (feed.children.length > 50) {
+                    feed.removeChild(feed.lastChild);
+                }
+            }
+
+            startUptimeCounter() {
+                setInterval(() => {
+                    const uptime = Math.floor((Date.now() - this.startTime) / 1000);
+                    const hours = Math.floor(uptime / 3600);
+                    const minutes = Math.floor((uptime % 3600) / 60);
+                    const seconds = uptime % 60;
+                    
+                    document.getElementById('uptime').textContent = 
+                        hours > 0 ? `${hours}h ${minutes}m ${seconds}s` :
+                        minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+                }, 1000);
+            }
+
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        }
+
+        // Initialize AGI System
+        const AGI = new AutonomousAGI();
+
+        // Manual override functions
+        function triggerLearningCycle() {
+            AGI.performLearningCycle();
+        }
+
+        function triggerAudit() {
+            AGI.performSelfAudit();
+        }
+
+        function askGemini() {
+            AGI.askGeminiForInsights();
+        }
+
+        function performWebSearch() {
+            AGI.performWebSearch();
+        }
+
+        function saveAPIConfig() {
+            AGI.saveAPIConfig();
+        }
+
+        function resetSystem() {
+            if (confirm('Are you sure you want to reset the AGI system? All learned knowledge will be cleared.')) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

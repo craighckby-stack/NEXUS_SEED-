@@ -1,0 +1,28 @@
+{
+  "index_id": "KMI-2024.A",
+  "description": "Mapping of required governance roles defined in security policies (RSP) to concrete active cryptographic assets and their metadata.",
+  "role_mappings": {
+    "RootTrust": {
+      "active_key_id": "CTG_Root_Key_v2",
+      "key_type": "Ed25519",
+      "metadata": {
+        "owner": "Cryptography Team Alpha",
+        "expiration": "2025-10-01T00:00:00Z"
+      }
+    },
+    "CommitAuthorization": {
+      "active_key_id": "AEOR_Commit_Key_v3",
+      "key_type": "RSA-4096",
+      "metadata": {
+        "owner": "Governance Committee",
+        "rotation_policy": "Quarterly"
+      }
+    }
+  },
+  "revocation_source_lookups": {
+    "RSL-Primary-001": {
+      "type": "CRL",
+      "endpoint": "https://crl.sovereign.local/primary/v1/latest.crl"
+    }
+  }
+}

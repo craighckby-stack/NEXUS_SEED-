@@ -1,0 +1,30 @@
+{
+  "description": "Health and Readiness configuration manifest for all Policy Enforcement Microservices (PEMs). Defines parameters for dynamic engine monitoring and failover criteria.",
+  "monitoring_version": "1.0.0",
+  "engines": {
+    "PKI_Service": {
+      "check_type": "external_http",
+      "health_check_endpoint": "/status/vitals",
+      "check_interval_s": 10,
+      "failure_threshold": 3,
+      "degradation_latency_ms": 500
+    },
+    "Logging_Ingestion_Engine": {
+      "check_type": "internal_metric",
+      "metric_name": "log_buffer_depth",
+      "max_acceptable_value": 1000,
+      "alert_level": "WARNING"
+    },
+    "Sovereign_Kernel_Policy_Module": {
+      "check_type": "internal_state",
+      "kernel_status_flag": "POLICY_MODULE_READY",
+      "required_uptime_min": 5
+    },
+    "Runtime_Scheduler_API": {
+      "check_type": "external_http",
+      "health_check_endpoint": "/health",
+      "check_interval_s": 15,
+      "failure_threshold": 5
+    }
+  }
+}

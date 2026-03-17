@@ -1,0 +1,15 @@
+{
+  "config_id": "LineageIndexConfig_V1",
+  "purpose": "Configuration parameters for maintaining the verified sequence chain of AIA transactions.",
+  "storage_backend": "BlockChainLedger(ConfiguredInstance)",
+  "sequence_mechanism": {
+    "type": "MerkleTreeAccumulator",
+    "tree_depth_target": 20,
+    "commitment_frequency": "1000_records"
+  },
+  "validation_policies": {
+    "policy_name": "SequentialIntegrity",
+    "required_fields": ["transaction_id", "timestamp_utc"],
+    "sequence_hash_inclusion": ["previous_sequence_hash"]
+  }
+}

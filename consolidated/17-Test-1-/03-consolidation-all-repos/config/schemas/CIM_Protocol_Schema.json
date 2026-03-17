@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.agi/schemas/CIM_Protocol_Schema.json",
+  "title": "CRoT Integrity Monitor (CIM) Operational Parameters",
+  "description": "Defines the mandatory configuration parameters, thresholds, and reporting pathways for the CRoT Integrity Monitor (CIM), guaranteeing predictable Integrity Halt (IH) behavior.",
+  "type": "object",
+  "anyOf": [
+    {
+      "properties": {
+        "measurement_intervals_ms": {
+          "type": "integer",
+          "minimum": 50,
+          "description": "Mandatory continuous measurement interval in milliseconds."
+        },
+        "entropy_source_path": {
+          "type": "string",
+          "format": "uri",
+          "description": "Path to the verified, high-quality entropy source (TRNG/PSM)."
+        },
+        "integrity_drift_threshold": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 10,
+          "description": "Maximum allowable difference (standard deviations) in runtime checksum before IH warning state."
+        },
+        "unauthorized_code_policy": {
+          "type": "string",
+          "enum": ["HALT_IMMEDIATE", "QUARANTINE_THROTTLE"],
+          "description": "Policy action upon detection of execution of code not validated by the TBC."
+        },
+        "tvcl_endpoint_uri": {
+          "type": "string",
+          "format": "uri",
+          "description": "Secure, authenticated URI for Trust Verifiable Configuration Log (TVCL) data transmission."
+        }
+      },
+      "required": [
+        "measurement_intervals_ms",
+        "entropy_source_path",
+        "integrity_drift_threshold",
+        "unauthorized_code_policy",
+        "tvcl_endpoint_uri"
+      ]
+    },
+    {
+      "properties": {
+        "governance": {
+          "$ref": "#/definitions/Governance"
+        },
+        "reporting": {
+          "$ref": "#/definitions/Reporting"
+        }
+      },
+      "additionalProperties": false
+    }
+  ],
+  "definitions": {
+    "Governance": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": ["operator", "governor", "agent"],
+          "description": "Role of the entity within the CRoT system."
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["modify", "observe", "admin"]
+          },
+          "description": "Permissions granted to the entity."
+        }
+      },
+      "additionalProperties": false
+    },
+    "Reporting": {
+      "type": "object",
+      "properties": {
+        "schedule": {
+          "type": "string",
+          "format": "uri",
+          "description": "Schedule for reporting (e.g., CRON expression)."
+        },
+        "recipients": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "email"
+          },
+          "description": "List of recipients for reports."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

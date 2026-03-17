@@ -1,0 +1,36 @@
+{
+  "service_name": "ProposalInitializationValidationService (PIVS)",
+  "description": "Configuration defining mandatory validation and initialization steps for new GSC proposals (L0 Ingress Control).",
+  "schema_path": "./proposal-schema.json",
+  "validation_layers": [
+    {
+      "layer_id": "L0/StructuralIntegrity",
+      "check": "JSON_SCHEMA_VALIDATION",
+      "failure_policy": "REJECT_IMMEDIATE"
+    },
+    {
+      "layer_id": "L0/PayloadHashVerification",
+      "check": "CRYPTOGRAPHIC_HASH_MATCH",
+      "target_field": "payload.source_content_hash",
+      "algorithm": "SHA256",
+      "failure_policy": "FLAG_AND_REJECT"
+    }
+  ],
+  "initialization_steps": [
+    {
+      "step_id": "A1_GenerateProposalID",
+      "target_field": "proposal_id",
+      "generator": "SystemIDGenerator/LayeredTimeBased"
+    },
+    {
+      "step_id": "A2_AuditLogReference",
+      "target_field": "provenance.log_entry_reference",
+      "generator": "IAL_ReferenceGenerator"
+    },
+    {
+      "step_id": "A3_AnchorPlaceholder",
+      "target_field": "provenance.chain_block_reference",
+      "placeholder": "PENDING:ANCHORING"
+    }
+  ]
+}

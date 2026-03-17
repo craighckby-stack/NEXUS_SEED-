@@ -1,0 +1,25 @@
+PGN_VERSION: 1.0.0
+PROTOCOL_NAME: Policy_Governance_Nexus_Specification
+DESCRIPTION: Defines the process and cryptographic requirements for validating, loading, and updating foundational protocol configuration artifacts (GAX, PIM, ACVM, Cryptographic Manifest).
+
+# I. ARTIFACT SIGNATURE REQUIREMENTS
+ARTIFACTS_TO_GOVERN:
+  GAX_MASTER:
+    PATH: protocol/gax_master.yaml
+    SIGNATURE_MIN_LEVEL: L4_CRITICAL
+    VERIFICATION_ACTOR: EMSU (at G0 pre-lock)
+  PIM_CONSTRAINTS:
+    PATH: config/pim_constraints.json
+    SIGNATURE_MIN_LEVEL: L3_HIGH
+  ACVM_CONFIGURATION:
+    PATH: config/acvm.json
+    SIGNATURE_MIN_LEVEL: L3_HIGH
+
+# II. UPDATE PROTOCOL (Required for GAX III Compliance)
+UPDATE_SEQUENCE:
+  - STEP: 1 (Proposal)
+    MANDATE: Distributed consensus signature required on proposed artifact hash.
+  - STEP: 2 (Pre-Lock Validation)
+    MANDATE: PIM verifies the governance signature chain against the PGN policy at S00, ensuring the loaded configuration is the correctly attested version for the Epoch Manifest Seal (EMS).
+  - STEP: 3 (Post-Epoch Commitment)
+    MANDATE: The new artifact version is activated only after the successful GAX I seal of the prior epoch (G3).

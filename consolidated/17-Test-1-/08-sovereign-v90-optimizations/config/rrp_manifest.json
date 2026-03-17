@@ -1,0 +1,46 @@
+{
+  "manifest_version": "2.0",
+  "system_id": "Sovereign_AGI_v94.1",
+  "description": "Runtime Resource Pool (RRP) Manifest v2.0 - Decoupled Resource Management.",
+  "runtime_settings": {
+    "dependency_resolution_mode": "StrictRecursive",
+    "fallback_policy_id": "POLICY_Default_Safemode",
+    "telemetry_frequency_hz": 5.0
+  },
+  "resource_definitions": [
+    {
+      "resource_id": "RSC_Execution_Core",
+      "type": "CPU_Compute",
+      "qos_tier": "Tier1_Critical",
+      "constraints": {
+        "min_frequency_ghz": 3.5,
+        "max_utilization_percent": 90,
+        "scheduling_priority": 1000
+      }
+    },
+    {
+      "resource_id": "RSC_Inference_VRAM",
+      "type": "GPU_Memory",
+      "qos_tier": "Tier2_High",
+      "constraints": {
+        "min_allocated_gb": 64,
+        "max_allocated_gb": 128,
+        "memory_type": "HBM3"
+      }
+    }
+  ],
+  "module_resource_mapping": [
+    {
+      "module_name": "M_Kernel_Scheduler",
+      "version": "94.1.0",
+      "required_resource_ids": ["RSC_Execution_Core"],
+      "startup_stage": "PRE_BOOT"
+    },
+    {
+      "module_name": "M_Context_Generator_LLM",
+      "version": "94.1.3",
+      "required_resource_ids": ["RSC_Execution_Core", "RSC_Inference_VRAM"],
+      "startup_stage": "RUNTIME_PRIORITY_A"
+    }
+  ]
+}

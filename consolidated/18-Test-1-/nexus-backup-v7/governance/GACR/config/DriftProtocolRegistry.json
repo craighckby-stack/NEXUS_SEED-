@@ -1,0 +1,22 @@
+{
+  "protocol_registry_version": "1.0.0",
+  "description": "Maps declared monitoring protocols (used in MPAM schema) to their mandatory configuration parameters and constraints.",
+  "protocols": [
+    {
+      "protocol_name": "Kolmogorov-Smirnov",
+      "implementation_reference": "library:scipy.stats.ks_2samp",
+      "drift_type_support": ["data", "model"],
+      "required_parameters": [
+        {"param_name": "KS_critical_value", "type": "number", "default_threshold": 0.1, "unit": "p-value"}
+      ]
+    },
+    {
+      "protocol_name": "Jensen-Shannon Divergence",
+      "implementation_reference": "library:custom.jensen_shannon",
+      "drift_type_support": ["data"],
+      "required_parameters": [
+        {"param_name": "JSD_score_limit", "type": "number", "default_threshold": 0.05, "unit": "divergence"}
+      ]
+    }
+  ]
+}

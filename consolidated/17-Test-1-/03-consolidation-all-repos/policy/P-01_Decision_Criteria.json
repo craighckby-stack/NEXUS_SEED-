@@ -1,0 +1,17 @@
+{
+  "policy_id": "P-01_PASS_CRITERIA",
+  "description": "Defines the aggregate logic and environment variables required for mandate execution approval.",
+  "policy_version": "1.0.0",
+  "aggregation_mode": "WEIGHTED_SUM_PLUS_HARD_CONSTRAINT",
+  "required_inputs_mapped": [
+    "MEE_Quantification_Spec.Q_SCORE_EFFICACY",
+    "MEE_Quantification_Spec.Q_SCORE_SYSTEM_RISK"
+  ],
+  "environment_constraints": [
+    {
+      "variable": "EXECUTION_MODE",
+      "required_value": "SAFE_ISOLATION"
+    }
+  ],
+  "final_threshold": 0.70
+}

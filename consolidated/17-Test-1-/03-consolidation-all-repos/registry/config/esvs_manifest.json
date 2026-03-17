@@ -1,0 +1,35 @@
+{
+  "description": "Immutable Environment and Signature Validation Service (ESVS) Manifest. V3 structure enforces explicit hashing algorithms and uses indexed dependencies for O(1) validation lookups.",
+  "metadata": {
+    "version": "3.0",
+    "generated_timestamp": "2024-07-29T10:00:00Z",
+    "checksum_standard_reference": "BLAKE3"
+  },
+  "signatures": {
+    "system": {
+      "runtime_identifier": "Core_DSE_CPT_001",
+      "signature": {
+        "algorithm": "BLAKE3",
+        "value": "8b1d9c1e0a2f4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c"
+      }
+    },
+    "dependencies": {
+      "numpy": {
+        "version": "1.26.4",
+        "source": "pypi",
+        "signature": {
+          "algorithm": "BLAKE3",
+          "value": "d34f..."
+        }
+      },
+      "pycrypto": {
+        "version": "2.6.1",
+        "source": "local_mirror",
+        "signature": {
+          "algorithm": "SHA256",
+          "value": "e45g..."
+        }
+      }
+    }
+  }
+}

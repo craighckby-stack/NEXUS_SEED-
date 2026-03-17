@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "description": "CEL Type Definitions for the GSEP Stage 1 Policy Evaluation Runtime context, used for strict type checking during constraint compilation.",
+  "types": {
+    "Goal_Declaration": {
+      "type": "map<string, string>",
+      "description": "The high-level goal parameters."
+    },
+    "Metrics": {
+      "type": "struct",
+      "fields": {
+        "Pre_Mutation": {
+          "type": "map<string, double>",
+          "description": "Metrics captured prior to mutation."
+        },
+        "Post_Mutation": {
+          "type": "map<string, double>",
+          "description": "Projected metrics after mutation."
+        }
+      }
+    },
+    "Mutation": {
+      "type": "struct",
+      "fields": {
+        "Risk_Score": {
+          "type": "double",
+          "description": "The computed risk score for the change (0.0 to 1.0)."
+        }
+      }
+    }
+  },
+  "root_context_objects": [
+    {"name": "Goal_Declaration", "type": "Goal_Declaration"},
+    {"name": "Metrics", "type": "Metrics"},
+    {"name": "Mutation", "type": "Mutation"}
+  ]
+}

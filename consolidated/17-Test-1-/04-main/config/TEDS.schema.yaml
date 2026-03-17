@@ -1,0 +1,37 @@
+schema_id: "TIPS_V94.1"
+revision: 1.0.0
+
+# Ensures structural adherence for all entries in the Trusted Event Data Stream (TEDS).
+# Required for auditability and Rollback Protocol (RRP) integrity.
+
+fields:
+  - name: "event_id"
+    type: "uuid"
+    required: true
+    description: "Unique ID for this specific event."
+  - name: "timestamp_utc"
+    type: "datetime"
+    required: true
+    description: "Creation time, strictly ordered."
+  - name: "source_agent"
+    type: "enum"
+    allowed_values: ["CRoT", "GAX", "SGS"]
+    required: true
+  - name: "governance_stage"
+    type: "string"
+    pattern: "S[0-9]{2}"
+    required: true
+    description: "The specific DSE lifecycle stage (S00-S14) this event occurred in."
+  - name: "csr_link_hash"
+    type: "sha256"
+    required: true
+    description: "Hash link back to the originating Config State Root, mandatory for immutability check."
+  - name: "payload_checksum"
+    type: "sha256"
+    required: false
+    description: "Checksum of the payload data if the payload exceeds 1MB."
+
+linkage:
+  # TEDS entries must maintain a cryptographic chain
+  - requirement: "previous_event_id_reference"
+    link_type: "crypto_chaining"

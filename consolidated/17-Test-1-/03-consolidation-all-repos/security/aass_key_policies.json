@@ -1,0 +1,27 @@
+{
+  "description": "Central configuration file defining aliases, physical key IDs (KIDs), associated cryptographic curves/algorithms, and mandatory access policies for the AASS.",
+  "policies": [
+    {
+      "policy_id": "POLICY_AASS_DIAL_V1",
+      "key_alias": "KID_DIAL_001",
+      "algorithm": "Ed25519",
+      "hsm_key_id": "HSM-DIAL-ENV-09A",
+      "allowed_callers": ["DARM-Core", "Sovereign-Sentinel"],
+      "revocation_threshold": 5
+    },
+    {
+      "policy_id": "POLICY_AASS_STATE_V1",
+      "key_alias": "KID_STR_002",
+      "algorithm": "P-521 (NIST)",
+      "hsm_key_id": "HSM-STATE-TRN-11C",
+      "allowed_callers": ["S14-Transition-Engine"]
+    },
+    {
+      "policy_id": "POLICY_AASS_CHR_V1",
+      "key_alias": "KID_CHR_003",
+      "algorithm": "ECDSA-P384 + RFC3161 TSP",
+      "hsm_key_id": "HSM-CHR-REG-04F",
+      "allowed_callers": ["Configuration-Manager"]
+    }
+  ]
+}

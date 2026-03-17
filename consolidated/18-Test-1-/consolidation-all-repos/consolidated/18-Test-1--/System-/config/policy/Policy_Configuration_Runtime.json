@@ -1,0 +1,31 @@
+{
+  "SAG_VERSION": "v94.1",
+  "ACVD": {
+    "UFRM_base": 0.15,
+    "CFTM_coefficient": 1.25,
+    "MAX_TRANSACTION_COUNT": 500
+  },
+  "FASV": {
+    "CoreStateLock": {
+      "type": "boolean",
+      "required": true,
+      "description": "Indicates if the core state manifest is locked during mutation cycle."
+    },
+    "ExecutionNonce": {
+      "type": "string",
+      "required": true,
+      "format": "uuid",
+      "description": "Unique identifier for the current execution epoch."
+    }
+  },
+  "TIPS": {
+    "MandatoryFields": [
+      "timestamp_ms",
+      "executor_id",
+      "operation_type",
+      "pre_state_hash",
+      "post_state_hash"
+    ],
+    "HashAlgorithm": "SHA256_EVIDENCE"
+  }
+}

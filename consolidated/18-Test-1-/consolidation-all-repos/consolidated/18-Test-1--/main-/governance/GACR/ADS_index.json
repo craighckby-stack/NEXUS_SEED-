@@ -1,0 +1,23 @@
+{
+  "serviceId": "AttributeDataServiceIndex",
+  "policyDomainId": "MPAM-GACR",
+  "indexVersion": "1.0",
+  "attributeMappings": {
+    "system.isMaintenanceMode": {
+      "source": "GlobalConfigStore",
+      "endpoint": "/system/mode/maintenance",
+      "cacheTTL": 300
+    },
+    "resource.scope": {
+      "source": "ResourceMetadataService",
+      "endpoint": "/metadata/{{resourceId}}/scope",
+      "cacheTTL": 3600
+    },
+    "request.time.local24h": {
+      "source": "AuraVM_LocalContext",
+      "endpoint": "LOCAL_RUNTIME_VAR",
+      "cacheTTL": 0
+    }
+  },
+  "description": "Maps policy attribute paths to their respective low-latency retrieval sources for efficient runtime evaluation."
+}

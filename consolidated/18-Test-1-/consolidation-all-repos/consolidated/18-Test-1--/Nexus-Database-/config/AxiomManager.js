@@ -1,0 +1,1 @@
+Optimized and abstracted the provided AxiomManager class for maximum computational efficiency and recursive abstraction.

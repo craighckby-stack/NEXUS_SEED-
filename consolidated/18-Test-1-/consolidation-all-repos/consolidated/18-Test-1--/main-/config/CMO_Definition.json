@@ -1,0 +1,36 @@
+{
+  "cmo_version": "1.1",
+  "config_hash": "C4B9A23E",
+  "metadata": {
+    "creation_date": "2024-06-15T00:00:00Z",
+    "interface_mandate": "Ensures all runtime constants derived from the Config Hash are traceable, immutable for the active manifest version, and accessible for L2 and L6 validation."
+  },
+  "modules": {
+    "viability_margin_oracle": {
+      "context_level": "L6: Risk Assessment",
+      "notes": "Controls dynamic computation of the epsilon safety margin.",
+      "parameters": {
+        "epsilon_decay_rate": 0.05,
+        "epsilon_minimum_floor": 0.01,
+        "spdm_window_size_epochs": 100
+      }
+    },
+    "constraint_budget_matrix": {
+      "context_level": "L2: Resource Allocation",
+      "notes": "Static resource allocation limits enforced by the CBM.",
+      "parameters": {
+        "max_compute_units": 500000,
+        "max_data_ingress_gb": 100
+      }
+    },
+    "metric_efficacy_contract": {
+      "context_level": "L5: Performance Synthesis",
+      "notes": "Weighting schema used by MEC for synthesizing critical metrics.",
+      "parameters": {
+        "utility_weight": 0.6,
+        "risk_penalty": 0.4,
+        "schema_version": "v98"
+      }
+    }
+  }
+}

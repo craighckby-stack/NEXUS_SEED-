@@ -1,0 +1,57 @@
+{
+  "schema_version": "2.1.0",
+  "config_metadata": {
+    "description": "Central registry for alert behaviors, abstracting common configurations using standardized templates.",
+    "standard_severities": {
+      "CRITICAL": {
+        "log_level": "CRITICAL",
+        "default_retention_days": 365
+      },
+      "HIGH": {
+        "log_level": "ERROR",
+        "default_retention_days": 90
+      },
+      "LOW": {
+        "log_level": "WARNING",
+        "default_retention_days": 30
+      }
+    },
+    "action_templates": {
+      "TPL_STANDARD_NOTIFICATION": {
+        "handler": "IncidentHandler",
+        "type": "NOTIFICATION",
+        "policy_id": "POLICY_STANDARD_NOTIFICATION",
+        "default_priority": 50
+      },
+      "TPL_SYSTEM_INTERRUPT": {
+        "handler": "DMW_Core_Scheduler",
+        "type": "SYSTEM_INTERRUPT",
+        "policy_id": "POLICY_CRITICAL_INTERRUPT",
+        "default_priority": 100
+      },
+      "TPL_SILENT_LOGGING": {
+        "handler": "SystemLogger",
+        "type": "LOGGING_ONLY",
+        "policy_id": "POLICY_NO_ACTION",
+        "default_priority": 10
+      }
+    }
+  },
+  "definitions": {
+    "INCIDENT_HIGH_SEVERITY": {
+      "severity": "HIGH",
+      "description": "Generic high severity alert forwarded to incident management.",
+      "action_template_ref": "TPL_STANDARD_NOTIFICATION"
+    },
+    "SYSTEM_CRITICAL_HALT": {
+      "severity": "CRITICAL",
+      "description": "Unrecoverable error state requiring immediate system interruption.",
+      "action_template_ref": "TPL_SYSTEM_INTERRUPT"
+    },
+    "PERFORMANCE_WARNING": {
+      "severity": "LOW",
+      "description": "Low severity log indicating potential future performance degradation.",
+      "action_template_ref": "TPL_SILENT_LOGGING"
+    }
+  }
+}

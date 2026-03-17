@@ -1,0 +1,18 @@
+{
+  "IncidentHandler": {
+    "protocol": "HTTP",
+    "endpoint_url": "https://api.internal/incidents/v1",
+    "auth_method": "OAUTH2",
+    "rate_limit_per_min": 120
+  },
+  "DMW_Core_Scheduler": {
+    "protocol": "RPC",
+    "endpoint_address": "scheduler.core.internal:8443",
+    "auth_method": "TLS_CERT",
+    "priority_queue": true
+  },
+  "SystemLogger": {
+    "protocol": "STREAM",
+    "endpoint_url": "kafka://logs/alerts"
+  }
+}

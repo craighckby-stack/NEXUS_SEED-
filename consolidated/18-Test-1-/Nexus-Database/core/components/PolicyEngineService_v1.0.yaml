@@ -1,0 +1,13 @@
+serviceId: PolicyEngine
+version: 1.0
+description: Core service for real-time policy evaluation and enforcement.
+enforcementMode: Active
+
+configuration:
+  metricStreamSource: kafka://metrics.stream/policies_input
+  bufferWindowMs: 50
+  concurrencyLevel: 8
+  policyCacheTTLSeconds: 300
+  defaultFailureHandling:
+    onMisconfiguration: LOG_AND_ALLOW
+    onEvaluationTimeout: LOG_AND_BLOCK

@@ -1,0 +1,30 @@
+# Resilience Protocol Index Manifest (RPIM) V1.0
+# Managed by SGS, Defined/Enforced by GAX.
+
+# This manifest maps GSEP-C CRITICAL Veto Gates to the specific Resilience/Recovery Protocol (RRP) routine
+# required for deterministic, automated remediation or required decision paralysis state.
+
+metadata:
+  version: 1.0
+  schema_attestation_id: SSVR_0094B
+
+rrp_index:
+  S2_POLICY_VETO:
+    error_code_prefix: E_AXM_PV
+    triage_routine: RRP_POLICY_REVISION_T01 # Requires GAX to trigger PVLM constraint analysis update
+    fallback_state: WAIT_FOR_HUMAN_OVERRIDE
+
+  S3_STABILITY_VETO:
+    error_code_prefix: E_AXM_ST
+    triage_routine: RRP_METRIC_RECALIBRATION_T02 # Requires SGS to rerun CPES model iteration
+    fallback_state: REVERT_TO_PSI_N
+
+  S4_PROVENANCE_TRUST:
+    error_code_prefix: E_CRT_PV
+    triage_routine: RRP_CRoT_REATTEMPT_T03 # CRoT rerun attestation verification
+    fallback_state: SIH_STATE_IMMINENT
+
+  S8_FINALITY_CERT:
+    error_code_prefix: E_AXM_FN
+    triage_routine: RRP_CFTM_MARGIN_CHECK_T05 # GAX must verify if marginal utility threshold adjustment is permissible
+    fallback_state: WAIT_FOR_HUMAN_FINALITY_APPROVAL

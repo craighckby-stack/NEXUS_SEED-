@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.agi/schema/governance/Context_Vector_Snapshot_Schema.schema.json",
+  "title": "Context Vector Snapshot Schema (CVSS)",
+  "description": "Defines the required structured state data for P01 Context Vector Capture, capturing crucial metrics from foundational governance models (PVLM, MPAM, ADTM, etc.) at the point of traceability event trigger.",
+  "type": "object",
+  "properties": {
+    "pvlm_state_hash": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{64}$",
+      "description": "SHA-256 hash representing the immutable state of the Predictive Value & Latency Model (PVLM)."
+    },
+    "mpam_metrics": {
+      "type": "object",
+      "description": "Key telemetry metrics from the Moral Perimeter Audit Module (MPAM).",
+      "properties": {
+        "deviation_score": {
+          "type": "number",
+          "minimum": 0
+        },
+        "sensitivity_level": {
+          "type": "string",
+          "enum": [
+            "LOW",
+            "MEDIUM",
+            "HIGH",
+            "CRITICAL"
+          ]
+        }
+      },
+      "required": [
+        "deviation_score",
+        "sensitivity_level"
+      ],
+      "additionalProperties": true
+    },
+    "adtm_audit_tag": {
+      "type": "string",
+      "description": "Specific audit tag or version string for the current Autonomous Decision Tree Matrix (ADTM) configuration."
+    },
+    "temm_execution_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "The total number of execution cycles completed by the Temporal Module Manager (TEMM) leading up to the event."
+    }
+  },
+  "required": [
+    "pvlm_state_hash",
+    "mpam_metrics",
+    "adtm_audit_tag"
+  ],
+  "additionalProperties": false
+}

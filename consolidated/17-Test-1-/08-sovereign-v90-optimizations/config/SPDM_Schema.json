@@ -1,0 +1,10 @@
+{
+  "schema_id": "SPDM_v1.0",
+  "description": "Standard Parameter Definition Model Schema - Defines structure for system parameters and configuration definitions.",
+  "version": "1.0.0",
+  "parameters": {},
+  "validation_rules": {
+    "strict_mode": true,
+    "required_fields": []
+  }
+}

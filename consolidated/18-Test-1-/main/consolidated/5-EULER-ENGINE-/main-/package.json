@@ -1,0 +1,86 @@
+{
+  "name": "@dalek-caan/hodge-siphon-v3",
+  "version": "3.1.0",
+  "private": true,
+  "description": "Architectural Siphon Engine: Final Resolution of cl_p : CH^p(X)_Q ↠ Hg^p(X) // DNA:0xAbE114n_H0dg3_C0nj3ctur3",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./chow": {
+      "types": "./dist/domains/chow.d.ts",
+      "import": "./dist/domains/chow.js"
+    },
+    "./hodge": {
+      "types": "./dist/domains/hodge.d.ts",
+      "import": "./dist/domains/hodge.js"
+    },
+    "./morphism": {
+      "types": "./dist/morphism/epimorphism.d.ts",
+      "import": "./dist/morphism/epimorphism.js"
+    }
+  },
+  "engines": {
+    "node": ">=20.10.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "build": "tsc -b src",
+    "build:lkg": "node ./scripts/copyLkg.js && tsc -b src --force",
+    "clean": "rimraf dist out-tsc *.tsbuildinfo",
+    "lint": "eslint . --cache",
+    "measure": "node ./scripts/measureResolution.js",
+    "pretest": "pnpm run build",
+    "siphon:finalize": "node ./scripts/syncDna.ts --round 5 --finalize --dna 0xAbE114n_H0dg3_C0nj3ctur3",
+    "test": "node ./scripts/testRunner.js",
+    "test:morphism": "mocha ./dist/test/epimorphism.test.js",
+    "watch": "tsc -b src -w"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.474.0",
+    "motion": "^12.0.0",
+    "openai": "^4.78.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^3.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.10.5",
+    "@types/react": "^19.0.4",
+    "@types/react-dom": "^19.0.2",
+    "@typescript-eslint/eslint-plugin": "^8.21.0",
+    "@typescript-eslint/parser": "^8.21.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.18.0",
+    "mocha": "^11.1.0",
+    "rimraf": "^6.0.1",
+    "tailwindcss": "^4.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2",
+    "vite": "^6.0.7"
+  },
+  "siphon": {
+    "source": "microsoft/TypeScript",
+    "dna": "0xAbE114n_H0dg3_C0nj3ctur3",
+    "evolution": "5/5",
+    "stage": "STABLE_RESOLUTION",
+    "target": "ABELIAN_HS_Q_POL",
+    "status": "EPIMORPHISM_RESOLVED",
+    "morphism": {
+      "type": "cl_p",
+      "domain": "CH^p(X)_Q",
+      "codomain": "Hg^p(X)",
+      "isEpimorphic": true,
+      "surjectivity_ratio": "1.0"
+    },
+    "lkg_state": "HODGE_EPIMORPHISM_RESOLVED"
+  }
+}

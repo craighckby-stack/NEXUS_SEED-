@@ -1,0 +1,52 @@
+{
+  "system_id": "Sovereign_AGI_v94_1",
+  "version": "2.1.0",
+  "last_audit": "2024-05-28T12:00:00Z",
+  "description": "Defines core Performance, Efficiency, and Stability (PES) governance requirements, dynamically tiered by operational context.",
+  "policy_tiers": {
+    "Production_HighVolume": {
+      "priority_level": 10,
+      "metric_definitions": [
+        { "key": "latency.p99_ms", "unit": "ms", "description": "99th percentile execution latency." },
+        { "key": "resource.carbon_intensity_gCO2eq", "unit": "gCO2eq", "description": "Operational carbon intensity, normalized per thousand instructions." }
+      ],
+      "compliance_rules": [
+        {
+          "metric": "latency.p99_ms",
+          "threshold_type": "Adaptive_Moving_Average",
+          "threshold_value": 150,
+          "allowable_deviation_factor": 1.15,
+          "severity": "CRITICAL",
+          "trigger_action": ["THROTTLE_MODULES", "INITIATE_FAILOVER"]
+        },
+        {
+          "metric": "error_rate_percent",
+          "threshold_type": "Static",
+          "threshold_value": 0.05,
+          "severity": "ALERT",
+          "trigger_action": ["SEND_PAGER_DUTY"]
+        }
+      ],
+      "enforcement_config": {
+        "check_frequency_seconds": 5,
+        "failure_count_before_rollback": 3
+      }
+    },
+    "Development_UnitTest": {
+      "priority_level": 1,
+      "compliance_rules": [
+        {
+          "metric": "test_coverage_percent",
+          "threshold_type": "Static",
+          "threshold_value": 90,
+          "severity": "BLOCKER",
+          "trigger_action": ["FAIL_CI_PIPELINE"]
+        }
+      ]
+    }
+  },
+  "review_schedule": {
+    "standard": "P4W",
+    "critical_deviation_trigger": true
+  }
+}

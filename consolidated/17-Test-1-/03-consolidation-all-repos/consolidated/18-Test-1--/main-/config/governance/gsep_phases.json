@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0",
+  "description": "Canonical definition for GSEP stage progression. Modifying this structure requires GCO consensus and system restart.",
+  "phases": [
+    {"id": "L0", "description": "INITIATION"},
+    {"id": "L1", "description": "VET_LOCK_A", "required_artifact": "PROPOSAL_DRAFT"},
+    {"id": "L2", "description": "VET_LOCK_B", "required_artifact": "REVIEW_SUMMARY"},
+    {"id": "L3", "description": "PROOF", "required_artifact": "PROOF_ARTIFACT"},
+    {"id": "L4", "description": "ADJ", "required_artifact": "ADJUSTMENT_MANDATE"},
+    {"id": "L5", "description": "COMMIT", "required_artifact": "SIGNED_MANDATE"},
+    {"id": "L6", "description": "EXECUTION", "required_artifact": "EXECUTION_REPORT"}
+  ],
+  "signals": {
+    "complete_signal": "CYCLE_COMPLETE",
+    "initial_id": "L0",
+    "final_id": "L6"
+  }
+}

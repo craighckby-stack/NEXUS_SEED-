@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "F-01 Failure Remediation Policy Schema",
+  "description": "Defines the structured format for policies governing failure state mandates, used by the Failure State Analysis Engine (FSAE) to ensure declarative governance.",
+  "type": "object",
+  "properties": {
+    "P01_TRUST_CALCULUS": {
+      "type": "object",
+      "properties": {
+        "VETOED": { "$ref": "#/definitions/remediationActionSet" },
+        "MAJOR_TRUST_DEFICIT": { "$ref": "#/definitions/remediationActionSet" },
+        "TARGETED_TRUST_DEFICIT": { "$ref": "#/definitions/remediationActionSet" },
+        "GENERAL_DEFICIT": { "$ref": "#/definitions/remediationActionSet" }
+      },
+      "required": ["VETOED"]
+    },
+    "M02_R_INDEX_READINESS": {
+      "type": "object",
+      "properties": {
+        "COMPONENT_INSTABILITY": { "$ref": "#/definitions/remediationActionSet" },
+        "GENERAL_INSTABILITY": { "$ref": "#/definitions/remediationActionSet" }
+      }
+    }
+  },
+  "definitions": {
+    "remediationActionSet": {
+      "type": "object",
+      "properties": {
+        "newTarget": {
+          "type": "number",
+          "description": "The R-Index target the proposal must meet on its next retry attempt."
+        },
+        "actions": {
+          "type": "array",
+          "description": "List of specific actions the proposal must take.",
+          "items": { "$ref": "#/definitions/mandateAction" }
+        }
+      },
+      "required": ["actions"]
+    },
+    "mandateAction": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Must be a valid MANDATE_ACTION_TYPES value."
+        },
+        "data": {
+          "type": "object",
+          "description": "Runtime parameters for the action, supporting policy-defined multipliers (e.g., gapMultiplier) for dynamic calculations."
+        }
+      },
+      "required": ["type"]
+    }
+  }
+}

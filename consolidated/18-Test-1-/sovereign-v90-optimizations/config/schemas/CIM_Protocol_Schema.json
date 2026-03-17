@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.agi/schemas/CIM_Protocol_Schema.json",
+  "title": "CRoT Integrity Monitor (CIM) Operational Parameters",
+  "description": "Defines the mandatory configuration parameters, thresholds, and reporting pathways for the CRoT Integrity Monitor (CIM), guaranteeing predictable Integrity Halt (IH) behavior.",
+  "type": "object",
+  "properties": {
+    "measurement_intervals_ms": {
+      "type": "integer",
+      "description": "Mandatory continuous measurement interval in milliseconds (e.g., 50ms)."
+    },
+    "entropy_source_path": {
+      "type": "string",
+      "description": "Path to the verified, high-quality entropy source (TRNG/PSM)."
+    },
+    "integrity_drift_threshold": {
+      "type": "number",
+      "description": "Maximum allowable difference (standard deviations) in runtime checksum before IH warning state."
+    },
+    "unauthorized_code_policy": {
+      "type": "string",
+      "enum": ["HALT_IMMEDIATE", "QUARANTINE_THROTTLE"],
+      "description": "Policy action upon detection of execution of code not validated by the TBC."
+    },
+    "tvcl_endpoint_uri": {
+      "type": "string",
+      "description": "Secure, authenticated URI for Trust Verifiable Configuration Log (TVCL) data transmission."
+    }
+  },
+  "required": [
+    "measurement_intervals_ms",
+    "entropy_source_path",
+    "integrity_drift_threshold",
+    "unauthorized_code_policy",
+    "tvcl_endpoint_uri"
+  ]
+}

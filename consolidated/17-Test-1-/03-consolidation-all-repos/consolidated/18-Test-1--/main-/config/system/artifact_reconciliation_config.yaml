@@ -1,0 +1,20 @@
+artifact_engine:
+  enabled: true
+  verification_level: strict # (strict, tolerant, off)
+  checksum_algo: SHA256
+  default_hashing_chunk_size: 4096
+  atomic_commit:
+    enabled: true
+    staging_directory: '.agi/artifacts/staging/'
+    rollback_on_failure: true
+    diff_application_tool: 'git_patch_util'
+  handlers:
+    generated:
+      action: 'write_new'
+      permission: '0644'
+    modified:
+      action: 'apply_diff'
+      backup_original: true
+    deleted:
+      action: 'remove_file'
+      safety_check_hash: true # Prevents deleting the wrong file if checksum mismatches

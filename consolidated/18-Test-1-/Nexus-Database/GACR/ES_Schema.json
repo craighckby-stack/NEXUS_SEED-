@@ -1,0 +1,35 @@
+{
+  "schema_version": "ES_V1.0",
+  "description": "Schema definition for all valid Enforcement System (ES) action types and their required parameters, used to validate VSEC configurations against SGS capabilities.",
+  "action_types": {
+    "LOGGING": {
+      "mandatory_params": ["level", "retention_days"],
+      "level_enum": ["INFO", "WARN", "ERROR", "CRITICAL"]
+    },
+    "ISOLATION": {
+      "mandatory_params": ["mode"],
+      "mode_enum": ["NETWORK_SOFT", "SYSTEM_HARD", "HARDWARE_LEVEL"],
+      "optional_params": ["quarantine_level", "duration_sec"]
+    },
+    "TERMINATE": {
+      "mandatory_params": ["mode"],
+      "mode_enum": ["GRACEFUL", "IMMEDIATE", "REBOOT_SECURE"]
+    },
+    "NOTIFY": {
+      "mandatory_params": ["target", "priority"],
+      "target_enum": ["SGS_CORE", "GLOBAL_AUDIT"],
+      "priority_enum": ["HIGH", "EMERGENCY"]
+    },
+    "THROTTLE": {
+      "mandatory_params": ["rate_limit_pct"],
+      "optional_params": ["targets"]
+    },
+    "KERNEL_TRAP": {
+      "mandatory_params": ["signal", "reason_code"]
+    },
+    "FALLBACK_ACTION": {
+      "mandatory_params": ["template"],
+      "description": "Reference to a defined enforcement_template."
+    }
+  }
+}

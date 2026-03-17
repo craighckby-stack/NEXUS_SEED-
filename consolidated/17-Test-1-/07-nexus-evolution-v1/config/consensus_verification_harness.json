@@ -1,0 +1,41 @@
+{
+  "harness_id": "ConsensusVerificationHarness",
+  "version": "V1.0",
+  "description": "Defines cryptographic checks and validation flow for signature aggregation against PCRE policies, implementing EP-QUORUM-SIG-V2.",
+  "profile_definitions": [
+    {
+      "profile_id": "EP-QUORUM-SIG-V2",
+      "validation_chain": [
+        {
+          "step_name": "Signature Integrity Check",
+          "mechanism": "ECDSA-P521",
+          "ledger_reference": "CHR_ROOT",
+          "failure_mode": "HALT_CRITICAL"
+        },
+        {
+          "step_name": "Timestamp Verification",
+          "mechanism": "NTP_Proof_of_Liveliness",
+          "time_variance_tolerance_seconds": 60,
+          "failure_mode": "WARNING_LOG_ONLY"
+        },
+        {
+          "step_name": "Role Threshold Aggregation",
+          "mechanism": "Weighted_Signature_Accumulation",
+          "input_policy_reference_format": "PCRE-V2.0",
+          "failure_mode": "REJECT_PROPOSAL"
+        }
+      ],
+      "data_requirements": {
+        "required_fields": ["proposal_hash", "signer_address", "timestamp", "role_id"],
+        "min_hash_complexity": "SHA3-512"
+      }
+    }
+  ],
+  "agent_interfaces": [
+    {
+      "agent_name": "DeploymentManager_CHR",
+      "access_level": "COMMIT_ONLY",
+      "allowed_actions": ["write_hash", "read_state"]
+    }
+  ]
+}

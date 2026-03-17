@@ -1,0 +1,27 @@
+{
+  "description": "Defines the mapping logic for converting MIS impact/scope classifications into GTCM simulation fidelity keys.",
+  "version": "1.0",
+  "mapping_rules": [
+    {
+      "impact": "critical",
+      "scope": "core",
+      "key_output": "high_critical",
+      "priority": 100
+    },
+    {
+      "impact": "high",
+      "scope": "*",
+      "key_output": "medium_high",
+      "priority": 90
+    },
+    {
+      "impact": "medium",
+      "scope": "*",
+      "key_output": "medium_default",
+      "priority": 80
+    }
+  ],
+  "default_rule": {
+    "key_output": "low_default"
+  }
+}

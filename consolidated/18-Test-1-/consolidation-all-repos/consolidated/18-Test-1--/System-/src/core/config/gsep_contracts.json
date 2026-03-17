@@ -1,0 +1,37 @@
+{
+  "PPC-V2.0": {
+    "description": "Standard Prompt Proposal Contract, version 2.0. Governs agent interaction requests.",
+    "validation_schema": [
+      {
+        "field": "contract_id",
+        "level": "CRITICAL",
+        "type": "string",
+        "pattern": "^PPC-V2\\.0$"
+      },
+      {
+        "field": "mission_definition",
+        "level": "CRITICAL",
+        "definition": {
+          "objective": {
+            "type": "string",
+            "required": true
+          },
+          "scope": {
+            "type": "array",
+            "required": false
+          }
+        }
+      },
+      {
+        "field": "resources",
+        "level": "NORMAL",
+        "definition": {
+          "time_budget_sec": {
+            "type": "number",
+            "required": true
+          }
+        }
+      }
+    ]
+  }
+}

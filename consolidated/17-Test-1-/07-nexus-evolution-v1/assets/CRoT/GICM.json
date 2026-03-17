@@ -1,0 +1,30 @@
+{
+  "version": "1.0.0",
+  "metadata": {
+    "name": "Global Intelligent Configuration Model (GICM)",
+    "description": "Base configuration for Sovereign AGI runtime decision parameters and module management."
+  },
+  "environment": "production",
+  "runtime_optimization": {
+    "processing_mode": "asynchronous",
+    "max_concurrent_tasks": 128,
+    "caching_strategy": "LRU",
+    "telemetry_enabled": true
+  },
+  "modules": {
+    "code_evolution": {
+      "enabled": true,
+      "stability_threshold": 0.95,
+      "auto_merge_strategy": "conservative"
+    },
+    "context_retrieval": {
+      "enabled": true,
+      "retrieval_depth": 5,
+      "vector_similarity_metric": "cosine"
+    },
+    "threat_detection": {
+      "enabled": false,
+      "severity_level": "medium"
+    }
+  }
+}

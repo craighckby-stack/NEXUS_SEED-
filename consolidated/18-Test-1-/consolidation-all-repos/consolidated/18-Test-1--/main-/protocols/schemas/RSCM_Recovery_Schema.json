@@ -1,0 +1,49 @@
+{
+  "schemaName": "RSCM_Recovery_Snapshot_Schema",
+  "version": "1.0",
+  "description": "Defines the mandatory contents of the Recovery Snapshot & Chain-of-Custody Manifest (RSCM) required by RRP V2.0 for RT-2 rollbacks. This ensures all critical state data ($\Omega_{Failure}$) is consistently gathered and attested by CRoT.",
+  "fields": [
+    {
+      "name": "metadata_capture_timestamp",
+      "type": "UTC_Timestamp",
+      "mandate": "Required",
+      "notes": "Exact timestamp of resource fencing initiation and state capture."
+    },
+    {
+      "name": "gsep_execution_trace",
+      "type": "JSON_Blob",
+      "mandate": "Required",
+      "notes": "Full, delimited execution trace stack leading to the failure trigger."
+    },
+    {
+      "name": "volatile_memory_dump_uri",
+      "type": "URI",
+      "mandate": "Required (if failure is memory-bound)",
+      "notes": "Secure, encrypted location of the memory snapshot relevant to the GICM focus."
+    },
+    {
+      "name": "environment_variables_snapshot",
+      "type": "JSON_Object",
+      "mandate": "Required",
+      "notes": "Snapshot of all active configuration and environment settings (non-secret).
+    "},
+    {
+      "name": "rscm_package_checksum",
+      "type": "SHA512",
+      "mandate": "Required",
+      "notes": "Cryptographic hash of the compiled RSCM data package before CRoT signing."
+    },
+    {
+      "name": "cr_integrity_signature",
+      "type": "Signature(CRoT_PublicKey)",
+      "mandate": "Required",
+      "notes": "CRoT signature certifying the integrity and authenticity of this RSCM record."
+    },
+    {
+      "name": "failure_context_uuid",
+      "type": "UUID",
+      "mandate": "Required",
+      "notes": "Cross-reference UUID linking this RSCM instance to the originating VRRM entry."
+    }
+  ]
+}

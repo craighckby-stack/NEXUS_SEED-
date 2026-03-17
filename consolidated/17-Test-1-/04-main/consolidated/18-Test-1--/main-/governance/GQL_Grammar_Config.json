@@ -1,0 +1,22 @@
+{
+  "description": "Configuration for the Governance Axiom Query Language (GQL) Syntax and recognized data access aliases.",
+  "version": "1.0.0",
+  "operators": [
+    {"symbol": "AND", "precedence": 3},
+    {"symbol": "OR", "precedence": 2},
+    {"symbol": "NOT", "precedence": 4},
+    {"symbol": "==", "precedence": 5},
+    {"symbol": "<", "precedence": 5}
+  ],
+  "recognized_functions": [
+    {"name": "IS_VALID_IP", "min_args": 1, "max_args": 1},
+    {"name": "CUMULATIVE_RISK", "min_args": 0, "max_args": 0},
+    {"name": "TARGET_AGE_DAYS", "min_args": 1, "max_args": 1}
+  ],
+  "system_aliases": [
+    "TargetScope",
+    "BudgetAllocated",
+    "OriginatorRank",
+    "SystemStateFlag"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "constant_manifest_id": "SYSTEM_CONTEXT_V1",
+  "system_states": {
+    "STATE_ARES_CERTIFIED": "System has passed baseline integrity and readiness checks.",
+    "STATE_INITIALIZING": "System is starting up."
+  },
+  "resource_policies": {
+    "POLICY_RESOURCE_BASELINE": 20,
+    "POLICY_RESOURCE_CRITICAL_HIGH": 95
+  },
+  "trigger_events": {
+    "EVENT_POLICY_EVAL_REQUEST": "Request for synchronous policy execution.",
+    "EVENT_CONSTRAINT_CHECK_REQUEST": "Request to evaluate hard operational limits."
+  }
+}

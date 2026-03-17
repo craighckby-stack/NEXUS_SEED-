@@ -1,0 +1,58 @@
+# Policy Correction Logic Definition (PCLD) - GAX V96.5
+
+Protocol: PCSS (Policy Correction Analysis State)
+Input_Source: TEDS_TVCR (Traceability Event Registry)
+Target_Output: PRM (Policy Recalibration Manifest)
+Custodian: GAX Agent
+
+# This logic defines the deterministic adjustments made by GAX following a mandatory
+# Rollback Protocol (RRP) trigger (P-01 ACV Failure).
+
+Recalibration_Matrix:
+  
+  # 1.0 UTILITY MAXIMIZATION (UMA I) Failure Logic
+  AXIOM_I_BREACH:
+    TRIGGER_CONDITION: P-01_FAILED_UMA_I
+    ANALYSIS_METRIC:
+      - Variable: 'TEMM'
+        Operator: '<'
+        Threshold_Formula: 'UFRM + CFTM'
+    RECALIBRATION_ACTIONS:
+      PRIORITY_1_MANDATE:
+        # Immediate tightening of the Conservative Finality Margin (CFTM).
+        - Component: ACVD
+          Target_Key: UMA.CFTM_Margin_Factor
+          Modification_Formula: 'TEMM_Difference / UFRM_Baseline * 1.05' # Dynamic tightening based on delta
+          Description: 'Adjust CFTM factor to account for utility maximization shortfall.'
+
+  # 2.0 AXIOMATIC INTEGRITY (AI III) Failure Logic - Policy Veto
+  AXIOM_III_PVLM_VETO:
+    TRIGGER_CONDITION: P-01_FAILED_AI_III_PVLM
+    ANALYSIS_METRIC:
+      - Variable: 'PVLM_Status'
+        Operator: '=='
+        Value: 'TRUE'
+    RECALIBRATION_ACTIONS:
+      PRIORITY_1_MANDATE:
+        # Registration requires human review of the Policy Violation Logic Manifest (PVLM).
+        - Component: PRM
+          Action: 'REGISTER_VETO_EVENT'
+          Description: 'Log non-compliant execution attempt. System must halt until PVLM status reset or manual PRM entry.'
+      PRIORITY_2_TEDS_CAPTURE:
+        - Component: TEDS_TVCR
+          Action: 'MANDATE_DEEPER_FORENSICS'
+          Description: 'Increase Traceability Event Capture Depth by 5 stages.'
+
+  # 3.0 CONTEXT ATTESTATION (CA II) Failure Logic
+  AXIOM_II_ECVM_FAILURE:
+    TRIGGER_CONDITION: P-01_FAILED_CA_II
+    ANALYSIS_METRIC:
+      - Variable: 'ECVM_Status'
+        Operator: '=='
+        Value: 'FALSE'
+    RECALIBRATION_ACTIONS:
+      PRIORITY_1_MANDATE:
+        - Component: SGS_Protocol
+          Target_Key: 'ECVM_Attestation_Retry_Budget'
+          Modification_Formula: '$CURRENT_VALUE + 3'
+          Description: 'Increase the allowed retries for ECVM verification on subsequent DSE cycles.'

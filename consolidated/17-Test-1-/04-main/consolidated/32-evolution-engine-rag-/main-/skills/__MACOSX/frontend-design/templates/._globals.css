@@ -1,0 +1,57 @@
+/* globals.css */
+
+/* Global Variables */
+:root {
+  --color-primary: #333;
+  --color-secondary: #666;
+  --font-family: Arial, sans-serif;
+  --font-size: 16px;
+  --line-height: 1.5;
+  --max-width: 1200px;
+  --container-padding-desktop: 20px;
+  --container-padding-mobile: 10px;
+}
+
+/* Box Model */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Typography */
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+}
+
+/* Links */
+a {
+  text-decoration: none;
+  color: var(--color-primary);
+}
+
+a:hover {
+  color: var(--color-secondary);
+}
+
+/* Images */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Utility Classes */
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--container-padding-desktop);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: var(--container-padding-mobile);
+  }
+}

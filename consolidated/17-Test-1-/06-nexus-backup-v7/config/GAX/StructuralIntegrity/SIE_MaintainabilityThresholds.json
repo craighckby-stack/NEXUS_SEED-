@@ -1,0 +1,19 @@
+{
+  "description": "Configuration for GAX Structural Integrity Evaluator (SIE) defining acceptable thresholds for code evolution metrics based on current system state class.",
+  "state_class": "CRITICAL_PATH_L1",
+  "complexity_constraints": {
+    "cyclomatic_complexity_delta": {
+      "max_allowed_positive_delta": 50, 
+      "target_negative_delta": 10,
+      "trigger_alert_threshold": 100
+    },
+    "maintainability_index_shift": {
+      "min_acceptable_mi": -5.0, 
+      "hard_stop_mi": -10.0
+    },
+    "test_coverage_delta_percent": {
+      "min_required_delta": -0.5, 
+      "target_delta": 1.0
+    }
+  }
+}

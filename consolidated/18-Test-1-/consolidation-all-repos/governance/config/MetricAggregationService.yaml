@@ -1,0 +1,28 @@
+service_name: DecisionalMetricsAggregator
+version: 94.1
+mode: Streaming (Kafka/Pulsar)
+processing_pipeline:
+  source_topics: [decision.logs, execution.telemetry, safety.reports]
+  sink_target: governance_metrics_db
+  aggregation_frequency: 1m
+metrics_mapping:
+  latencyMs:
+    source: execution.telemetry
+    field: decision_latency_ms
+    aggregation: P90
+  computationalCostUnits:
+    source: execution.telemetry
+    field: normalized_resource_cost
+    unit: TFLOP_E
+  alignmentScore:
+    source: safety.reports
+    field: alignment_fidelity
+    method: average
+    alert_threshold: 0.75
+  codeChurnDelta:
+    source: code.analysis
+    field: git_lines_delta
+    method: sum_absolute
+enforcement_config:
+  schema_validation_path: governance/schemas/DecisionalMetricsSchema.json
+  fail_on_schema_error: true

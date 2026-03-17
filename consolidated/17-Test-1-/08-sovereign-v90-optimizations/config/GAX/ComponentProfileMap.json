@@ -1,0 +1,61 @@
+{
+  "map_version": "3.0",
+  "description": "Priority-based mapping of system artifacts (ID, Path, Tag) to defined constraint profiles. Used by the GAX validation engine (v94.1+) for dynamic strictness enforcement. Version 3.0 introduces explicit activity toggles, structured notes, and supported match type declarations.",
+  "mapping_schema": "PRIORITY_ARRAY_V3",
+  "supported_match_types": [
+    "ID",
+    "TAG",
+    "PATH_REGEX",
+    "FALLBACK"
+  ],
+  "mappings": [
+    {
+      "priority": 100,
+      "is_active": true,
+      "match_type": "ID",
+      "target": "Core_Scheduler_v95",
+      "profile_id": "CRITICAL_PERFORMANCE",
+      "notes": "Ensures minimal latency constraints for primary synchronization loop."
+    },
+    {
+      "priority": 95,
+      "is_active": true,
+      "match_type": "TAG",
+      "target": "HIGH_THROUGHPUT",
+      "profile_id": "CRITICAL_PERFORMANCE",
+      "notes": "Catch-all for infrastructure components supporting heavy I/O workloads."
+    },
+    {
+      "priority": 80,
+      "is_active": true,
+      "match_type": "ID",
+      "target": "Data_Storage_Engine",
+      "profile_id": "HIGH_CAPACITY_TCO",
+      "notes": "Balancing resource efficiency against long-term storage viability."
+    },
+    {
+      "priority": 70,
+      "is_active": true,
+      "match_type": "PATH_REGEX",
+      "target": "^src/gateways/internal/.*",
+      "profile_id": "NORMAL_SECURITY",
+      "notes": "Standard security profile for intra-system communication channels."
+    },
+    {
+      "priority": 60,
+      "is_active": false,
+      "match_type": "ID",
+      "target": "Internal_API_Gateway",
+      "profile_id": "NORMAL_SECURITY",
+      "notes": "Redundant rule, disabled in favor of PATH_REGEX (priority 70) for broader coverage."
+    },
+    {
+      "priority": 0,
+      "is_active": true,
+      "match_type": "FALLBACK",
+      "target": "*",
+      "profile_id": "BASE_PROFILE",
+      "notes": "Default minimum constraint requirements for unmapped components."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "manifest_id": "GTEM_V1.0",
+  "description": "Governance Telemetry Endpoint Manifest: Defines the schema, destination, and integrity requirements for certified governance variable (CGV) reporting (GRTS compliant). CRoT-signed.",
+  "schema_version": "PESM_V1.0",
+  "telemetry_endpoint_uri": "https://telemetry.sovereign.local/v1/report",
+  "required_fields_schema": {
+    "transition_id": "string [CRITICAL]",
+    "agent_source": "SGS_V94.1",
+    "s01_utility": "number [Efficacy Metric]",
+    "s02_risk": "number [Risk Metric]",
+    "s03_veto_state": "boolean [True if PVLM violation]",
+    "p01_finality_pass": "boolean [S7 Result]",
+    "timestamp_s7_cert": "ISO8601 [Attested time of S7]",
+    "cryptographic_attestation": "string [CRoT signature of entire payload]"
+  },
+  "transport_protocol": "HTTPS/TLS1.3",
+  "latency_tolerance_ms": 500
+}

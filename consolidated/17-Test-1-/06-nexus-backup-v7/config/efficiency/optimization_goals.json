@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "description": "Defines the optimization policy goals and constraints referenced by metrics and policy engines.",
+  "optimization_strategies": {
+    "RESOURCE_USAGE": {
+      "default_goal": "MINIMIZE_COST",
+      "priority_weight": 0.8,
+      "constraint": "MAX_EFFICIENCY_DEGRADATION: 0.1"
+    },
+    "PERFORMANCE": {
+      "default_goal": "MAXIMIZE_THROUGHPUT",
+      "priority_weight": 0.6,
+      "constraint": "MIN_LATENCY_PERCENTILE_99: 500ms"
+    },
+    "FINANCIAL": {
+      "default_goal": "STAY_UNDER_BUDGET",
+      "priority_weight": 1.0,
+      "alert_target": 0.9
+    }
+  }
+}

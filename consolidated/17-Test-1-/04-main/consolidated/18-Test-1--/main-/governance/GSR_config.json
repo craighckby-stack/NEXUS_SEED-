@@ -1,0 +1,13 @@
+{
+  "GSR_service_enabled": true,
+  "report_generation_frequency": "T_10M",
+  "trigger_thresholds": {
+    "ConsecutiveRiskViolations": 3,
+    "EfficacyDrift_percentage": 0.05
+  },
+  "report_targets": [
+    { "type": "INTERNAL_AUDIT_LOG", "level": "HIGH" },
+    { "type": "AOC_ENDPOINT", "endpoint": "/api/aoc/submit_report" }
+  ],
+  "data_anonymization_policy": "LEVEL_3_SANITIZE"
+}

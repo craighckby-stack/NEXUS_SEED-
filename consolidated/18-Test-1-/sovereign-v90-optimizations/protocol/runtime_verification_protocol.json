@@ -1,0 +1,28 @@
+{
+  "spec_id": "VAL-941-RT-001",
+  "verification_version": "1.0.0",
+  "target_entity": "ProtocolAgentCHR",
+  "metrics_suite": {
+    "integrity_check": {
+      "pass_threshold": 1.0,
+      "required_modules": ["CoreBinding", "StatePersistence"],
+      "fail_policy": "Quarantine"
+    },
+    "coherence_stability_test": {
+      "duration_seconds": 300,
+      "tolerance_deviation_sigma": 0.05,
+      "test_scenarios": ["StressContextSwitch", "TemporalDissonance"],
+      "expected_behavior_compliance": 0.90
+    },
+    "resource_compliance": {
+      "budget_stage": "deep_synthesis",
+      "enforcement_action": "ThrottleAndReport",
+      "max_overhead_percentage": 5.0
+    }
+  },
+  "deployment_gate": {
+    "required_stamp": "ComplianceStamping",
+    "required_metrics_pass": 3,
+    "automatic_retries": 1
+  }
+}

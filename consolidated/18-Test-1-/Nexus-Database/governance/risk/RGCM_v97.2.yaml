@@ -1,0 +1,26 @@
+# RGCM (Risk Governance Compliance Module) Policy V97.2
+# Purpose: Mandates for S-02 Risk Floor parameter attestation.
+
+integrity_checks:
+  - check_id: RGC_001
+    source_data: RFCI_Configuration
+    validation_policy: GRS_MACRO_CONSTRAINTS.P02_RISK_FLOOR_BOUNDS
+    severity: CRITICAL
+    mandate: Parameters defining S-02 must fall within the maximum and minimum constraints stipulated by GRS P02.
+
+  - check_id: RGC_002
+    source_data: RFCI_Deployment_History
+    validation_policy: GRS_RATE_LIMIT.R17_FLOOR_MUTABILITY
+    severity: HIGH
+    mandate: Rate limit on S-02 configuration changes (RFCI updates) cannot exceed 3 mutations per 24-hour cycle, attested via MCR timestamps.
+
+attestation_process:
+  module: TIAR
+  input_schema: RFCI_Schema_V97
+  output_format: ATTESTED_S02_CONFIG_HASH
+  required_status: POLICY_PASS
+
+failure_handling:
+  path_on_failure: CTG (Compliance Trace Generator)
+  stage_revert: 4
+  reason_code: E_RGCM_POLICY_VIOLATION

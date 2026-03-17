@@ -1,0 +1,31 @@
+{
+  "agentID": "CEA_V1",
+  "agentPurpose": "Calculate real-time policy compliance metrics and execute tiered remediation pipelines as defined by the GFRM.",
+  "dependencies": [
+    "FME_V1",
+    "ADE_V2",
+    "ResourceAllocationKernel"
+  ],
+  "monitoringIntervalMs": 500,
+  "metricDefinitions": [
+    {
+      "metricName": "Compliance_Delta_Index",
+      "calculationSource": "PolicyDeltaEngine.calculate_PDI",
+      "triggerThresholdRef": "GFRM_P94.1A:/governanceMechanism/complianceMetrics/maxTolerance"
+    },
+    {
+      "metricName": "Cost_Benefit_Index_CBI",
+      "calculationSource": "FME_V1.calculate_CBI",
+      "outputTarget": "GFRM_P94.1A:/financialManagement/budgetConfiguration/dynamicAdjustment"
+    }
+  ],
+  "remediationInterface": {
+    "endpoint": "API/governance/executeRemediation",
+    "requiredParameters": ["policyID", "remediationLevel", "timestamp"],
+    "successCode": 202
+  },
+  "stateStorage": {
+    "type": "Key-Value",
+    "namespace": "GFRM_Runtime_State"
+  }
+}

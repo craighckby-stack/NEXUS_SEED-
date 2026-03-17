@@ -1,0 +1,65 @@
+{
+  "version": "v2.0",
+  "description": "Intelligent SMS Routing Policies, referencing external carrier metadata for dynamic decision making and operational performance tuning.",
+  "policies": [
+    {
+      "policy_id": "P001_CriticalHA",
+      "policy_name": "CriticalAlerts_HighAvailability",
+      "match_conditions": {
+        "compliance_category": "critical_alert",
+        "priority_level_min": 1,
+        "priority_level_max": 2,
+        "content_type": "transactional"
+      },
+      "routing_strategy": "Sequential_Failover",
+      "execution_parameters": {
+        "timeout_ms": 3000,
+        "max_retries_per_sequence": 1,
+        "latency_tolerance": "low"
+      },
+      "routing_targets": [
+        {
+          "region_code": "US",
+          "carrier_profile_id": "TWLIO_DEDICATED_US",
+          "sequence": 1
+        },
+        {
+          "region_code": "*",
+          "carrier_profile_id": "VNG_PREMIUM_GLOBAL",
+          "sequence": 1
+        },
+        {
+          "region_code": "*",
+          "carrier_profile_id": "AWS_SNS_STANDARD",
+          "sequence": 2
+        }
+      ]
+    },
+    {
+      "policy_id": "P002_MarketingLCO",
+      "policy_name": "Marketing_BulkSend_LowestCost",
+      "match_conditions": {
+        "compliance_category": "marketing",
+        "priority_level_min": 4,
+        "priority_level_max": 5
+      },
+      "routing_strategy": "Cost_Optimization",
+      "execution_parameters": {
+        "max_cpm_usd": 0.05,
+        "minimum_delivery_rate": 0.95,
+        "latency_tolerance": "high"
+      },
+      "routing_targets": [
+        {
+          "region_code": "EU",
+          "carrier_profile_id": "NXM_STANDARD_EU_BULK",
+          "sequence": 1
+        },
+        {
+          "region_code": "*",
+          "carrier_profile_id": "GENERIC_LOW_COST"
+        }
+      ]
+    }
+  ]
+}

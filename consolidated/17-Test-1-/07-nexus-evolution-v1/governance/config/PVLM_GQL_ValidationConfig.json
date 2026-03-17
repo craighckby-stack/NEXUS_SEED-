@@ -1,0 +1,26 @@
+{
+  "schema_version": "V98.4",
+  "gql_config": {
+    "allowed_context_variables": [
+      "TargetScope",
+      "Budget",
+      "RequiredPermissions",
+      "ExecutionEnvironment",
+      "RiskScoreS02"
+    ],
+    "allowed_operators": [
+      "==",
+      "!=",
+      ">",
+      "<",
+      ">=",
+      "<=",
+      "AND",
+      "OR",
+      "IN",
+      "NOT IN"
+    ],
+    "max_expression_depth": 5
+  },
+  "reasoning": "This configuration file is necessary for pre-deployment validation of PVLM files. It ensures that the 'logic_expression' uses only approved variables and operators defined within the GAX engine context, preventing runtime errors and unauthorized data access."
+}

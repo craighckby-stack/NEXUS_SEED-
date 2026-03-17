@@ -1,0 +1,27 @@
+{
+  "standard_version": "GSEP-C/V94.1",
+  "description": "Defines the mandated validation logic and integrity checks (GAX I, II, III) referenced by the AAM pipeline's artifact registry, providing explicit module pathing for the dependency resolver.",
+  "standards": [
+    {
+      "id": "GAX III Integrity Check",
+      "target_artifact_type": "CSR",
+      "criticality": "High",
+      "validation_module": "modules/validation/checksum_verification.py",
+      "minimum_success_rate": 0.9999
+    },
+    {
+      "id": "GAX II Compliance Check",
+      "target_artifact_type": "ECVM",
+      "criticality": "Medium",
+      "validation_module": "modules/validation/context_mapping_validation.js",
+      "minimum_success_rate": 0.985
+    },
+    {
+      "id": "GAX I Efficiency Check",
+      "target_artifact_type": "TEMM",
+      "criticality": "High",
+      "validation_module": "modules/validation/deviation_tolerance_check.py",
+      "minimum_success_rate": 0.995
+    }
+  ]
+}

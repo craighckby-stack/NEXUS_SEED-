@@ -1,0 +1,25 @@
+{
+  "service_id": "GOVERNANCE_RUNTIME_EVALUATOR_V1",
+  "processing_pipeline": {
+    "input_source": "StructuralDeltaReport_V2",
+    "config_source": "config/governance/C-01_StructuralCostRules.json",
+    "output_sink": "Gatemaster_DecisionEngine",
+    "processing_strategy": "PARALLEL_ASYNC_CHECK"
+  },
+  "failure_hooks": {
+    "P1_CRITICAL_VIOLATION": {
+      "action": "HALT_MERGE_PROCESS",
+      "response_code": "409_CONFLICT",
+      "report_template": "CRITICAL_STRUCTURAL_COST_REPORT"
+    },
+    "AGGREGATE_THRESHOLD_EXCEEDED": {
+      "action": "REQUIRE_GOVERNANCE_OVERRIDE",
+      "response_code": "403_FORBIDDEN",
+      "report_template": "OVERRIDE_REQUIRED_COST_REPORT"
+    }
+  },
+  "runtime_parameters": {
+    "timeout_ms": 5000,
+    "max_concurrent_evaluations": 10
+  }
+}

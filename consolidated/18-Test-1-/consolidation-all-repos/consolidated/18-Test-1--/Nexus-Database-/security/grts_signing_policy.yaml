@@ -1,0 +1,21 @@
+# GRTS Non-Repudiation Key Policy (GRP-001)
+
+policy_id: GRP-001
+protocol_target: GRTS V2.0
+
+# 1. Key Storage and Access Constraints
+key_hsm_module: dedicated_telemetry_signer_01
+key_security_level: non_critical_telemetry
+access_rate_limit: 1000/sec (burst tolerance: 5000)
+
+# 2. Cryptographic Parameters
+signature_algorithm: ED25519 (high-throughput curve)
+hash_algorithm: SHA3-256
+key_length: 256 bits
+
+# 3. Rotation Schedule
+rotation_frequency: 72 hours
+key_deprecation_threshold: 1 hour (allow signing only for verification purposes after threshold)
+
+# 4. Latency Requirement
+max_signing_latency_ms: 10.0 # Must be subordinate to the 15ms GATM limit.

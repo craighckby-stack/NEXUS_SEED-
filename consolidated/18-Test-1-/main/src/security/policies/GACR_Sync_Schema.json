@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "version": {"type": "string"},
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "policy_id": {"type": "string"},
+        "description": {"type": "string"}
+      },
+      "required": ["policy_id"]
+    },
+    "sync_profiles": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "target_systems": {"type": "array", "items": {"type": "string"}},
+          "schedule_type": {"type": "string", "enum": ["REALTIME_EVENT_DRIVEN", "BATCH_HOURLY", "BATCH_DAILY", "MANUAL"]},
+          "conflict_resolution": {"type": "string", "enum": ["SOURCE_OF_TRUTH_WINS", "MOST_RECENT_TIMESTAMP_WINS", "FAIL_SYNC"]},
+          "failure_strategy": {"type": "string"},
+          "throttling": {"type": "object"}
+        },
+        "required": ["target_systems", "schedule_type", "conflict_resolution"]
+      }
+    },
+    "global_enforcement": {
+      "type": "object",
+      "properties": {
+        "circuit_breaker_enabled": {"type": "boolean"},
+        "max_sync_errors_per_hour": {"type": "integer"}
+      }
+    }
+  },
+  "required": ["version", "sync_profiles"]
+}

@@ -1,0 +1,20 @@
+{
+  "policy_name": "Tier1_Security_Baseline",
+  "validation_mode": "StrictFailFast",
+  "hashing_constraints": {
+    "minimum_allowed_algorithm": "BLAKE3",
+    "allow_mixed_algorithms": true
+  },
+  "source_constraints": {
+    "allowed_sources": ["pypi", "internal_repo", "core_mirror"],
+    "action_on_untrusted_source": "DENY"
+  },
+  "failure_actions": {
+    "on_system_signature_mismatch": "CRITICAL_HALT",
+    "on_dependency_signature_mismatch": "QUARANTINE_AND_LOG_HIGH"
+  },
+  "remediation_strategy": {
+    "enabled": true,
+    "attempt_source": "internal_repo"
+  }
+}

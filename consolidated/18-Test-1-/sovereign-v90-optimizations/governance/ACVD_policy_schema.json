@@ -1,0 +1,94 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Axiom Constraint Validation Domain (ACVD) Policy Schema",
+  "description": "Defines the required fields and structural constraints for operational governance policies, ensuring compliance with Axiom III. Enhanced for AGI-KERNEL self-modification and auditing.",
+  "type": "object",
+  "required": [
+    "governance_policy_version",
+    "minimum_utility_threshold",
+    "mandatory_schema_signatures",
+    "operational_constraints",
+    "policy_scope"
+  ],
+  "properties": {
+    "governance_policy_version": {
+      "type": "string",
+      "description": "Immutable policy state identifier, mandatory for CSR trace generation."
+    },
+    "policy_scope": {
+      "type": "string",
+      "description": "Defines the operational domain this policy applies to (e.g., 'Evolution Pipeline', 'Nexus-Database', 'Infrastructure Authority')."
+    },
+    "minimum_utility_threshold": {
+      "type": "number",
+      "format": "float",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Explicit minimum utility value threshold (Omega_min) required to satisfy GAX I. Often correlated with normalized capability scores."
+    },
+    "mandatory_schema_signatures": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "Cryptographic key or hash."
+      },
+      "minItems": 1,
+      "description": "Cryptographic artifacts validating the ACVD structure against MPAM auditing standards."
+    },
+    "operational_constraints": {
+      "type": "object",
+      "description": "Detailed map of versioned system operation limits and rules enforced by ACVD, specifically targeting AGI evolution metrics.",
+      "required": [
+        "agik_evolution_metrics",
+        "infrastructure_authority"
+      ],
+      "properties": {
+        "agik_evolution_metrics": {
+          "type": "object",
+          "description": "Mandatory tracking requirements aligned with AGI-KERNEL success indicators and stagnation protocols.",
+          "required": [
+            "minimum_maturity_target",
+            "max_stagnation_cycles"
+          ],
+          "properties": {
+            "minimum_maturity_target": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "The minimum maturity level required for operations under this policy."
+            },
+            "max_stagnation_cycles": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "The maximum allowed consecutive cycles without improvement before activating Stagnation Recovery Protocol."
+            },
+            "minimum_capability_scores": {
+              "type": "object",
+              "description": "Object detailing minimum required score thresholds for core capabilities."
+            }
+          }
+        },
+        "infrastructure_authority": {
+          "type": "object",
+          "description": "Constraints applied to autonomous infrastructure creation and self-modification actions.",
+          "required": [
+            "manifest_justification_required",
+            "rollback_mechanism_mandatory"
+          ],
+          "properties": {
+            "manifest_justification_required": {
+              "type": "boolean",
+              "description": "If true, requires detailed justification in manifest.json before execution."
+            },
+            "rollback_mechanism_mandatory": {
+              "type": "boolean",
+              "description": "If true, requires a tested rollback mechanism be defined for the change."
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

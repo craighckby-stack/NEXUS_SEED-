@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.agi/AXEL/PolicyEngineConfigSchema.json",
+  "title": "AXEL Adaptive Policy Definition",
+  "type": "object",
+  "properties": {
+    "policy_id": {"type": "string", "description": "Unique identifier for the policy (must match runtime config policy_name)."},
+    "governance_mode_attributes": {
+      "type": "object",
+      "description": "Specific tunable parameters based on the selected governance mode (e.g., EFFICIENT, LOW_LATENCY).",
+      "properties": {
+        "EFFICIENT": {"type": "object", "properties": {"max_idle_time_s": {"type": "integer"}, "garbage_collection_interval_ms": {"type": "integer"}}},
+        "LOW_LATENCY": {"type": "object", "properties": {"min_worker_sustain": {"type": "integer"}, "preemptive_allocation": {"type": "boolean"}}}
+      },
+      "required": ["EFFICIENT", "LOW_LATENCY"]
+    },
+    "trigger_conditions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "metric": {"type": "string", "enum": ["CPU_UTIL", "MEMORY_PRESSURE", "QUEUE_DEPTH"]},
+          "threshold": {"type": "number"},
+          "action": {"type": "string", "enum": ["SCALE_UP", "SCALE_DOWN", "REALLOCATE_CACHE"]}
+        }
+      }
+    }
+  },
+  "required": ["policy_id", "governance_mode_attributes"]
+}

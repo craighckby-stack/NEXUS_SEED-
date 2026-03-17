@@ -1,0 +1,30 @@
+{
+  "map_version": "v94.1-ESM-01",
+  "description": "Standardized Error State Mapping (ESM) for SMC transitions, defining standard resolution paths for known faults.",
+  "error_states": {
+    "E999_SYSTEM_HALT": {
+      "message": "Critical system halt detected. Integrity failure.",
+      "severity": "CRITICAL",
+      "action": "HALT_NODE | LOG_CRITICAL",
+      "fallback": null
+    },
+    "E100_AUTH_FAILURE": {
+      "message": "Resource allocation or initial signature verification failed.",
+      "severity": "HIGH",
+      "action": "RETRY_S010 | NOTIFY_GOVERNANCE",
+      "fallback": "S000_INIT"
+    },
+    "E200_ENV_SETUP_FAIL": {
+      "message": "Required external/internal environment setup (TEMM/ECVM) could not be finalized.",
+      "severity": "MEDIUM",
+      "action": "REVERT_TO_SAFE_MODE",
+      "fallback": "S000_INIT"
+    },
+    "E400_FINALITY_ABORT": {
+      "message": "P-01 finality commit failed due to inconsistency or integrity failure.",
+      "severity": "CRITICAL",
+      "action": "TRIGGER_CONSENSUS_ABORT_VOTE",
+      "fallback": "E999_SYSTEM_HALT"
+    }
+  }
+}

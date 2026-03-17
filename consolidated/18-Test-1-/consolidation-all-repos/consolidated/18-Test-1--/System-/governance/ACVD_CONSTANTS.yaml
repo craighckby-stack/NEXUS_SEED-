@@ -1,0 +1,20 @@
+# Axiom Constraint Validation Domain (ACVD) Configuration V94.1
+# Defines the mandatory policy thresholds required for P-01 Atomic Finality (S11).
+
+ACVD_VERSION: "94.1.0"
+
+# --- Axiom I: Utility Thresholds (TEMM) ---
+AXIOM_I:
+  # Minimum acceptable Transition Efficacy Metric Measure (Omega_min).
+  # State transition fails DSE if TEMM < MIN_UTILITY_THRESHOLD.
+  MIN_UTILITY_THRESHOLD: 0.98
+  # Threshold for logging Utility Debt (ADTM entry) if TEMM is marginally sufficient.
+  ADTM_DEBT_REPORT_THRESHOLD: 0.995
+
+# --- Axiom III: Integrity Check Policies (MPAM) ---
+AXIOM_III:
+  # Mandatory Structural Violations List (if checked true, P-01 is instant FAIL)
+  MANDATORY_VIOLATIONS_CHECK:
+    - "CONFIG_SCHEMA_BREAKDOWN": true
+    - "SEC_PRIVILEGE_ESCAPE": true
+    - "RECURSIVE_STATE_CALL": true

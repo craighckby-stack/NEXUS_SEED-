@@ -1,0 +1,56 @@
+{
+  "policy_version": "v94.1-HighSecurity-PKS-11",
+  "enabled": true,
+  "governance": {
+    "default_rotation_interval_days": 90,
+    "critical_rotation_interval_days": 30,
+    "key_derivation_algorithm": "HKDF_SHA256",
+    "max_parallel_ops": 10,
+    "failover_threshold_minutes": 5
+  },
+  "transport_security": {
+    "wrapping_algorithm": "RSA_OAEP_4096",
+    "root_kms_identifier": "arn:orchestrator-root-key/global-001",
+    "require_hsm_attestation": true
+  },
+  "key_groups": [
+    {
+      "id": "service_data_crypto_v1",
+      "purpose": "Symmetric encryption of sensitive database fields",
+      "sensitivity": "P1_Critical",
+      "cipher_suite": "AES_256_GCM",
+      "rotation_schedule": "governance.critical_rotation_interval_days",
+      "providers": [
+        { "name": "Primary_AWS_KMS", "mode": "Active" },
+        { "name": "Secondary_Azure_KV", "mode": "Passive_Backup" }
+      ]
+    },
+    {
+      "id": "jwt_signing_keys",
+      "purpose": "Asymmetric signing for internal tokens",
+      "sensitivity": "P2_Confidential",
+      "cipher_suite": "ECDSA_P521",
+      "rotation_schedule": "governance.default_rotation_interval_days",
+      "providers": [
+        { "name": "GCP_KMS", "mode": "Active" }
+      ]
+    }
+  ],
+  "providers": {
+    "Primary_AWS_KMS": {
+      "type": "AWS_KMS",
+      "region": "us-east-1",
+      "endpoint": null,
+      "credentials_profile": "kms-orchestrator-role"
+    },
+    "Secondary_Azure_KV": {
+      "type": "Azure_KeyVault",
+      "vault_url": "https://agi-vault.vault.azure.net",
+      "tenant_id": "9876-5432-1"
+    }
+  },
+  "auditing": {
+    "events": ["ROTATION_SUCCESS", "DEGRADATION_WARNING", "REVOCATION"],
+    "sink": "Internal_ELK_Security_Pipeline"
+  }
+}

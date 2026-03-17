@@ -1,0 +1,23 @@
+{
+  "policy_version": "1.0.0",
+  "description": "Defines the baseline configurations for all referenced governance policies (P-GOV-XXX) used by the Context Resolver.",
+  "policies": [
+    {
+      "policy_id": "P-GOV-001_EfficacyCheck",
+      "target_sensor": "S-01_Efficacy_Score",
+      "baseline": {
+        "required_pass_score": 75.0,
+        "weight_multiplier": 1.0
+      },
+      "description": "Standard governance policy defining the minimum acceptable efficacy threshold and its weighing."
+    },
+    {
+      "policy_id": "P-GOV-002_RiskExposure",
+      "target_sensor": "S-02_Risk_Exposure",
+      "baseline": {
+        "tolerance_override": 0.05
+      },
+      "description": "Standard governance policy defining the acceptable maximum threshold for operational risk exposure."
+    }
+  ]
+}

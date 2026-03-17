@@ -1,0 +1,62 @@
+{
+  "policy_metadata": {
+    "policy_id": "SBCM-941B",
+    "audit_version": "v2.0.0",
+    "description": "Configuration for Sovereign Behavioral Constraint Monitoring (SBCM) audit streams."
+  },
+  "telemetry_config": {
+    "default_collection_interval_ms": 1000,
+    "metrics": {
+      "system_resource": [
+        {"name": "cpu_utilization_percent", "priority": "HIGH"},
+        {"name": "memory_pressure_ratio", "priority": "HIGH"}
+      ],
+      "performance": [
+        {"name": "dependency_load_time_ms", "priority": "MEDIUM"}
+      ],
+      "governance": [
+        {"name": "governance_violation_count", "priority": "CRITICAL", "aggregation_method": "SUM"}
+      ]
+    }
+  },
+  "logging_profiles": {
+    "P_CRITICAL_SEC": {
+      "level": "CRITICAL",
+      "sinks": ["SECURITY_EVENTS", "AUDIT_LOG_STREAM"],
+      "action_on_sink_failure": "FALLBACK_TO_LOCAL_DISK",
+      "alert_trigger": true
+    },
+    "P_TELEMETRY_BG": {
+      "level": "WARNING",
+      "sinks": ["TELEMETRY_DATALAKE"],
+      "action_on_sink_failure": "DROP",
+      "debounce_window_s": 60
+    },
+    "P_FATAL_ASSURANCE": {
+      "level": "FATAL",
+      "sinks": ["SECURITY_EVENTS", "AUDIT_LOG_STREAM"],
+      "action_on_sink_failure": "HALT_PROCESS",
+      "alert_trigger": true
+    }
+  },
+  "enforcement_streams": [
+    {
+      "breach_type": "integrity_violation",
+      "profile_id": "P_CRITICAL_SEC",
+      "required_metadata_set": ["timestamp", "violating_function", "context_hash"],
+      "sampling_rate": 1.0
+    },
+    {
+      "breach_type": "runtime_governance_breach",
+      "profile_id": "P_TELEMETRY_BG",
+      "required_metadata_set": ["model_uuid", "policy_trigger"],
+      "sampling_rate": 0.5
+    },
+    {
+      "breach_type": "assurance_failure",
+      "profile_id": "P_FATAL_ASSURANCE",
+      "required_metadata_set": ["model_uuid", "input_hash", "confidence_score", "policy_trigger", "source_file"],
+      "sampling_rate": 1.0
+    }
+  ]
+}

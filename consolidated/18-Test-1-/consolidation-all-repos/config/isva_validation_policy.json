@@ -1,0 +1,11 @@
+{
+  "description": "Configuration for the Input State Validation Agent (ISVA). Defines granular operational constraints for input resources before G1 gate entry.",
+  "policy_version": "v1.0",
+  "constraints": {
+    "max_payload_size_mb": 500,
+    "required_metadata_fields": ["epoch_id", "origin_hash", "source_timestamp"],
+    "timing_tolerance_ms": 50, 
+    "protocol_allow_list": ["psi-transport/v1"]
+  },
+  "action_on_violation": "IH_P-M02_TRIGGER"
+}

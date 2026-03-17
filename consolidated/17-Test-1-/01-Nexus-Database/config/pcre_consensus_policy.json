@@ -1,0 +1,98 @@
+{
+  "metadata": {
+    "policy_name": "Policy_Consensus_Ratification_Evolution",
+    "policy_version": "V2.0_BETA",
+    "config_schema_version": "AGI-Aura-S2",
+    "policy_id": "PCRE-V2.0",
+    "description": "Defines cryptographic quorum, role-based acceptance thresholds, and multi-party ratification process for updating Core Mandates (P-SET) and ACVM Thresholds. Refactored for modularity."
+  },
+  "governance_parameters": {
+    "time_constraints": {
+      "update_frequency_cap_hours": 72,
+      "rollback_window_hours": 24,
+      "proposal_expiration_hours": 168
+    },
+    "ratification_thresholds": {
+      "absolute_min_signers_count": 7,
+      "role_acceptance_percent": 0.67,
+      "total_pool_acceptance_percent": 0.51,
+      "is_overridable": false
+    },
+    "enforcement_profile_id": "EP-QUORUM-SIG-V2"
+  },
+  "signer_roles": [
+    {
+      "role_id": "REG_GOV",
+      "role_name": "Regulatory_Governance",
+      "required_groups": [
+        "Governance_DAO_Key"
+      ],
+      "min_required_signatures": 1,
+      "enforcement_level": "CRITICAL"
+    },
+    {
+      "role_id": "SYS_INT",
+      "role_name": "System_Integrity_Verification",
+      "required_groups": [
+        "Integrity_Audit_Service",
+        "Security_Harness_Agent"
+      ],
+      "min_required_signatures": 3,
+      "enforcement_level": "CRITICAL"
+    },
+    {
+      "role_id": "OPS_STAB",
+      "role_name": "Operational_Stability",
+      "required_groups": [
+        "System_Stability_Council"
+      ],
+      "min_required_signatures": 1,
+      "enforcement_level": "ADVISORY"
+    }
+  ],
+  "protected_policy_targets": {
+    "lock_mechanism": "CRYPTOGRAPHIC_HASH_LOCK (L2)",
+    "target_definitions": [
+      {
+        "module_id": "ACVM",
+        "target_description": "Autonomous Core Validation Mandates",
+        "enforcement_profile_reference": "PROFILE-VigilanceEngine-V3"
+      },
+      {
+        "module_id": "GSEP",
+        "target_description": "Global System Execution Parameters (Core/Fallback)",
+        "enforcement_profile_reference": "PROFILE-RuntimeKernelHalt-V1"
+      },
+      {
+        "module_id": "DARM",
+        "target_description": "Data Access Restriction Mandates",
+        "enforcement_profile_reference": "PROFILE-StateConsistencyMonitor-V2"
+      }
+    ]
+  },
+  "ratification_workflow": [
+    {
+      "stage_id": "P-DRAFT",
+      "name": "Policy Draft Generation and Artifact Hashing",
+      "validation_id": "PV-DRAFT-01",
+      "input_set_type": "P-SET",
+      "success_condition": "Artifact hash recorded to Temporal State Ledger (TSL)."
+    },
+    {
+      "stage_id": "P-VOTE",
+      "name": "Signature Collection and Quorum Consensus Check",
+      "predecessor": "P-DRAFT",
+      "validation_id": "PV-QUORUM-02",
+      "check_agent": "ConsensusVerificationHarness",
+      "success_condition": "All governance parameters met/exceeded."
+    },
+    {
+      "stage_id": "P-COMMIT",
+      "name": "State Activation and Deployment Interlock",
+      "predecessor": "P-VOTE",
+      "validation_id": "PV-DEPLOY-03",
+      "enforcement_agent": "DeploymentManager_CHR",
+      "success_condition": "Deployment committed and verifiable by watchdog."
+    }
+  ]
+}

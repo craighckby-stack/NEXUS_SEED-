@@ -1,0 +1,37 @@
+{
+  "ProtocolID": "SHL/P-11",
+  "ProtocolName": "Sequential Hashing Ledger Interface",
+  "Version": "1.0",
+  "Mandate": "Provide an immutable, verifiable, append-only record store for TEDS (P-004) Failure Vectors ($F_V$).",
+  "Interface": {
+    "CommitRecord": {
+      "Input": {
+        "FailureVector": "Object (F_V Schema compliant)",
+        "OriginatingSignature": "Hex String"
+      },
+      "Output": {
+        "RecordID": "String (SHA-256)",
+        "LedgerBlockHash": "Hex String"
+      },
+      "Requires": "Verification of OriginatingSignature."
+    },
+    "RetrieveRecord": {
+      "Input": {
+        "RecordID": "String"
+      },
+      "Output": {
+        "FailureVector": "Object",
+        "CommitMetadata": "Object (Timestamp, SHL_Index)"
+      }
+    },
+    "VerifyChainIntegrity": {
+      "Input": {
+        "BlockHash": "Hex String"
+      },
+      "Output": {
+        "Status": "Boolean",
+        "CRoTSignature": "Hex String"
+      }
+    }
+  }
+}

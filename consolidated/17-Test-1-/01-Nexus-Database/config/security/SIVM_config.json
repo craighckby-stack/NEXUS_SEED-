@@ -1,0 +1,37 @@
+{
+  "module_id": "SIVM_V2",
+  "name": "Sovereign Integrity Validation Matrix Configuration",
+  "description": "Configuration for the multi-stage State Integrity Validation Matrix.",
+  "operational_policies": [
+    "POLICY_DYNAMIC_INTEL_GATED_CHECK",
+    "POLICY_PROCESS_WHITELISTING_HVM",
+    "POLICY_NETWORK_SEALING"
+  ],
+  "policy_matrix": {
+    "SEALED_STATE": {
+      "integrity_score_min": 0.9995,
+      "entropy_min_level": 0.95,
+      "allowed_components": ["SIVM_CORE", "NOTARY_SYNC_H", "SRAA_AGENT"],
+      "network_profile": "SEALED_LOOPBACK"
+    },
+    "AUDIT_STATE": {
+      "integrity_score_min": 0.9950,
+      "entropy_min_level": 0.80,
+      "allowed_components": ["SIVM_CORE", "NOTARY_SYNC_H", "TELEMETRY_ENGINE"],
+      "network_profile": "INTERNAL_SUBNET_READ_ONLY"
+    }
+  },
+  "telemetry_settings": {
+    "logging_level": "AUDIT_AND_ABOVE",
+    "retention_policy": "FORENSIC_90D",
+    "report_targets": [
+      {"type": "LOCAL_HARDENED_LOG", "encrypted": true, "sync_priority": 1},
+      {"type": "EXTERNAL_VAULT", "protocol": "AES-256-GCM", "endpoint_key": "SIVM_EKEY_1", "sync_priority": 0}
+    ]
+  },
+  "response_chain": [
+    {"stage": 1, "score_violation": 0.0005, "action": "PROCESS.QUARANTINE_NON_WHITELISTED", "delay_ms": 50},
+    {"stage": 2, "score_violation": 0.0010, "action": "NETWORK.SEAL_ALL_PORTS", "delay_ms": 0},
+    {"stage": 3, "score_violation": 0.0015, "action": "SYSTEM.INITIATE_FAILSAFE_SHUTDOWN", "delay_ms": 200}
+  ]
+}

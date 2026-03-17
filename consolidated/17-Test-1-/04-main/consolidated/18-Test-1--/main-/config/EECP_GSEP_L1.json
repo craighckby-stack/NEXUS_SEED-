@@ -1,0 +1,23 @@
+{
+  "profile_id": "EECP_GSEP_V94_L1_PROD",
+  "description": "Execution Constraints Profile for GSEP Workflow in L1 Production Environment.",
+  "governing_manifest_ref": "WCIM_V1.2_20240726_RC1",
+  "resource_limits": {
+    "cpu_max_cores": 8,
+    "memory_limit_gb": 64,
+    "network_egress_rate_mbps": 500
+  },
+  "security_enforcements": [
+    {
+      "module_ref": "CPES_Sandbox_Engine",
+      "constraint_type": "SELinux_Policy",
+      "policy_version": "L1_Mandatory_Isolation_V3"
+    },
+    {
+      "module_ref": "SGS_Orchestrator_Core",
+      "constraint_type": "Allowed_Service_Endpoints",
+      "endpoints": ["Internal_Data_Bus_V94", "CRONOS_Telemetry"]
+    }
+  ],
+  "environmental_hash_check": true
+}

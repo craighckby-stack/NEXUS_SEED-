@@ -1,0 +1,26 @@
+{
+  "policy_name": "Aggressive_High_Availability",
+  "policy_id": "AS_P_003",
+  "description": "Policy for dynamically adjusting resource limits when core CPU threshold is breached.",
+  "triggers": {
+    "cpu_breach": {
+      "type": "GPC_Reference",
+      "threshold_key": "cpu_load_threshold_pct"
+    }
+  },
+  "actions": [
+    {
+      "action_id": 1,
+      "type": "ScaleOut",
+      "target": "compute_unit",
+      "increment": 1,
+      "cooldown_sec": 30
+    },
+    {
+      "action_id": 2,
+      "type": "Priority_Downgrade",
+      "target": "low_priority_tasks",
+      "priority_shift": 5
+    }
+  ]
+}

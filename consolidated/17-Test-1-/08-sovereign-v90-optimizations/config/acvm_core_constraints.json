@@ -1,0 +1,46 @@
+{
+  "version": "1.1",
+  "constraint_set_name": "ACVM_Core_V2_AGI_Enabled",
+  "constraints": [
+    {
+      "id": "C001_TemporalConsistency",
+      "description": "Ensure temporal entropy shift does not exceed delta threshold based on TEMM input.",
+      "severity": "CRITICAL",
+      "metric_dependency": "TEMM",
+      "formula": "ABS(TEMM.delta) <= ACVM_CONFIG.TEMPORAL_THRESHOLD"
+    },
+    {
+      "id": "C002_ErosionThreshold",
+      "description": "Limit acceptable error correction attempts based on ECVM input to prevent degradation.",
+      "severity": "HIGH",
+      "metric_dependency": "ECVM",
+      "formula": "ECVM.attempts < 100 AND ECVM.rate < 0.05"
+    },
+    {
+      "id": "C003_ResourceBudgetCompliance",
+      "description": "Verify the planned resource allocation remains within the baseline budget defined by the initial CSR, allowing for minor AGI infrastructure overhead.",
+      "severity": "LOW",
+      "metric_dependency": "CSR",
+      "formula": "CPR_PLAN.resource_cost <= CSR.baseline_budget * 1.10"
+    },
+    {
+      "id": "C004_NavigationDiversity",
+      "description": "Mandate the Navigator system ensures strategic diversity and adequate exploration coverage across the 2,300+ file repository scale.",
+      "severity": "CRITICAL",
+      "metric_dependency": "NAVIGATOR_METRICS",
+      "formula": "NAVIGATOR_METRICS.unique_files_touched_ratio >= 0.01 OR NAVIGATOR_METRICS.blacklist_size < 30"
+    },
+    {
+      "id": "C005_Emergent_Capability_Tracking",
+      "description": "Monitor the creation of novel capabilities within the /emergent directory as a proxy for successful cross-domain synthesis and innovation.",
+      "severity": "HIGH",
+      "metric_dependency": "EMERGENCE_PROTOCOL",
+      "formula": "EMERGENCE_PROTOCOL.active_capabilities > 0 AND EMERGENCE_PROTOCOL.discovery_rate > 0.001"
+    }
+  ],
+  "default_policy": {
+    "on_critical_failure": "HALT_IMMEDIATELY",
+    "on_high_failure": "LOG_AND_FLAG_REVIEW",
+    "on_medium_failure": "LOG_WARNING"
+  }
+}

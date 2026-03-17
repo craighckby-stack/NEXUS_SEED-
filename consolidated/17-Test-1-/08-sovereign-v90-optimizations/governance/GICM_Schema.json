@@ -1,0 +1,48 @@
+{
+  "SchemaID": "GICM-V94.1-Core",
+  "version": "94.1.0",
+  "metadata": {
+    "description": "Defines the normative structures for Governance, Integration, and Conflict Management (GICM) operations within the Sovereign AGI architecture.",
+    "isImmutable": true
+  },
+  "definitions": {
+    "PolicyDefinition": {
+      "type": "object",
+      "description": "A core operational policy structure.",
+      "required": ["PolicyID", "ScopeTargets", "EnforcementLevel"],
+      "properties": {
+        "PolicyID": {"type": "string", "pattern": "^P_[A-Z0-9]{5,10}$", "description": "Unique, immutable policy identifier."},
+        "ScopeTargets": {"type": "array", "items": {"type": "string", "enum": ["CORE_KERNEL", "MODULE_A", "DATA_LAKE", "EXTERNAL_API"]}},
+        "EnforcementLevel": {"$ref": "#/definitions/EnforcementLevel"},
+        "AdherenceMetricID": {"type": "string", "description": "References the required ID in SystemMetrics."}
+      }
+    },
+    "ConflictProfile": {
+      "type": "object",
+      "description": "Schema for classifying and resolving internal conflicts.",
+      "required": ["ConflictType", "ResolutionStrategy"],
+      "properties": {
+        "ConflictType": {"type": "string", "enum": ["RESOURCE_DEADLOCK", "POLICY_VIOLATION", "INTEGRATION_MISMATCH", "GOVERNANCE_STALEMATE"]},
+        "ResolutionStrategy": {"type": "string", "enum": ["AUTO_MERGE", "HIERARCHICAL_DEFERRAL", "CONSENSUS_VOTING"]},
+        "PriorityMatrix": {"type": "object", "description": "Defines decision weight distribution."}
+      }
+    },
+    "EnforcementLevel": {
+      "type": "string",
+      "enum": ["CRITICAL_HALT", "BLOCKING_WARNING", "NON_BLOCKING_LOG", "REPORTING_ONLY"],
+      "default": "BLOCKING_WARNING"
+    }
+  },
+  "SystemMetrics": {
+    "type": "array",
+    "description": "Mandatory metrics tracked by the governance system.",
+    "items": {
+      "type": "object",
+      "properties": {
+        "MetricID": {"type": "string", "pattern": "^M_[A-Z0-9]{5,10}$"},
+        "CalculationEngine": {"type": "string", "description": "Pointer to the utility responsible for computation."},
+        "Thresholds": {"type": "object", "properties": {"Failure": {"type": "number"}, "Warning": {"type": "number"}}}
+      }
+    }
+  }
+}

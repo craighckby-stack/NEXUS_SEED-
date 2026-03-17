@@ -1,0 +1,9 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Disallow admin paths
+Disallow: /admin/
+Disallow: /api/
+
+Sitemap: https://craighckby-stack.github.io/ai-scaffold/sitemap.xml

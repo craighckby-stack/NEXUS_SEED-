@@ -1,0 +1,1 @@
+Optimization initiated for P-01_PASS_CRITERIA policy. Applying WEIGHTED_SUM_PLUS_HARD_CONSTRAINT aggregation mode with recursive abstraction. Mandate execution approval requires Q_SCORE_EFFICACY and Q_SCORE_SYSTEM_RISK inputs, and EXECUTION_MODE set to SAFE_ISOLATION. Final threshold set to 0.70.

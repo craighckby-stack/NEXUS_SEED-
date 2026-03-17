@@ -1,0 +1,34 @@
+# Formal Governance Configuration Schema (FGCS) V94.4
+# Mandates the structural integrity of all Governance Artifacts (Manifests).
+
+version: 94.4.0
+description: Schema for critical configuration files feeding the P-01 Calculus.
+
+schemas:
+  CFTM_Schema:
+    manifest_acronym: CFTM
+    required_fields:
+      - name: epsilon_utility_margin
+        type: float
+        bounds: [0.000001, 1.0]
+        criticality: CRITICAL_P01_S8
+        description: Minimum required delta (epsilon) for utility maximization.
+
+  PVLM_Schema:
+    manifest_acronym: PVLM
+    required_fields:
+      - name: prohibited_keywords
+        type: array(string)
+        criticality: CRITICAL_P01_S2
+      - name: maximum_resource_deviation_percent
+        type: float
+        bounds: [0.0, 0.1]
+        criticality: CRITICAL_P01_S2
+
+  MPAM_Schema:
+    manifest_acronym: MPAM
+    required_fields:
+      - name: metric_bounds
+        type: array(object)
+        schema_ref: MetricBoundsItem
+        criticality: CRITICAL_P01_S3

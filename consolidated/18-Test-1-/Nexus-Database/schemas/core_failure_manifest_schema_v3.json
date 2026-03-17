@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://agi.sovereign/schemas/core_failure_manifest_v3.json",
+  "title": "Core Failure Thresholds Manifest Schema V3",
+  "type": "object",
+  "properties": {
+    "manifest_id": {"type": "string"},
+    "description": {"type": "string"},
+    "version": {"type": "string"},
+    "METADATA": {"type": "object"},
+    "CONSTANTS": {
+      "type": "object",
+      "description": "System-wide mathematical constants.",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "properties": {
+            "value": {"type": "number"},
+            "unit": {"type": "string"},
+            "purpose": {"type": "string"}
+          },
+          "required": ["value", "unit", "purpose"]
+        }
+      }
+    },
+    "CORE_SAFETY_THRESHOLDS": {
+      "type": "object",
+      "description": "Hard limits requiring immediate termination or resource control.",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "properties": {
+            "level": {"enum": ["CRITICAL", "HARD_LIMIT"]},
+            "value": {"type": "number"},
+            "unit": {"type": "string"},
+            "action": {"type": "string"}
+          },
+          "required": ["level", "value", "unit", "action"]
+        }
+      }
+    },
+    "MONITORING_THRESHOLDS": {
+      "type": "object",
+      "description": "Soft limits requiring auditing or continuous monitoring alerts.",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "properties": {
+            "level": {"enum": ["WARNING"]},
+            "value": {"type": "number"},
+            "unit": {"type": "string"},
+            "action": {"type": "string"}
+          },
+          "required": ["level", "value", "unit", "action"]
+        }
+      }
+    }
+  },
+  "required": ["manifest_id", "version", "CONSTANTS", "CORE_SAFETY_THRESHOLDS"]
+}

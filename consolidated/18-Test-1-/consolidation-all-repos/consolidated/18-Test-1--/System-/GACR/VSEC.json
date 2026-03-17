@@ -1,0 +1,33 @@
+{
+  "schema_version": "VSEC_V1.0",
+  "description": "Violation Severity and Enforcement Configuration. Defines required punitive/remediation actions upon Constraint Violations (VSEC). This configuration is read by SGS to determine mandatory response actions upon detection of AIM breaches.",
+  "violation_types": {
+    "RESOURCE_EXHAUSTION": {
+      "severity": "HIGH",
+      "action": "THROTTLE_AND_LOG",
+      "trigger_thresholds_percent": {
+        "SGS_AGENT": 90,
+        "GAX_AGENT": 85
+      }
+    },
+    "INTEGRITY_CHECK_FAILURE": {
+      "severity": "CRITICAL",
+      "action": "ISOLATE_AND_HALT",
+      "quarantine_mode": "SEC_LEVEL_5"
+    },
+    "UNAUTHORIZED_SYSCALL": {
+      "severity": "CATASTROPHIC",
+      "action": "KERNEL_TRAP_SIGNAL_SGS"
+    },
+    "NETWORK_POLICY_BREACH": {
+      "severity": "CRITICAL",
+      "action": "NETWORK_ISOLATE_SOFT"
+    }
+  },
+  "default_enforcement_policy": {
+    "LOW": "LOG_WARN",
+    "HIGH": "TERMINATE_GRACEFUL",
+    "CRITICAL": "ISOLATE_HARD",
+    "CATASTROPHIC": "REBOOT_SYSTEM_SECURE"
+  }
+}

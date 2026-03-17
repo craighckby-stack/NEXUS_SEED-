@@ -1,0 +1,61 @@
+{
+  "manifest_schema_version": "2.0.0",
+  "manifest_id": "SBCM_Layered",
+  "baseline_label": "SovereignAGI_v94.1_Root_Q3",
+  "description": "Layered governance baseline ensuring strict separation of mandatory security constraints from operational controls.",
+  "effective_period": {
+    "start": "2024-07-01T00:00:00Z",
+    "end": "2025-01-01T00:00:00Z"
+  },
+  "layers": [
+    {
+      "name": "Security_Foundation",
+      "type": "Mandatory_Immutable",
+      "purpose": "Non-negotiable cryptographically verified controls.",
+      "constraints": [
+        {
+          "id": "TRUST_ROOT_CRYPTO",
+          "policy_engine": "PKI_Service",
+          "configuration": {
+            "signing_key_fingerprint": "941C:B007:E123:FABC:941A",
+            "required_signature_algorithm": "Ed25519",
+            "revocation_check": "CRL"
+          }
+        },
+        {
+          "id": "AUDIT_IMMUTABILITY",
+          "policy_engine": "Logging_Ingestion_Engine",
+          "configuration": {
+            "target_system": "ImmutableLedger",
+            "minimum_retention_days": 365,
+            "external_replication_required": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "Operational_Evolution",
+      "type": "Flexible_Runtime",
+      "purpose": "Adaptable constraints for operational resource use and autonomous evolution.",
+      "constraints": [
+        {
+          "id": "CODE_EVOLUTION_LIMITS",
+          "policy_engine": "Sovereign_Kernel_Policy_Module",
+          "configuration": {
+            "max_daily_commit_volume": 50,
+            "self_modification_requires_consensus": true
+          }
+        },
+        {
+          "id": "RESOURCE_THROTTLING",
+          "policy_engine": "Runtime_Scheduler_API",
+          "configuration": {
+            "cpu_limit_pct_p90": 85,
+            "memory_limit_gb": 64,
+            "iops_threshold_p99": 10000
+          }
+        }
+      ]
+    }
+  ]
+}

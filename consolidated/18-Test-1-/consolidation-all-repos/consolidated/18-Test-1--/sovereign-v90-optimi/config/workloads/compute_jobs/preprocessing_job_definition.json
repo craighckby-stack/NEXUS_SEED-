@@ -1,0 +1,22 @@
+{
+  "jobId": "J01_DATA_PREPROCESSING",
+  "resourceRef": "Kube_HighCPU_Cluster",
+  "driverConfig": {
+    "cpuCores": 4,
+    "memoryGiB": 16
+  },
+  "executorConfig": {
+    "instances": 20,
+    "cpuCoresPerInstance": 8,
+    "memoryGiBPerInstance": 32,
+    "scalingPolicy": "AUTOSCALE_DYNAMIC"
+  },
+  "command": {
+    "mainClass": "com.godm.preprocessing.PipelineExecutor",
+    "args": [
+      "--input-schema-ref", "@R01_DB_SCHEMA_SETUP.DB_Config_ID",
+      "--output-storage-path", "s3://raw-staging/preprocessed"
+    ]
+  },
+  "jobTimeoutMinutes": 60
+}

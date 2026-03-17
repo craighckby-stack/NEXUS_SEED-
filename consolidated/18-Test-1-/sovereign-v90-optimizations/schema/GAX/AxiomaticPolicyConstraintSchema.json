@@ -1,0 +1,115 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "sag-v94-1/GAX/AxiomaticPolicyConstraintSchema.json",
+  "title": "Axiomatic Policy Constraint Schema (APCS)",
+  "description": "Defines declarative structural requirements for Axiomatic Constraint Vectors, optimizing integrity checks for Prohibition Veto Logic (PVLM) and Metric Performance Assurance (MPAM) before GAX execution.",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Policy Schema Version.",
+      "pattern": "^v[0-9]+\\.[0-9]+$"
+    },
+    "prohibitionVetoLogic": {
+      "type": "array",
+      "description": "Structured policy rules governing the Prohibition Veto Logic Module (PVLM).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique Constraint Identifier (e.g., C001)."
+          },
+          "targetScope": {
+            "type": "string",
+            "description": "Defines the scope/phase of the GAX pipeline where the constraint applies.",
+            "enum": ["GLOBAL", "MODEL_EVOLUTION", "VECTOR_INJECTION", "STATE_AUDIT"]
+          },
+          "ruleDefinition": {
+            "$ref": "#/definitions/PolicyRule"
+          }
+        },
+        "required": ["id", "targetScope", "ruleDefinition"]
+      }
+    },
+    "stabilityBounds": {
+      "type": "object",
+      "description": "Constraints governing Stability Bounds Veto (MPAM, S04), related to evolutionary drift.",
+      "properties": {
+        "max_drift_pct": {
+          "type": "number",
+          "description": "Maximum allowed divergence from baseline metrics (0.0 to 1.0).",
+          "minimum": 0.0,
+          "maximum": 0.5
+        },
+        "time_to_live_s": {
+          "type": "integer",
+          "description": "Minimum required evolution lifetime (in seconds) before re-evaluation.",
+          "minimum": 30
+        },
+        "critical_metric_ids": {
+          "type": "array",
+          "description": "List of core metric identifiers critical for MPAM evaluation.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["max_drift_pct", "time_to_live_s", "critical_metric_ids"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["version", "prohibitionVetoLogic", "stabilityBounds"],
+  "definitions": {
+    "PolicyRule": {
+      "type": "object",
+      "description": "A single, declarative constraint rule, replacing ambiguous string logic.",
+      "properties": {
+        "logicGate": {
+          "type": "string",
+          "enum": ["AND", "OR", "NOT"],
+          "default": "AND",
+          "description": "How sub-constraints are evaluated."
+        },
+        "constraints": {
+          "type": "array",
+          "description": "An array of specific comparison constraints.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "field": {
+                "type": "string",
+                "description": "The target field in the State Vector or Context."
+              },
+              "operator": {
+                "type": "string",
+                "enum": ["EQ", "NEQ", "GT", "LT", "GTE", "LTE", "IN", "CONTAINS"],
+                "description": "The comparison operator."
+              },
+              "value": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "array"
+                  },
+                  {
+                    "type": "boolean"
+                  }
+                ],
+                "description": "The value to compare against."
+              }
+            },
+            "required": ["field", "operator", "value"]
+          },
+          "minItems": 1
+        }
+      },
+      "required": ["constraints"]
+    }
+  }
+}

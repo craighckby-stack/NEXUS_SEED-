@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agi.sovereign/configs/AGI_Network_Status_Codes.json",
+  "title": "AGI Network Status Codes Definition",
+  "description": "Standardized status codes for CNRE envelopes, supplementing or replacing HTTP codes for internal AGI communication, ensuring consistency across all agents.",
+  "type": "object",
+  "properties": {
+    "1000": {
+      "message": "Processing Intent",
+      "type": "Informational",
+      "success": null
+    },
+    "2000": {
+      "message": "Operation Successful",
+      "type": "Success",
+      "success": true
+    },
+    "4000": {
+      "message": "Invalid Request Format",
+      "type": "Client Error",
+      "success": false
+    },
+    "4001": {
+      "message": "Agent Target Not Found",
+      "type": "Client Error",
+      "success": false
+    },
+    "5000": {
+      "message": "Internal AGI System Failure",
+      "type": "Server Error",
+      "success": false
+    },
+    "5001": {
+      "message": "Execution Timeout/TTL Expired",
+      "type": "Server Error",
+      "success": false
+    }
+  },
+  "required": [],
+  "additionalProperties": true
+}

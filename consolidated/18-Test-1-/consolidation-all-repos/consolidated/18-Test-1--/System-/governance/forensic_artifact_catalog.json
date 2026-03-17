@@ -1,0 +1,25 @@
+{
+  "catalog_version": "v1.0.0",
+  "description": "Defines standardized forensic artifacts and their required collection methods for use across Deviation Resolution Profiles, centralizing definitions for collection logic and data handling.",
+  "artifacts": {
+    "MEM_SNAPSHOT_DEEP": {
+      "collection_method": "JTAG_READOUT",
+      "target_scope": ["HEAP", "STACK", "REGISTER_CONTEXT"],
+      "compression": "LZ4_HIGH",
+      "retention_policy": "90_DAYS_IMMUTABLE"
+    },
+    "GOVERNANCE_CONTEXT_STACK": {
+      "collection_method": "DATABASE_QUERY",
+      "query_parameters": {
+        "lookback_seconds": 60,
+        "log_level_min": "WARNING"
+      },
+      "sensitive_data_masking": true
+    },
+    "RESOURCE_PROFILE_LIGHT": {
+      "collection_method": "OS_API_CALL",
+      "data_points": ["CPU_UTIL", "MEMORY_USED_PCT", "DISK_IOPS"],
+      "sample_rate": "1s"
+    }
+  }
+}

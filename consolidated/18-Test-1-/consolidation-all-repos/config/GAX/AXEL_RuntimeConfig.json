@@ -1,0 +1,16 @@
+{
+  "namespace_mappings": {
+    "MPAM": "metrics/mpam_state.json",
+    "PVLM": "metrics/pvlm_policy.json",
+    "ADTM": "metrics/adtm_behavior.json",
+    "GAX": "metrics/gax_runtime.json"
+  },
+  "allowed_functions": [
+    "MAX",
+    "MIN",
+    "AVG",
+    "TIME_SINCE"
+  ],
+  "parser_version": "v1.1.0",
+  "default_evaluation_timeout_ms": 50
+}

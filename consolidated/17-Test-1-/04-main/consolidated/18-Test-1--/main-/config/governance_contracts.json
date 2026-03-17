@@ -1,0 +1,48 @@
+{
+  "description": "Machine-readable registry defining the activated path/endpoints for critical Governance Contracts (GCR) required by the GSEP-C pipeline. Used primarily by L0 and L4 for context resolution and trust verification.",
+  "contracts": [
+    {
+      "id": "GSC",
+      "title": "Governance Schema Contract",
+      "layer": "PRE",
+      "version": "3.2.1",
+      "path": "/contracts/schemas/proposal_v3_2.json",
+      "immutable_hash": "sha256:a4b6c7d8e9f01234567890abcdef"
+    },
+    {
+      "id": "CTAL",
+      "title": "Configuration Trust Assurance Layer",
+      "layer": "L4",
+      "version": "1.0.5",
+      "endpoint": "http://core-services/ctal/v1/verify_context"
+    },
+    {
+      "id": "SCI",
+      "title": "Structural Cost Index",
+      "layer": "L3",
+      "version": "5.0.0-adaptive",
+      "path": "/policies/cost/sci_v5.yaml"
+    },
+    {
+      "id": "PVLM",
+      "title": "Policy Veto Logic Module",
+      "layer": "L1",
+      "version": "1.10.2",
+      "endpoint": "http://governance/veto-logic/critical"
+    },
+    {
+      "id": "MEE/MEC",
+      "title": "Metric/Equation Engine & Contract",
+      "layer": "L6",
+      "version": "94.1",
+      "path": "/contracts/metrics/objective_v94.1.py"
+    },
+    {
+      "id": "VMO",
+      "title": "Viability Margin Oracle",
+      "layer": "L7",
+      "version": "6.3",
+      "endpoint": "http://governance/margin-oracle/viability"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+# METRIC INGESTION AND FEATURE GENERATION PROTOCOL (MIFGP) V1.0
+
+description: Standardized protocol governing the certified transformation of input data (post-S3 Provenance Check) into Certified Governance Variables (CGVs: S01, S02) required for the GAX Engine (S6). Adherence to MDSM schema is mandatory.
+
+protocol_id: MIFGP_V1.0
+governance_stage: S6 (Metric)
+mandatory_assets: ["MDSM"]
+
+validation_steps:
+  # 1. Input Integrity Check
+  - step_id: V1.01
+    name: Source Data Semantic Verification
+    objective: Confirm inbound data aligns structurally and semantically with expected formats defined in MDSM schemas.
+    dependency: S4 Model Output
+    failure_mode: RRP
+
+  # 2. Feature Engineering & Normalization Layer
+  - step_id: V1.02
+    name: Certified Feature Transformation
+    objective: Execute only approved, certified transformation functions (CFuncs) listed in MDSM to derive intermediate features.
+    constraints: Enforce required normalization (Z-score, Min-Max, etc.) based on MDSM definition.
+    failure_mode: RRP
+
+  # 3. CGV Aggregation
+  - step_id: V1.03
+    name: Certified Governance Variable Synthesis (S01/S02)
+    objective: Aggregate normalized features into the final $S_{01}$ (Efficacy) and $S_{02}$ (Risk) scalar values, applying MDSM weighting rules.
+    output: { S01_Value: float, S02_Value: float, S6_Trace: sha256_hash }
+    failure_mode: RRP
+
+traceability_requirement:
+  - requirement: Trace all CFuncs used in V1.02/V1.03 execution.
+  - requirement: Include S6_Trace hash in the audit log (NRALS, S8) which encapsulates the input state, CFuncs used, and the final $S_{01}/S_{02}$ values.

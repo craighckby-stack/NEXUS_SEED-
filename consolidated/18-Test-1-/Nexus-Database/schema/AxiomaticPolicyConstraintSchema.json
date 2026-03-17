@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "sag-v94-1/schema/AxiomaticPolicyConstraintSchema.json",
+  "title": "Axiomatic Policy Constraint Schema (APCS)",
+  "description": "Defines the standard declarative structure for policy rules and constraints consumed by the GAX Constraint Validation Engine.",
+  "type": "object",
+  "properties": {
+    "PolicyId": { "type": "string", "description": "Unique identifier for the policy." },
+    "Target": {
+      "type": "object",
+      "properties": {
+        "Scope": { "type": "string", "description": "Defines the execution context (e.g., 'resource/storage', 'api/user'). Used for load optimization." },
+        "Description": { "type": "string" }
+      },
+      "required": ["Scope"]
+    },
+    "Rule": {
+      "type": "object",
+      "description": "The specific constraint to be evaluated.",
+      "properties": {
+        "Field": { "type": "string", "description": "The declarative field name, resolved via stateVectorMap (e.g., 'Target.Scope')." },
+        "Operator": { "type": "string", "description": "The symbolic operator, resolved via operatorFunctions (e.g., 'EQ', 'GTE')." },
+        "Value": { "type": ["string", "number", "boolean", "array", "null"], "description": "The comparative value used against the runtime state." }
+      },
+      "required": ["Field", "Operator", "Value"]
+    },
+    "Effect": { "type": "string", "enum": ["Allow", "Deny", "Monitor"], "description": "The consequence of a successful rule match." }
+  },
+  "required": ["PolicyId", "Target", "Rule", "Effect"]
+}

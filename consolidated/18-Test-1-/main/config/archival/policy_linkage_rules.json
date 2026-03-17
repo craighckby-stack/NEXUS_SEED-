@@ -1,0 +1,28 @@
+{
+  "mapping_version": "1.0.0",
+  "linkage_rules": [
+    {
+      "rule_id": "R001_EU_CUSTOMER_DATA",
+      "data_scope": "customer_data_european_union",
+      "required_profiles": [
+        "Regulatory_WORM_L4_Strict"
+      ],
+      "retention_default": "Retention_RP_GAX1_LITIGATION",
+      "context_match": {
+        "regulatory_zone": "GDPR",
+        "data_sensitivity": "Level_4"
+      }
+    },
+    {
+      "rule_id": "R002_INTERNAL_KMS_DEPENDENCY",
+      "data_scope": "system_keys",
+      "required_profiles": [
+        "System_KMS_Cluster_R6"
+      ],
+      "context_match": {
+        "environment": "Production",
+        "tier": "Critical_Infrastructure"
+      }
+    }
+  ]
+}

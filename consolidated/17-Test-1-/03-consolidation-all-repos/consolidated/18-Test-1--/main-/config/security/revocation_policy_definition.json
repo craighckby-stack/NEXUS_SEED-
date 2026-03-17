@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "description": "Definitions for key and asset revocation policies, guiding automated response, auditing processes, and ensuring policy compliance for cryptographic assets."
+  },
+  "policies": {
+    "POLICY:CRL-A-001": {
+      "policy_name": "Standard Annual Key Revocation & Archival",
+      "description": "Standard procedure for safely revoking and archiving keys after their rotation lifecycle is complete or upon verifiable compromise.",
+      "risk_tolerance_score": 0.9,
+      "triggers": [
+        {"type": "LifecycleExpiration", "condition_metric": "DaysSinceRotationDue", "threshold": 90},
+        {"type": "CompromiseSignal", "condition_status": "RISK_ELEVATED"}
+      ],
+      "actions": [
+        {"action_id": "DISABLE_USAGE", "target_key_status": "Revoked", "service_notification": ["KMS_Service", "API_Gateway"]},
+        {"action_id": "ARCHIVE_BACKUP", "retention_period_iso8601": "P5Y", "storage_class": "Cold"},
+        {"action_id": "AUDIT_LOG", "recipients": ["SecurityAuditorGroup"]}
+      ],
+      "compliance_level": "Mandatory"
+    }
+  }
+}

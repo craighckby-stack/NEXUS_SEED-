@@ -1,0 +1,383 @@
+import React, { useState, useEffect, useReducer, useRef, useCallback } from 'react';
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+
+/**
+ * Sovereign v89.1: Context-Aware Edition
+ * -----------------------------------------------------------------------------
+ * 1. Logic: Prioritizes README.md to prime the AI with project context.
+ * 2. Evolution: Injects project-wide documentation into every file refactor.
+ * 3. Protocol: Temperature 0.8 + "Auditor" persona for high-entropy changes.
+ * 4. Architecture: Preserved high-contrast sidebar/telemetry layout.
+ * -----------------------------------------------------------------------------
+ */
+
+const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'emg-v88-sovereign';
+let FIREBASE_CONFIG = null;
+try {
+  FIREBASE_CONFIG = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+} catch (e) {}
+
+const CONFIG = {
+  CYCLE_INTERVAL: 4000, 
+  MAX_HISTORY: 500, 
+  MODELS: [
+    { id: 'llama-3.3-70b', label: 'Llama 3.3 70B (Elite)' },
+    { id: 'llama-3.1-8b', label: 'Llama 3.1 8B (Fast)' }
+  ],
+  ALLOWED_EXT: /\.(js|jsx|ts|tsx|cjs|mjs|py|html|css|rs|go|json|md|c|cpp|h|hpp|java|rb|php|sh|yml|yaml|sql|dart|swift|kt)$/i,
+  IGNORED_PATHS: ['node_modules', 'dist', 'build', '.git', '.ico', 'package-lock.json', '.next', 'vendor', 'bin']
+};
+
+const app = initializeApp(FIREBASE_CONFIG);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const initialState = {
+  isLive: false,
+  status: 'IDLE',
+  activePath: 'System Ready',
+  selectedModel: localStorage.getItem('emg_v88_model') || 'llama-3.3-70b',
+  targetRepo: localStorage.getItem('emg_v88_repo') || '',
+  cerebrasKey: localStorage.getItem('emg_v88_key') || '',
+  ghToken: '', 
+  logs: [],
+  metrics: { mutations: 0, progress: 0, errors: 0 }
+};
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'SET_VAL':
+      if (['targetRepo', 'selectedModel', 'cerebrasKey'].includes(action.key)) {
+        localStorage.setItem(`emg_v88_${action.key}`, action.value);
+      }
+      return { ...state, [action.key]: action.value };
+    case 'TOGGLE': 
+      return { ...state, isLive: !state.isLive, status: !state.isLive ? 'INITIALIZING' : 'IDLE' };
+    case 'LOG': 
+      return { ...state, logs: [...state.logs, { ...action.payload, id: Math.random() }].slice(-CONFIG.MAX_HISTORY) };
+    case 'UPDATE_METRICS': 
+      return { ...state, metrics: { ...state.metrics, ...action.payload } };
+    case 'SET_STATUS': 
+      return { ...state, status: action.value, activePath: action.path || state.activePath };
+    case 'RESET':
+      return { ...initialState, logs: [], metrics: { mutations: 0, progress: 0, errors: 0 } };
+    default: return state;
+  }
+}
+
+export default function App() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const [user, setUser] = useState(null);
+  
+  const isProcessing = useRef(false);
+  const queue = useRef([]);
+  const projectContext = useRef(""); 
+  const cursor = useRef(parseInt(localStorage.getItem('emg_v88_cursor'), 10) || 0);
+  const logEndRef = useRef(null);
+  const liveState = useRef(state);
+
+  useEffect(() => { liveState.current = state; }, [state]);
+
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+      } catch (e) { setTimeout(initAuth, 2000); }
+    };
+    initAuth();
+    return onAuthStateChanged(auth, setUser);
+  }, []);
+
+  useEffect(() => {
+    logEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [state.logs]);
+
+  const pushLog = useCallback((msg, type = 'info') => {
+    dispatch({ type: 'LOG', payload: { msg, type, timestamp: new Date().toLocaleTimeString() } });
+  }, []);
+
+  const b64Decode = (str) => {
+    try {
+      return decodeURIComponent(atob(str.replace(/\s/g, '')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+    } catch (e) { return atob(str); }
+  };
+
+  const b64Encode = (str) => btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (_, p1) => String.fromCharCode('0x' + p1)));
+
+  const runCycle = useCallback(async () => {
+    if (!liveState.current.isLive || isProcessing.current || !user) return;
+    
+    const { targetRepo, ghToken, cerebrasKey, selectedModel } = liveState.current;
+    const repo = targetRepo.trim().replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, '');
+    const token = ghToken.trim();
+    const key = cerebrasKey.trim();
+
+    if (!repo || !token || !key) return;
+
+    isProcessing.current = true;
+    const headers = { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' };
+
+    try {
+      // 1. CONTEXTUAL INDEXING
+      if (queue.current.length === 0) {
+        dispatch({ type: 'SET_STATUS', value: 'INDEXING' });
+        const rRes = await fetch(`https://api.github.com/repos/${repo}`, { headers });
+        const rData = await rRes.json();
+        const tRes = await fetch(`https://api.github.com/repos/${repo}/git/trees/${rData.default_branch}?recursive=1`, { headers });
+        const tData = await tRes.json();
+        
+        let allFiles = (tData.tree || [])
+          .filter(f => f.type === 'blob' && !CONFIG.IGNORED_PATHS.some(p => f.path.includes(p)))
+          .filter(f => !f.path.includes('.') || CONFIG.ALLOWED_EXT.test(f.path))
+          .map(f => f.path);
+
+        // Sort to ensure README is first
+        allFiles.sort((a, b) => {
+          if (a.toLowerCase().includes('readme.md')) return -1;
+          if (b.toLowerCase().includes('readme.md')) return 1;
+          return 0;
+        });
+
+        queue.current = allFiles;
+        pushLog(`Contextual Scan: ${queue.current.length} files discovered.`, 'success');
+      }
+
+      if (cursor.current >= queue.current.length) {
+        pushLog(`Full Cycle Finished. Re-indexing for new evolutions...`, 'success');
+        cursor.current = 0;
+        queue.current = [];
+        projectContext.current = "";
+        isProcessing.current = false;
+        return;
+      }
+
+      const path = queue.current[cursor.current];
+      
+      // 2. ATOMIC FETCH
+      dispatch({ type: 'SET_STATUS', value: 'FETCHING', path });
+      const fRes = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, { headers });
+      const fData = await fRes.json();
+      const raw = b64Decode(fData.content);
+
+      // 3. CONTEXT CAPTURE (If this is documentation)
+      if (path.toLowerCase().includes('readme.md') && !projectContext.current) {
+        projectContext.current = raw.substring(0, 3000); // Store first 3k chars for priming
+        pushLog(`Project Context Captured: ${path}`, 'success');
+      }
+
+      // 4. EVOLUTION WITH PRIMING
+      dispatch({ type: 'SET_STATUS', value: 'EVOLVING', path });
+      const aiRes = await fetch('https://api.cerebras.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: selectedModel,
+          messages: [
+            { 
+              role: 'system', 
+              content: `You are the Sovereign Evolution Engine.
+              
+              [PROJECT CONTEXT]
+              ${projectContext.current || "No documentation found. Analyze code for structure."}
+
+              [TASK]
+              You are auditing and REFACTORING the provided file. 
+              1. NEVER return the same code. 
+              2. Use the Project Context to ensure changes align with the overall system architecture.
+              3. Modernize syntax, improve logic performance, and enhance readability.
+              4. Even for documentation, refine the language for clarity.
+              5. Output ONLY the code block.
+              6. End with SUMMARY: <log of specific improvements>.`
+            },
+            { role: 'user', content: `EVOLVE FILE (${path}):\n\n${raw}` }
+          ],
+          temperature: 0.8
+        })
+      });
+
+      const aiData = await aiRes.json();
+      const aiText = aiData?.choices?.[0]?.message?.content || '';
+      const parts = aiText.split(/SUMMARY:/i);
+      const enhancedCode = parts[0].trim().replace(/^```[\w]*\n/, '').replace(/\n```$/, '').trim();
+      const summary = (parts[1] || 'Architectural refinement based on project context').trim();
+
+      // 5. MUTATION VALIDATION
+      const isMutationDetected = enhancedCode.length > 5 && enhancedCode !== raw.trim();
+
+      if (isMutationDetected) {
+        dispatch({ type: 'SET_STATUS', value: 'MUTATING', path });
+        
+        const shaRes = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, { headers });
+        const latestFile = await shaRes.json();
+
+        const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify({ 
+            message: `[Sovereign] Informed Evolve: ${summary.substring(0, 70)}`, 
+            content: b64Encode(enhancedCode), 
+            sha: latestFile.sha 
+          })
+        });
+
+        if (putRes.ok) {
+          pushLog(`MUTATED: ${path} (${summary})`, 'success');
+          dispatch({ type: 'UPDATE_METRICS', payload: { mutations: liveState.current.metrics.mutations + 1 } });
+        } else {
+          const errData = await putRes.json();
+          pushLog(`COMMIT FAILED: ${path} - ${errData.message}`, 'error');
+        }
+      } else {
+        pushLog(`NO CHANGE: ${path} (AI found no improvements)`, 'info');
+      }
+
+    } catch (e) {
+      pushLog(`Engine Fault: ${e.message}`, 'error');
+      dispatch({ type: 'UPDATE_METRICS', payload: { errors: liveState.current.metrics.errors + 1 } });
+    } finally {
+      cursor.current++;
+      localStorage.setItem('emg_v88_cursor', cursor.current.toString());
+      dispatch({ type: 'UPDATE_METRICS', payload: { progress: Math.round((cursor.current / (queue.current.length || 1)) * 100) } });
+      isProcessing.current = false;
+    }
+  }, [user, pushLog]);
+
+  useEffect(() => {
+    let timer;
+    if (state.isLive) {
+      runCycle();
+      timer = setInterval(runCycle, CONFIG.CYCLE_INTERVAL);
+    }
+    return () => clearInterval(timer);
+  }, [state.isLive, runCycle]);
+
+  return (
+    <div className="min-h-screen bg-[#060606] text-zinc-300 flex flex-col overflow-x-hidden font-sans">
+      
+      {/* HEADER */}
+      <header className="w-full bg-zinc-900/80 border-b border-white/5 p-6 md:px-10 backdrop-blur-2xl sticky top-0 z-[100]">
+        <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-6">
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl border transition-all duration-700 ${state.isLive ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.2)]' : 'bg-zinc-800 border-white/10 text-zinc-600'}`}>
+              {state.isLive ? '🧬' : '💤'}
+            </div>
+            <div>
+              <h1 className="text-2xl font-black uppercase tracking-tighter text-white italic leading-none mb-1">Sovereign v89.1</h1>
+              <p className="text-[10px] font-mono text-zinc-500 tracking-[0.2em] uppercase">
+                <span className="text-emerald-500">{state.status}</span> // {state.activePath}
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <select value={state.selectedModel} onChange={e => dispatch({ type: 'SET_VAL', key: 'selectedModel', value: e.target.value })} className="bg-zinc-950 border border-white/10 text-[10px] font-bold uppercase p-4 rounded-xl outline-none focus:border-emerald-500/50">
+              {CONFIG.MODELS.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}
+            </select>
+            <button onClick={() => dispatch({ type: 'TOGGLE' })} className={`px-10 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-2xl ${state.isLive ? 'bg-red-500 text-white shadow-red-500/20' : 'bg-emerald-600 text-white shadow-emerald-500/20'}`}>
+              {state.isLive ? 'Deactivate' : 'Activate Engine'}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* MAIN BODY */}
+      <main className="flex-1 w-full max-w-[1600px] mx-auto flex flex-col lg:flex-row gap-8 p-6 md:p-10 pb-80">
+        
+        <aside className="w-full lg:w-[380px] flex flex-col gap-6 shrink-0">
+          <div className="bg-zinc-900/20 border border-white/5 p-8 rounded-[3rem] space-y-8 shadow-2xl">
+            <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.4em]">Engine Credentials</h3>
+            
+            <Field label="Github Target" val={state.targetRepo} onChange={v => dispatch({ type: 'SET_VAL', key: 'targetRepo', value: v })} placeholder="user/repo" />
+            <Field label="Cerebras Key" val={state.cerebrasKey} onChange={v => dispatch({ type: 'SET_VAL', key: 'cerebrasKey', value: v })} type="password" placeholder="csk_..." />
+            <Field label="GitHub Token" val={state.ghToken} onChange={v => dispatch({ type: 'SET_VAL', key: 'ghToken', value: v })} type="password" placeholder="ghp_..." />
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-black/50 border border-white/5 p-6 rounded-3xl flex flex-col items-center">
+                <span className="text-3xl font-black text-emerald-400">{state.metrics.mutations}</span>
+                <span className="text-[9px] font-black uppercase text-zinc-600 tracking-widest mt-1">Mutations</span>
+              </div>
+              <div className="bg-black/50 border border-white/5 p-6 rounded-3xl flex flex-col items-center">
+                <span className="text-3xl font-black text-red-400">{state.metrics.errors}</span>
+                <span className="text-[9px] font-black uppercase text-zinc-600 tracking-widest mt-1">Faults</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-8 bg-zinc-900/10 border border-white/5 rounded-[2.5rem] space-y-4">
+             <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Context Logic</div>
+             <p className="text-[11px] font-mono text-zinc-500 leading-relaxed italic">
+               // Priming: [README PRIORITY]<br/>
+               // Awareness: [PROJECT-WIDE]<br/>
+               // Progress: {state.metrics.progress}%
+             </p>
+          </div>
+        </aside>
+
+        <section className="flex-1 min-h-[600px] bg-black border border-white/10 rounded-[4rem] overflow-hidden flex flex-col shadow-2xl relative">
+          <div className="bg-zinc-900/40 p-8 border-b border-white/10 flex justify-between items-center">
+            <div className="flex items-center gap-4">
+               <div className={`w-2 h-2 rounded-full ${state.isLive ? 'bg-emerald-500 animate-pulse' : 'bg-zinc-700'}`}></div>
+               <h2 className="text-[11px] font-black uppercase tracking-[0.5em] text-white">Telemetry Stream</h2>
+            </div>
+            <span className="text-[10px] font-mono text-zinc-600 uppercase">Buffer: {state.logs.length}</span>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-10 space-y-4 font-mono text-[12px] custom-scroll">
+            {state.logs.length === 0 && (
+              <div className="h-full flex flex-col items-center justify-center text-zinc-800 uppercase tracking-[0.8em] opacity-20">
+                <span className="text-6xl mb-4">📡</span>
+                <span>Awaiting Engine Signal</span>
+              </div>
+            )}
+            {state.logs.map((log) => (
+              <div key={log.id} className="flex gap-6 group hover:bg-white/5 p-2 rounded-lg transition-colors border-b border-white/[0.02]">
+                <span className="text-zinc-700 font-bold shrink-0 opacity-50 w-20">{log.timestamp}</span>
+                <span className={`flex-1 break-all ${log.type === 'success' ? 'text-emerald-400 font-bold' : log.type === 'error' ? 'text-red-400' : 'text-zinc-400'}`}>
+                  {log.msg}
+                </span>
+              </div>
+            ))}
+            <div ref={logEndRef} className="h-40" />
+          </div>
+
+          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black to-transparent pointer-events-none" />
+        </section>
+      </main>
+
+      <footer className="fixed bottom-0 left-0 right-0 p-6 pointer-events-none">
+        <div className="text-[9px] font-black uppercase tracking-[0.8em] text-zinc-900 text-center">
+          Sovereign Core System // v89.1
+        </div>
+      </footer>
+
+      <style>{`
+        .custom-scroll::-webkit-scrollbar { width: 8px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #1a1a1a; border-radius: 10px; border: 2px solid #000; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #10b981; }
+        body { background: #060606; }
+      `}</style>
+    </div>
+  );
+}
+
+function Field({ label, val, onChange, type = "text", placeholder }) {
+  return (
+    <div className="space-y-3">
+      <label className="text-[9px] font-black uppercase text-zinc-500 tracking-widest ml-2">{label}</label>
+      <input 
+        type={type}
+        value={val} 
+        onChange={e => onChange(e.target.value)} 
+        placeholder={placeholder}
+        className="w-full bg-black/60 border border-white/10 p-5 rounded-2xl text-[13px] text-white focus:border-emerald-500/50 focus:ring-4 ring-emerald-500/5 transition-all outline-none placeholder:text-zinc-800"
+      />
+    </div>
+  );
+}

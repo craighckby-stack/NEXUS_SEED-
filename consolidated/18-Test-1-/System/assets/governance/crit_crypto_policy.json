@@ -1,0 +1,28 @@
+{
+  "policy_version": "1.0",
+  "description": "Cryptographic governance policy for Critical Integrity (CRIT) systems.",
+  "jws_integrity_policy": {
+    "allowed_algorithms": [
+      "ES384",
+      "ES512",
+      "PS384",
+      "PS512"
+    ],
+    "disallowed_algorithms": [
+      "HS256",
+      "RS256",
+      "PS256",
+      "ES256"
+    ],
+    "key_requirements": {
+      "ECC_minimum_bits": 384,
+      "RSA_minimum_bits": 4096,
+      "padding_standard": "PSS"
+    },
+    "replay_prevention": {
+      "nonce_required": true,
+      "max_time_skew_seconds": 60,
+      "token_cache_duration_seconds": 300
+    }
+  }
+}

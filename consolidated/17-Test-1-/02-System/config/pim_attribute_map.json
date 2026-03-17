@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "description": "Maps standard PIM attributes to internal storage IDs and localization strategies."
+  },
+  "global_attributes": {
+    "title": {
+      "storage_id": "attr_001",
+      "localizable": true,
+      "localization_strategy": "KeyedSuffix"
+    },
+    "description_long": {
+      "storage_id": "attr_002",
+      "localizable": true,
+      "localization_strategy": "KeyedSuffix"
+    },
+    "base_price": {
+      "storage_id": "attr_010",
+      "localizable": false
+    }
+  }
+}

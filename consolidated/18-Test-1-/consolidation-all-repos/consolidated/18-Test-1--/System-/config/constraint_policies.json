@@ -1,0 +1,20 @@
+{
+  "description": "Defines the structured responses for all action policies referenced by ACVM and other manifests.",
+  "policies": {
+    "P-01_HALT_RESOLUTION": {
+      "type": "TERMINAL_BLOCK",
+      "description": "Immediately halt the P-01 finality resolution attempt. Requires CRITICAL severity logs and notification to the ACVD monitor.",
+      "logging_level": "CRITICAL"
+    },
+    "P-01_ROLLBACK_SELF": {
+      "type": "REMEDIATION_SELF",
+      "description": "Trigger an immediate rollback or self-correction mechanism to the last validated state. Only applies during pre-flight checks.",
+      "rollback_target": "last_validated_config"
+    },
+    "LOG_AND_FLAG": {
+      "type": "ADVISORY",
+      "description": "Log the deviation as a high-priority warning and flag the affected state for human review without interrupting finality.",
+      "logging_level": "HIGH"
+    }
+  }
+}

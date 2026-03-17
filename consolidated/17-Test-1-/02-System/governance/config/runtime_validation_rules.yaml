@@ -1,0 +1,8 @@
+# AGI Operational Limits for Governance Processing
+# Prevents Denial-of-Service or undue resource consumption via overly large or complex governance proposals.
+governance_module_limits:
+  max_proposal_size_bytes: 65536 # Maximum allowed byte size for any governance proposal JSON.
+  max_directives_delta: 5       # Max number of directives allowed to be added/removed in one amendment cycle.
+  governance_processor_timeout_ms: 15000 # Max runtime for validating and enacting a successful governance change.
+  voting_entity_cap: 100        # Maximum number of authorized voters supported by the current epoch.
+  immutable_keys: ["core_directives", "version"] # Fields that are exempt from standard amendment procedure.

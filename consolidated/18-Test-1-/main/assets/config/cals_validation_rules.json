@@ -1,0 +1,38 @@
+{
+  "validator_version": "1.0",
+  "spec_target": "CALS_V2.0",
+  "data_types": {
+    "string": {
+      "default_max_length": 1024
+    },
+    "boolean": {}
+  },
+  "format_rules": {
+    "ISO_8601": {
+      "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z$",
+      "description": "Strict UTC ISO 8601 format."
+    },
+    "hex_512": {
+      "regex": "^[0-9a-fA-F]{128}$",
+      "length": 128
+    },
+    "SHA256": {
+      "regex": "^[0-9a-fA-F]{64}$",
+      "length": 64
+    },
+    "SGS_ENUM": {
+      "type": "enum_whitelist",
+      "whitelist": [
+        "INGESTION",
+        "PRE_PROCESS",
+        "EXECUTION",
+        "POST_PROCESS",
+        "FINALIZATION",
+        "ROLLBACK"
+      ]
+    }
+  },
+  "security_rules": {
+    "key_id_format": "CRoT_KEY_V[0-9]+"
+  }
+}

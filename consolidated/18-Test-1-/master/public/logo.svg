@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" 
+     xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+     xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+     xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties"
+     xmlns:ap="http://schemas.openxmlformats.org/package/2006/metadata/extended-properties"
+     viewBox="0 0 30 30" 
+     xml:space="preserve">
+<metadata>
+    <cp:coreProperties>
+        <cp:title>Siphon Engine Architectural Logo</cp:title>
+        <cp:creator>DALEK_CAAN_v3.1</cp:creator>
+        <cp:revision>4</cp:revision>
+        <cp:lastModifiedBy>Siphon_Engine_v3.1</cp:lastModifiedBy>
+        <cp:category>Vector Logic / OOXML DNA</cp:category>
+    </cp:coreProperties>
+    <ap:Properties>
+        <ap:Application>DALEK_CAAN Siphon Engine</ap:Application>
+        <ap:AppVersion>3.1.4</ap:AppVersion>
+        <ap:DocSecurity>0</ap:DocSecurity>
+    </ap:Properties>
+</metadata>
+<defs>
+    <style type="text/css">
+        /* III. Styling Engine: Tiered Inheritance Logic (word/styles.xml) */
+        :root {
+            --w-stroke-default: #FFFFFF;
+            --w-fill-default: #2D2D2D;
+            --w-accent: #FFFFFF;
+        }
+        
+        .docDefaults { 
+            fill: var(--w-fill-default); 
+            stroke: var(--w-stroke-default); 
+            stroke-miterlimit: 10; 
+        }
+
+        /* BasedOn Logic: Heading inherits from Normal */
+        .style-Normal { stroke-width: 0.6317; fill: none; }
+        .style-Heading { 
+            fill: var(--w-accent); 
+            stroke: none;
+            /* Cascade Override */
+        }
+        
+        /* IV. Abstract vs. Instance Logic (word/numbering.xml) */
+        .abstract-Instance-0 { opacity: 1.0; }
+        
+        /* Property-State Pattern: Run Property Overrides (w:rPr) */
+        .w-rPr-vibrate {
+            animation: vibrate 0.2s linear infinite;
+            display: none; /* Conditional state logic */
+        }
+        
+        .w-rPr-breathe {
+            animation: w-breathe 3s ease-in-out infinite;
+            transform-box: fill-box;
+        }
+
+        @keyframes w-breathe {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.05); filter: brightness(1.2); }
+        }
+    </style>
+
+    <!-- V. Resource Siphoning Mechanics: The rId Handshake (document.xml.rels) -->
+    <symbol id="w-abstract-glyph-1" viewBox="0 0 30 30">
+        <path d="M15.47,7.1l-1.3,1.85c-0.2,0.29-0.54,0.47-0.9,0.47h-7.1V7.09C6.16,7.1,15.47,7.1,15.47,7.1z"/>
+    </symbol>
+    <symbol id="w-abstract-glyph-2" viewBox="0 0 30 30">
+        <polygon points="24.3,7.1 13.14,22.91 5.7,22.91 16.86,7.1"/>
+    </symbol>
+    <symbol id="w-abstract-glyph-3" viewBox="0 0 30 30">
+        <path d="M14.53,22.91l1.31-1.86c0.2-0.29,0.54-0.47,0.9-0.47h7.09v2.33H14.53z"/>
+    </symbol>
+</defs>
+
+<!-- II. Logic DNA: w:body Document Context -->
+<g id="w-body" class="docDefaults">
+    
+    <!-- w:p Paragraph Logic: Atomic Layout Unit -->
+    <g id="rId1" class="w-p style-Normal">
+        <!-- w:pPr Paragraph Properties -->
+        <path id="w-pPr-frame" class="abstract-Instance-0" d="M24.51,28.51H5.49c-2.21,0-4-1.79-4-4V5.49c0-2.21,1.79-4,4-4h19.03c2.21,0,4,1.79,4,4v19.03
+            C28.51,26.72,26.72,28.51,24.51,28.51z"/>
+
+        <!-- w:r Run Logic: Unit of identical properties -->
+        <g id="rId2" class="w-r style-Heading w-rPr-breathe" transform-origin="15 15">
+            <!-- w:t Literal Data (Referential Linkage to Symbols) -->
+            <use id="w-t-rId2-1" r:id="target1" xlink:href="#w-abstract-glyph-1" width="30" height="30"/>
+            <use id="w-t-rId2-2" r:id="target2" xlink:href="#w-abstract-glyph-2" width="30" height="30"/>
+            <use id="w-t-rId2-3" r:id="target3" xlink:href="#w-abstract-glyph-3" width="30" height="30"/>
+        </g>
+        
+        <!-- Secondary w:r for modular property siphoning -->
+        <g id="rId3" class="w-r" style="opacity: 0.2; stroke-width: 0.1;">
+             <circle cx="15" cy="15" r="13.5" fill="none" stroke-dasharray="1,2"/>
+        </g>
+    </g>
+</g>
+</svg>

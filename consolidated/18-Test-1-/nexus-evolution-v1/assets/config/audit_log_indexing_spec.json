@@ -1,0 +1,16 @@
+{
+  "spec_id": "CALS_INDEX_V1.0",
+  "log_specification_reference": "CALS_V1.0",
+  "schema_definition_and_indexing": {
+    "transaction_hash": {"type": "SHA256", "required": true, "indexing_priority": "PrimaryPartitionKey"},
+    "timestamp_utc": {"type": "ISO8601", "required": true, "indexing_priority": "CompositeSortKey"},
+    "sgs_pipeline_stage_id": {"type": "STRING", "required": true, "indexing_priority": "SecondaryIndex"},
+    "triggering_input_digest": {"type": "SHA256", "required": true, "indexing_priority": "SecondaryIndex"},
+    "ga_x_finality_result": {"type": "BOOLEAN_ENUM", "required": true, "indexing_priority": "TernaryIndex"}
+  },
+  "query_optimization_targets": [
+    {"target_use_case": "Chronological_Replay", "fields": ["sgs_pipeline_stage_id", "timestamp_utc"]},
+    {"target_use_case": "Tamper_Check_High_Velocity", "fields": ["transaction_hash", "gac_manifest_hash_at_time"]}
+  ],
+  "indexing_engine_id": "VectorDB/Quantum_Index_Engine_V5"
+}

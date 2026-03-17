@@ -1,0 +1,18 @@
+{
+  "forecasting_service": {
+    "enabled": true,
+    "default_model": "LSTM_CostPredictor_V3",
+    "lookback_window_days": 30,
+    "sensitivity_tolerance_percent": 2.5,
+    "model_parameters": {
+      "LSTM_CostPredictor_V3": {
+        "training_frequency_hours": 24,
+        "features_used": ["cpu_load", "network_iops", "memory_usage"]
+      }
+    }
+  },
+  "calibration_targets": {
+    "expected_cost_p95": 0.15,
+    "expected_latency_p99_ms": 500
+  }
+}

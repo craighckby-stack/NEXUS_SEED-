@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "v1.0.0",
+  "manifestVersion": "V94.1",
+  "metadata": {
+    "authoredBy": "GSEP L4/PolicyEngine",
+    "ratificationTimestamp": "2024-05-15T10:00:00Z",
+    "complianceBinding": "AOC-2024-Q2-001"
+  },
+  "utilityConstraints": {
+    "Utility_Min": 0.85,
+    "Utility_Baseline_Reference": 0.90
+  },
+  "riskConstraints": {
+    "Exposure_Max": 0.05,
+    "Tolerance_Level": "LOW"
+  }
+}

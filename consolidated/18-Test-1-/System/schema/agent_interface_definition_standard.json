@@ -1,0 +1,99 @@
+{
+  "$id": "http://agiv94.1.com/schema/agent_interface_definition_standard_v2.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Sovereign AGI Instruction Set Standard (v2)",
+  "description": "Defines the standard output structure for an AGI generating execution plans and structured tool requests, enforcing determinism and parallelization readiness.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "2.0.0",
+      "description": "The explicit version of this interface definition."
+    },
+    "instruction_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for this specific instruction cycle."
+    },
+    "agent_name": {
+      "type": "string",
+      "description": "Identifier of the specific agent (e.g., PlanningEngine, RefactorBot) generating the output."
+    },
+    "decision_logic": {
+      "type": "string",
+      "description": "An internal, structured thought process (monologue) explaining the derived action_plan, vital for traceability and debugging."
+    },
+    "action_plan": {
+      "type": "array",
+      "description": "A sequenced list of discrete, actionable instructions to be executed by the external runtime environment.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "action_id": {
+            "type": "string",
+            "description": "Unique ID for this specific action within the plan, enabling asynchronous tracking."
+          },
+          "action_type": {
+            "type": "string",
+            "enum": [
+              "TOOL_CALL",
+              "CODE_EXECUTION",
+              "FILE_WRITE",
+              "LOG_OUTPUT",
+              "TERMINATE"
+            ],
+            "description": "The fundamental category of action."
+          },
+          "tool_call": {
+            "type": "object",
+            "description": "Details for a function/tool invocation (required if action_type is TOOL_CALL). Structured to allow standardized API interaction.",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "arguments": {
+                "type": "object",
+                "description": "JSON object of named arguments for the tool."
+              }
+            },
+            "required": [
+              "name",
+              "arguments"
+            ]
+          },
+          "code_details": {
+            "type": "object",
+            "description": "Details for CODE_EXECUTION, specifying language and content."
+          },
+          "file_details": {
+            "type": "object",
+            "description": "Details for FILE_WRITE, specifying path and content."
+          }
+        },
+        "required": [
+          "action_id",
+          "action_type"
+        ]
+      },
+      "minItems": 1
+    },
+    "execution_status": {
+      "type": "string",
+      "enum": [
+        "AWAITING_EXECUTION",
+        "AWAITING_RESPONSE",
+        "PLAN_GENERATED",
+        "GOAL_ACHIEVED",
+        "CRITICAL_FAILURE"
+      ],
+      "description": "Indicates the final state the Agent output leads to."
+    }
+  },
+  "required": [
+    "schema_version",
+    "instruction_id",
+    "agent_name",
+    "action_plan",
+    "execution_status"
+  ]
+}

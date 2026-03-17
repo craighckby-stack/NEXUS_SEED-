@@ -1,0 +1,20 @@
+{
+  "policy_name": "ConflictResolutionMatrix_V1",
+  "heuristics": [
+    {
+      "id": "HRC_001",
+      "trigger": "Scaling_Constraint_Clash",
+      "condition": "(GODM.max_replicas > ResourceMgr.available_slots)",
+      "action": "SCALE_DOWN_WITH_GRACEFUL_DECOMMISSION",
+      "priority_ranking": "MIN(QoS_Priority, Operational_Stability)"
+    },
+    {
+      "id": "HRC_002",
+      "trigger": "Dependency_Violation",
+      "condition": "(Component.status == 'DOWN' && Dependency.status == 'UP')",
+      "action": "ATTEMPT_SELF_HEAL(5) THEN SIGNAL_PAGER(L1)",
+      "cooldown_s": 300
+    }
+  ],
+  "default_action": "LOG_WARNING_AND_MAINTAIN_CURRENT_STATE"
+}

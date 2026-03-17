@@ -1,0 +1,56 @@
+{
+  "version": "2.0",
+  "status": "ACTIVE",
+  "description": "Total Quality Management (TQM) Governance Thresholds, linking operational metrics to mandated autonomous mitigation hooks.",
+  "TQM_Core_Config": {
+    "Enforcement_Engine_Path": "system/core/TQM_EnforcementEngine.js",
+    "Acknowledge_Required_Severity": "WARNING"
+  },
+  "threshold_categories": {
+    "Code_Evolution_Integrity": {
+      "priority": 90,
+      "metrics": {
+        "Technical_Debt_Index_Max": {
+          "level": 0.12,
+          "unit": "Debt/LOC Ratio",
+          "severity": "CRITICAL",
+          "on_breach_hook": "CodeReviewer/HaltNewDeployment"
+        },
+        "Refactoring_Divergence_STDV_Max": {
+          "level": 2.5,
+          "unit": "Standard Deviations",
+          "severity": "ERROR",
+          "on_breach_hook": "EvolutionMonitor/RollbackRefactorCycle"
+        }
+      }
+    },
+    "Runtime_Stability_Performance": {
+      "priority": 95,
+      "metrics": {
+        "Error_Rate_Per_Cycle_Max": {
+          "level": 0.003,
+          "unit": "Ratio (Errors/Ops)",
+          "severity": "CRITICAL",
+          "on_breach_hook": "SelfDiagnosis/InitiateEmergencyThrottle"
+        },
+        "Autonomous_Resource_Overhead_Max": {
+          "level": 0.40,
+          "unit": "Percentage (%) of available resources",
+          "severity": "WARNING",
+          "on_breach_hook": "ResourceScheduler/ScaleDownInferenceWorkers"
+        }
+      }
+    },
+    "Security_Policy_Adherence": {
+      "priority": 80,
+      "metrics": {
+        "Untested_Endpoint_Coverage_Min": {
+          "level": 0.98,
+          "unit": "Coverage Ratio",
+          "severity": "ERROR",
+          "on_breach_hook": "SecurityHarness/PreventServiceInitialization"
+        }
+      }
+    }
+  }
+}

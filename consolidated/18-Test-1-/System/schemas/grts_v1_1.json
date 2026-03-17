@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agi.sovereign/schemas/grts_v1_1.json",
+  "title": "GRTS V1.1 Telemetry Payload",
+  "type": "object",
+  "required": [
+    "transition_id",
+    "grts_schema_version",
+    "timestamp_s7_cert",
+    "s01_efficacy_score",
+    "s02_risk_metric",
+    "s03_veto_state",
+    "p01_finality",
+    "pipeline_version"
+  ],
+  "properties": {
+    "transition_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique GSEP-C execution instance identifier."
+    },
+    "grts_schema_version": {
+      "type": "string",
+      "enum": [
+        "v1.1"
+      ],
+      "description": "Version identifier for the GRTS schema definition."
+    },
+    "timestamp_s7_cert": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Time of definitive P-01 certification issuance (UTC)."
+    },
+    "s01_efficacy_score": {
+      "type": "number",
+      "format": "float",
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "description": "Computed Governance Efficacy Metric ($S_{01}$). 8 DP."
+    },
+    "s02_risk_metric": {
+      "type": "number",
+      "format": "float",
+      "minimum": 0.0,
+      "description": "Computed Operational Risk Metric ($S_{02}$). 8 DP."
+    },
+    "s03_veto_state": {
+      "type": "boolean",
+      "description": "Final system Veto Signal status ($S_{03}$ outcome)."
+    },
+    "p01_finality": {
+      "type": "boolean",
+      "description": "P-01 Certification outcome (True=PASS/False=FAIL)."
+    },
+    "pipeline_version": {
+      "type": "string",
+      "description": "Current GSEP-C runtime version."
+    }
+  },
+  "signature_required": true
+}

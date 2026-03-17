@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "GACR/Schemas/APITelemetry.json",
+  "title": "API Performance Metrics Telemetry Schema",
+  "type": "object",
+  "properties": {
+    "timestamp_ms": {
+      "type": "integer",
+      "description": "Unix timestamp of the measurement."
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "latency": {
+          "type": "object",
+          "properties": {
+            "ms": {
+              "type": "number",
+              "format": "float",
+              "description": "The specific metric utilized in data_path: 95th percentile latency."
+            },
+            "p99": {
+              "type": "number",
+              "format": "float",
+              "description": "99th percentile latency in milliseconds."
+            }
+          },
+          "required": [
+            "ms"
+          ]
+        },
+        "errors_per_second": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "latency"
+      ]
+    }
+  },
+  "required": [
+    "timestamp_ms",
+    "metrics"
+  ]
+}

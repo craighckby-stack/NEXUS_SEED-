@@ -1,0 +1,11 @@
+{
+  "ManifestID": "SGS-M-942",
+  "ActiveKeys": [
+    {
+      "KeyName": "Primary_Integrity_Key",
+      "Hash": "PLACEHOLDER_SHA256_HASH",
+      "Status": "Active"
+    }
+  ],
+  "RevocationList": []
+}

@@ -1,0 +1,20 @@
+{
+  "policy_name": "InterModuleRetryAndEscalationPolicy (REP)",
+  "version": "1.0",
+  "description": "Defines standardized retry behaviors and failure escalation paths for transient and persistent communication failures across core system modules.",
+  "retry_strategy": {
+    "type": "ExponentialBackoffJitter",
+    "base_delay_ms": 100,
+    "max_delay_ms": 5000,
+    "max_retries": 5
+  },
+  "failure_classification": {
+    "transient_codes": [408, 429, 500, 503, 504],
+    "persistent_codes": [400, 401, 403, 404, 409]
+  },
+  "escalation_path": {
+    "persistent_failure_action": "HIL_Log_And_Halt_Queue",
+    "transient_failure_max_out_action": "HIL_Log_and_Alert_FRM",
+    "escalation_target": "system/governance/Failure_Review_Module (FRM)"
+  }
+}

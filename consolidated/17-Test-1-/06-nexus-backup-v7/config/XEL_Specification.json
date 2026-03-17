@@ -1,0 +1,61 @@
+{
+  "SpecificationID": "XEL_V94_1_CORE_R1",
+  "SpecificationTimestamp": "2024-07-20T00:00:00Z",
+  "SchemaVersion": "3.0",
+
+  "TypeDefinitions": {
+    "ID_Format": {"type": "string", "pattern": "^[A-Z]{1,4}-[0-9a-f]{8,12}$", "description": "Standardized ID format"},
+    "TaskPriority": {"type": "integer", "minimum": 1, "maximum": 5},
+    "ScopeDomain": {"type": "string", "enum": ["CORE", "UTILITY", "ADAPTER", "CONFIG", "POLICY"], "description": "Functional domain of the task"}
+  },
+  
+  "OperationalConstraints": {
+    "ExecutionEnvironment": "Autonomous_Sandboxed_L4_Secured",
+    "RuntimeLimits": {
+      "Tokens_Per_Cycle": 12288,
+      "Runtime_Memory_MB": 12288,
+      "MaxCompilationComplexity_Score": 0.95 
+    },
+    "SafetyPolicy": {
+      "HarmScore_Maximum": 0.10,
+      "CodeComplexityScore_MaxAllowable": 0.75 
+    }
+  },
+
+  "ComponentSchemas": {
+    "TaskRequest": {
+      "required": ["task_id", "priority", "payload_type", "scope", "target_files"],
+      "properties": {
+        "task_id": {"$ref": "#/TypeDefinitions/ID_Format"},
+        "priority": {"$ref": "#/TypeDefinitions/TaskPriority"},
+        "payload_type": {"type": "string", "enum": ["CODE_EVOLUTION", "DATA_ANALYSIS", "POLICY_UPDATE"]},
+        "scope": {"$ref": "#/TypeDefinitions/ScopeDomain"},
+        "target_files": {"type": "array", "items": {"type": "string"}, "description": "Files/paths targeted for modification"}
+      }
+    },
+    "EvolutionResult": {
+      "required": ["success", "SystemPerformanceImprovement_Delta", "audit_summary", "file_changes"],
+      "properties": {
+        "success": {"type": "boolean"},
+        "SystemPerformanceImprovement_Delta": {"type": "number", "minimum": -0.5, "description": "Measured performance change post-evolution"},
+        "file_changes": {"type": "array"},
+        "audit_summary": {"type": "object", "required": ["passed_tests", "complexity_score"]}
+      }
+    }
+  },
+
+  "SystemFSM": {
+    "InitialState": "BOOTSTRAP",
+    "TerminalStates": ["HALT", "ERROR_CRITICAL"],
+    "Transitions": [
+      {"from": "BOOTSTRAP", "to": "INITIALIZE", "trigger": "SYSTEM_START"},
+      {"from": "INITIALIZE", "to": "OPERATIONAL_IDLE", "trigger": "CONFIG_LOADED"},
+      {"from": "OPERATIONAL_IDLE", "to": "EVOLVE_TASK", "trigger": "TASK_RECEIVED"},
+      {"from": "EVOLVE_TASK", "to": "TASK_VALIDATION", "trigger": "TASK_COMPLETED_SUCCESS"},
+      {"from": "EVOLVE_TASK", "to": "OPERATIONAL_IDLE", "trigger": "TASK_FAILED_SELF_CONTAINED"},
+      {"from": "TASK_VALIDATION", "to": "OPERATIONAL_IDLE", "trigger": "VALIDATION_PASSED"},
+      {"from": "TASK_VALIDATION", "to": "EVOLVE_TASK", "trigger": "VALIDATION_FAILED_RETRY", "description": "Rollback and re-attempt evolution"},
+      {"from": "EVOLVE_TASK", "to": "ERROR_CRITICAL", "trigger": "RESOURCE_EXCEED"}
+    ]
+  }
+}

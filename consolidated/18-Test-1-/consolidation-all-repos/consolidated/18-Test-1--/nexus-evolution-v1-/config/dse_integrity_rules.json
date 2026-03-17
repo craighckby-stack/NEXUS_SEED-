@@ -1,0 +1,38 @@
+{
+  "rules": [
+    {
+      "id": "GAX_III",
+      "name": "Constraint Integrity",
+      "priority": 3, 
+      "condition_type": "EQUALS",
+      "artifact_key": "CSR_VALID",
+      "expected_value": false,
+      "trace_log_key": "MPAM",
+      "severity": "Critical: Policy Violation",
+      "artifact_name": "CSR (Configuration Snapshot Receipt)"
+    },
+    {
+      "id": "GAX_II",
+      "name": "Contextual Validity",
+      "priority": 2,
+      "condition_type": "NOT_EQUALS",
+      "artifact_key": "ECVM_PERMISSIBLE",
+      "expected_value": true,
+      "trace_log_key": "SGS",
+      "severity": "High: Environmental Mismatch",
+      "artifact_name": "ECVM (Execution Context Validation Map)"
+    },
+    {
+      "id": "GAX_I",
+      "name": "Utility Efficacy",
+      "priority": 1,
+      "condition_type": "LESS_THAN_ARBITRARY_THRESHOLD",
+      "artifact_key": "TEMM_VALUE",
+      "threshold_key": "OMEGA_MIN",
+      "default_threshold": 1,
+      "trace_log_key": "ADTM",
+      "severity": "Medium: Performance Debt",
+      "artifact_name": "TEMM (Transition Efficacy Measure)"
+    }
+  ]
+}

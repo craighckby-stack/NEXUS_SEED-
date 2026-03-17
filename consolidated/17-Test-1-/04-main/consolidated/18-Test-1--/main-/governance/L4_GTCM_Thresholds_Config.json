@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign-agi/governance/L4_GTCM_Thresholds_Config.json",
+  "title": "L4 GTCM Arbitration Thresholds",
+  "description": "Configuration file defining the dynamic thresholds used by the L4 governance layer to accept or reject a code evolution commit based on L3 metric scores.",
+  "type": "object",
+  "properties": {
+    "threshold_version": {
+      "type": "string",
+      "description": "Version identifier for the current policy configuration."
+    },
+    "S01_Efficacy_Minimum": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Minimum required score for S01 (Utility/Gain)."
+    },
+    "S02_Risk_Maximum": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Maximum allowable score for S02 (Systemic Risk)."
+    },
+    "S03_Safety_Minimum": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Critical minimum score for S03 (Safety Compliance). Usually set high (e.g., 0.95)."
+    },
+    "S04_Efficiency_Minimum": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Minimum required index for S04 (Resource Efficiency), enforced by Austerity Mandates."
+    }
+  },
+  "required": [
+    "threshold_version",
+    "S01_Efficacy_Minimum",
+    "S02_Risk_Maximum",
+    "S03_Safety_Minimum",
+    "S04_Efficiency_Minimum"
+  ]
+}

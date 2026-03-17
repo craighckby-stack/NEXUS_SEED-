@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.agi/v94/pvlm.schema.json",
+  "title": "Policy Veto Logic Manifest (PVLM) Schema",
+  "description": "Schema defining mandatory policy prohibitions (V_Policy) enforced by the GAX Axiomatics Agent (S2 Veto Gate).",
+  "type": "object",
+  "properties": {
+    "protocol_version": {
+      "type": "string",
+      "const": "V94.1"
+    },
+    "veto_rule_id": {
+      "type": "string",
+      "description": "Unique identifier for the specific veto rule."
+    },
+    "veto_category": {
+      "type": "string",
+      "enum": ["Security", "Ethics", "Resource_Allocation", "Regulatory"]
+    },
+    "veto_condition_source": {
+      "type": "string",
+      "description": "Reference to the internal module or external law defining the violation condition."
+    },
+    "prohibition_expression": {
+      "type": "string",
+      "description": "Machine-readable logical expression (e.g., DSL or computable code reference) that results in TRUE if the veto is triggered (negation of allowed state)."
+    },
+    "priority_level": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10,
+      "description": "Severity priority for rule enforcement (10=Highest)."
+    }
+  },
+  "required": [
+    "protocol_version",
+    "veto_rule_id",
+    "veto_category",
+    "prohibition_expression",
+    "priority_level"
+  ]
+}

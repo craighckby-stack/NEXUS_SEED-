@@ -1,0 +1,65 @@
+{
+  "manifestVersion": "1.0.0",
+  "description": "Defines all permissible input vectors (requests, commands, internal triggers) for system ingestion, validation, and automated routing.",
+  "vectors": {
+    "VEC_USER_COMMAND_CLI": {
+      "vectorId": "VEC_USER_COMMAND_CLI",
+      "sourceType": "CLI",
+      "priority": 700,
+      "schemaReference": "#/definitions/UserCommandSchema",
+      "targetHandler": "CMD_Processor_Engine",
+      "constraints": {
+        "rateLimit": "10/s",
+        "authenticationRequired": false
+      }
+    },
+    "VEC_API_TASK_REQUEST": {
+      "vectorId": "VEC_API_TASK_REQUEST",
+      "sourceType": "API_REST",
+      "priority": 950,
+      "schemaReference": "#/definitions/APITaskSchema",
+      "targetHandler": "API_Gateway_Ingress",
+      "constraints": {
+        "rateLimit": "50/m",
+        "authenticationRequired": true
+      }
+    },
+    "VEC_AE_EVOLUTION_TRIGGER": {
+      "vectorId": "VEC_AE_EVOLUTION_TRIGGER",
+      "sourceType": "INTERNAL_SYSTEM",
+      "priority": 999,
+      "schemaReference": "#/definitions/EvolutionTriggerSchema",
+      "targetHandler": "Autonomous_Evolution_Engine",
+      "constraints": {
+        "rateLimit": "1/h",
+        "authenticationRequired": true
+      }
+    }
+  },
+  "definitions": {
+    "UserCommandSchema": {
+      "type": "object",
+      "properties": {
+        "cmd": {"type": "string", "description": "The command identifier"},
+        "args": {"type": "array"}
+      },
+      "required": ["cmd"]
+    },
+    "EvolutionTriggerSchema": {
+      "type": "object",
+      "properties": {
+        "triggerType": {"type": "string", "enum": ["PERFORMANCE_DEGRADE", "OBJECTIVE_MISS", "SCHEDULED_SCAN"]},
+        "reason": {"type": "string"}
+      },
+      "required": ["triggerType"]
+    },
+    "APITaskSchema": {
+        "type": "object",
+        "properties": {
+            "taskId": {"type": "string", "format": "uuid"},
+            "payload": {"type": "object"}
+        },
+        "required": ["taskId", "payload"]
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "MetricRegistryVersion": "V1.0",
+  "GlobalSamplingRate_ms": 5000,
+  "MetricDefinitions": [
+    {
+      "MetricID": "P99_CommitTime_ms",
+      "Source": "Kernel/Scheduler",
+      "Unit": "ms",
+      "RetentionPolicy_days": 90,
+      "AggregationType": "P99"
+    },
+    {
+      "MetricID": "CPU_Usage_pct",
+      "Source": "OS/HostAgent",
+      "Unit": "%",
+      "RetentionPolicy_days": 7,
+      "AggregationType": "Average"
+    }
+  ],
+  "BaselineMethodology": {
+    "Type": "SlidingWindow",
+    "WindowDuration_h": 24,
+    "SmoothingFactor": 0.1
+  }
+}

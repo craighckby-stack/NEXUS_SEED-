@@ -1,0 +1,25 @@
+{
+  "SchemaName": "DERE_Efficacy_Audit",
+  "Version": "1.0",
+  "Description": "Immutable log schema for DERE mandate injection history, ensuring traceability for AIA/AIE learning phases.",
+  "Fields": {
+    "Timestamp": "ISO8601, Time of deviation detection and mandate issue.",
+    "Deviation_Vector": {
+      "Type": "Object",
+      "S01_Actual": "Float, Real-time efficacy reading.",
+      "S01_Committed": "Float, Target efficacy value from AIA.",
+      "Absolute_Drift": "Float, |Actual - Committed|.",
+      "Drift_Components": "Array<String>, Identifying which key metrics contribute most significantly to S-01 deviation (e.g., Latency, ResourceCost, TaskFailureRate)."
+    },
+    "MOS_Context": {
+      "DT_Threshold_Used": "Float, Critical Tolerance Delta.",
+      "DW_Threshold_Used": "Float, Warning Delta."
+    },
+    "Mandate_Issued": {
+      "Mandate_ID": "Enum<SRM-01, SRM-02, NONE>",
+      "Severity_Tier": "Enum<CRITICAL, SIGNIFICANT, NOMINAL>",
+      "Target_System_Injection": "Enum<MIS_L5, DSP_L3, AIA_L6, LOG_ONLY>",
+      "Payload_Hash": "String, SHA256 hash of the full mandate instruction packet."
+    }
+  }
+}

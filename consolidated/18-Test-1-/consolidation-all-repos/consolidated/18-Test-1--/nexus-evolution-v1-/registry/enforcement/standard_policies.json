@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "policies": {
+    "POLICY_STANDARD_NOTIFICATION": {
+      "retry": "STANDARD_BACKOFF",
+      "max_attempts": 3,
+      "timeout_ms": 5000
+    },
+    "POLICY_CRITICAL_INTERRUPT": {
+      "retry": "NONE",
+      "max_attempts": 1,
+      "timeout_ms": 10000
+    },
+    "POLICY_NO_ACTION": {
+      "retry": "NONE",
+      "max_attempts": 1,
+      "timeout_ms": 1000
+    }
+  }
+}

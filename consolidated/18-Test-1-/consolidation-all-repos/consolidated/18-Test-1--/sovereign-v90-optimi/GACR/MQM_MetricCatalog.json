@@ -1,0 +1,109 @@
+{
+  "$schema": "http://sgs-v97.5/schema/mqm_metrics",
+  "metadata": {
+    "version": "1.4",
+    "last_updated": "AGI-KERNEL_v7.5.0_Cycle_1"
+  },
+  "metric_definitions": [
+    {
+      "metric_id": "MQM_S03_STORAGE_LATENCY",
+      "source": "StorageService_S3",
+      "data_key": "p99_read_ms",
+      "description": "99th percentile storage read latency (converted to % of SLO violation).",
+      "unit": "Percentage Violation",
+      "constraint_type": "MAX",
+      "target_value": 1.0,
+      "priority_weight": 0.5
+    },
+    {
+      "metric_id": "MQM_S04_MODEL_DRIFT_COUNT",
+      "source": "ModelMonitoringService_DriftEngine",
+      "data_key": "drift_alarm_count",
+      "description": "Number of confirmed severe statistical model drift alarms detected within the reporting window.",
+      "unit": "Absolute Count",
+      "constraint_type": "MAX",
+      "target_value": 3,
+      "priority_weight": 0.6
+    },
+    {
+      "metric_id": "MQM_P01_PREDICTION_BIAS",
+      "source": "FairnessMonitoringEngine",
+      "data_key": "bias_deviation_score",
+      "description": "Deviation from acceptable demographic parity tolerance.",
+      "unit": "Ratio",
+      "constraint_type": "TARGET",
+      "target_value": 0.05,
+      "priority_weight": 0.7
+    },
+    {
+      "metric_id": "MQM_K01_ERROR_RATE",
+      "source": "AGI_Kernel_ErrorHandling",
+      "data_key": "cycle_error_rate",
+      "description": "Percentage of cycles resulting in a critical error state (Failure to commit/parse). Directly measures Error Handling capability.",
+      "unit": "Percentage",
+      "constraint_type": "MAX",
+      "target_value": 0.01,
+      "priority_weight": 1.0
+    },
+    {
+      "metric_id": "MQM_K02_JSON_PARSE_FAILURES",
+      "source": "AGI_Kernel_JSONParser",
+      "data_key": "recovery_attempts_per_cycle",
+      "description": "Average number of attempts required to successfully parse mission-critical JSON outputs. Measures JSON Parsing capability.",
+      "unit": "Average Attempts",
+      "constraint_type": "MAX",
+      "target_value": 1.5,
+      "priority_weight": 0.8
+    },
+    {
+      "metric_id": "MQM_K03_STAGNATION_CYCLES",
+      "source": "AGI_Kernel_Strategy",
+      "data_key": "consecutive_stagnation_count",
+      "description": "Count of consecutive evolution cycles without detectable maturity improvement. Measures Meta-Reasoning and strategy effectiveness.",
+      "unit": "Count",
+      "constraint_type": "MAX",
+      "target_value": 0,
+      "priority_weight": 1.0
+    },
+    {
+      "metric_id": "MQM_K04_AUTONOMY_CREATIONS",
+      "source": "AGI_Kernel_Infrastructure",
+      "data_key": "successful_infrastructure_creations",
+      "description": "Cumulative count of autonomously created, functional infrastructure components (branches, testing, telemetry). Measures Autonomy capability.",
+      "unit": "Count",
+      "constraint_type": "MIN",
+      "target_value": 1,
+      "priority_weight": 0.4
+    },
+    {
+      "metric_id": "MQM_K05_CREATIVITY_SCORE",
+      "source": "AGI_Kernel_SelfAssessment",
+      "data_key": "novelty_index_score",
+      "description": "Self-assessed index tracking the novelty and non-incrementality of solutions generated.",
+      "unit": "Index Score",
+      "constraint_type": "MIN",
+      "target_value": 0.75,
+      "priority_weight": 0.9
+    },
+    {
+      "metric_id": "MQM_K06_MEMORY_UTILIZATION",
+      "source": "AGI_Kernel_NexusDatabase",
+      "data_key": "history_recall_ratio",
+      "description": "Ratio of learning history successfully integrated into current strategy selection (Contextual Recall). Supports Meta-Reasoning.",
+      "unit": "Ratio (0.0 - 1.0)",
+      "constraint_type": "MIN",
+      "target_value": 0.95,
+      "priority_weight": 0.9
+    },
+    {
+      "metric_id": "MQM_K07_EMERGENT_CAPABILITIES",
+      "source": "AGI_Kernel_EmergentCapabilityManager",
+      "data_key": "active_tool_count",
+      "description": "The count of actively registered emergent capabilities available for use in the Synergy Loop. Directly tracks core mission success.",
+      "unit": "Count",
+      "constraint_type": "MIN",
+      "target_value": 10,
+      "priority_weight": 1.0
+    }
+  ]
+}

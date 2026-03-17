@@ -1,0 +1,12 @@
+{
+  "description": "Configuration file defining the required secure environment state baseline for RETV.",
+  "critical_paths": [
+    "/etc/hosts",
+    "/etc/security/limits.conf",
+    "/usr/bin/python3",
+    "/path/to/security_policy_script.sh"
+  ],
+  "runtime_dependencies": [
+    "/usr/local/lib/secure_agent.so"
+  ]
+}

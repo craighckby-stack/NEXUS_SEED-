@@ -1,0 +1,35 @@
+{
+  "profile_schema_version": "1.0",
+  "profiles": [
+    {
+      "name": "MAX_RECALL",
+      "description": "Prioritizes recall rate, accepting higher latency (suited for batch processing or large dataset ingestion).",
+      "tuning": {
+        "HNSW": {
+          "M": 32,
+          "ef_search": 200,
+          "ef_construction": 400
+        },
+        "IVFPQ": {
+          "nlist": 1024,
+          "nprobe": 64
+        }
+      }
+    },
+    {
+      "name": "LOW_LATENCY",
+      "description": "Prioritizes query speed and low latency, accepting minor recall degradation (suited for real-time APIs).",
+      "tuning": {
+        "HNSW": {
+          "M": 16,
+          "ef_search": 80,
+          "ef_construction": 150
+        },
+        "IVFPQ": {
+          "nlist": 512,
+          "nprobe": 32
+        }
+      }
+    }
+  ]
+}

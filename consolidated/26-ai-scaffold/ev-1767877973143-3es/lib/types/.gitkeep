@@ -1,0 +1,43 @@
+// Optimized, reusable core utility types suitable for a 'lib/types/' structure.
+
+/**
+ * Dictionary: A generic type for mapping keys to values.
+ * Optimized using mapped types for clarity and compile-time performance.
+ */
+export type Dictionary<T, K extends string | number | symbol = string> = {
+  [P in K]: T;
+};
+
+/**
+ * ValueOf: Extracts the union of all property value types from an object type T.
+ */
+export type ValueOf<T> = T[keyof T];
+
+/**
+ * Nullable: Creates a type where all properties of T can also be null or undefined.
+ */
+export type Nullable<T> = {
+  [P in keyof T]: T[P] | null | undefined;
+};
+
+/**
+ * DeepReadonly: Recursively makes all properties of an object readonly.
+ * Optimized for performance by using specific interfaces for arrays to avoid recursive instantiation issues.
+ */
+export type DeepReadonly<T> = T extends (infer R)[]
+  ? DeepReadonlyArray<R>
+  : T extends object
+  ? DeepReadonlyObject<T>
+  : T;
+
+interface DeepReadonlyArray<T> extends ReadonlyArray<DeepReadonly<T>> {}
+type DeepReadonlyObject<T> = {
+  readonly [P in keyof T]: DeepReadonly<T[P]>;
+};
+
+/**
+ * UnionToIntersection: Converts a union type (A | B) into an intersection type (A & B).
+ * Highly optimized type for advanced type transformations (e.g., merging functional mixins).
+ */
+export type UnionToIntersection<U> =
+  (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never;

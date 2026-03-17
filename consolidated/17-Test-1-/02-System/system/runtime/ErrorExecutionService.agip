@@ -1,0 +1,38 @@
+class ErrorExecutionService {
+  constructor(protocol_P01) {
+    this.protocol = protocol_P01;
+  }
+
+  execute(errorCodeMnemonic, contextData) {
+    const errorDef = this.protocol.codes[errorCodeMnemonic];
+    if (!errorDef) {
+      console.error(`Error code ${errorCodeMnemonic} not defined in P01.`);
+      return;
+    }
+
+    const severity = errorDef.severity;
+    const action = errorDef.operational_action;
+
+    // 1. Log the attempt
+    CoreLogger.logError(errorDef.mnemonic, action, contextData);
+
+    // 2. Dispatch the operational action based on severity/action text (e.g., Halt, Rollback, Escalation)
+    switch (severity) {
+      case 5:
+        SystemRuntime.initiateLockdown(action);
+        break;
+      case 4:
+        SystemRuntime.captureSnapshot();
+        HumanOversight.escalate(action, 4);
+        break;
+      default:
+        StateManagement.executeRollback(action);
+    }
+
+    return { success: true, action: action };
+  }
+
+  getMitigationStrategy(errorCodeMnemonic) {
+    return this.protocol.codes[errorCodeMnemonic]?.mitigation_strategy;
+  }
+}

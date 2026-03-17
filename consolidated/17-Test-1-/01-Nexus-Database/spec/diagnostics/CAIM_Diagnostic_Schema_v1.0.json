@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "CAIM_Diagnostic_Structure_v1.0",
+  "title": "CAIM Diagnostic Structure Specification (CDSS)",
+  "description": "Standardized reporting structure for all CAIM initialization failures.",
+  "type": "object",
+  "properties": {
+    "report_id": {
+      "type": "string",
+      "description": "Unique monotonic identifier for this diagnostic report."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Time of failure issuance."
+    },
+    "failure_phase": {
+      "type": "string",
+      "enum": ["P0_L-PRE", "P1_PRE"],
+      "description": "The specific Pillar of Validation (3PV) where execution halted."
+    },
+    "protocol_triggered": {
+      "type": "string",
+      "enum": ["SIH", "RRP"],
+      "description": "The failure response protocol activated."
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["Critical", "High"],
+      "description": "Derived severity based on the protocol triggered."
+    },
+    "error_summary": {
+      "type": "string",
+      "description": "Brief, machine-parsable summary of the core error."
+    },
+    "asset_context": {
+      "type": "array",
+      "description": "List of assets (paths/IDs) directly implicated in the failure.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "details": {
+      "type": "object",
+      "description": "Extended, phase-specific details.",
+      "properties": {
+        "verification_authority": {
+          "type": "string",
+          "description": "CRoT registry ID or SDVM schema name that failed validation."
+        },
+        "validation_code": {
+          "type": "string",
+          "description": "Specific error code (e.g., MCIS_E901, SDVM_S404)."
+        }
+      },
+      "required": ["verification_authority", "validation_code"]
+    }
+  },
+  "required": [
+    "report_id",
+    "timestamp",
+    "failure_phase",
+    "protocol_triggered",
+    "severity",
+    "error_summary"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "policy_id": "SPDM_ENFORCEMENT_V1",
+  "governance_ref": "SPDM_V95.1",
+  "description": "Configuration defining the runtime checks and enforcement actions for mission-critical SPDM parameters, ensuring compliance with Runtime Integrity Lockdown requirements.",
+  "integrity_checks": {
+    "immutability_check": {
+      "enabled": true,
+      "mechanism": "K-M_Hash_Check",
+      "frequency": "15s",
+      "scope": ["VC.VME", "SB.SOTSM"],
+      "tolerated_deviation": "0.00000001"
+    },
+    "validation_cycle": {
+      "enabled": true,
+      "frequency": "5s",
+      "action_on_failure": "ALERT_L3_SHUTDOWN",
+      "failure_response_timeout_ms": 100
+    }
+  },
+  "runtime_lockdown": {
+    "status": "active",
+    "mechanism": "OS_Kernel_Memory_Lock",
+    "lockdown_targets": [
+      {"parameter_id": "viability_margin_epsilon", "permissions": "READ_ONLY"},
+      {"parameter_id": "safety_override_threshold_s02_max", "permissions": "READ_ONLY"}
+    ]
+  }
+}

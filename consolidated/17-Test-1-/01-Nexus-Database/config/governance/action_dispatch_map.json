@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Maps abstract governance action types to concrete service handlers or RPC endpoints used by the Governance Execution Engine.",
+  "action_map": {
+    "LOGGING": {
+      "handler_type": "MODULE",
+      "path": "engine.action_handlers.LoggingHandler",
+      "async": true
+    },
+    "NOTIFICATION": {
+      "handler_type": "RPC_ENDPOINT",
+      "endpoint": "system.messaging.AlertDispatcher/Notify",
+      "rate_limit_token": "GOV_NOTIFY_L3"
+    },
+    "METRIC_EMISSION": {
+      "handler_type": "STREAM_PIPE",
+      "destination": "telemetry/governance_metrics"
+    },
+    "INGRESS_CONTROL": {
+      "handler_type": "SYSTEM_CALL",
+      "command": "/bin/ctasctl/ingress_manage",
+      "secure_context_level": 3
+    }
+  }
+}

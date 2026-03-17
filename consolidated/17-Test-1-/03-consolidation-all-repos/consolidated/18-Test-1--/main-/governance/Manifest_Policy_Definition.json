@@ -1,0 +1,27 @@
+{
+  "policy_name": "Core_Integrity_Enforcement",
+  "policy_version": "1.0",
+  "target_manifest": "governance/SCR_IntegrityManifest.json",
+  "mandatory_assets": [
+    {
+      "asset_id": "P01_DECS",
+      "min_status_lock": "L4_REFERENCE_COMMIT",
+      "required_type": "Configuration/Input"
+    },
+    {
+      "asset_id": "SCHEMA_CFRAME",
+      "min_status_lock": "ASDM_COMPLIANCE_LOCK",
+      "required_type": "Schema/Constraint"
+    },
+    {
+      "asset_id": "POLICY_PDB",
+      "min_status_lock": "L1_CRITICAL_LOCK",
+      "required_type": "Policy/DecisionalBase"
+    }
+  ],
+  "verification_rules": {
+    "hash_algorithm_mandatory": "SHA3-512",
+    "allow_unlisted_assets": false,
+    "enforce_asset_existence": true
+  }
+}

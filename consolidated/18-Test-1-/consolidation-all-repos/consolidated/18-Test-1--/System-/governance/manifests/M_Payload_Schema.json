@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://aoc.v99/M_Payload_Schema.json",
+  "title": "M-02 Mutation Payload Governance Schema",
+  "description": "Defines the mandatory structure and integrity fields for all M-02 Payloads and their M-01 Intent precursors, enforced by PSIM (Stage 2).",
+  "type": "object",
+  "required": [
+    "artifact_id",
+    "mutation_type",
+    "source_intent_M01",
+    "required_resources_RACM_estimate",
+    "integrity_hash_SHA512",
+    "compliance_flags"
+  ],
+  "properties": {
+    "artifact_id": {
+      "type": "string",
+      "description": "Unique monotonic identifier (e.g., V99.2.M02.001).
+    },
+    "mutation_type": {
+      "type": "string",
+      "enum": ["Code Evolution", "Configuration Update", "Resource Reallocation", "Policy Refinement"],
+      "description": "Category of the proposed change."
+    },
+    "source_intent_M01": {
+      "type": "string",
+      "format": "uri",
+      "description": "Pointer to the initial M-01 Intent document, locked pre-Stage 2."
+    },
+    "required_resources_RACM_estimate": {
+      "type": "object",
+      "description": "Initial estimate of computational and memory resources required for deployment/runtime, subject to Stage 4 ECR input."
+    },
+    "integrity_hash_SHA512": {
+      "type": "string",
+      "description": "The cryptographic lock enforced by PSIM and committed as the PMH."
+    },
+    "compliance_flags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Policy metadata confirming Stage 1 RSAM compliance status."
+    }
+  }
+}

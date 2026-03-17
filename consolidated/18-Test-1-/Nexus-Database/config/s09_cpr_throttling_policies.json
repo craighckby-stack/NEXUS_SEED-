@@ -1,0 +1,18 @@
+{
+  "policies": [
+    {
+      "policy_name": "Mission_Critical_Tier",
+      "multiplier": 5.0,
+      "trigger_load_avg": 0.95,
+      "reaction": "Shed_Lowest_Priority"
+    },
+    {
+      "policy_name": "Standard_Query_Tier",
+      "multiplier": 1.0,
+      "trigger_load_avg": 0.80,
+      "reaction": "Exponential_Backoff"
+    }
+  ],
+  "default_reaction": "Queue_Request",
+  "metrics_source": "/api/v1/system/load_metrics"
+}

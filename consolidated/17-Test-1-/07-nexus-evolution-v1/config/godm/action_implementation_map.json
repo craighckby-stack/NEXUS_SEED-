@@ -1,0 +1,20 @@
+{
+  "catalog_ref": "1.0.0",
+  "implementations": {
+    "QUEUE_FOR_REVIEW": {
+      "handler": "governance.ReviewQueue.enqueue",
+      "runtime_requirements": ["DB_WRITE"],
+      "timeout_ms": 500
+    },
+    "RESOURCE_SCALE_UP": {
+      "handler": "system.KubeOrchestrator.scale",
+      "runtime_requirements": ["NETWORK_CLOUD_API", "AUTH_ADMIN"],
+      "timeout_ms": 30000
+    },
+    "IMPOSE_RATE_LIMIT": {
+      "handler": "security.WAFManager.throttle",
+      "runtime_requirements": ["NETWORK_SECURITY_FABRIC"],
+      "timeout_ms": 1000
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "manifestId": "GATR-TMM-V1.0",
+  "governanceOwner": "GATR_Core",
+  "description": "Governance Audit and Tracing Mapping Manifest. Defines how Trace Profile IDs map to logging infrastructure endpoints and required context fields for external interfaces.",
+  "profiles": [
+    {
+      "traceProfileId": "TRACE-AUDIT-001",
+      "logStreamType": "Synchronous_Audit_Stream",
+      "targetEndpoint": "GATR-Audit-Kafka:9092/HA-API-Audit",
+      "requiredContextFields": ["timestamp", "source_ip", "user_id_hash", "policy_match_result", "cr_verification_status"],
+      "retentionPolicy_days": 365
+    },
+    {
+      "traceProfileId": "TRACE-STREAM-005",
+      "logStreamType": "Asynchronous_Telemetry_Sink",
+      "targetEndpoint": "GATR-Tele-S3/data/telemetry_sinks/",
+      "requiredContextFields": ["timestamp", "stream_id", "ingress_size_kB"],
+      "retentionPolicy_days": 90
+    }
+  ]
+}

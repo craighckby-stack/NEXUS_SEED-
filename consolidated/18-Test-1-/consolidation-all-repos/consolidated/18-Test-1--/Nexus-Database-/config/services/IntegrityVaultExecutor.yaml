@@ -1,0 +1,21 @@
+service_id: SVE_941
+name: IntegrityVaultExecutor
+description: Dedicated, L5-hardened service for executing critical governance and cryptographic integrity checks referenced by GACR.
+deployment:
+  mode: containerized
+  isolation_level: L5_SECURE_HARDENED
+endpoints:
+  - path: /v1/execute_check
+    method: POST
+    required_schema: IntegrityCheckExecutionSchema
+    security: MTLS, TokenV94.1
+  - path: /v1/status
+    method: GET
+    security: InternalOnly
+supported_modules:
+  Integrity.Hash: { path: /app/modules/hash_calc.py }
+  Integrity.Crypto: { path: /app/modules/pki_validator.py }
+  Integrity.Immutability: { path: /app/modules/dlt_connector.py }
+performance_metrics:
+  timeout_ms: 500
+  rate_limit: 1000/s

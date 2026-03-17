@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://governance.agi/schema/GAX/PolicyExpressionSyntax.schema.json",
+  "title": "GAX Policy Expression Syntax Definition",
+  "description": "Defines the canonical allowed operations, variables, and syntactic structure for complex expressions (formulas) used in fields like lower_bound_expr/upper_bound_expr within CRED definitions.",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^v[0-9]+\\.[0-9]+$"
+    },
+    "allowed_operators": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Whitelist of mathematical/logical operators permitted in formulaic constraints (e.g., +, -, *, /, LOG, EXP, IF)."
+    },
+    "function_registry": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "arity": { "type": "integer", "description": "Number of arguments required." },
+          "description": { "type": "string" }
+        },
+        "required": ["name", "arity"]
+      },
+      "description": "Catalog of pre-approved runtime functions accessible within expressions."
+    },
+    "reserved_keywords": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Keywords reserved by the GAX state machine or expression evaluator that cannot be used as variable names."
+    }
+  },
+  "required": ["version", "allowed_operators", "function_registry"]
+}

@@ -1,0 +1,15 @@
+{
+  "client_id": "ALV-S_Client_Config",
+  "policy_registry_endpoint": "https://registry.forensic.corp/api/v2/policies",
+  "targets": ["ALV-S", "NRALS-Emitter"],
+  "cache_configuration": {
+    "enabled": true,
+    "ttl_minutes": 5,
+    "fallback_on_stale": false
+  },
+  "enforcement_behavior": {
+    "unregistered_policy_action": "SOFT_WARNING",
+    "logging_path": "/var/log/forensic/policy_violations.json",
+    "required_libraries": ["PKCS11_Connector"]
+  }
+}

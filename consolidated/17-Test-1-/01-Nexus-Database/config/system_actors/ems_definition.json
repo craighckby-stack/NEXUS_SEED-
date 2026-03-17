@@ -1,0 +1,13 @@
+{
+  "actor_id": "EMS",
+  "name": "Efficacy Measurement Subsystem",
+  "description": "Responsible for evaluating the contextual validity and resultant efficacy measures of the proposed state transition.",
+  "roles": [
+    "Artifact Generation (TEMM)",
+    "Artifact Generation (ECVM)",
+    "Stage Execution (S07, S08)"
+  ],
+  "dependencies": ["CRoT Agent", "GAX Executor"],
+  "output_artifacts": ["TEMM", "ECVM"],
+  "logging_targets": ["SGS", "ADTM"]
+}

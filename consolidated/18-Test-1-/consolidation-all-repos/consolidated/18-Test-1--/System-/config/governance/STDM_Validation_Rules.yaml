@@ -1,0 +1,21 @@
+rules:
+  - id: BGT-001  # Budget Overrun Check
+    target_field: ComputationalBudget.consumed_flops_estimate
+    condition: '> ComputationalBudget.allocated_flops * 0.95'
+    severity: CRITICAL
+    action: HALT_S7_EXECUTION
+    description: "Computational consumption exceeded 95% of allocated budget, indicating potential resource saturation."
+
+  - id: MPAM-002 # Model Conformance Drift
+    target_field: DriftHealthReport.MPAM_conformance
+    condition: '< 0.85'
+    severity: WARNING
+    action: LOG_AND_REPORT
+    description: "Model Integrity (MPAM) score dropped below the required operational safety margin."
+
+  - id: ARS-003  # Agent Critical Status Check
+    target_field: AgentReadiness.status
+    condition: '= CRITICAL'
+    severity: ALERT
+    action: SHUTDOWN_AND_REBOOT
+    description: "Primary agent complex reported critical operational state, requiring immediate intervention."

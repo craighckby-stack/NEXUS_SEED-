@@ -1,0 +1,24 @@
+{
+  "processing_routines": {
+    "Z_SCORE_V2": {
+      "description": "Standardized Z-score normalization routine.",
+      "module_path": "lib/metrics/normalization/zscore_v2.js",
+      "parameters": {"clip_sigma": 4.0, "fallback": "median"}
+    },
+    "WEIGHTED_AVERAGE_V1": {
+      "description": "Dynamic weighted average aggregation routine.",
+      "module_path": "lib/metrics/aggregation/weighted_average_v1.py",
+      "parameters": {"weight_source": "TRAFFIC_FLOW", "min_samples": 50}
+    }
+  },
+  "source_acronyms": [
+    "ATM",
+    "PSR",
+    "ADA",
+    "MCRA",
+    "RACM",
+    "RSAM",
+    "CIL",
+    "SBC"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "HSM_Configuration": {
+    "cluster_id": "SCSK_PRIMARY_01",
+    "endpoint_type": "gRPC_TLS_V1.3"
+  },
+  "Attestation_Parameters": {
+    "check_frequency_ms": 40, 
+    "latency_threshold_ms": 50,
+    "max_consecutive_failure": 5 
+  },
+  "CKRL_Parameters": {
+    "update_latency_max_s": 3,
+    "source_endpoint": "https://internal.trust.anchor/ckrl/latest"
+  },
+  "KVM_Ref_API": {
+    "rate_limit_per_module": 100,
+    "required_authorization_scope": "ssc-01:read:kvm-ref"
+  }
+}

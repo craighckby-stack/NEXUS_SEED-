@@ -1,0 +1,60 @@
+{
+  "$schema": "http://sgs-v97.5/schema/mqm",
+  "metadata": {
+    "version": "3.0-STRUCTURAL_ALIGNMENT",
+    "owner": "GAX/MQM_Core",
+    "description": "Defines core Model Quality Management policies and remediation protocols."
+  },
+  "policies": {
+    "version_tag": "ARES_MQM_V3.0_SA",
+    "enforcement_tiers": {
+      "CRITICAL_P1": {
+        "description": "High business impact models. Fast quarantine, extremely low tolerance (SLR/SLO aligned).",
+        "failure_criteria": {
+          "max_consecutive_reruns": 2,
+          "window_hrs": 12
+        },
+        "monitoring_rules": [
+          {
+            "metric_id": "MQM_S03_STORAGE_LATENCY",
+            "type": "PERCENTILE_LIMIT",
+            "limit": 0.10
+          },
+          {
+            "metric_id": "MQM_S04_MODEL_DRIFT_COUNT",
+            "type": "ABSOLUTE_COUNT_MAX",
+            "limit": 1
+          }
+        ]
+      },
+      "STANDARD_P2": {
+        "description": "Default operational models. Standard tolerance and recovery window.",
+        "failure_criteria": {
+          "max_consecutive_reruns": 4,
+          "window_hrs": 72
+        },
+        "monitoring_rules": [
+          {
+            "metric_id": "MQM_S03_STORAGE_LATENCY",
+            "type": "PERCENTILE_LIMIT",
+            "limit": 0.20
+          },
+          {
+            "metric_id": "MQM_S04_MODEL_DRIFT_COUNT",
+            "type": "ABSOLUTE_COUNT_MAX",
+            "limit": 3
+          }
+        ]
+      }
+    },
+    "default_tier": "STANDARD_P2"
+  },
+  "certified_remediation_protocols": [
+    {
+      "protocol_id": "Model_Remediation_Protocol_V1.1",
+      "activation_priority": 100,
+      "description": "Standard retraining/recalibration sequence based on V97.5 standards.",
+      "remediation_playbook": "PLAYBOOK_MLOP_RETRAIN_V975"
+    }
+  ]
+}

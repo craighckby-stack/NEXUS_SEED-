@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.agi.system/GRCS_AuditPolicy/v1",
+  "title": "GRCS Audit Policy and Execution Schema",
+  "description": "Defines scheduling, execution policies, and enforcement actions for continuous control verification by the autonomous engine.",
+  "type": "object",
+  "properties": {
+    "policyId": {
+      "type": "string",
+      "format": "ulid",
+      "description": "Unique identifier for the Audit Policy (referenced by GRCS controls)."
+    },
+    "auditJobs": {
+      "type": "array",
+      "description": "List of scheduled jobs to verify GRCS controls.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "jobId": { "type": "string", "format": "ulid" },
+          "targetControlId": {
+            "type": "string",
+            "description": "ID of the control being verified (references GRCS.controls[].controlId)."
+          },
+          "schedule": {
+            "type": "string",
+            "format": "cron",
+            "description": "CRON expression for verification frequency."
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"],
+            "description": "Severity of non-compliance if the control fails verification."
+          },
+          "verificationScriptPath": {
+            "type": "string",
+            "description": "Internal system path to the autonomous script or binary performing the verification logic."
+          }
+        },
+        "required": ["jobId", "targetControlId", "schedule", "severity", "verificationScriptPath"]
+      }
+    }
+  },
+  "required": ["policyId", "auditJobs"]
+}

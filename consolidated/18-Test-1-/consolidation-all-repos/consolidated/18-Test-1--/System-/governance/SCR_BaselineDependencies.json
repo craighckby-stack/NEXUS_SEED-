@@ -1,0 +1,28 @@
+{
+  "baseline_id": "B941-R-20240725",
+  "ag_version": "94.1",
+  "defined_baselines": {
+    "CoreRuntime": {
+      "required_version": "94.1.0",
+      "dependencies": [
+        {"file_path": "core/runtime/Kernel.bin", "required_match": true, "criticality": "H"},
+        {"file_path": "core/PolicyEngine.py", "required_match": true, "criticality": "Q"}
+      ],
+      "validation_scripts": []
+    },
+    "ConfigurationStack": {
+      "required_version": "1.0",
+      "dependencies": [
+        {"file_path": "config/system/ConfigurationStore.json", "required_match": true, "criticality": "A"}
+      ],
+      "validation_scripts": []
+    },
+    "ExternalInterfaces": {
+      "required_version": "94.1.0-Ext",
+      "dependencies": [
+        
+      ]
+    }
+  },
+  "comment": "Defines required file states and structural dependencies for core architectural components. References integrity codes defined in SCR_IntegrityManifest."
+}

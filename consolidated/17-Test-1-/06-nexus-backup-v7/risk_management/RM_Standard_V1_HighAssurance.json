@@ -1,0 +1,19 @@
+{
+  "model_id": "RM_Standard_V1_HighAssurance",
+  "description": "Profile suited for production deployments, prioritizing stability over aggressive metric gain.",
+  "risk_scoring": {
+    "factors": [
+      {"name": "RegressionDelta", "weight": 0.40, "threshold_limit": -0.01},
+      {"name": "SecurityVulnerabilityScore", "weight": 0.30, "threshold_limit": 1},
+      {"name": "TestCoverageChange", "weight": 0.15, "threshold_limit": 0.00},
+      {"name": "ExternalDependencyChange", "weight": 0.15, "threshold_limit": "low"}
+    ],
+    "max_acceptable_score": 10
+  },
+  "policy_actions": {
+    "score_threshold_critical": 8,
+    "critical_action": "AbortCommit_NotifyHumanOperator",
+    "score_threshold_warning": 5,
+    "warning_action": "PauseAcceptance_AIGenCorrectionPlan"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "path_registry": {
+    "PROPOSAL_ID_TARGET": {
+      "path": "proposal_id",
+      "access": "WRITE_ONLY",
+      "description": "Target for the system-generated unique identifier."
+    },
+    "HASH_SOURCE": {
+      "path": "payload.source_content_hash",
+      "access": "READ_ONLY",
+      "description": "Source hash provided by the proposal originator."
+    },
+    "SYSTEM_CALCULATED_HASH": {
+      "path": "system.calculated_hash",
+      "access": "SYSTEM_RW",
+      "description": "Internal field where the service writes the calculated hash of the payload for comparison."
+    },
+    "LOG_REF_TARGET": {
+      "path": "provenance.log_entry_reference",
+      "access": "WRITE_ONLY",
+      "description": "Target for the Immutable Audit Log entry reference."
+    },
+    "ANCHOR_REF_TARGET": {
+      "path": "provenance.chain_block_reference",
+      "access": "WRITE_ONLY",
+      "description": "Target field for final anchoring reference (temporarily set to PENDING)."
+    }
+  },
+  "path_version": "1.0",
+  "purpose": "Defines and controls secure access to proposal document paths for PIVS operations."
+}

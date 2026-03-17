@@ -1,0 +1,706 @@
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+
+// --- Icon Components (Kept clean and memoized) ---
+
+const IconWrapper = React.memo(({ children, className = "w-6 h-6" }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        {children}
+    </svg>
+));
+
+const CogIcon = (props) => (
+  <IconWrapper {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12a7.5 7.5 0 0015 0m-15 0a7.5 7.5 0 1115 0m-15 0H3m18 0h-1.5m-15 0a7.5 7.5 0 1115 0m-15 0H3m18 0h-1.5m-15 0a7.5 7.5 0 1115 0m-15 0H3m18 0h-1.5M12 9.75v1.5m0 7.5v1.5m0-4.5v1.5m0 0v-1.5m0 0a1.5 1.5 0 100 3 1.5 1.5 0 000-3zM12 9.75a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+  </IconWrapper>
+);
+
+const BeakerIcon = (props) => (
+  <IconWrapper {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M14.25 6.087c0-.66.537-1.197 1.197-1.197h.006c.66 0 1.197.537 1.197 1.197v7.603a.75.75 0 01-.06.29l-2.095 4.19a.75.75 0 01-.69.407h-4.218a.75.75 0 01-.69-.407l-2.095-4.19a.75.75 0 01-.06-.29V6.087c0-.66.537-1.197 1.197-1.197h.006c.66 0 1.197.537 1.197 1.197v.006a.75.75 0 001.5 0V6.087z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M14.25 18v1.5c0 .621.504 1.125 1.125 1.125h.006c.621 0 1.125-.504 1.125-1.125V18M9.75 18v1.5c0 .621.504 1.125 1.125 1.125h.006c.621 0 1.125-.504 1.125-1.125V18M12 6.75h.008v.008H12V6.75z" />
+  </IconWrapper>
+);
+
+const ZapIcon = (props) => (
+  <IconWrapper {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+  </IconWrapper>
+);
+
+const KeyIcon = (props) => (
+  <IconWrapper {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+  </IconWrapper>
+);
+
+const UserGroupIcon = (props) => (
+  <IconWrapper {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 00-12 0m12 0a9.094 9.094 0 01-12 0m12 0v.006M9.75 9.75a3 3 0 116 0 3 3 0 01-6 0zM3.75 20.25a9.094 9.094 0 0116.5 0v.006M21.75 20.25a9.094 9.094 0 00-16.5 0v.006" />
+  </IconWrapper>
+);
+
+const TerminalIcon = (props) => (
+  <IconWrapper {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 7.5l3 2.25-3 2.25m3 0h3m-3 0l3 2.25-3 2.25M6.75 15l3-2.25-3-2.25m12-9l-3 2.25 3 2.25m-3 0h-3m3 0l-3 2.25 3 2.25M9 3l-3 2.25 3 2.25M15 3l3 2.25-3 2.25m-3 12l3 2.25-3-2.25M9 21l3-2.25-3-2.25" />
+  </IconWrapper>
+);
+
+const CodeBracketIcon = (props) => (
+    <IconWrapper {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-5.25 15" />
+    </IconWrapper>
+);
+
+const CpuChipIcon = (props) => (
+    <IconWrapper {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 13.5l3 3 3-3m-3-6h.007V7.5H12v.007zM20.25 13.5v-7.5a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6V18a2.25 2.25 0 002.25 2.25h12.75a2.25 2.25 0 002.25-2.25v-7.5" />
+    </IconWrapper>
+);
+
+const Spinner = () => (
+    <svg className="loading-spinner w-5 h-5 text-white animate-spin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+);
+
+// --- Global CSS variables & keyframes ---
+const GlobalStyles = () => (
+  <style>{`
+    :root {
+      --bg: #0b1020;
+      --bg-soft: #141a2b;
+      --card: #0f1630;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --primary: #4f46e5; /* indigo-600 */
+      --green: #10b981;   /* emerald-500 */
+      --yellow: #f59e0b;  /* amber-500 */
+      --red: #ef4444;     /* red-500 */
+    }
+
+    /* ESN node styles for knowledge graph visualization */
+    .node-fact { color: var(--green); }
+    .node-hypo { color: var(--yellow); }
+    .node-conflict { color: var(--red); }
+  `}</style>
+);
+
+// --- Dork Strategies Definition (Outside component for stability) ---
+const DORK_STRATEGIES = [
+  {
+    id: 'academic',
+    name: 'Academic/Official Reports (High-Confidence)',
+    template: `"{topic}" (site:gov OR site:edu OR site:org) AND (filetype:pdf OR filetype:pptx)`,
+    description: 'Searches for formal, vetted documentation from government, educational institutions, or non-profits.'
+  },
+  {
+    id: 'tech_trends',
+    name: 'Emerging Tech & Code Trends (Opinion/Code)',
+    template: `"{topic}" (site:reddit.com OR site:github.com OR site:stackoverflow.com OR intext:"beta" OR intext:"alpha")`,
+    description: 'Focuses on forums and repositories for cutting-edge, yet unverified, developments and code examples.'
+  },
+  {
+    id: 'corporate_data',
+    name: 'Financial & Corporate Data (Statistics/Reports)',
+    template: `"{topic}" (site:sec.gov OR filetype:xlsx OR filetype:csv OR intext:"Q4 report")`,
+    description: 'Targets official financial filings and structured data sheets for quantitative analysis.'
+  },
+];
+
+
+// --- API Implementation and Core Logic (Utilities) ---
+
+const API_MODEL = 'gemini-2.5-flash';
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${API_MODEL}:generateContent`;
+const MAX_RETRIES = 5;
+
+/**
+ * Executes a fetch request with exponential backoff for resilience.
+ */
+async function fetchWithExponentialBackoff(url, options, retries = 0) {
+    try {
+        const response = await fetch(url, options);
+        if (response.status === 429 && retries < MAX_RETRIES) {
+            const delay = Math.pow(2, retries) * 1000 + Math.random() * 1000;
+            console.warn(`Rate limit hit (429). Retrying in ${Math.round(delay / 1000)}s...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            return fetchWithExponentialBackoff(url, options, retries + 1);
+        }
+        if (!response.ok) {
+            let errorDetail = await response.text();
+            try {
+                const jsonError = JSON.parse(errorDetail);
+                errorDetail = jsonError.error?.message || errorDetail;
+            } catch (e) {
+                // If it's not JSON, truncate large error responses
+                errorDetail = errorDetail.substring(0, 100) + '...';
+            }
+            throw new Error(`API request failed with status: ${response.status}. Detail: ${errorDetail}`);
+        }
+        return response.json();
+    } catch (error) {
+        if (retries < MAX_RETRIES) {
+            const delay = Math.pow(2, retries) * 1000 + Math.random() * 1000;
+            console.warn(`Fetch error. Retrying in ${Math.round(delay / 1000)}s...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            return fetchWithExponentialBackoff(url, options, retries + 1);
+        }
+        throw new Error(`Final API request failed after ${MAX_RETRIES} retries: ${error.message}`);
+    }
+}
+
+/**
+ * Applies a specific Google Dork strategy to the user's topic.
+ */
+const applyGoogleDorks = (topic, strategyId) => {
+    const strategy = DORK_STRATEGIES.find(s => s.id === strategyId);
+    if (!strategy) return topic;
+    // Replace placeholder safely, escaping existing quotes in the topic
+    return strategy.template.replace('{topic}', topic.replace(/"/g, '\\"'));
+};
+
+/**
+ * Extracts and sorts all unique printable characters from one or more strings.
+ */
+const getUniqueCharacters = (texts) => {
+    const combinedText = Array.isArray(texts) ? texts.join(' ') : texts || '';
+    if (!combinedText) return [];
+    
+    const characters = new Set();
+    // Only capture printable ASCII characters (32 is space, 126 is tilde)
+    for (const char of combinedText) {
+        const code = char.charCodeAt(0);
+        if (code >= 32 && code <= 126) {
+            characters.add(char);
+        }
+    }
+    // Sort by code point for consistent ordering (Space first, then symbols, then alpha/numeric)
+    return Array.from(characters).sort((a, b) => a.charCodeAt(0) - b.charCodeAt(0));
+};
+
+
+// --- Refactored Sub-Components (Memoized) ---
+
+const MetricCard = React.memo(({ title, value, icon, color }) => {
+    const colorClasses = {
+      green: 'text-[var(--green)]',
+      blue: 'text-indigo-400',
+      yellow: 'text-[var(--yellow)]',
+    };
+    const bgClasses = {
+      green: 'bg-[var(--green)]',
+      blue: 'bg-indigo-500',
+      yellow: 'bg-[var(--yellow)]',
+    };
+    // Clamp and floor value for display stability (0-100)
+    const roundedValue = Math.max(0, Math.min(100, Math.floor(value))); 
+
+    return (
+      <div className="bg-[var(--bg-soft)] p-4 rounded-lg border border-[#1e2a4a]">
+        <div className="flex items-center space-x-3 mb-2">
+          {React.cloneElement(icon, { className: `w-5 h-5 ${colorClasses[color]}` })}
+          <span className="text-sm font-medium text-[var(--muted)]">{title}</span>
+        </div>
+        <div className="text-3xl font-bold text-[var(--text)]">{roundedValue}%</div>
+        <div className="w-full bg-[#1e2a4a] rounded-full h-1.5 mt-3">
+          <div
+            className={`${bgClasses[color]} h-1.5 rounded-full shadow-lg`}
+            style={{ 
+                width: `${roundedValue}%`, 
+                transition: 'width 0.5s cubic-bezier(0.4, 0, 0.2, 1)', 
+                // Dynamically apply box shadow based on color variable
+                boxShadow: `0 0 8px 0 ${color === 'green' ? 'var(--green)' : color === 'blue' ? 'var(--primary)' : 'var(--yellow)'}40` 
+            }}
+          ></div>
+        </div>
+      </div>
+    );
+});
+
+const PersonaCard = React.memo(({ name, perspective, icon, color }) => (
+    <div className="bg-[var(--bg-soft)] rounded-lg p-5 border border-[#1e2a4a] transition-shadow duration-300 hover:shadow-lg hover:shadow-black/30">
+       <div className="flex items-start space-x-3 mb-3">
+         {React.cloneElement(icon, { className: `flex-shrink-0 w-6 h-6 ${color}` })}
+         <h3 className="text-lg font-semibold text-[var(--text)]">{name}</h3>
+       </div>
+       {/* Added font-mono for clear, pre-formatted style output */}
+       <p className="text-sm text-[var(--text)] font-mono leading-relaxed max-h-24 overflow-y-auto whitespace-pre-wrap">{perspective}</p>
+     </div>
+));
+
+const SystemMetricsPanel = React.memo(({ metrics }) => (
+    <div className="bg-[var(--card)] border border-[#1e2a4a] rounded-xl p-5 shadow-2xl shadow-black/20">
+        <h2 className="text-lg font-semibold mb-4 border-b border-[#1e2a4a] pb-3 text-[var(--text)]">System Metrics</h2>
+        <div className="grid grid-cols-3 gap-4">
+            <MetricCard title="Accuracy" value={metrics.accuracy} icon={<BeakerIcon />} color="green" />
+            <MetricCard title="Coherence" value={metrics.coherence} icon={<CogIcon />} color="blue" />
+            <MetricCard title="Novelty" value={metrics.novelty} icon={<ZapIcon />} color="yellow" />
+        </div>
+    </div>
+));
+
+const PersonaAnalysisPanel = React.memo(({ personas }) => (
+    <div className="bg-[var(--card)] border border-[#1e2a4a] rounded-xl p-5 shadow-2xl shadow-black/20">
+        <h2 className="flex items-center space-x-2 mb-4 border-b border-[#1e2a4a] pb-3 text-[var(--text)] font-semibold">
+            <UserGroupIcon className="w-5 h-5 text-indigo-400" />
+            <span>Persona Analysis</span>
+        </h2>
+        <div className="space-y-4">
+            <PersonaCard name="Critic (Limitation)" perspective={personas.critic} icon={<BeakerIcon />} color="text-[var(--red)]" />
+            <PersonaCard name="Optimist (Breakthrough)" perspective={personas.optimist} icon={<ZapIcon />} color="text-[var(--green)]" />
+            <PersonaCard name="Synthesizer (Conclusion)" perspective={personas.synthesizer} icon={<CogIcon />} color="text-indigo-400" />
+        </div>
+    </div>
+));
+
+const KnowledgeGraphPanel = React.memo(({ knowledgeNodes, relationships }) => (
+    <div className="bg-[var(--card)] border border-[#1e2a4a] rounded-xl shadow-2xl shadow-black/20 h-full flex flex-col">
+        <h2 className="flex items-center space-x-2 p-5 border-b border-[#1e2a4a] text-[var(--text)] font-semibold">
+            <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" /></svg>
+            <span>Knowledge Graph (Artifacts: {knowledgeNodes.length + relationships.length})</span>
+        </h2>
+        <div className="p-5 flex-grow overflow-y-auto font-mono text-sm space-y-5">
+            <div>
+                <h3 className="text-indigo-400 font-bold border-b border-[#1e2a4a] pb-1 mb-2">Nodes:</h3>
+                <ul className="pl-2 space-y-1 text-xs">
+                    {knowledgeNodes.map(node => (
+                        <li key={node.id} className={
+                            node.type === 'fact' ? 'node-fact' :
+                            node.type === 'hypo' ? 'node-hypo' :
+                            'node-conflict'
+                        }>
+                            [{node.id}] {node.label}
+                        </li>
+                    ))}
+                </ul>
+            </div>
+            <div>
+                <h3 className="text-indigo-400 font-bold border-b border-[#1e2a4a] pb-1 mb-2">Relationships:</h3>
+                <ul className="pl-2 space-y-1 text-xs text-[var(--muted)]">
+                    {relationships.map((rel, i) => (
+                        <li key={i} className={
+                            rel.type === 'valid' ? 'text-[var(--green)]' :
+                            rel.type ==='questionable' ? 'text-[var(--yellow)]' :
+                            'text-[var(--red)]'
+                        }>
+                            {rel.from} --[{rel.label}]--&gt; {rel.to}
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        </div>
+    </div>
+));
+
+const CharacterAnalysisPanel = React.memo(({ uniqueCharacters }) => (
+    <div className="bg-[var(--card)] border border-[#1e2a4a] rounded-xl p-5 shadow-2xl shadow-black/20">
+        <h2 className="flex items-center space-x-2 mb-4 border-b border-[#1e2a4a] pb-3 text-[var(--text)] font-semibold">
+            <CodeBracketIcon className="w-5 h-5 text-purple-400" />
+            <span>Character Set Analysis ({uniqueCharacters.length} Unique Chars)</span>
+        </h2>
+        <div className="max-h-32 overflow-y-auto space-y-1">
+            {uniqueCharacters.length === 0 ? (
+                <p className="text-[var(--muted)] text-sm">Run an analysis cycle to map the character set used in the response.</p>
+            ) : (
+                <div className="flex flex-wrap gap-1.5 font-mono text-base text-[var(--text)]">
+                    {uniqueCharacters.map((char, index) => (
+                        <span 
+                            key={index} 
+                            title={char === ' ' ? 'Space (SPC)' : `Code: ${char.charCodeAt(0)}`}
+                            className="px-2 py-1 bg-[#1e2a4a] rounded text-xs leading-none hover:bg-indigo-700 transition-colors cursor-default select-none"
+                        >
+                            {char === ' ' ? 'SPC' : char}
+                        </span>
+                    ))}
+                </div>
+            )}
+        </div>
+    </div>
+));
+
+const LearningCycleLog = React.memo(({ learningCycles }) => (
+    <div className="bg-[var(--card)] border border-[#1e2a4a] rounded-xl p-5 shadow-2xl shadow-black/20">
+        <h2 className="flex items-center space-x-2 mb-4 border-b border-[#1e2a4a] pb-3 text-[var(--text)] font-semibold">
+            <TerminalIcon className="w-5 h-5 text-green-400" />
+            <span>Learning Cycle Log</span>
+        </h2>
+        <div className="max-h-48 overflow-y-auto space-y-3">
+            {learningCycles.length === 0 ? (
+                <p className="text-[var(--muted)]">System ready. Enter a topic and start analysis.</p>
+            ) : (
+                // Displaying logs reversed (newest first)
+                learningCycles.slice().reverse().map((log) => (
+                    <div key={log.cycle} className="font-mono text-xs border-b border-[#1e2a4a] pb-2 last:border-b-0">
+                        <p className="text-green-400 mb-1">Cortex Run: Cycle {log.cycle} (Completed)</p>
+                        <p className="text-[var(--muted)]">{log.summary.substring(0, 120)}{log.summary.length > 120 ? '...' : ''}</p>
+                    </div>
+                ))
+            )}
+        </div>
+    </div>
+));
+
+
+// --- Main Dashboard Component ---
+export default function App() {
+  const [geminiApiKey, setGeminiApiKey] = useState('');
+  const [apiConfigured, setApiConfigured] = useState(false);
+  
+  const [currentTopic, setCurrentTopic] = useState('Safety protocols for self-improving AI models');
+  const [selectedDorkId, setSelectedDorkId] = useState(DORK_STRATEGIES[0].id);
+  
+  const [echoedInput, setEchoedInput] = useState('');
+  const [advancedQuery, setAdvancedQuery] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [error, setError] = useState(null);
+
+  const [knowledgeNodes, setKnowledgeNodes] = useState([]);
+  const [relationships, setRelationships] = useState([]);
+
+  const [learningCycles, setLearningCycles] = useState([]);
+  const [currentCycle, setCurrentCycle] = useState(0);
+
+  const [systemMetrics, setSystemMetrics] = useState({ accuracy: 0, coherence: 0, novelty: 0 });
+  const [uniqueCharacters, setUniqueCharacters] = useState([]); 
+
+  const [personas, setPersonas] = useState({
+    critic: "Awaiting new data analysis...",
+    optimist: "Ready to find potential!",
+    synthesizer: "Awaiting data to connect..."
+  });
+
+  const currentDorkStrategy = useMemo(() => 
+    DORK_STRATEGIES.find(s => s.id === selectedDorkId), 
+    [selectedDorkId]
+  );
+
+
+  const generateSystemPrompt = useCallback((topic) => `
+    You are the SPED Cortex, an advanced Analytical System specializing in synthesizing highly targeted information. 
+    
+    The user's query ("${topic}") has been optimized using an advanced Google Dork search to provide highly specific, high-quality documentation. Assume the search results you receive are high-confidence sources.
+
+    Perform a rapid, tri-perspective analysis:
+
+    1. **Critique:** Identify the biggest limitation, risk, or challenge discovered in the high-quality documents (e.g., funding gaps, technical hurdles, or regulatory delays). Be skeptical and factual.
+    2. **Optimist:** Identify the most promising advancement, potential breakthrough, or efficiency gain cited in the search results. Be positive but grounded.
+    3. **Synthesize:** Provide a brief summary connecting the key facts and future implications found across the reliable sources to form a single, coherent conclusion.
+    
+    Format your entire response strictly as a single, continuous paragraph using the labels exactly: Critique: [TEXT] Optimist: [TEXT] Synthesize: [TEXT]
+  `, []);
+
+  const initializeData = useCallback(() => {
+    setKnowledgeNodes([
+       { id: 'C0_INIT', label: 'System Initialized - Awaiting Target Query Context', type: 'fact' }
+    ]);
+    setRelationships([]);
+    setSystemMetrics({ accuracy: 10, coherence: 10, novelty: 10 });
+    setLearningCycles([{ cycle: 0, summary: "System architecture loaded. Ready to initiate deep learning cycle." }]);
+    setCurrentCycle(0);
+    setError(null);
+    setUniqueCharacters([]);
+    setAdvancedQuery('');
+    setEchoedInput('');
+    setPersonas({
+        critic: "Awaiting new data analysis...",
+        optimist: "Ready to find potential!",
+        synthesizer: "Awaiting data to connect..."
+    });
+  }, []);
+
+  // --- API Call Logic ---
+  const startLearning = useCallback(async () => {
+    if (isAnalyzing || !geminiApiKey || !currentTopic.trim()) return;
+    
+    setIsAnalyzing(true);
+    setError(null);
+    
+    const baseUserQuery = currentTopic.trim();
+    const advancedUserQuery = applyGoogleDorks(baseUserQuery, selectedDorkId);
+    
+    setEchoedInput(baseUserQuery);
+    setAdvancedQuery(advancedUserQuery);
+    
+    const systemPrompt = generateSystemPrompt(baseUserQuery);
+
+    const payload = {
+        // We use the advanced Dork query as the primary context for the model
+        contents: [{ role: 'user', parts: [{ text: advancedUserQuery }] }], 
+        // Crucial for grounding the analysis
+        config: {
+            systemInstruction: systemPrompt,
+            temperature: 0.2, // Low temp for grounded response
+            tools: [{ googleSearch: {} }], 
+        },
+    };
+    
+    const urlWithKey = `${API_URL}?key=${geminiApiKey}`;
+    const newCycle = currentCycle + 1;
+
+    try {
+        const result = await fetchWithExponentialBackoff(urlWithKey, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "Analysis failed to return structured text.";
+        
+        const cycleId = `C${newCycle}`;
+        
+        // 1. Robust Persona Extraction
+        const extractText = (regex, defaultText) => {
+            // Use a non-greedy match (.*?) followed by the next keyword or end of string ($)
+            const match = text.match(regex);
+            return match ? match[1].trim() : defaultText;
+        };
+
+        const parsedPersonas = {
+            // Note: The structure relies on 'Critique:' being first, then 'Optimist:', then 'Synthesize:'
+            critic: extractText(/Critique:\s*(.*?)(?=\s*Optimist:|$)/i, `Critique parse failure in Cycle ${newCycle}.`),
+            optimist: extractText(/Optimist:\s*(.*?)(?=\s*Synthesize:|$)/i, `Optimist parse failure in Cycle ${newCycle}.`),
+            synthesizer: extractText(/Synthesize:\s*(.*)/i, `Synthesis parse failure in Cycle ${newCycle}.`),
+        };
+        setPersonas(parsedPersonas);
+
+        // 2. Update Logs
+        const summary = parsedPersonas.synthesizer.length > 5 ? parsedPersonas.synthesizer : text;
+        setLearningCycles(prev => [...prev, { cycle: newCycle, summary }]);
+        
+        // 3. Character Analysis
+        const uniqueChars = getUniqueCharacters([currentTopic, text]);
+        setUniqueCharacters(uniqueChars);
+
+        // 4. Simulate Metric Update (Averages previous value with a random gain, maxed at 99)
+        setSystemMetrics(prev => ({
+            accuracy: Math.min(99, Math.floor(prev.accuracy * 0.7 + 25 + Math.random() * 10)), 
+            coherence: Math.min(99, Math.floor(prev.coherence * 0.7 + 20 + Math.random() * 15)),
+            novelty: Math.min(99, Math.floor(prev.novelty * 0.6 + 30 + Math.random() * 20)),
+        }));
+
+        // 5. Simulate Knowledge Graph update
+        const factNodeId = `${cycleId}_FACT`;
+        const hypoNodeId = `${cycleId}_HYPO`;
+        const conflictNodeId = `${cycleId}_CONFLICT`;
+
+        setKnowledgeNodes(prev => {
+            const newNodes = [
+                { id: factNodeId, label: `Fact: ${baseUserQuery.substring(0, 30)}...`, type: 'fact' },
+                { id: hypoNodeId, label: `Hypothesis: ${parsedPersonas.optimist.substring(0, 30)}...`, type: 'hypo' },
+                { id: conflictNodeId, label: `Conflict: ${parsedPersonas.critic.substring(0, 30)}...`, type: 'conflict' }
+            ];
+            // Limit the total number of nodes to prevent overflow/performance issues
+            const maxNodes = 15; 
+            return [...prev.slice(-(maxNodes - newNodes.length)), ...newNodes];
+        });
+
+        setRelationships(prev => {
+            const lastCycleId = currentCycle > 0 ? `C${currentCycle}_HYPO` : 'C0_INIT';
+            const newRels = [
+                // Link previous successful conclusion to the new cycle's fact
+                { from: lastCycleId, to: factNodeId, label: 'supports_context', type: 'valid' },
+                // Link the new facts to the synthesized outcome (Hypothesis)
+                { from: factNodeId, to: hypoNodeId, label: 'leads_to_future', type: 'questionable' },
+                // Link fact to conflict
+                { from: factNodeId, to: conflictNodeId, label: 'contradicts_risk', type: 'invalid' }
+            ];
+            const maxRels = 20;
+            return [...prev.slice(-(maxRels - newRels.length)), ...newRels];
+        });
+        
+        setCurrentCycle(newCycle);
+
+    } catch (err) {
+        console.error("Gemini API Error:", err);
+        setError(`Analysis failed. Check API Key or network: ${err.message}`);
+        setPersonas({ critic: "SYSTEM ERROR", optimist: "SYSTEM ERROR", synthesizer: "SYSTEM ERROR" });
+    } finally {
+        setIsAnalyzing(false);
+    }
+  }, [geminiApiKey, currentTopic, selectedDorkId, currentCycle, generateSystemPrompt]);
+
+
+  // --- Key Loading and Data Initialization ---
+ useEffect(() => {
+   const savedGeminiKey = localStorage.getItem('gemini-api-key');
+
+   if (savedGeminiKey) {
+     setGeminiApiKey(savedGeminiKey);
+     setApiConfigured(true);
+     initializeData();
+   }
+ }, [initializeData]);
+
+  const saveApiKeys = () => {
+    if (geminiApiKey.trim()) {
+        localStorage.setItem('gemini-api-key', geminiApiKey.trim());
+        initializeData();
+        setApiConfigured(true);
+    }
+  };
+  
+  // --- Render: API Key Modal ---
+  if (!apiConfigured) {
+    return (
+      <>
+        <GlobalStyles />
+        <div className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[var(--card)] border border-[#1e2a4a] rounded-xl p-6 shadow-xl max-w-md w-full text-[var(--text)]">
+            <div className="flex items-center space-x-3 mb-4">
+              <KeyIcon className="w-8 h-8 text-indigo-400" />
+              <h2 className="text-2xl font-bold">Configure API Key</h2>
+            </div>
+            <p className="text-sm text-[var(--muted)] mb-5">
+              Please enter your **Gemini API Key**. It is required for grounded analysis using Google Search. The key is stored locally in your browser.
+            </p>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[var(--text)] mb-1">Gemini API Key</label>
+                <input
+                  type="password"
+                  placeholder="Your Gemini API Key"
+                  className="w-full px-4 py-2 rounded-lg bg-[var(--bg-soft)] border border-[#1e2a4a] text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  value={geminiApiKey}
+                  onChange={(e) => setGeminiApiKey(e.target.value)}
+                  onKeyPress={(e) => { if (e.key === 'Enter') saveApiKeys(); }}
+                />
+              </div>
+              <button
+                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 px-4 rounded-lg transition-colors disabled:bg-gray-600"
+                onClick={saveApiKeys}
+                disabled={!geminiApiKey.trim()}
+              >
+                Save Key & Load System
+              </button>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // --- Main Dashboard UI ---
+  return (
+   <>
+     <GlobalStyles />
+     <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] p-4 md:p-8 font-sans">
+       {/* Header */}
+       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 pb-4 border-b border-[#1e2a4a]">
+         <div>
+           <h1 className="text-3xl font-extrabold">SPED Cortex <span className="text-indigo-400">v2.0</span></h1>
+           <p className="text-[var(--muted)]">Advanced Grounded Analysis using Dynamic Google Dorks</p>
+         </div>
+         <div className="flex items-center space-x-4 mt-3 sm:mt-0">
+           <span className="text-sm text-[var(--muted)]">Cycle: <span className="font-bold text-[var(--text)]">{currentCycle}</span></span>
+           <button 
+             onClick={initializeData}
+             className="text-red-400 hover:text-red-500 text-sm flex items-center transition-colors"
+             title="Reset System"
+             >
+                <TerminalIcon className="w-4 h-4 mr-1"/>
+                System Reset
+             </button>
+         </div>
+       </header>
+
+       {/* Error Message */}
+        {error && (
+            <div className="bg-red-900/30 border border-red-500/50 p-3 rounded-lg text-sm mb-6 font-mono text-red-300">
+                <span className="font-bold">SYSTEM ERROR:</span> {error}
+            </div>
+        )}
+
+       {/* Content grid */}
+       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+         {/* Column 1: Control Panel (Input & Dorks) */}
+         <div className="lg:col-span-1 space-y-6">
+           {/* Input Control Panel */}
+           <div className="bg-[var(--card)] border border-[#1e2a4a] rounded-xl shadow-2xl shadow-black/20 p-5">
+             <h2 className="text-lg font-semibold mb-3 text-[var(--text)]">Analysis Control Panel</h2>
+             
+             <label htmlFor="topic-input" className="block text-sm font-medium text-[var(--text)] mb-1">Learning Topic / Query</label>
+             <input
+               id="topic-input"
+               value={currentTopic}
+               onChange={(e) => setCurrentTopic(e.target.value)}
+               disabled={isAnalyzing}
+               placeholder="e.g., The future of high-density battery chemistry"
+               className="w-full px-4 py-2.5 mb-4 bg-[var(--bg-soft)] border border-[#1e2a4a] rounded-lg text-[var(--text)] disabled:opacity-70 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none"
+             />
+
+             {/* Dork Strategy Selector */}
+             <label htmlFor="dork-select" className="block text-sm font-medium text-[var(--text)] mb-1 flex items-center">
+                <CpuChipIcon className="w-4 h-4 mr-1 text-indigo-400"/>
+                Dork Search Strategy
+             </label>
+             <div className="relative">
+                <select
+                    id="dork-select"
+                    value={selectedDorkId}
+                    onChange={(e) => setSelectedDorkId(e.target.value)}
+                    disabled={isAnalyzing}
+                    className="w-full px-4 py-2.5 bg-[var(--bg-soft)] border border-[#1e2a4a] rounded-lg text-[var(--text)] disabled:opacity-70 focus:ring-indigo-500 focus:border-indigo-500 appearance-none cursor-pointer"
+                >
+                    {DORK_STRATEGIES.map(strategy => (
+                        <option key={strategy.id} value={strategy.id}>{strategy.name}</option>
+                    ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                </div>
+             </div>
+
+             <p className="text-xs text-[var(--muted)] mt-2 italic h-10 overflow-hidden">{currentDorkStrategy?.description}</p>
+             
+             <div className="mt-6">
+               <button
+                 disabled={isAnalyzing || !currentTopic.trim()}
+                 className="w-full flex justify-center items-center space-x-2 px-4 py-3 bg-indigo-600 rounded-lg hover:bg-indigo-500 font-semibold text-white disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
+                 onClick={startLearning}
+               >
+                 {isAnalyzing ? (
+                    <>
+                        <Spinner />
+                        <span>Applying Dorks & Analyzing...</span>
+                    </>
+                 ) : (
+                    <span>Start Dynamic Analysis (Cycle {currentCycle + 1})</span>
+                 )}
+               </button>
+             </div>
+           </div>
+
+           {/* Advanced Query Output */}
+           <div className="bg-[var(--card)] border border-[#1e2a4a] rounded-xl shadow-2xl shadow-black/20 p-5">
+             <h2 className="text-lg font-semibold mb-2 text-[var(--text)]">Advanced Search Query (Dorks Applied)</h2>
+             <p className="font-mono text-xs text-amber-400 break-words max-h-40 overflow-y-auto p-2 bg-[#1e2a4a] rounded select-all">
+                {advancedQuery || <span className="text-[var(--muted)]">Awaiting topic and analysis start...</span>}
+             </p>
+             <p className="mt-3 text-sm text-[var(--muted)]">Base Topic: <span className="text-[var(--text)] font-semibold">{echoedInput || 'N/A'}</span></p>
+           </div>
+           
+           <CharacterAnalysisPanel uniqueCharacters={uniqueCharacters} />
+         </div>
+
+         {/* Column 2: Knowledge Graph (simulated) */}
+         <div className="lg:col-span-1 space-y-6">
+           <KnowledgeGraphPanel knowledgeNodes={knowledgeNodes} relationships={relationships} />
+         </div>
+
+         {/* Column 3: Reports & Logs */}
+         <div className="lg:col-span-1 space-y-6">
+           
+           <SystemMetricsPanel metrics={systemMetrics} />
+           
+           <PersonaAnalysisPanel personas={personas} />
+
+           <LearningCycleLog learningCycles={learningCycles} />
+         </div>
+
+       </div>
+     </div>
+   </>
+ );
+}

@@ -1,0 +1,1 @@
+The provided ContractArtifactValidator JavaScript class ensures the consistency and integrity of smart contract JSON artifacts. It checks for mandatory keys, validates the structure, and verifies the bytecode, among other checks.

@@ -1,0 +1,62 @@
+{
+  "description": "Defines mandatory control checks (CIDs) for GSEP-C execution stages, mapping them to required verification logic and failure thresholds.",
+  "version": "V95.0",
+  "controls": [
+    {
+      "id": "C_ACVL_LOAD",
+      "level": "CRITICAL",
+      "target_service": "ACCESS_CTRL",
+      "description": "Ensure Access Control Verification List (ACVL) is loaded and immutable prior to intent registration.",
+      "threshold": "FAIL_FAST",
+      "metric": "LOAD_STATUS.hash_integrity"
+    },
+    {
+      "id": "C_MPAM_PRECHECK",
+      "level": "HIGH",
+      "target_service": "STATE_PERSIST",
+      "description": "Pre-check the Master Pipeline Arbitration Mechanism (MPAM) integrity and availability.",
+      "threshold": "SOFT_WARNING",
+      "metric": "MPAM.heartbeat_latency_ms"
+    },
+    {
+      "id": "C_BOUNDARY_LOCK",
+      "level": "CRITICAL",
+      "target_service": "EXECUTION_ENV",
+      "description": "Verify the constraint boundary state transition locking mechanism is active.",
+      "threshold": "FAIL_IMMEDIATE",
+      "metric": "CONSTRAINT_LOCK_ID.status"
+    },
+    {
+      "id": "C_ECVM_COMPUTE",
+      "level": "HIGH",
+      "target_service": "VALIDATION_ENGINE",
+      "description": "Trigger and verify the successful computation of the Execution Context Validity Matrix.",
+      "threshold": "MUST_PASS",
+      "metric": "ECVM.computation_status"
+    },
+    {
+      "id": "C_TEMM_CRITICAL",
+      "level": "HIGH",
+      "target_service": "VALIDATION_ENGINE",
+      "description": "Ensure the Transition Efficacy Measurement is within acceptable bounds before finality assessment.",
+      "threshold": "MUST_PASS_THRESHOLD",
+      "metric": "TEMM.efficacy_score"
+    },
+    {
+      "id": "C_GAX_COMMIT_PREP",
+      "level": "CRITICAL",
+      "target_service": "FINALITY_ENGINE",
+      "description": "Validation that ECVM, TEMM, and all required Axioms (I, II, III) result in a state that permits atomic commit.",
+      "threshold": "MUST_PASS",
+      "metric": "GAX_ASSESSMENT.result"
+    },
+    {
+      "id": "C_AUDIT_FINALIZATION",
+      "level": "CRITICAL",
+      "target_service": "AUDIT_TRAIL",
+      "description": "Confirm irreversible persistence of all generated artifacts and required audit records (ADTM, MPAM, STR).",
+      "threshold": "IRREVERSIBLE_SUCCESS",
+      "metric": "AUDIT_COMMIT.status"
+    }
+  ]
+}

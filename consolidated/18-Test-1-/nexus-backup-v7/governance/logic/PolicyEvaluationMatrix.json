@@ -1,0 +1,22 @@
+{
+  "matrix_id": "PEM_A94_1",
+  "description": "Defines how governance policies (Action Level) interact with current Operational Control status (Veto Signals, Global Enforcement) to determine final execution outcome.",
+  "evaluation_rules": [
+    {
+      "precedence": 1,
+      "condition": "Policy.status == 'Dormant' AND OperationalControls.global_enforcement_level != 'Emergency'",
+      "result": "Bypass"
+    },
+    {
+      "precedence": 2,
+      "condition": "Policy.action_level == 'CRITICAL_VETO' OR VetoSignals.any_true == true",
+      "result": "Halt_And_Log_L1"
+    },
+    {
+      "precedence": 3,
+      "condition": "Policy.scope == 'DependencyManagement' AND DeploymentPhase in Policy.trigger_environments",
+      "result": "Evaluate_Constraints_L2"
+    }
+  ],
+  "default_action": "Allow_Execution"
+}

@@ -1,0 +1,30 @@
+{
+  "spec_version": "1.0.0",
+  "description": "Trust Boundary Registry: Definitive list of files and artifacts required for CTH validation, excluding ephemeral system state.",
+  "manifest_source": "/system/signatures/G0-Policy_Manifest.sig",
+  "artifact_groups": [
+    {
+      "group_id": "PROTOCOL_DEFINITIONS",
+      "integrity_required": true,
+      "files": [
+        "protocols/pds_v1.json",
+        "protocols/gax_v3.yaml"
+      ]
+    },
+    {
+      "group_id": "RUNTIME_CONFIGS",
+      "integrity_required": true,
+      "schema_map": {
+        "config/acvm.json": "schemas/acvm_schema.json",
+        "config/eml_pipeline.json": "schemas/eml_schema.json"
+      }
+    },
+    {
+      "group_id": "INITIAL_STATE",
+      "integrity_required": false,
+      "files": [
+        "initial_state/bootstrap_keys.json"
+      ]
+    }
+  ]
+}

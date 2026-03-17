@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Autonomous Runtime Safety Policy",
+  "description": "Defines live environment acceptable performance deviations triggering automated rollback (Post-Deployment Governance). This decouples real-time operational limits from pre-deployment confidence metrics. Includes specific safeguards for AGI autonomous evolution cycles.",
+  "type": "object",
+  "properties": {
+    "latency_deviation_ms": {
+      "type": "number",
+      "default": 50,
+      "description": "Maximum acceptable sustained increase in 95th percentile request latency (in milliseconds) relative to pre-deployment baseline."
+    },
+    "error_rate_threshold": {
+      "type": "number",
+      "default": 0.005,
+      "description": "Maximum acceptable sustained transaction error rate (e.g., 0.005 = 0.5% failure rate) relative to baseline."
+    },
+    "memory_spike_limit_pct": {
+      "type": "number",
+      "default": 15.0,
+      "description": "Maximum percentage spike in allocated memory usage relative to the deployment baseline (measured over 5-minute window)."
+    },
+    "minimum_failure_duration_s": {
+      "type": "integer",
+      "default": 30,
+      "description": "Minimum duration (seconds) required for metric deviation to persist before classifying the deployment as unstable and triggering general rollback."
+    },
+    "autonomous_cycle_time_increase_pct": {
+      "type": "number",
+      "default": 25.0,
+      "description": "Maximum acceptable increase (%) in AGI Kernel's average autonomous evolution cycle time post-deployment (indicating internal degradation or logic bloat)."
+    },
+    "novelty_integration_rollback_delay_s": {
+      "type": "integer",
+      "default": 60,
+      "description": "If a deployment includes a new /emergent capability, extend the minimum failure duration to allow for initial stabilization phase (seconds). This grants tolerance for novel solutions."
+    }
+  },
+  "required": [
+    "latency_deviation_ms",
+    "error_rate_threshold",
+    "memory_spike_limit_pct",
+    "minimum_failure_duration_s",
+    "autonomous_cycle_time_increase_pct",
+    "novelty_integration_rollback_delay_s"
+  ]
+}

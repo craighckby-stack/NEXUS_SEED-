@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign-agi.com/governance/smc_schema.json",
+  "title": "State Machine Controller (SMC) Definition Schema",
+  "description": "Defines the mandatory structural constraints for all DSE state machine configuration manifests (e.g., gsep_c_flow.json). Ensures auditable, deterministic, non-branching transition structures.",
+  "type": "object",
+  "required": ["flow_id", "version", "stages"],
+  "properties": {
+    "flow_id": {
+      "type": "string",
+      "description": "Unique identifier for the state machine flow (e.g., GSEP-C)"
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic versioning of the flow definition."
+    },
+    "stages": {
+      "type": "array",
+      "description": "Ordered list of atomic execution stages (S00 to S14).",
+      "minItems": 15,
+      "maxItems": 15,
+      "items": {
+        "type": "object",
+        "required": ["stage_id", "actor_role", "input_requirement", "output_artifact", "failure_policy"],
+        "properties": {
+          "stage_id": {
+            "type": "string",
+            "pattern": "^S\\d{2}$",
+            "description": "Stage identifier (S00, S01, etc.)"
+          },
+          "actor_role": {
+            "type": "string",
+            "description": "The specific role defined in aam_definition.in.json responsible for this stage."
+          },
+          "input_requirement": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "List of required input artifacts/telemetry (references artifact_manifest_schema.json)."
+          },
+          "output_artifact": {
+            "type": "string",
+            "description": "Artifact produced upon successful execution (can be 'N/A' if pure verification stage)."
+          },
+          "verification_target": {
+            "type": "string",
+            "description": "Reference to the specific constraint in ACVD or telemetry_spec (e.g., 'ACVD/GAX_III_CSR_AUDIT')."
+          },
+          "failure_policy": {
+            "type": "string",
+            "enum": ["IntegrityHalt", "ContinueVerification", "StateModificationRequired"],
+            "description": "Policy triggered upon stage constraint failure. IntegrityHalt fulfills M-01."
+          }
+        }
+      }
+    }
+  }
+}

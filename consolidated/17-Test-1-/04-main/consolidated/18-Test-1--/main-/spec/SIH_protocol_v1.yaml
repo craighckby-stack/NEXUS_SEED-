@@ -1,0 +1,29 @@
+# spec/SIH_protocol_v1.yaml
+# SOVEREIGN GOVERNANCE MANIFEST: System Integrity Halt Protocol Specification
+
+protocol_id: SIH_V1
+trigger_condition: L9_COMMITMENT_FAILURE
+governance_mandate: CRITICAL_HALT
+
+# --- Core Procedures (Mandatory Steps upon L9 Failure) ---
+procedures:
+  1. SYSTEM_LOCKDOWN:
+    description: Initiate immediate, global read-only system state lockdown. Prevent all new SST requests.
+    required_state: ReadOnly
+    exception: DiagnosticAgentsOnly
+  2. STATE_DUMP:
+    description: Capture atomic snapshot of transaction buffers, system memory, and critical architectural variables.
+    target_path_template: /forensics/L9_HALT_$(timestamp)
+    integrity_check_mandate: Cryptographic hashing required for validation.
+  3. COMPLIANCE_LOGGING:
+    description: Record full compliance audit log (L0-L9 inputs, outputs, and failure signal stack trace).
+    status_tag: FAILURE_CRITICAL_STATE_9
+    reference: SIHM_V1 (Configuration Parameters)
+  4. NOTIFICATION_CASCADE:
+    description: Notify Tier-0 governance agents and core architectural monitors via primary secure link.
+    severity: SEVERITY_10_HALT
+
+# --- Required Exit Criteria ---
+exit_criteria:
+  - MANUAL_GOVERNANCE_OVERRIDE (Requires 7/9 Veto-Proof Agent Consensus)
+  - FORENSIC_CLEARANCE_P01 (Verification that root cause is identified and patched)

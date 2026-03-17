@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+.next/
+
+# Config files
+*.config.js
+
+# Other
+*.min.js
+coverage/

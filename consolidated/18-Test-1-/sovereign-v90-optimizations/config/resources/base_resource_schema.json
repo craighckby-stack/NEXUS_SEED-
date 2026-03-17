@@ -1,0 +1,18 @@
+{
+  "schemaId": "RES_SCH_V1",
+  "resourceTypes": {
+    "KubeCluster": {
+      "requiredFields": ["provider", "region", "minNodes"],
+      "validationRules": {
+        "minNodes": "int_gt_0"
+      }
+    },
+    "Postgres": {
+      "requiredFields": ["endpoint", "port", "engineVersion"],
+      "validationRules": {}
+    }
+  },
+  "metadata": {
+    "description": "Defines the mandatory structure and validation for resource entries referenced by GODM."
+  }
+}

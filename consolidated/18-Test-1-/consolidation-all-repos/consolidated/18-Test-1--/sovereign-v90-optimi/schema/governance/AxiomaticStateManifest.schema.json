@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.ai/schema/governance/AxiomaticStateManifest.schema.json",
+  "title": "Axiomatic State Manifest (ASM)",
+  "description": "Canonical accumulator for all ACV component validation results collected during GSEP-C Stages S02 through S10, used as input for S11 P-01 PASS determination.",
+  "type": "object",
+  "required": [
+    "uma_metric_results",
+    "context_attestation",
+    "integrity_vetoes"
+  ],
+  "properties": {
+    "manifest_version": {
+      "type": "string",
+      "description": "Version of the ASM schema."
+    },
+    "uma_metric_results": {
+      "type": "object",
+      "description": "Results related to Utility Maximization Axiom (I).",
+      "required": ["TEMM", "UFRM", "CFTM"],
+      "properties": {
+        "TEMM": {"type": "number", "description": "Target Execution Utility Metric ($S_{01}$, calculated in S08)."},
+        "UFRM": {"type": "number", "description": "Baseline Required Utility Metric ($S_{02}$, from GAX config)."},
+        "CFTM": {"type": "number", "description": "Minimum required utility margin ($ε$, from GAX config)."},
+        "uma_pass": {"type": "boolean", "description": "Result of TEMM >= (UFRM + CFTM) (Checked in S10)."}
+      }
+    },
+    "context_attestation": {
+      "type": "object",
+      "description": "Results related to Context Attestation Axiom (II).",
+      "required": ["ECVM"],
+      "properties": {
+        "ECVM": {"type": "boolean", "description": "Environmental Context Verification Status (Validated in S06)."}
+      }
+    },
+    "integrity_vetoes": {
+      "type": "object",
+      "description": "Results related to Axiomatic Integrity Axiom (III). Absence of veto is required.",
+      "required": ["PVLM", "MPAM", "ADTM"],
+      "properties": {
+        "PVLM": {"type": "boolean", "description": "Policy Prohibition Veto Status (S03 check)."},
+        "MPAM": {"type": "boolean", "description": "Stability Bounds Veto Status (S04 check)."},
+        "ADTM": {"type": "boolean", "description": "Runtime Anomaly Veto Status (S09 check)."}
+      }
+    },
+    "p01_finality_result": {
+      "type": "boolean",
+      "description": "Final result of the S11 P-01 PASS calculation. Requires UMA_pass AND ECVM AND NOT (PVLM OR MPAM OR ADTM)."
+    }
+  },
+  "additionalProperties": false
+}

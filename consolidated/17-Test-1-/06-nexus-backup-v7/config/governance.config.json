@@ -1,0 +1,17 @@
+{
+  "gco_version": "V94.1",
+  "scr_mandates": {
+    "p01_efficacy_threshold_min": 0.75, 
+    "p01_risk_cap_max": 0.20,
+    "sdr_metric_sources_required": [
+      "SystemThroughputV1",
+      "LatencyMetricsV2"
+    ],
+    "gsep_timeout_ms": 3600000
+  },
+  "l1_veto_policies": [
+    "SecurityIntegrityPolicyV3",
+    "AOC_CompliancePolicyV1"
+  ],
+  "gsep_stage_locking_mechanism": "SHA3_512"
+}

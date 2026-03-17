@@ -1,0 +1,20 @@
+{
+  "$schemaVersion": "1.0",
+  "description": "Reusable schema definitions and validation rule sets referenced by SchemaAttestationPolicyMap.",
+  "Validation_IdentityV1_Strict": {
+    "type": "JSONSchema",
+    "rules": {
+      "required": ["issuerId", "subjectData", "timestamp"],
+      "properties": {
+        "issuerId": {"format": "uuid"}
+      }
+    }
+  },
+  "Validation_TelemetryV3_Relaxed": {
+    "type": "JSONSchema",
+    "rules": {
+      "maxProperties": 10,
+      "additionalProperties": true
+    }
+  }
+}

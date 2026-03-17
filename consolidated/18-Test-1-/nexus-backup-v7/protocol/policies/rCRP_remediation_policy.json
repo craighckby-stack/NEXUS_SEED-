@@ -1,0 +1,41 @@
+{
+  "violation_policy_version": "1.0.0",
+  "policy_id": "rCRP_remediation_policy",
+  "violation_categories": {
+    "V_C_001": {
+      "name": "Tautological Contradiction",
+      "description": "Two derived constraints conflict directly.",
+      "remediation_strategy": "S_R_002",
+      "priority": 1
+    },
+    "V_C_002": {
+      "name": "Contextual Ambiguity",
+      "description": "Insufficient context to stabilize key variables.",
+      "remediation_strategy": "S_R_001",
+      "priority": 2
+    },
+    "V_C_003": {
+      "name": "Resource Exhaustion Prediction",
+      "description": "Projected iteration count exceeds budget limits.",
+      "remediation_strategy": "S_R_003",
+      "priority": 3
+    }
+  },
+  "remediation_strategies": {
+    "S_R_001": {
+      "action": "CONTEXT_RETRIEVAL",
+      "parameters": {"k_neighbors": 10, "source_types": ["KnowledgeGraph", "ExternalAPI"]},
+      "effect": "Add high-relevance data to working memory."
+    },
+    "S_R_002": {
+      "action": "PARAMETER_DILUTION",
+      "parameters": {"focus_area": "conflicting_variables", "confidence_weight_reduction": 0.15},
+      "effect": "Reduce certainty score on derived conflicts to allow iterative override."
+    },
+    "S_R_003": {
+      "action": "PRUNING",
+      "parameters": {"depth_limit": 3},
+      "effect": "Terminate low-probability search branches."
+    }
+  }
+}

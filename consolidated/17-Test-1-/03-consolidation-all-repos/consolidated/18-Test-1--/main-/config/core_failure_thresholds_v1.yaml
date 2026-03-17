@@ -1,0 +1,17 @@
+# CORE FAILURE THRESHOLDS MANIFEST (CFTM) V1.0
+# Defines the mandatory constants for deterministic failure threshold enforcement.
+
+# 1.0 CORE OBJECTIVE FUNCTION (COF) INPUTS
+# tau_norm: Normalization constant applied to Risk ($S-02$) in the COF denominator.
+# Must be > 0 to prevent division by zero/instability.
+tau_norm: 0.001
+
+# 2.0 P-01 FINALITY GATE INPUTS
+# epsilon_min: The minimum acceptable safety margin (Viability Margin) for L7.
+# P-01 requires S-01 > S-02 + epsilon (where epsilon >= epsilon_min).
+epsilon_min: 0.05
+
+# 3.0 RESOURCE CONSTRAINT LIMITS (L4 INPUTS)
+# Optional thresholds that can be consumed by L4 (SCI) to define CAC dynamically.
+# Example: Maximum allowable resource budget (in compute units per SST).
+max_compute_units: 15000

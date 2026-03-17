@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign.agi/schemas/v97.1/HETM.json",
+  "title": "Host Environment Trust Manifest (HETM) Schema",
+  "description": "Mandatory specifications for the underlying computational environment verified at GSEP-C S0 (INIT). Requires CRoT signature.",
+  "type": "object",
+  "properties": {
+    "manifest_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for this specific manifest instance."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "HETM Specification version (SemVer, e.g., 1.0.0)"
+    },
+    "required_platform_measurement": {
+      "type": "string",
+      "description": "The cryptographically attested boot/attestation measurement (e.g., PCRs or Hypervisor hash). Must be SHA384 hex.",
+      "pattern": "^[0-9a-fA-F]{96}$"
+    },
+    "minimal_os_integrity_level": {
+      "type": "integer",
+      "description": "Minimum required security certification level of the host environment. Must align with GACR Tier Classification (1-5).",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "required_enclave_features": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "SGX",
+          "TDX",
+          "AMD-SEV",
+          "TrustZone",
+          "VT-x/EPT"
+        ]
+      },
+      "description": "List of mandatory security/isolation features.",
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "triumvirate_segmentation_rules": {
+      "type": "object",
+      "description": "Defines mandatory isolation constraints for the Sovereign Global Segment (SGS), Global Axiomizer (GAX), and Cryptographic Root of Trust (CRoT).",
+      "properties": {
+        "memory_isolation_policy": {
+          "type": "string",
+          "enum": [
+            "Strict",
+            "Hardened",
+            "Isolated"
+          ],
+          "description": "The required memory protection policy enforced by the hypervisor."
+        },
+        "vCPU_pinning_requirement": {
+          "type": "boolean",
+          "description": "True if agent execution requires dedicated, non-shared physical cores."
+        }
+      },
+      "required": [
+        "memory_isolation_policy",
+        "vCPU_pinning_requirement"
+      ]
+    },
+    "audit_log_endpoint": {
+      "type": "string",
+      "format": "uri",
+      "description": "Certified and cryptographically bound endpoint for immutable log relay prior to S8 persistence."
+    },
+    "attestation_signature": {
+      "type": "string",
+      "description": "CRoT signature verifying the integrity and origin of the HETM manifest payload."
+    }
+  },
+  "required": [
+    "manifest_id",
+    "version",
+    "required_platform_measurement",
+    "minimal_os_integrity_level",
+    "required_enclave_features",
+    "triumvirate_segmentation_rules",
+    "audit_log_endpoint",
+    "attestation_signature"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "resolver_definitions": {
+    "GAX_III_INTEGRITY": {
+      "type": "ServiceCall",
+      "endpoint": "integrity/v1/hashing/validate",
+      "timeout_ms": 500,
+      "failure_policy": "REJECT_AND_LOG"
+    },
+    "GAX_II_COMPLIANCE": {
+      "type": "InternalFunction",
+      "function_name": "SchemaValidator.verifyArtifact(metadata)",
+      "timeout_ms": 200,
+      "failure_policy": "HALT_STAGE"
+    },
+    "GAX_I_EFFICIENCY": {
+      "type": "ExternalAPI",
+      "api_host": "metrics.corp.local",
+      "path": "/metrics/v2/delta_check",
+      "failure_policy": "WARN_ONLY"
+    }
+  }
+}

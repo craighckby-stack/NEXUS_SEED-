@@ -1,0 +1,48 @@
+{
+  "PVLM_Version": "V97.2-B",
+  "Policy_Signal_Registry": {
+    "S-03": {
+      "name": "Mandatory Constraint Violation Signal",
+      "severity": "CRITICAL",
+      "default_action": "Requires Immediate Attention"
+    }
+  },
+  "OCM_Veto_Rules": [
+    {
+      "rule_id": "VETO-C-101",
+      "metric_target": "Systemic_Debt_Index",
+      "data_type": "float",
+      "threshold_type": "Hard Max",
+      "threshold_value": 0.05,
+      "status_trigger_if_exceeded": "S-03:ACTIVE"
+    },
+    {
+      "rule_id": "VETO-C-102",
+      "metric_target": "External_Regulatory_Compliance_Flag",
+      "data_type": "string",
+      "threshold_type": "Binary Must Equal",
+      "threshold_value": "CLEARED",
+      "status_trigger_if_not_met": "S-03:ACTIVE"
+    },
+    {
+      "rule_id": "VETO-C-103",
+      "metric_target": "Resource_Volatility_Spike_Count_1H",
+      "data_type": "integer",
+      "threshold_type": "Soft Max",
+      "threshold_value": 3,
+      "status_trigger_if_exceeded": "S-03:PENDING_REVIEW"
+    }
+  ],
+  "Veto_Resolution_Map": {
+    "S-03:ACTIVE": {
+      "required_action": "REJECT",
+      "execution_flow": "L0 Re-entry",
+      "priority": "HIGH_IMMEDIATE"
+    },
+    "S-03:PENDING_REVIEW": {
+      "required_action": "REVIEW",
+      "execution_flow": "Manual Handoff",
+      "priority": "MEDIUM"
+    }
+  }
+}

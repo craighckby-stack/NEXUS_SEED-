@@ -1,0 +1,31 @@
+{
+  "system_version": "v94.1",
+  "description": "Target efficiency and alert thresholds for monitored resource consumption metrics, derived from RCM_V2 data fields.",
+  "targets": [
+    {
+      "metric_key": "TokenGenerationRate_tps",
+      "source_fields": ["model_context.tokens_output", "compute_metrics.latency_ms"],
+      "target_minimum": 500,
+      "alert_threshold_low": 350,
+      "alert_severity": "WARNING",
+      "unit": "tokens/second",
+      "calculation_method": "(tokens_output / latency_ms) * 1000"
+    },
+    {
+      "metric_key": "CostPerOperation_usd",
+      "source_fields": ["financial_metrics.estimated_cost_usd"],
+      "target_maximum": 0.005,
+      "alert_threshold_high": 0.007,
+      "alert_severity": "CRITICAL",
+      "unit": "USD/operation"
+    },
+    {
+      "metric_key": "PeakMemoryUsage_MiB",
+      "source_fields": ["compute_metrics.memory_peak_bytes"],
+      "target_maximum": 1048576000, 
+      "alert_threshold_high": 1572864000, 
+      "alert_severity": "WARNING",
+      "unit": "bytes"
+    }
+  ]
+}

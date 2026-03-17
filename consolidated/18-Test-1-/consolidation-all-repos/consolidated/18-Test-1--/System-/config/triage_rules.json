@@ -1,0 +1,18 @@
+{
+  "description": "Defines automated actions triggered by FMA codes based on runtime context.",
+  "rules": [
+    {
+      "fma_code": "FMA-02",
+      "context_match": {"production_mode": true, "external_access": true},
+      "action": "INITIATE_LOCKDOWN_P04",
+      "escalation": "LEVEL_3_IMMEDIATE_ALERT"
+    },
+    {
+      "fma_code": "FMA-01A",
+      "context_match": {"load_factor": {"min": 0.8}},
+      "action": "INITIATE_TRUST_ISOLATION_S01",
+      "escalation": "LEVEL_2_SCHEDULED_REVIEW"
+    }
+  ],
+  "default_action": "P_LOG_AND_MONITOR"
+}

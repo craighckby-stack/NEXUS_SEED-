@@ -1,0 +1,25 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  pr-checks:
+    name: Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: oven-sh/setup-bun@v1
+
+    - name: Install Dependencies
+      run: bun install --frozen-lockfile
+
+    - name: Type Check
+      run: bunx tsc --noEmit
+
+    - name: Run Tests
+      run: bun test

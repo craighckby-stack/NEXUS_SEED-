@@ -1,0 +1,18 @@
+{
+  "config_id": "MCRA-P_FACTOR-C1",
+  "target_factor": "P_Deviation_Factor",
+  "input_array_key": "Precedent_Risk_Thresholds",
+  "derivation_method": "Bayesian_Weighted_Average",
+  "temporal_decay": {
+    "enabled": true,
+    "halflife_epochs": 25
+  },
+  "similarity_indexing": {
+    "context_weight_bias": 0.70,
+    "criticality_threshold": 0.95
+  },
+  "capping_parameters": {
+    "max_p_factor": 0.35,
+    "min_p_factor": 0.00
+  }
+}

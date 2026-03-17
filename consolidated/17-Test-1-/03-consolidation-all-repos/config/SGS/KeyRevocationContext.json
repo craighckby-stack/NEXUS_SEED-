@@ -1,0 +1,13 @@
+{
+  "RevocationContextVersion": "1.0",
+  "LastSyncTimestamp": "2024-05-15T10:30:00Z",
+  "RevokedKeys": [
+    {
+      "KeyID": "SGS-KEY-93-05B-T1",
+      "Reason": "COMPROMISE_SUSPECTED",
+      "RevocationTimestamp": "2024-04-01T08:00:00Z"
+    }
+  ],
+  "SuspendedKeys": [],
+  "PendingKeys": []
+}

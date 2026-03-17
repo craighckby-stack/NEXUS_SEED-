@@ -1,0 +1,26 @@
+{
+  "state_management": {
+    "persistence_backend": "TemporalDB",
+    "checkpoint_frequency": "StepEnd",
+    "history_retention_limit": 100,
+    "context_lifetime_ms": 3600000
+  },
+  "retry_handler": {
+    "global_max_retries": 5,
+    "jitter_factor": 0.1,
+    "default_backoff_base_ms": 200
+  },
+  "expression_evaluator": {
+    "type": "JEXL",
+    "context_bindings": [
+      "protocol_metadata",
+      "step_results.*",
+      "system_environment.*"
+    ],
+    "max_execution_time_ms": 50
+  },
+  "timeout_strategy": {
+    "default_ms": 5000,
+    "critical_ms": 10000
+  }
+}

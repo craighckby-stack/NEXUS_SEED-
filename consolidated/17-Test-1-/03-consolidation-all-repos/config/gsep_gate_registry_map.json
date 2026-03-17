@@ -1,0 +1,17 @@
+{
+  "gate_validators": {
+    "GateValidator_Basic": {
+      "path": "runtime/validators/basic/GateValidator.js",
+      "dependencies": ["MetricsContext", "ArtifactStore"]
+    },
+    "GateValidator_HashCheck": {
+      "path": "runtime/validators/integrity/HashCheckValidator.py",
+      "dependencies": ["PsiHashStore", "ACVM_Core_API"]
+    },
+    "GateValidator_Review": {
+      "path": "runtime/validators/compliance/ReviewGate.java",
+      "dependencies": ["P-R03_AuditLog", "AASS_Certification_Service"]
+    }
+  },
+  "registry_version": "v1.0"
+}

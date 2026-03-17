@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Schema Metadata Registry (SMR) Configuration: Defines operational hooks and runtime enforcement policies tied to CDSM definitions.",
+  "schema_enforcement_policies": [
+    {
+      "cdsm_name": "GICM_Commitment",
+      "assurance_level": "L4_CERTIFIED",
+      "enforcement_hooks": [
+        "Verify_CROT_Proof",
+        "Finality_Gate_Lock"
+      ],
+      "policy_owner": "Sovereign-GICM-Warrant-1"
+    },
+    {
+      "cdsm_name": "CISM_IntermediateState",
+      "assurance_level": "L3_SECURE",
+      "enforcement_hooks": [
+        "Check_Payload_Decryption_Key_Availability",
+        "Verify_Retention_Schedule"
+      ],
+      "encryption_method_required": "AES-256-GCM"
+    }
+  ],
+  "default_retention": "P1Y"
+}

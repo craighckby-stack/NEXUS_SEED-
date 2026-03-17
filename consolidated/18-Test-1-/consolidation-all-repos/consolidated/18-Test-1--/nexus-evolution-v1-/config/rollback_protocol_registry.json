@@ -1,0 +1,61 @@
+{
+  "protocol_version": "1.0",
+  "default_action": "isolate_state_blockade",
+  "rollback_mappings": {
+    "RRP:SCHEMA_FAIL": {
+      "level": "L0_STATE_RESET",
+      "action": ["restore_ingress_schema", "notify_upstream_source"],
+      "severity": 4
+    },
+    "RRP:FORMAT_FAIL": {
+      "level": "L0_STATE_RESET",
+      "action": ["sanitize_input_buffers", "retry_parse(max_1)"],
+      "severity": 3
+    },
+    "RRP:POLICY_VETO": {
+      "level": "L1_CRITICAL_HALT",
+      "action": ["global_system_lockdown", "initiate_human_override_request"],
+      "severity": 8
+    },
+    "RRP:TRUST_FAIL": {
+      "level": "L2_PROVENANCE_FAIL",
+      "action": ["quarantine_source", "audit_trust_chain_history"],
+      "severity": 5
+    },
+    "RRP:SIM_DIVERGE": {
+      "level": "L3_MODEL_WARNING",
+      "action": ["recalibrate_confidence_model", "request_human_review_l3"],
+      "severity": 2
+    },
+    "RRP:BUDGET_EXCEED": {
+      "level": "L4_RESOURCE_BLOCK",
+      "action": ["enforce_resource_ceiling", "decommission_ancillary_processes"],
+      "severity": 4
+    },
+    "RRP:DATA_FIDELITY": {
+      "level": "L5_DATA_FAIL",
+      "action": ["rollback_to_last_certified_input_snapshot"],
+      "severity": 6
+    },
+    "RRP:METRIC_FAIL": {
+      "level": "L6_CALCULATION_ERROR",
+      "action": ["re-run_mee_with_redundant_oracle"],
+      "severity": 3
+    },
+    "RRP:FINALITY_BREACH": {
+      "level": "L7_GOVERNANCE_FAIL",
+      "action": ["purge_state_transition_candidate", "log_breach_for_external_audit"],
+      "severity": 7
+    },
+    "RRP:LOG_FAIL": {
+      "level": "L8_AUDIT_WARNING",
+      "action": ["force_persistence_flush_external"],
+      "severity": 5
+    },
+    "RRP:AUDIT_BREACH": {
+      "level": "L9_RUNTIME_FAIL",
+      "action": ["rollback_system_to_pre_transition_snapshot"],
+      "severity": 9
+    }
+  }
+}

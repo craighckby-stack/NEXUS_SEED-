@@ -1,0 +1,48 @@
+{
+  "contractName": "TEDS_CoreEvents_v1",
+  "contractVersion": "1.0.0",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "defaultMetadataSchema": {
+    "type": "object",
+    "description": "Standard event envelope metadata fields",
+    "properties": {
+      "eventId": {"type": "string", "format": "uuid"},
+      "timestamp": {"type": "string", "format": "date-time"},
+      "sourceService": {"type": "string", "description": "The generating service name"},
+      "contractVersion": {"type": "string"}
+    },
+    "required": ["eventId", "timestamp", "sourceService", "contractVersion"],
+    "additionalProperties": false
+  },
+  "eventTypes": {
+    "UserCreated": {
+      "topic": "teds.user.lifecycle.created",
+      "priority": "HIGH",
+      "schemaVersion": "1.0",
+      "description": "Emitted when a new user is provisioned.",
+      "payloadSchema": {
+        "type": "object",
+        "properties": {
+          "userId": {"type": "integer"},
+          "email": {"type": "string", "format": "email"}
+        },
+        "required": ["userId", "email"]
+      }
+    },
+    "TransactionInitiated": {
+      "topic": "teds.financial.transactions",
+      "priority": "MEDIUM",
+      "schemaVersion": "1.1",
+      "description": "Emitted when a financial transaction starts processing.",
+      "payloadSchema": {
+        "type": "object",
+        "properties": {
+          "transactionId": {"type": "string"},
+          "amount": {"type": "number"},
+          "currency": {"type": "string", "minLength": 3, "maxLength": 3}
+        },
+        "required": ["transactionId", "amount", "currency"]
+      }
+    }
+  }
+}

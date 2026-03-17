@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gsep.sovereign.agi/policies/TransitionGuardPolicies.json",
+  "title": "GSEP Workflow Transition Guard Policies",
+  "description": "Defines behavioral and access control policies required to activate transitions defined in the ArtifactTransitionMatrix.",
+  "type": "object",
+  "patternProperties": {
+    "^L[0-9]_[A-Z][a-zA-Z0-9]*_TO_L[0-9]_[A-Z][a-zA-Z0-9]*$": {
+      "type": "object",
+      "properties": {
+        "required_roles": {
+          "type": "array",
+          "description": "Roles required to initiate this transition."
+        },
+        "required_approvals": {
+          "type": "integer",
+          "description": "Minimum count of required peer or system approvals."
+        },
+        "preconditions": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "List of status checks required on the source artifact (e.g., 'evaluation_status == PASSED')."
+        }
+      },
+      "required": ["required_roles"]
+    }
+  },
+  "properties": {
+    "L3_EvaluationReport_TO_L4_DSC": {
+      "required_roles": ["Steward", "Architect"],
+      "required_approvals": 3,
+      "preconditions": ["L3_EvaluationReport.score >= 0.9", "L3_EvaluationReport.audits_passed == true"]
+    }
+  },
+  "additionalProperties": true
+}

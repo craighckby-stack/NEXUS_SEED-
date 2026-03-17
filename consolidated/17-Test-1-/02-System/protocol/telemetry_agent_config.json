@@ -1,0 +1,25 @@
+{
+  "agent_id": "TA_V94_2",
+  "protocol_version_lock": "V94.2",
+  "ingestion_endpoints": [
+    "https://telemetry.core.l/ingest_primary",
+    "https://telemetry.core.l/ingest_secondary"
+  ],
+  "buffer_policy": {
+    "max_buffer_size_mb": 128,
+    "flush_trigger_ms": 500,
+    "data_rotation_strategy": "LIFO_CRITICAL"
+  },
+  "security_enforcement": {
+    "signing_key_alias": "ActorKey_V94",
+    "retry_policy": {
+      "max_attempts": 3,
+      "delay_ms": 500
+    },
+    "immutable_ledger_sync_required": true
+  },
+  "rate_limiting": {
+    "cme_max_per_second": 1000,
+    "sgs_max_per_minute": 60
+  }
+}

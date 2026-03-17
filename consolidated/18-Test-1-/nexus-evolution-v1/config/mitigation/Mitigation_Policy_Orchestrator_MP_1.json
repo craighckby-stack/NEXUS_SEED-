@@ -1,0 +1,31 @@
+{
+  "policy_version": "MP_1.0",
+  "operational_strategies": {
+    "L1_Self_Correction_Patch": {
+      "execution_engine": "Self_Evolution_Module",
+      "priority": 50,
+      "parameters": {
+        "max_runtime_ms": 5000,
+        "rollback_on_failure": true,
+        "logging_level": "DEBUG_HYPER"
+      }
+    },
+    "State_Rollback_Request": {
+      "execution_engine": "Persistence_Harness",
+      "priority": 90,
+      "parameters": {
+        "rollback_target": "Previous_Safe_Commit",
+        "grace_period_ms": 200,
+        "notify_system_modules": ["Persistence", "Observability"]
+      }
+    },
+    "System_Pause_Self_Diagnosis": {
+      "execution_engine": "Scheduler_Lockdown",
+      "priority": 100,
+      "parameters": {
+        "lock_duration_ms": 30000,
+        "diagnostic_routine": "Deep_Memory_Sweep"
+      }
+    }
+  }
+}

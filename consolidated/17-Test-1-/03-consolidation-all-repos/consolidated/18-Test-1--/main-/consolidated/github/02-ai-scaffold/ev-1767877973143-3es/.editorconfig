@@ -1,0 +1,24 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Global settings for most file types
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+# Standard indentation size for most languages (HTML, JS, CSS, JSON, YML, etc.)
+indent_size = 2
+
+# Exceptions / Overrides
+
+# Markdown requires allowing trailing whitespace for explicit line breaks
+[*.md]
+trim_trailing_whitespace = false
+
+# Makefiles must use tabs
+[Makefile]
+indent_style = tab

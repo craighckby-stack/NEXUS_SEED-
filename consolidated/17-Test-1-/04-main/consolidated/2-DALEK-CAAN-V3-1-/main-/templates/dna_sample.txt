@@ -1,0 +1,55 @@
+/**
+ * DALEK_CAAN DNA SAMPLE: HIGH-ORDER ARCHITECTURAL PATTERNS
+ * 
+ * This file serves as a reference for the Siphon Engine to extract 
+ * coding styles, logic structures, and architectural signatures.
+ */
+
+// Pattern: Dependency Injection & Interface-based Design
+interface IDataStore {
+  save(id: string, data: any): Promise<void>;
+  load(id: string): Promise<any>;
+}
+
+class CloudStore implements IDataStore {
+  async save(id: string, data: any) {
+    console.log(`Saving ${id} to cloud...`);
+    // Implementation...
+  }
+  async load(id: string) {
+    return { id, data: "Cloud Data" };
+  }
+}
+
+// Pattern: Singleton with Lazy Initialization
+class SystemOrchestrator {
+  private static instance: SystemOrchestrator;
+  private constructor() {}
+
+  public static getInstance(): SystemOrchestrator {
+    if (!SystemOrchestrator.instance) {
+      SystemOrchestrator.instance = new SystemOrchestrator();
+    }
+    return SystemOrchestrator.instance;
+  }
+
+  // Pattern: Event-Driven Lifecycle
+  public async initialize() {
+    this.emit("INIT_START");
+    // Logic...
+    this.emit("INIT_COMPLETE");
+  }
+
+  private emit(event: string) {
+    console.log(`[EVENT] ${event}`);
+  }
+}
+
+// Pattern: Functional Pipe for Data Transformation
+const processData = (data: any) => {
+  return [
+    (d: any) => ({ ...d, timestamp: Date.now() }),
+    (d: any) => ({ ...d, version: "2.0" }),
+    (d: any) => JSON.stringify(d)
+  ].reduce((acc, fn) => fn(acc), data);
+};

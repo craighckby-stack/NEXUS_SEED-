@@ -1,0 +1,1 @@
+// This file is obsolete. All concept IDs and associated constants have been migrated to the ConceptIdRegistryKernel to enforce immutability and architectural separation via Dependency Injection.

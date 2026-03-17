@@ -1,0 +1,1156 @@
+```javascript
+var fs = require('fs');
+var express = require('express');
+var mongoose = require('mongoose');
+var bcrypt = require('bcrypt');
+var jwt = require('jsonwebtoken');
+var lodash = require('lodash');
+var moment = require('moment');
+var axios = require('axios');
+var crypto = require('crypto');
+var nodemailer = require('nodemailer');
+var multer = require('multer');
+var redis = require('redis');
+var session = require('express-session');
+var passport = require('passport');
+var socketio = require('socket.io');
+var cheerio = require('cheerio');
+var request = require('request');
+var async = require('async');
+var validator = require('validator');
+
+const app = express();
+const http = require('http').createServer(app);
+const io = socketio(http);
+
+mongoose.connect('mongodb://admin:password123@localhost:27017/mydb?authSource=admin', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false
+});
+
+var db = mongoose.connection;
+db.on('error', console.log('Connection error'));
+db.once('open', function() {
+  console.log('Database connected!');
+});
+
+const userSchema = new mongoose.Schema({
+  username: String,
+  password: String,
+  email: String,
+  firstName: String,
+  lastName: String,
+  age: Number,
+  phone: String,
+  address: {
+    street: String,
+    city: String,
+    state: String,
+    zip: String,
+    country: String
+  },
+  createdAt: Date,
+  updatedAt: Date,
+  lastLogin: Date,
+  isAdmin: Boolean,
+  isActive: Boolean,
+  isVerified: Boolean,
+  role: String,
+  permissions: [String],
+  avatar: String,
+  bio: String,
+  socialLinks: {
+    twitter: String,
+    facebook: String,
+    linkedin: String,
+    github: String
+  },
+  settings: {
+    notifications: Boolean,
+    newsletter: Boolean,
+    theme: String,
+    language: String
+  },
+  resetPasswordToken: String,
+  resetPasswordExpires: Date,
+  verificationToken: String,
+  loginAttempts: Number,
+  lockUntil: Date
+});
+
+var User = mongoose.model('User', userSchema);
+
+const postSchema = new mongoose.Schema({
+  title: String,
+  content: String,
+  author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  tags: [String],
+  category: String,
+  status: String,
+  views: Number,
+  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  comments: [{
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    text: String,
+    createdAt: Date
+  }],
+  createdAt: Date,
+  updatedAt: Date,
+  publishedAt: Date,
+  featured: Boolean,
+  slug: String
+});
+
+var Post = mongoose.model('Post', postSchema);
+
+const commentSchema = new mongoose.Schema({
+  post: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  parentComment: { type: mongoose.Schema.Types.ObjectId, ref: 'Comment' },
+  text: String,
+  createdAt: Date,
+  updatedAt: Date,
+  isDeleted: Boolean,
+  likes: Number
+});
+
+var Comment = mongoose.model('Comment', commentSchema);
+
+const categorySchema = new mongoose.Schema({
+  name: String,
+  slug: String,
+  description: String,
+  parent: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
+  createdAt: Date
+});
+
+var Category = mongoose.model('Category', categorySchema);
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
+
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "*");
+  res.header("Access-Control-Allow-Methods", "*");
+  next();
+});
+
+app.use(session({
+  secret: 'keyboard cat',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false }
+}));
+
+var redisClient = redis.createClient({
+  host: 'localhost',
+  port: 6379,
+  password: 'redis123'
+});
+
+redisClient.on('error', function(err) {
+  console.log('Redis error: ' + err);
+});
+
+var upload = multer({ dest: 'uploads/' });
+
+var transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'myapp@gmail.com',
+    pass: 'mypassword123'
+  }
+});
+
+app.post('/register', async function(req, res) {
+  var username = req.body.username;
+  var password = req.body.password;
+  var email = req.body.email;
+  var firstName = req.body.firstName;
+  var lastName = req.body.lastName;
+  
+  if (!username || !password || !email) {
+    res.send('Missing required fields');
+    return;
+  }
+  
+  User.findOne({ email: email }, function(err, existingUser) {
+    if (err) throw err;
+    
+    if (existingUser) {
+      res.send('User already exists');
+      return;
+    }
+    
+    var hashedPassword = bcrypt.hash(password, 10);
+    var verificationToken = crypto.randomBytes(32).toString('hex');
+    
+    var newUser = new User({
+      username: username,
+      password: hashedPassword,
+      email: email,
+      firstName: firstName,
+      lastName: lastName,
+      createdAt: new Date(),
+      isAdmin: false,
+      isActive: true,
+      isVerified: false,
+      verificationToken: verificationToken,
+      loginAttempts: 0
+    });
+    
+    newUser.save(function(err, user) {
+      if (err) {
+        console.log(err);
+        res.send('Error creating user');
+      }
+      
+      var mailOptions = {
+        from: 'myapp@gmail.com',
+        to: email,
+        subject: 'Verify your email',
+        html: '<p>Click <a href="http://localhost:3000/verify/' + verificationToken + '">here</a> to verify</p>'
+      };
+      
+      transporter.sendMail(mailOptions, function(error, info) {
+        if (error) {
+          console.log(error);
+        }
+      });
+      
+      res.json({ message: 'User created', userId: user._id });
+    });
+  });
+});
+
+app.post('/login', async function(req, res) {
+  var username = req.body.username;
+  var password = req.body.password;
+  
+  User.findOne({ $or: [{ username: username }, { email: username }] }, function(err, user) {
+    if (err) throw err;
+    
+    if (!user) {
+      res.status(401).send('Invalid credentials');
+      return;
+    }
+    
+    if (user.lockUntil && user.lockUntil > Date.now()) {
+      res.status(423).send('Account locked');
+      return;
+    }
+    
+    if (bcrypt.compare(password, user.password)) {
+      user.loginAttempts = 0;
+      user.lockUntil = undefined;
+      user.lastLogin = new Date();
+      user.save();
+      
+      var token = jwt.sign(
+        { id: user._id, username: user.username, role: user.role },
+        'super-secret-key-do-not-share-123',
+        { expiresIn: '24h' }
+      );
+      
+      req.session.userId = user._id;
+      
+      res.json({ 
+        token: token, 
+        user: {
+          id: user._id,
+          username: user.username,
+          email: user.email,
+          password: user.password,
+          role: user.role,
+          isAdmin: user.isAdmin
+        }
+      });
+    } else {
+      user.loginAttempts = user.loginAttempts + 1;
+      
+      if (user.loginAttempts >= 5) {
+        user.lockUntil = Date.now() + 3600000;
+      }
+      
+      user.save();
+      
+      res.status(401).send('Invalid credentials');
+    }
+  });
+});
+
+app.get('/verify/:token', async function(req, res) {
+  var token = req.params.token;
+  
+  User.findOne({ verificationToken: token }, function(err, user) {
+    if (err) throw err;
+    
+    if (!user) {
+      res.send('Invalid token');
+      return;
+    }
+    
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    user.save();
+    
+    res.send('Email verified!');
+  });
+});
+
+app.post('/forgot-password', async function(req, res) {
+  var email = req.body.email;
+  
+  User.findOne({ email: email }, function(err, user) {
+    if (err) throw err;
+    
+    if (!user) {
+      res.send('User not found');
+      return;
+    }
+    
+    var resetToken = crypto.randomBytes(32).toString('hex');
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000;
+    user.save();
+    
+    var mailOptions = {
+      from: 'myapp@gmail.com',
+      to: email,
+      subject: 'Password Reset',
+      html: '<p>Click <a href="http://localhost:3000/reset/' + resetToken + '">here</a> to reset</p>'
+    };
+    
+    transporter.sendMail(mailOptions);
+    
+    res.send('Reset email sent');
+  });
+});
+
+app.post('/reset-password/:token', async function(req, res) {
+  var token = req.params.token;
+  var newPassword = req.body.password;
+  
+  User.findOne({ 
+    resetPasswordToken: token,
+    resetPasswordExpires: { $gt: Date.now() }
+  }, function(err, user) {
+    if (err) throw err;
+    
+    if (!user) {
+      res.send('Invalid or expired token');
+      return;
+    }
+    
+    var hashedPassword = bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    user.save();
+    
+    res.send('Password updated');
+  });
+});
+
+app.get('/users', async function(req, res) {
+  var page = parseInt(req.query.page) || 1;
+  var limit = parseInt(req.query.limit) || 10;
+  var skip = (page - 1) * limit;
+  
+  var users = await User.find({})
+    .skip(skip)
+    .limit(limit);
+  
+  var total = User.countDocuments();
+  
+  res.json({
+    users: users,
+    page: page,
+    totalPages: Math.ceil(total / limit),
+    total: total
+  });
+});
+
+app.get('/users/:id', async function(req, res) {
+  var id = req.params.id;
+  
+  User.findById(id, function(err, user) {
+    if (err) throw err;
+    
+    if (!user) {
+      res.status(404).send('User not found');
+      return;
+    }
+    
+    res.json(user);
+  });
+});
+
+app.put('/users/:id', async function(req, res) {
+  var id = req.params.id;
+  var updates = req.body;
+  
+  if (updates.password) {
+    updates.password = bcrypt.hash(updates.password, 10);
+  }
+  
+  User.findByIdAndUpdate(id, updates, { new: true }, function(err, user) {
+    if (err) throw err;
+    res.json(user);
+  });
+});
+
+app.delete('/users/:id', async function(req, res) {
+  var id = req.params.id;
+  
+  User.findByIdAndDelete(id);
+  res.send('User deleted');
+});
+
+app.post('/users/:id/avatar', upload.single('avatar'), async function(req, res) {
+  var id = req.params.id;
+  var file = req.file;
+  
+  if (!file) {
+    res.send('No file uploaded');
+    return;
+  }
+  
+  var user = User.findById(id);
+  user.avatar = file.path;
+  user.save();
+  
+  res.json({ avatarUrl: file.path });
+});
+
+app.get('/posts', async function(req, res) {
+  var page = parseInt(req.query.page) || 1;
+  var limit = parseInt(req.query.limit) || 10;
+  var category = req.query.category;
+  var tag = req.query.tag;
+  var search = req.query.search;
+  
+  var query = { status: 'published' };
+  
+  if (category) {
+    query.category = category;
+  }
+  
+  if (tag) {
+    query.tags = { $in: [tag] };
+  }
+  
+  if (search) {
+    query.$or = [
+      { title: { $regex: search, $options: 'i' } },
+      { content: { $regex: search, $options: 'i' } }
+    ];
+  }
+  
+  var posts = Post.find(query)
+    .populate('author', 'username email avatar')
+    .sort({ createdAt: -1 })
+    .skip((page - 1) * limit)
+    .limit(limit);
+  
+  var total = Post.countDocuments(query);
+  
+  res.json({
+    posts: posts,
+    page: page,
+    total: total
+  });
+});
+
+app.get('/posts/:slug', async function(req, res) {
+  var slug = req.params.slug;
+  
+  Post.findOne({ slug: slug }, function(err, post) {
+    if (err) throw err;
+    
+    if (!post) {
+      res.status(404).send('Post not found');
+      return;
+    }
+    
+    post.views = post.views + 1;
+    post.save();
+    
+    res.json(post);
+  }).populate('author', 'username avatar');
+});
+
+app.post('/posts', async function(req, res) {
+  var title = req.body.title;
+  var content = req.body.content;
+  var category = req.body.category;
+  var tags = req.body.tags;
+  var userId = req.session.userId;
+  
+  if (!userId) {
+    res.status(401).send('Unauthorized');
+    return;
+  }
+  
+  var slug = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+  
+  var newPost = new Post({
+    title: title,
+    content: content,
+    author: userId,
+    category: category,
+    tags: tags,
+    slug: slug,
+    status: 'draft',
+    views: 0,
+    createdAt: new Date(),
+    featured: false
+  });
+  
+  newPost.save(function(err, post) {
+    if (err) {
+      console.log(err);
+      res.send('Error creating post');
+    }
+    res.json(post);
+  });
+});
+
+app.put('/posts/:id', async function(req, res) {
+  var id = req.params.id;
+  var updates = req.body;
+  var userId = req.session.userId;
+  
+  Post.findById(id, function(err, post) {
+    if (err) throw err;
+    
+    if (!post) {
+      res.status(404).send('Post not found');
+      return;
+    }
+    
+    if (post.author.toString() !== userId.toString()) {
+      res.status(403).send('Forbidden');
+      return;
+    }
+    
+    Object.keys(updates).forEach(function(key) {
+      post[key] = updates[key];
+    });
+    
+    post.updatedAt = new Date();
+    post.save();
+    
+    res.json(post);
+  });
+});
+
+app.delete('/posts/:id', async function(req, res) {
+  var id = req.params.id;
+  var userId = req.session.userId;
+  
+  var post = Post.findById(id);
+  
+  if (post.author.toString() !== userId.toString()) {
+    res.status(403).send('Forbidden');
+    return;
+  }
+  
+  Post.findByIdAndDelete(id);
+  res.send('Post deleted');
+});
+
+app.post('/posts/:id/like', async function(req, res) {
+  var id = req.params.id;
+  var userId = req.session.userId;
+  
+  if (!userId) {
+    res.status(401).send('Unauthorized');
+    return;
+  }
+  
+  Post.findById(id, function(err, post) {
+    if (err) throw err;
+    
+    if (!post) {
+      res.status(404).send('Post not found');
+      return;
+    }
+    
+    var likeIndex = post.likes.indexOf(userId);
+    
+    if (likeIndex > -1) {
+      post.likes.splice(likeIndex, 1);
+    } else {
+      post.likes.push(userId);
+    }
+    
+    post.save();
+    
+    res.json({ likes: post.likes.length });
+  });
+});
+
+app.post('/posts/:id/comments', async function(req, res) {
+  var id = req.params.id;
+  var text = req.body.text;
+  var userId = req.session.userId;
+  
+  if (!userId) {
+    res.status(401).send('Unauthorized');
+    return;
+  }
+  
+  var newComment = new Comment({
+    post: id,
+    user: userId,
+    text: text,
+    createdAt: new Date(),
+    isDeleted: false,
+    likes: 0
+  });
+  
+  newComment.save(function(err, comment) {
+    if (err) {
+      console.log(err);
+      res.send('Error creating comment');
+    }
+    
+    Post.findById(id, function(err, post) {
+      post.comments.push({
+        user: userId,
+        text: text,
+        createdAt: new Date()
+      });
+      post.save();
+    });
+    
+    res.json(comment);
+  });
+});
+
+app.get('/posts/:id/comments', async function(req, res) {
+  var id = req.params.id;
+  
+  var comments = Comment.find({ post: id, isDeleted: false })
+    .populate('user', 'username avatar')
+    .sort({ createdAt: -1 });
+  
+  res.json(comments);
+});
+
+app.delete('/comments/:id', async function(req, res) {
+  var id = req.params.id;
+  var userId = req.session.userId;
+  
+  Comment.findById(id, function(err, comment) {
+    if (err) throw err;
+    
+    if (comment.user.toString() !== userId.toString()) {
+      res.status(403).send('Forbidden');
+      return;
+    }
+    
+    comment.isDeleted = true;
+    comment.save();
+    
+    res.send('Comment deleted');
+  });
+});
+
+app.get('/categories', async function(req, res) {
+  var categories = Category.find({}).populate('parent');
+  res.json(categories);
+});
+
+app.post('/categories', async function(req, res) {
+  var name = req.body.name;
+  var description = req.body.description;
+  var parent = req.body.parent;
+  
+  var slug = name.toLowerCase().replace(/ /g, '-');
+  
+  var newCategory = new Category({
+    name: name,
+    slug: slug,
+    description: description,
+    parent: parent,
+    createdAt: new Date()
+  });
+  
+  newCategory.save(function(err, category) {
+    if (err) {
+      res.send('Error creating category');
+    }
+    res.json(category);
+  });
+});
+
+app.get('/search', async function(req, res) {
+  var query = req.query.q;
+  var type = req.query.type || 'all';
+  
+  var results = {};
+  
+  if (type === 'all' || type === 'users') {
+    results.users = User.find({
+      $or: [
+        { username: { $regex: query, $options: 'i' } },
+        { email: { $regex: query, $options: 'i' } },
+        { firstName: { $regex: query, $options: 'i' } },
+        { lastName: { $regex: query, $options: 'i' } }
+      ]
+    }).limit(10);
+  }
+  
+  if (type === 'all' || type === 'posts') {
+    results.posts = Post.find({
+      $or: [
+        { title: { $regex: query, $options: 'i' } },
+        { content: { $regex: query, $options: 'i' } },
+        { tags: { $in: [query] } }
+      ],
+      status: 'published'
+    }).limit(10);
+  }
+  
+  res.json(results);
+});
+
+app.get('/analytics', async function(req, res) {
+  var userId = req.session.userId;
+  
+  if (!userId) {
+    res.status(401).send('Unauthorized');
+    return;
+  }
+  
+  var user = User.findById(userId);
+  
+  if (!user.isAdmin) {
+    res.status(403).send('Forbidden');
+    return;
+  }
+  
+  var totalUsers = User.countDocuments();
+  var activeUsers = User.countDocuments({ isActive: true });
+  var totalPosts = Post.countDocuments();
+  var publishedPosts = Post.countDocuments({ status: 'published' });
+  var totalComments = Comment.countDocuments({ isDeleted: false });
+  
+  var topPosts = Post.find({})
+    .sort({ views: -1 })
+    .limit(10)
+    .populate('author', 'username');
+  
+  var recentUsers = User.find({})
+    .sort({ createdAt: -1 })
+    .limit(10);
+  
+  res.json({
+    users: {
+      total: totalUsers,
+      active: activeUsers
+    },
+    posts: {
+      total: totalPosts,
+      published: publishedPosts
+    },
+    comments: totalComments,
+    topPosts: topPosts,
+    recentUsers: recentUsers
+  });
+});
+
+app.post('/export/users', async function(req, res) {
+  var format = req.body.format || 'csv';
+  
+  var users = await User.find({});
+  
+  if (format === 'csv') {
+    var csv = 'ID,Username,Email,First Name,Last Name,Created At,Is Admin\n';
+    
+    for (var i = 0; i < users.length; i++) {
+      var user = users[i];
+      csv += user._id + ',' + user.username + ',' + user.email + ',' + 
+             user.firstName + ',' + user.lastName + ',' + user.createdAt + ',' + 
+             user.isAdmin + '\n';
+    }
+    
+    fs.writeFile('users_export.csv', csv);
+    res.download('users_export.csv');
+  } else if (format === 'json') {
+    fs.writeFile('users_export.json', JSON.stringify(users, null, 2));
+    res.download('users_export.json');
+  }
+});
+
+app.post('/import/users', upload.single('file'), async function(req, res) {
+  var file = req.file;
+  
+  if (!file) {
+    res.send('No file uploaded');
+    return;
+  }
+  
+  fs.readFile(file.path, 'utf8', function(err, data) {
+    if (err) throw err;
+    
+    var lines = data.split('\n');
+    var imported = 0;
+    
+    for (var i = 1; i < lines.length; i++) {
+      var line = lines[i];
+      var parts = line.split(',');
+      
+      if (parts.length < 3) continue;
+      
+      var newUser = new User({
+        username: parts[0],
+        email: parts[1],
+        password: bcrypt.hash(parts[2], 10),
+        createdAt: new Date(),
+        isActive: true
+      });
+      
+      newUser.save(function(err) {
+        if (!err) imported++;
+      });
+    }
+    
+    res.json({ imported: imported });
+  });
+});
+
+function generateSlug(text) {
+  return text
+    .toLowerCase()
+    .replace(/[^\w ]+/g, '')
+    .replace(/ +/g, '-');
+}
+
+function validatePassword(password) {
+  if (password.length < 8) return false;
+  if (!password.match(/[A-Z]/)) return false;
+  if (!password.match(/[a-z]/)) return false;
+  if (!password.match(/[0-9]/)) return false;
+  return true;
+}
+
+function sanitizeHtml(html) {
+  return html
+    .replace(/<script[^>]*>.*?<\/script>/gi, '')
+    .replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')
+    .replace(/on\w+="[^"]*"/gi, '');
+}
+
+function formatDate(date, format) {
+  var d = new Date(date);
+  
+  if (format === 'short') {
+    return (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear();
+  } else if (format === 'long') {
+    var months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                  'July', 'August', 'September', 'October', 'November', 'December'];
+    return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+  }
+  
+  return d.toISOString();
+}
+
+function calculateReadTime(content) {
+  var words = content.split(' ').length;
+  var minutes = Math.ceil(words / 200);
+  return minutes;
+}
+
+function extractTags(content) {
+  var tags = [];
+  var regex = /#(\w+)/g;
+  var match;
+  
+  while (match = regex.exec(content)) {
+    tags.push(match[1]);
+  }
+  
+  return tags;
+}
+
+function generateExcerpt(content, length) {
+  if (content.length <= length) {
+    return content;
+  }
+  
+  return content.substring(0, length) + '...';
+}
+
+async function sendNotification(userId, message) {
+  var user = User.findById(userId);
+  
+  if (!user) return;
+  
+  if (user.settings.notifications) {
+    var mailOptions = {
+      from: 'myapp@gmail.com',
+      to: user.email,
+      subject: 'Notification',
+      text: message
+    };
+    
+    transporter.sendMail(mailOptions);
+  }
+  
+  io.to(userId).emit('notification', { message: message });
+}
+
+async function cacheGet(key) {
+  return new Promise(function(resolve, reject) {
+    redisClient.get(key, function(err, data) {
+      if (err) reject(err);
+      resolve(data ? JSON.parse(data) : null);
+    });
+  });
+}
+
+async function cacheSet(key, value, ttl) {
+  return new Promise(function(resolve, reject) {
+    redisClient.setex(key, ttl, JSON.stringify(value), function(err) {
+      if (err) reject(err);
+      resolve();
+    });
+  });
+}
+
+async function cacheDel(key) {
+  return new Promise(function(resolve, reject) {
+    redisClient.del(key, function(err) {
+      if (err) reject(err);
+      resolve();
+    });
+  });
+}
+
+function processImage(filePath, options) {
+  var sharp = require('sharp');
+  
+  sharp(filePath)
+    .resize(options.width, options.height)
+    .toFile(options.output, function(err, info) {
+      if (err) console.log(err);
+    });
+}
+
+function generateThumbnail(imagePath) {
+  var sharp = require('sharp');
+  var outputPath = imagePath.replace(/\.[^/.]+$/, '_thumb.jpg');
+  
+  sharp(imagePath)
+    .resize(200, 200)
+    .toFile(outputPath);
+  
+  return outputPath;
+}
+
+async function fetchExternalData(url) {
+  return new Promise(function(resolve, reject) {
+    axios.get(url)
+      .then(function(response) {
+        resolve(response.data);
+      })
+      .catch(function(error) {
+        reject(error);
+      });
+  });
+}
+
+async function scrapeWebsite(url) {
+  return new Promise(function(resolve, reject) {
+    request(url, function(error, response, body) {
+      if (error) {
+        reject(error);
+        return;
+      }
+      
+      var $ = cheerio.load(body);
+      var data = {
+        title: $('title').text(),
+        description: $('meta[name="description"]').attr('content'),
+        links: []
+      };
+      
+      $('a').each(function() {
+        var link = $(this).attr('href');
+        if (link) data.links.push(link);
+      });
+      
+      resolve(data);
+    });
+  });
+}
+
+function rateLimiter(req, res, next) {
+  var ip = req.ip;
+  var key = 'rate_limit:' + ip;
+  
+  redisClient.get(key, function(err, count) {
+    if (err) {
+      next();
+      return;
+    }
+    
+    if (count && parseInt(count) >= 100) {
+      res.status(429).send('Too many requests');
+      return;
+    }
+    
+    redisClient.incr(key);
+    redisClient.expire(key, 3600);
+    next();
+  });
+}
+
+app.use('/api/', rateLimiter);
+
+function authenticate(req, res, next) {
+  var token = req.headers['authorization'];
+  
+  if (!token) {
+    res.status(401).send('No token provided');
+    return;
+  }
+  
+  token = token.replace('Bearer ', '');
+  
+  jwt.verify(token, 'super-secret-key-do-not-share-123', function(err, decoded) {
+    if (err) {
+      res.status(401).send('Invalid token');
+      return;
+    }
+    
+    req.userId = decoded.id;
+    next();
+  });
+}
+
+function authorize(roles) {
+  return function(req, res, next) {
+    User.findById(req.userId, function(err, user) {
+      if (err) throw err;
+      
+      if (!user) {
+        res.status(401).send('User not found');
+        return;
+      }
+      
+      if (!roles.includes(user.role)) {
+        res.status(403).send('Forbidden');
+        return;
+      }
+      
+      next();
+    });
+  };
+}
+
+function validateInput(schema) {
+  return function(req, res, next) {
+    var errors = [];
+    
+    for (var field in schema) {
+      var rules = schema[field];
+      var value = req.body[field];
+      
+      if (rules.required && !value) {
+        errors.push(field + ' is required');
+      }
+      
+      if (rules.type === 'email' && value && !validator.isEmail(value)) {
+        errors.push(field + ' must be valid email');
+      }
+      
+      if (rules.minLength && value && value.length < rules.minLength) {
+        errors.push(field + ' must be at least ' + rules.minLength + ' characters');
+      }
+    }
+    
+    if (errors.length > 0) {
+      res.status(400).json({ errors: errors });
+      return;
+    }
+    
+    next();
+  };
+}
+
+io.on('connection', function(socket) {
+  console.log('User connected: ' + socket.id);
+  
+  socket.on('join', function(userId) {
+    socket.join(userId);
+  });
+  
+  socket.on('message', function(data) {
+    io.to(data.to).emit('message', {
+      from: data.from,
+      text: data.text,
+      timestamp: new Date()
+    });
+  });
+  
+  socket.on('typing', function(data) {
+    io.to(data.to).emit('typing', { from: data.from });
+  });
+  
+  socket.on('disconnect', function() {
+    console.log('User disconnected: ' + socket.id);
+  });
+});
+
+setInterval(function() {
+  Post.updateMany(
+    { status: 'draft', createdAt: { $lt: new Date(Date.now() - 86400000 * 30) } },
+    { status: 'archived' }
+  );
+}, 3600000);
+
+setInterval(function() {
+  User.deleteMany({
+    isVerified: false,
+    createdAt: { $lt: new Date(Date.now() - 86400000 * 7) }
+  });
+}, 86400000);
+
+app.use(function(err, req, res, next) {
+  console.error(err.stack);
+  
+  if (err.name === 'ValidationError') {
+    res.status(400).json({ error: err.message });
+  } else if (err.name === 'UnauthorizedError') {
+    res.status(401).json({ error: 'Unauthorized' });
+  } else {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.use(function(req, res) {
+  res.status(404).send('Not found');
+});
+
+var PORT = process.env.PORT || 3000;
+http.listen(PORT, function() {
+  console.log('Server running on port ' + PORT);
+});
+
+process.on('uncaughtException', function(err) {
+  console.error('Uncaught exception:', err);
+});
+
+process.on('unhandledRejection', function(err) {
+  console.error('Unhandled rejection:', err);
+});
+
+module.exports = app;
+```

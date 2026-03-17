@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://sovereign-agi/L4_Arbitration_Input_Schema.json",
+  "title": "L4 Commit Arbitration Input Payload",
+  "description": "Schema defining the mandatory quantitative scores provided by the L3 assessment layer for L4 GTCM validation against defined thresholds.",
+  "type": "object",
+  "properties": {
+    "commit_hash": {
+      "type": "string",
+      "description": "The unique identifier (SHA hash) of the proposed code commit package."
+    },
+    "metrics": {
+      "type": "object",
+      "description": "Standardized quantified assessments provided by the L3 scoring module.",
+      "properties": {
+        "S01_Efficacy_Score": {
+          "type": "number",
+          "description": "The projected utility/efficacy score (0.0 - 1.0). Must meet or exceed GTCM.S01_Efficacy_Threshold.",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "S02_Risk_Score": {
+          "type": "number",
+          "description": "The synthesized systemic risk score (0.0 - 1.0). Must be less than or equal to GTCM.S02_Risk_Tolerance.",
+          "minimum": 0.0,
+          "maximum": 1.0
+        }
+      },
+      "required": ["S01_Efficacy_Score", "S02_Risk_Score"]
+    },
+    "assessment_metadata": {
+      "type": "object",
+      "description": "Metadata concerning the assessment process.",
+      "properties": {
+        "model_version": {
+          "type": "string",
+          "description": "Version of the predictive model used for L3 assessment."
+        },
+        "analysis_timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["model_version", "analysis_timestamp"]
+    }
+  },
+  "required": ["commit_hash", "metrics", "assessment_metadata"]
+}

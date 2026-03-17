@@ -1,0 +1,32 @@
+{
+  "specVersion": "1.0.0",
+  "name": "DQPM_Enforcement_Configuration",
+  "description": "Defines automated responses and remediation actions triggered by DQPM rule breaches, mapping trigger IDs from the specification.",
+  "responseMap": [
+    {
+      "triggerId": "LANT-FAIL-C1",
+      "breachLevel": "Critical",
+      "actionSequence": [
+        {"action": "IsolateModule", "targetReference": "breached_module_id"},
+        {"action": "EmergencyRateLimit", "intensity": "P80_Reduction"},
+        {"action": "SystemAlert", "priority": "Urgent"}
+      ]
+    },
+    {
+      "triggerId": "LANT-P99-C2",
+      "breachLevel": "Major",
+      "actionSequence": [
+        {"action": "IncreaseResourcePool", "percentage": 15},
+        {"action": "ActivateDiagnosticTracing", "level": "L4"}
+      ]
+    },
+    {
+      "triggerId": "integrityScoreThreshold",
+      "breachLevel": "Minor",
+      "actionSequence": [
+        {"action": "QuarantineData", "scope": "Invalidated_Set"},
+        {"action": "InitiateSchemaReconciliation"}
+      ]
+    }
+  ]
+}

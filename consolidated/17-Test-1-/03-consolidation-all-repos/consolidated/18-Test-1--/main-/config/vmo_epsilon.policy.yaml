@@ -1,0 +1,34 @@
+# Viability Margin Oracle (VMO) Configuration Policy V1.0
+# Defines the parameters and function used by the VMO to calculate the dynamic safety margin (epsilon, $\epsilon$).
+
+# --- Input Configuration (State Variables) ---
+state_inputs:
+  - name: system_volatility_index
+    source: L4.ProvenanceTrustLog
+    weight: 0.4
+    threshold: 0.15
+
+  - name: external_dependency_risk_score
+    source: L5.DataFidelitySeal
+    weight: 0.35
+    threshold: 0.8
+
+  - name: historical_failure_rate_normalized
+    source: DB.Telemetry
+    weight: 0.25
+    threshold: 0.01
+
+# --- Epsilon Calculation Function ---
+# The function defines how inputs map to the final margin $\epsilon$.
+# The calculated $\epsilon$ must satisfy $\epsilon \ge 0$ (L7 constraint).
+
+calculation_function:
+  type: WeightedSumModel
+  expression:
+    # V_i = state_input[i].weight * state_input[i].value
+    # $\epsilon = Max(0, 0.1 + Sum(V_i))$
+    base_margin: 0.05 # Minimum acceptable risk buffer if all inputs are nominal.
+  
+# --- Constraints ---
+epsilon_maximum: 1.5 # Hard limit to prevent extreme VMO calculation halting the system needlessly.
+log_level: HIGH

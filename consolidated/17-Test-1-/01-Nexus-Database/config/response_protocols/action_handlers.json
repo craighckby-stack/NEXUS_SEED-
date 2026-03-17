@@ -1,0 +1,27 @@
+{
+  "ACTION_LOCKDOWN": {
+    "handler": "system.core.lockdown_routine",
+    "params": {
+      "mode": "LEVEL_5_ISOLATION"
+    }
+  },
+  "ACTION_DIAGNOSTIC_ENTRY": {
+    "handler": "system.diagnostics.enter_mode",
+    "params": {
+      "target_module": "RCA_INTEGRITY"
+    }
+  },
+  "ACTION_RETRY_TARGET_STAGE": {
+    "handler": "system.scheduler.retry_stage",
+    "params": {
+      "strategy": "BACKOFF_LINEAR",
+      "target_source": "trigger.associated_stage"
+    }
+  },
+  "ACTION_INCREMENT_COUNTER": {
+    "handler": "system.metrics.increment",
+    "params": {
+      "metric_key": "failure.VEC_002.count"
+    }
+  }
+}

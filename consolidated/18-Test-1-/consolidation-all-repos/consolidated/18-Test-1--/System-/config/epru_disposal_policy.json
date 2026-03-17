@@ -1,0 +1,31 @@
+{
+  "version": "1.0.0",
+  "name": "EPDU_SecureDisposal_Policy",
+  "description": "Defines the protocol and constraints for compliant, auditable destruction, redaction, and disposal of EPU instances after minimum retention periods are met.",
+  "linked_archival_spec": "config/epru_archival_spec.json::1.1.0",
+  "disposal_rules": [
+    {
+      "policy_id": "P_R10Y_A_AUTO",
+      "retention_code_match": "REGULATORY_LITIGATION_HOLD",
+      "action_trigger": {
+        "type": "AUTOMATIC_POST_PERIOD",
+        "evaluation_check_service": "Compliance_Ledger_Query_S4",
+        "delay_after_min_period_days": 90
+      },
+      "disposal_method": "CRYPTO_SHREDDING_KMS_REVOCATION",
+      "required_approvals": 0,
+      "audit_trail_mandate": true
+    },
+    {
+      "policy_id": "P_DSAR_MANUAL_REDACTION",
+      "retention_code_match": "DSAR_REQUEST",
+      "action_trigger": {
+        "type": "MANUAL_OR_API_TRIGGERED",
+        "evaluation_check_service": "Privacy_Officer_Review_Portal"
+      },
+      "disposal_method": "DATA_REDACTION_PII_ONLY",
+      "required_approvals": 2,
+      "audit_trail_mandate": true
+    }
+  ]
+}

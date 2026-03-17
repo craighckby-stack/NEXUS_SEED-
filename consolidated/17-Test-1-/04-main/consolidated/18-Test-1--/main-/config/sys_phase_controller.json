@@ -1,0 +1,129 @@
+{
+  "module_name": "SystemPhaseController",
+  "version": "2.1.0",
+  "description": "Adaptive controller defining system operational states based on observed metrics, incorporating multi-metric logical triggers and distinct entry/exit hysteresis durations for stability.",
+  "metrics_config": {
+    "latency_p95_ms": {
+      "input_key": "AverageLatency_ms",
+      "aggregation": "P95",
+      "unit": "ms"
+    },
+    "error_rate_p99": {
+      "input_key": "ErrorRate_P99",
+      "aggregation": "P99",
+      "unit": "fraction",
+      "weight": 2
+    },
+    "resource_saturation_perc": {
+      "input_key": "RSL_Max_Aggregate",
+      "aggregation": "MAX",
+      "unit": "%",
+      "threshold": 75
+    }
+  },
+  "phases": {
+    "NORMAL": {
+      "phase_id": 0,
+      "description": "All systems nominal. Optimal performance.",
+      "status_threshold": 80,
+      "hysteresis_s": {
+        "entry_confirm": 10,
+        "exit_recover": 180
+      },
+      "exit_conditions":[
+        {
+          "condition_name": "TRIGGER_DEGRADED",
+          "target_phase": "DEGRADED",
+          "trigger_type": "ANY",
+          "metrics": [
+            { "key": "latency_p95_ms", "op": ">=", "value": 60 },
+            { "key": "error_rate_p99", "op": ">=", "value": 0.002 },
+            { "key": "resource_saturation_perc", "op": ">=", "value": 80 }
+          ]
+        }
+      ]
+    },
+    "DEGRADED": {
+      "phase_id": 1,
+      "description": "Service performance slightly compromised or high resource usage detected. Limited adaptive responses active.",
+      "status_threshold": 30,
+      "hysteresis_s": {
+        "entry_confirm": 60,
+        "exit_recover": 300
+      },
+      "entry_conditions": [
+        {
+          "condition_name": "RECOVERY_TO_NORMAL",
+          "target_phase": "NORMAL",
+          "trigger_type": "ALL",
+          "metrics": [
+            { "key": "latency_p95_ms", "op": "<", "value": 40 },
+            { "key": "error_rate_p99", "op": "<", "value": 0.001 }
+          ],
+          "confidence_threshold": 0.85
+        },
+        {
+          "condition_name": "TRIGGER_CRITICAL",
+          "target_phase": "CRITICAL",
+          "trigger_type": "ANY",
+          "metrics": [
+            { "key": "latency_p95_ms", "op": ">=", "value": 200 },
+            { "key": "error_rate_p99", "op": ">=", "value": 0.03 }
+          ],
+          "delay_s": 90
+        }
+      ],
+      "exit_conditions":[
+        {
+          "condition_name": "RECOVERY_TO_NORMAL",
+          "target_phase": "NORMAL",
+          "trigger_type": "ALL",
+          "metrics": [
+            { "key": "latency_p95_ms", "op": "<", "value": 20 },
+            { "key": "error_rate_p99", "op": "<", "value": 0.001 }
+          ],
+          "confidence_threshold": 0.9
+        }
+      ]
+    },
+    "CRITICAL": {
+      "phase_id": 2,
+      "description": "System is unstable or near major failure. Aggressive throttling and defensive measures required.",
+      "status_threshold": 10,
+      "hysteresis_s": {
+        "entry_confirm": 5,
+        "exit_recover": 120
+      },
+      "entry_conditions": [
+        {
+          "condition_name": "RECOVERY_TO_DEGRADED",
+          "target_phase": "DEGRADED",
+          "trigger_type": "ALL",
+          "metrics": [
+            { "key": "error_rate_p99", "op": "<", "value": 0.015 }
+          ],
+          "confidence_threshold": 0.95
+        }
+      ],
+      "exit_conditions":[
+        {
+          "condition_name": "RECOVERY_TO_DEGRADED",
+          "target_phase": "DEGRADED",
+          "trigger_type": "ALL",
+          "metrics": [
+            { "key": "error_rate_p99", "op": ">=", "value": 0.015 }
+          ],
+          "confidence_threshold": 0.8
+        }
+      ]
+    }
+  },
+  "confidence_calculation": {
+    "type": "weighted_sum",
+    "weights": [
+      { "metric": "latency_p95_ms", "weight": 0.4 },
+      { "metric": "error_rate_p99", "weight": 0.3 },
+      { "metric": "resource_saturation_perc", "weight": 0.3 }
+    ]
+  }
+}

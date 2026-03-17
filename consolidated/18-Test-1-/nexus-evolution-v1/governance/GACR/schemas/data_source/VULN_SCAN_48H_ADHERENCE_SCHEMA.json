@@ -1,0 +1,36 @@
+{
+  "schema_id": "VULN_SCAN_48H_ADHERENCE_SCHEMA",
+  "schema_version": "1.0.0",
+  "description": "Schema defining the payload required for GACR-Resolver to calculate the adherence ratio for Critical Vulnerability Remediation SLO (SEC-001).",
+  "type": "object",
+  "properties": {
+    "report_timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "critical_vulnerabilities_identified": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "critical_vulnerabilities_remediated_48h": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "adherence_ratio": {
+      "type": "number",
+      "description": "The metric value calculated by the source system (remediated/identified).",
+      "minimum": 0.0,
+      "maximum": 1.0
+    }
+  },
+  "required": [
+    "report_timestamp",
+    "critical_vulnerabilities_identified",
+    "critical_vulnerabilities_remediated_48h",
+    "adherence_ratio"
+  ],
+  "metadata": {
+    "applies_to_kai": ["KAI-SEC-001-A"],
+    "owner_service": "GACR-Data-Ingestor"
+  }
+}

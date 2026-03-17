@@ -1,0 +1,11 @@
+const recipientObject = {
+  name: "Target Recipient",
+  email: "target@example.com",
+  id: "UUID-12345"
+};
+
+// Optimized logic flow: Use JSON.stringify for a clear representation of the object's content
+const formattedOutput = `To: ${JSON.stringify(recipientObject, null, 2)}`;
+
+// If the intent was to display a specific property:
+// const specificPropertyOutput = `To: ${recipientObject.name} <${recipientObject.email}>`;

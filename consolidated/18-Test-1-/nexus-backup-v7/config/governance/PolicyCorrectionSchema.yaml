@@ -1,0 +1,39 @@
+schema_id: PCSS-V1.0
+protocol_version: SAG-V97.2
+
+# Defines the mandatory structure for the output of the GAX-led Policy Correction Analysis (PCSS)
+# required during the Rollback Protocol (RRP).
+
+PolicyCorrectionSchema:
+  type: object
+  required:
+    - incident_id
+    - rrp_trigger_stage
+    - failing_axiom
+    - forensic_data_stream_id # Reference to TEDS/TVCR capture
+    - policy_correction_directive
+
+properties:
+  incident_id:
+    type: string
+    description: Unique identifier for the RRP event.
+  rrp_trigger_stage:
+    type: string
+    description: The pipeline stage (S02 - S11) where the failure was detected.
+  failing_axiom:
+    type: string
+    enum: [UMA I, CA II, AI III, IH Pre-S13]
+    description: The specific axiom that failed or caused the RRP event.
+  forensic_data_stream_id:
+    type: string
+    description: Pointer to the associated TEDS (Triage Event Data Stream) record.
+  policy_correction_directive:
+    type: object
+    description: The corrective action defined by GAX referencing PCLD.
+    properties:
+      directive_type:
+        type: string
+        enum: [ACVD_ADJUSTMENT, UFRM_RECALIBRATION, PCLD_UPDATE]
+      directive_parameters:
+        type: object
+        description: Detailed parameters for applying the correction (e.g., new constraint value, affected policy definition).

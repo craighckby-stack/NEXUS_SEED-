@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "GMCI_V97_2_SCHEMA",
+  "title": "Governance Manifest Chain Indexer (GMCI)",
+  "description": "Defines the mandatory structure for indexing, attesting, and verifying the active chain of GACR manifests on the host system. Crucial for low-latency CRoT signature verification during GSEP-C stages S0, S2, S7, and S9.",
+  "type": "object",
+  "properties": {
+    "assetId": {
+      "description": "The GACR ID (e.g., PVLM, HETM) this index file corresponds to.",
+      "type": "string"
+    },
+    "activeVersion": {
+      "description": "The semantic version string of the manifest currently active in memory.",
+      "type": "string",
+      "pattern": "^v\\d+\\.\\d+\\.\\d+$"
+    },
+    "manifestPath": {
+      "description": "Local filesystem path to the actively loaded, CRoT-signed manifest file.",
+      "type": "string"
+    },
+    "loadTimestamp": {
+      "description": "Unix timestamp of when the active manifest was validated and loaded via CDVP.",
+      "type": "integer"
+    },
+    "chainHistory": {
+      "description": "A cryptographically linked list of previous verified versions, enabling rapid rollback and audit tracing.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "hashSHA256": {
+            "description": "Hash of the file content, verified by CRoT.",
+            "type": "string"
+          },
+          "signatureCRoT": {
+            "description": "The CRoT agent's cryptographic signature over the manifest hash.",
+            "type": "string"
+          },
+          "previousLinkHash": {
+            "description": "Hash of the preceding item in the chainHistory array (used for integrity chaining).",
+            "type": "string"
+          }
+        },
+        "required": ["version", "hashSHA256", "signatureCRoT", "previousLinkHash"]
+      }
+    }
+  },
+  "required": ["assetId", "activeVersion", "manifestPath", "loadTimestamp", "chainHistory"]
+}

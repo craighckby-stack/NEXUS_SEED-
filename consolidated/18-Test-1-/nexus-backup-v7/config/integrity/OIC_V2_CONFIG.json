@@ -1,0 +1,26 @@
+{
+  "mechanism_name": "OperationalIntegrityCheck_L8",
+  "version": "2.0",
+  "layer_scope": "L8_EXECUTION_HOOK",
+  "checks": [
+    {
+      "id": "C01_STATE_DIFF_VERIFICATION",
+      "target": "SST_TARGET_HASH",
+      "criteria": "MATCH_PULSAR_HASH"
+    },
+    {
+      "id": "C02_ROLLING_AVAILABILITY_PROBE",
+      "target": "CORE_SERVICES",
+      "criteria": "99.99_PCT_AVAILABILITY_15SEC"
+    },
+    {
+      "id": "C03_CONFIGURATION_SIGNATURE",
+      "target": "APPLIED_CONFIG",
+      "criteria": "KMS_SIGNED_VERIFICATION"
+    }
+  ],
+  "failure_handling": {
+    "type": "HARD_STOP",
+    "signal": "RRP:DEPLOY_FAIL"
+  }
+}

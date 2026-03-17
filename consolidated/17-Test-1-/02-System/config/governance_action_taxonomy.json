@@ -1,0 +1,43 @@
+{
+  "taxonomy_version": "v1.0.0",
+  "description": "Defines standardized governance action definitions referenced by the resolution matrix.",
+  "severities": [
+    {
+      "id": "SEV_CRITICAL",
+      "impact_description": "Immediate system halt and forensic preservation."
+    },
+    {
+      "id": "SEV_GUARDED_WARNING",
+      "impact_description": "Controlled pause allowing limited execution and analysis."
+    }
+  ],
+  "mitigation_strategies": [
+    {
+      "id": "MGS_ROLLBACK_TERMINATE",
+      "procedure_ref": "/scripts/rollback_terminate_safe_state.sh",
+      "required_resources": ["SYSTEM_CONTROL_LOCK" ]
+    },
+    {
+      "id": "MGS_PRUNE_THROTTLE_QUEUE",
+      "procedure_ref": "/scripts/throttle_prune_instruction_queue.py",
+      "required_resources": ["QUEUE_READ_WRITE"]
+    }
+  ],
+  "forensic_kits": [
+    {
+      "id": "KIT_DEEP_HALT_CTX",
+      "artifact_keys": [
+        "MEM_SNAPSHOT_DEEP",
+        "GOVERNANCE_CONTEXT_STACK",
+        "LAST_100_INSTRUCTIONS"
+      ]
+    },
+    {
+      "id": "KIT_RESOURCE_LIGHT",
+      "artifact_keys": [
+        "RESOURCE_PROFILE_LIGHT",
+        "PENDING_INSTRUCTION_QUEUE"
+      ]
+    }
+  ]
+}

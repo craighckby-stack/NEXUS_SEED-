@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "enforcement_defaults": {
+    "default_cache_strategy": "TTL",
+    "default_max_age_ms": 60000,
+    "rate_limit_enabled": true,
+    "rate_limit_policy": {
+      "requests_per_second": 100,
+      "burst_tolerance": 10
+    },
+    "fallback_mechanism": "STALE_OR_LAST_GOOD",
+    "fallback_policy": {
+      "max_stale_age_ms": 120000,
+      "retry_attempts": 3,
+      "retry_delay_ms": 500
+    }
+  },
+  "security_enforcement": {
+    "default_authorization_check": true,
+    "allow_downgrade_level": "L2" 
+  }
+}

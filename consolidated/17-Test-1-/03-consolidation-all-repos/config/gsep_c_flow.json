@@ -1,0 +1,55 @@
+{
+  "description": "Machine-readable definition for the Governance State Execution Pipeline (GSEP-C), providing deterministic stage structure and axiom linkage.",
+  "version": "V94.3",
+  "stages": [
+    {
+      "id": "S00",
+      "phase": "P I: DEFINITION",
+      "goal": "Pre-validation and Intent Registration",
+      "artifact_generation": [],
+      "mandatory_check": "ACVL Load & MPAM Pre-Check"
+    },
+    {
+      "id": "S01",
+      "phase": "P I: DEFINITION",
+      "goal": "Generate Configuration Snapshot Receipt (CSR)",
+      "artifact_generation": ["CSR"],
+      "axiom_relevance": "I, III"
+    },
+    {
+      "id": "S02",
+      "phase": "P I: DEFINITION",
+      "goal": "Lock Constraint Boundary & Establish CRoT Context",
+      "artifact_generation": [],
+      "axiom_relevance": "III"
+    },
+    {
+      "id": "S07",
+      "phase": "P II: VALIDATION",
+      "goal": "Compute Execution Context Validity Matrix (ECVM)",
+      "artifact_generation": ["ECVM"],
+      "axiom_relevance": "II"
+    },
+    {
+      "id": "S08",
+      "phase": "P II: VALIDATION",
+      "goal": "Measure Transition Efficacy (TEMM)",
+      "artifact_generation": ["TEMM"],
+      "axiom_relevance": "I"
+    },
+    {
+      "id": "S11",
+      "phase": "P III: FINALITY",
+      "goal": "Execute P-01 Atomic Finality Assessment (GAX)",
+      "artifact_generation": ["P-01"],
+      "mandatory_check": "Require (Axiom I $\land$ Axiom II $\land$ Axiom III) PASS"
+    },
+    {
+      "id": "S14",
+      "phase": "P III: FINALITY",
+      "goal": "Persist Audit Trails (ADTM, MPAM) and Final State Receipt (STR)",
+      "artifact_generation": ["ADTM", "MPAM", "STR"],
+      "axiom_relevance": "Post-Commit Audit"
+    }
+  ]
+}

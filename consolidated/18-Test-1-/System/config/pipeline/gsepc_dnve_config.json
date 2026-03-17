@@ -1,0 +1,31 @@
+{
+  "engine_id": "DNVE-94.1",
+  "description": "Configuration for the Directive Normalization and Validation Engine (DNVE). Executes within the GSEP-C pipeline after STP parsing and before CTM staging.",
+  "normalization_rules": {
+    "path_resolution": "strict_canonical",
+    "encoding": "utf-8",
+    "eol_style": "LF",
+    "json_format": "standard_indent_2"
+  },
+  "command_validation": {
+    "CREATE_FILE": {
+      "path_must_not_exist": true,
+      "max_size_bytes": 1048576,
+      "payload_required": true
+    },
+    "UPDATE_FILE": {
+      "path_must_exist": true,
+      "patch_strategy": "json_patch_rfc6902",
+      "diff_threshold": 0.95
+    },
+    "DELETE_FILE": {
+      "path_must_exist": true,
+      "requires_double_approval_for_paths": ["config/", "schema/", "core/"],
+      "payload_must_be_null": true
+    }
+  },
+  "security_checks": {
+    "path_blacklist": ["/kernel/*", "/core/security/*", "/runtime/memory_map"],
+    "provenance_check_level": "strict_chain_of_custody"
+  }
+}

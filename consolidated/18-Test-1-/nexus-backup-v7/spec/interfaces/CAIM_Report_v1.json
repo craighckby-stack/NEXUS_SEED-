@@ -1,0 +1,56 @@
+{
+  "title": "CAIM Initialization Report Schema V1.0",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Standardized schema for reporting the outcome of the CAIM initialization sequence, mandatory for signaling failures (SIH/RRP) or successes (CRE delivery).",
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["SUCCESS", "FAILURE_SIH", "FAILURE_RRP"],
+      "description": "The final outcome of the CAIM execution."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "duration_ms": {
+      "type": "integer",
+      "description": "Total execution time of CAIM."
+    },
+    "certified_asset_count": {
+      "type": "integer"
+    },
+    "certified_memory_checksum": {
+      "type": "string",
+      "description": "Cryptographic hash/checksum of the final Certified Runtime Environment (CRE). Zero/null on failure."
+    },
+    "failure_details": {
+      "type": "object",
+      "description": "Details populated only if status indicates failure.",
+      "properties": {
+        "phase": {
+          "type": "string",
+          "enum": ["L-PRE (Integrity Certification)", "PRE (Structural Validation)"]
+        },
+        "asset_path": {
+          "type": "string",
+          "description": "The specific resource that caused the failure."
+        },
+        "violation_type": {
+          "type": "string",
+          "description": "e.g., 'MISSING_SIGNATURE', 'SDVM_TYPE_MISMATCH'."
+        },
+        "violation_context": {
+          "type": "string",
+          "description": "Detailed error message or stack trace context."
+        }
+      }
+    }
+  },
+  "required": [
+    "status",
+    "timestamp",
+    "certified_asset_count",
+    "certified_memory_checksum"
+  ]
+}

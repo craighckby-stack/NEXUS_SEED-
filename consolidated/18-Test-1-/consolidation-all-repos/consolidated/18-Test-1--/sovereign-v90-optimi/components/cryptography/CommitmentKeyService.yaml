@@ -1,0 +1,23 @@
+service: CommitmentKeyService (CKS)
+version: 1.0.0
+mandate: Cryptographic Assertion Layer for GSEP L6.5
+
+description: The CKS is an isolated, secure microservice responsible solely for managing the ACR Private Key and executing digital signature requests (R0 Operations) for Audit Summary Manifests (ASM).
+
+interface:
+  endpoint: /sign/asm
+  method: POST
+  payload_in_schema:
+    type: 'CanonicalizedJSON'
+    description: ASM data block pending signature.
+  payload_out_schema:
+    field: 'ACR_Signature'
+    type: 'ASN.1/PKCS#1 Structured Signature'
+    curve: 'ECC P-256'
+    hash_preimage: 'SHA3-512'
+
+security_requirements:
+  1. Key Storage: Must utilize Hardware Security Module (HSM) or equivalent FIPS 140-2 certified mechanism for private key persistence.
+  2. Isolation: Must operate in a network-isolated (air-gapped or equivalent logical isolation) environment with strictly defined input/output channels.
+  3. Access Control: Signature execution requires dual authorization tokens (ACR Service ID + L6.5 Timestamp Challenge).
+  4. Logging: All signature requests, successes, and failures must be logged immediately to the WORM Security Log Ledger.

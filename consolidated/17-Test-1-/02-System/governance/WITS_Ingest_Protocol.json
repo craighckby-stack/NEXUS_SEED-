@@ -1,0 +1,18 @@
+{
+  "protocolId": "WITS_Ingest_V94.1",
+  "description": "Configuration for the WITS telemetry ingestion and routing pipeline.",
+  "telemetry_source_rate_hz": 100,
+  "ingestion_buffer": {
+    "mode": "TIME_BASED",
+    "threshold_ms": 5000,
+    "max_record_count": 500
+  },
+  "integrity_enforcement_level": "STRICT_VALIDATION",
+  "routing_matrix": {
+    "FAIL": "ROUTE_TO_GOVERNANCE_AUDIT_Q",
+    "TERMINAL": "ROUTE_TO_LONG_TERM_ARCHIVE_Q",
+    "PASS": "ROUTE_TO_PERFORMANCE_METRICS_Q"
+  },
+  "non_compliance_handling": "DROP_AND_ALERT_S01",
+  "retention_policy_days": 90
+}

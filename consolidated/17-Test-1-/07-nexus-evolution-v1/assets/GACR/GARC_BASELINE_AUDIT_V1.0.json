@@ -1,0 +1,23 @@
+{
+  "baseline_id": "GARC-2024Q3-001",
+  "purpose": "Define external, immutable configuration baselines for integrity checks during SIH Recovery (HARM R02).",
+  "storage_protocol": "COLD_VAULT_IMMUTABLE_STORAGE_V3",
+  "verification_targets": [
+    {
+      "target_key": "OS_KERNEL_HASH",
+      "reconciliation_policy": "STRICT_EQUIVALENCE",
+      "description": "Last verified kernel configuration hash."
+    },
+    {
+      "target_key": "GAX_AUTH_POLICY_MANIFEST",
+      "reconciliation_policy": "VERSION_LOCK",
+      "description": "Required manifest version for GAX authorization policies."
+    },
+    {
+      "target_key": "CRoT_TRUST_ANCHORS",
+      "reconciliation_policy": "LIST_SUPREMACY",
+      "description": "Verified list of required CRoT trust anchors; ensures against supply chain attack vector in CRoT itself."
+    }
+  ],
+  "default_action_on_drift": "FAIL_R02_AND_INITIATE_FORENSIC_SNAPSHOT"
+}

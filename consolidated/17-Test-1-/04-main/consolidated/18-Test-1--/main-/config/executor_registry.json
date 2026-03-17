@@ -1,0 +1,23 @@
+{
+  "INDEXING_OPTIMIZED": {
+    "endpoint": "http://indexer.service/v1",
+    "capabilities": ["NLP_preproc", "vector_search"],
+    "load_average": 0.4,
+    "latency_p95_ms": 250,
+    "resource_tag": "CPU_HighBandwidth"
+  },
+  "LOGIC_MODEL_HI_ACCURACY": {
+    "endpoint": "http://logic.engine/v3",
+    "capabilities": ["formal_logic", "constraint_solver"],
+    "load_average": 0.9,
+    "latency_p95_ms": 1200,
+    "resource_tag": "GPU_T4"
+  },
+  "REASONING_GPU_TIGHT": {
+    "endpoint": "http://reasoning.cluster/v5",
+    "capabilities": ["multi_step_deduction", "recursive_abstraction"],
+    "load_average": 0.2,
+    "latency_p95_ms": 500,
+    "resource_tag": "GPU_A100"
+  }
+}

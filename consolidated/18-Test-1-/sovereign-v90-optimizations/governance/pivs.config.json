@@ -1,0 +1,82 @@
+{
+  "service_alias": "PIVS",
+  "name": "ProposalInitializationValidationService",
+  "version": "1.2.0",
+  "description": "L0 Ingress Control configuration defining mandatory pipeline steps for new Governance Service proposals (GSPs). This config relies on the associated 'pivs.paths.json' for safe field traversal.",
+  "schema_config": {
+    "path": "./proposal-schema.json",
+    "required_version": "v3.2"
+  },
+  "pipeline_definition": {
+    "validation_rules": [
+      {
+        "rule_id": "STRUCT_L0",
+        "description": "Mandatory JSON Schema and structural conformance.",
+        "validator_ref": "V_SCHEMA_V32",
+        "priority": 100,
+        "failure_control": {
+          "policy": "REJECT_IMMEDIATE",
+          "log_level": "CRITICAL"
+        }
+      },
+      {
+        "rule_id": "INTEGRITY_HASH",
+        "description": "Payload integrity check via SHA256 match.",
+        "validator_ref": "V_SHA256_MATCH",
+        "priority": 90,
+        "failure_control": {
+          "policy": "REJECT_DEFERRED_AUDIT",
+          "log_level": "ALERT"
+        }
+      }
+    ],
+    "initialization_steps": [
+      {
+        "step_id": "INIT_PROPOSAL_ID",
+        "description": "Generate unique Layered Time-Based Proposal ID.",
+        "initializer_ref": "I_SYS_ID_GEN",
+        "target_path_key": "PROPOSAL_ID_TARGET"
+      },
+      {
+        "step_id": "INIT_PROVENANCE_LOG",
+        "description": "Establish Immutable Audit Log reference.",
+        "initializer_ref": "I_IAL_REF",
+        "target_path_key": "LOG_REF_TARGET"
+      },
+      {
+        "step_id": "INIT_ANCHOR_PENDING",
+        "description": "Set placeholder for blockchain anchoring.",
+        "initializer_ref": "I_PLACEHOLDER_ANCHOR",
+        "target_path_key": "ANCHOR_REF_TARGET"
+      }
+    ]
+  },
+  "component_registry": {
+    "validators": {
+      "V_SCHEMA_V32": {
+        "type": "SCHEMA_CHECK",
+        "schema_key": "v3.2"
+      },
+      "V_SHA256_MATCH": {
+        "type": "CRYPTOGRAPHIC_MATCH",
+        "algorithm": "SHA256",
+        "source_path_key": "HASH_SOURCE",
+        "calculated_path_key": "SYSTEM_CALCULATED_HASH"
+      }
+    },
+    "initializers": {
+      "I_SYS_ID_GEN": {
+        "type": "GENERATOR",
+        "class": "SystemIDGenerator/LayeredTimeBased"
+      },
+      "I_IAL_REF": {
+        "type": "GENERATOR",
+        "class": "IAL_ReferenceGenerator"
+      },
+      "I_PLACEHOLDER_ANCHOR": {
+        "type": "PLACEHOLDER",
+        "value": "PENDING:ANCHORING"
+      }
+    }
+  }
+}

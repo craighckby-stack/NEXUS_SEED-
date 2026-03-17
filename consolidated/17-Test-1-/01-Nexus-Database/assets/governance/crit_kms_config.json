@@ -1,0 +1,33 @@
+{
+  "kms_version": "1.0",
+  "description": "Configuration parameters for integration with the external Key Management System (KMS) for keys compliant with crit_crypto_policy.",
+  "kms_provider_type": "Hybrid_Cloud",
+  "default_kms_endpoint": "https://kms.crit.system.local",
+  "key_types_config": [
+    {
+      "use": "SIGNATURE",
+      "purpose": "JWT_Signing",
+      "algorithm_match": "ES384",
+      "kms_identifier": "alias/crit-production-signing-p384",
+      "rotation_policy": {
+        "enabled": true,
+        "period_days": 90,
+        "automated_retirement_delay_days": 7
+      }
+    },
+    {
+      "use": "ENCRYPTION",
+      "purpose": "Symmetric_Content_Encryption",
+      "algorithm_match": "A256GCM",
+      "kms_identifier": "alias/crit-production-aes256",
+      "rotation_policy": {
+        "enabled": true,
+        "period_days": 180
+      }
+    }
+  ],
+  "auditing_config": {
+    "logging_destination": "CloudTrail",
+    "minimum_audit_level": "CRITICAL"
+  }
+}

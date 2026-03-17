@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://agi.sovereign/protocol_definition_schema.json",
+  "title": "Protocol Definition Schema",
+  "description": "Schema for defining and standardizing integrity protocols used by the Protocol Integrity Manager (PIM), enabling systematic versioning and execution by the PIM engine.",
+  "type": "object",
+  "properties": {
+    "protocol_id": {
+      "type": "string",
+      "description": "Unique identifier for the protocol (e.g., GAX_III)."
+    },
+    "name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^v\\d+\\.\\d+\\.\\d+$"
+    },
+    "security_level": {
+      "type": "string",
+      "enum": [
+        "Low",
+        "Medium",
+        "High",
+        "Critical",
+        "Extreme"
+      ],
+      "description": "The security classification of the protocol."
+    },
+    "description": {
+      "type": "string"
+    },
+    "required_steps": {
+      "type": "array",
+      "description": "Ordered list of verification steps or sub-routines required by the protocol execution wrapper.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step_name": {
+            "type": "string"
+          },
+          "verifier_module": {
+            "type": "string",
+            "description": "Reference to the executable module path/name/version."
+          },
+          "timeout_ms": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "step_name",
+          "verifier_module"
+        ]
+      }
+    },
+    "logging_policy": {
+      "type": "string",
+      "enum": [
+        "Full",
+        "Minimal",
+        "FailureOnly"
+      ]
+    }
+  },
+  "required": [
+    "protocol_id",
+    "version",
+    "security_level",
+    "required_steps"
+  ]
+}

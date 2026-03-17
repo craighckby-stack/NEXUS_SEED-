@@ -1,0 +1,31 @@
+{
+  "version": "1.0",
+  "constraint_set_name": "ACVM_Core_V2",
+  "constraints": [
+    {
+      "id": "C001_TemporalConsistency",
+      "description": "Ensure temporal entropy shift does not exceed delta threshold based on TEMM input.",
+      "severity": "CRITICAL",
+      "metric_dependency": "TEMM",
+      "formula": "ABS(TEMM.delta) <= ACVM_CONFIG.TEMPORAL_THRESHOLD"
+    },
+    {
+      "id": "C002_ErosionThreshold",
+      "description": "Limit acceptable error correction attempts based on ECVM input to prevent degradation.",
+      "severity": "HIGH",
+      "metric_dependency": "ECVM",
+      "formula": "ECVM.attempts < 100 AND ECVM.rate < 0.05"
+    },
+    {
+      "id": "C003_ResourceBudgetCompliance",
+      "description": "Verify the planned resource allocation remains within the baseline budget defined by the initial CSR.",
+      "severity": "LOW",
+      "metric_dependency": "CSR",
+      "formula": "CPR_PLAN.resource_cost <= CSR.baseline_budget * 1.05"
+    }
+  ],
+  "default_policy": {
+    "on_critical_failure": "HALT_IMMEDIATELY",
+    "on_high_failure": "LOG_AND_FLAG"
+  }
+}

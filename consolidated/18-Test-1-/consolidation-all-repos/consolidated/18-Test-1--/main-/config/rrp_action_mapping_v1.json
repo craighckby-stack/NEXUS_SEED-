@@ -1,0 +1,34 @@
+{
+  "metadata": {
+    "description": "Configuration mapping for the Rollback and Recovery Protocol (RRP) hooks.",
+    "version": "v2.0",
+    "protocol_standard": "GSEP-C V3.4",
+    "efficiency_gain": "Introduced 'category' for specialized routing, telemetry grouping, and faster triage."
+  },
+  "mappings": {
+    "RRP:POLICY_VETO": {
+      "category": "GOVERNANCE",
+      "severity": "CRITICAL",
+      "action_sequence": ["HALT_EXECUTION", "ISOLATE_STATE", "NOTIFY_GOVERNOR"],
+      "fallback": "HARD_RESET"
+    },
+    "RRP:FINALITY_BREACH": {
+      "category": "INTEGRITY",
+      "severity": "CRITICAL",
+      "action_sequence": ["HALT_EXECUTION", "REVERT_TO_L6_STATE", "LOG_VIOLATION"],
+      "fallback": "RRP:LOG_FAIL"
+    },
+    "RRP:BUDGET_EXCEED": {
+      "category": "RESOURCE",
+      "severity": "HIGH",
+      "action_sequence": ["SOFT_HALT", "RECALCULATE_BUDGET", "REQUEUE_SST"],
+      "fallback": "HALT_EXECUTION"
+    },
+    "RRP:SCHEMA_FAIL": {
+      "category": "VALIDATION",
+      "severity": "HIGH",
+      "action_sequence": ["REJECT_INPUT", "ALERT_SOURCE"],
+      "fallback": null
+    }
+  }
+}

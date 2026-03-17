@@ -1,0 +1,18 @@
+{
+  "version": "v94.2",
+  "currency_unit": "credits_v94.2",
+  "api_costs": {
+    "openai_gpt_4o": {
+      "input_cost_per_m_token": 5.00,
+      "output_cost_per_m_token": 15.00
+    },
+    "internal_inference_model_a": {
+      "cpu_time_ms_cost": 0.0001,
+      "gpu_time_ms_cost": 0.005
+    }
+  },
+  "storage_costs": {
+    "vector_db_gb_hr": 0.01,
+    "data_lake_tb_month": 5.00
+  }
+}

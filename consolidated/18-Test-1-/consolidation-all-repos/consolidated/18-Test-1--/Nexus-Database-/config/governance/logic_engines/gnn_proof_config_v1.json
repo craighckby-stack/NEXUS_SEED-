@@ -1,0 +1,13 @@
+{
+  "engine_id": "GNN_PROOF_v1",
+  "version": "1.0.0",
+  "resource_limits": {
+    "cpu_cycles_max": 50000000,
+    "memory_kb_max": 2048,
+    "timeout_ms": 50
+  },
+  "model_path": "/axioms/GNN/pvlm_proof_net_v94.1.pb",
+  "sandbox_profile": "L3_ISOLATED_GPU",
+  "validation_protocol": "MAJORITY_VOTE (3/5)",
+  "error_behavior": "FAIL_SAFE_DEFAULT"
+}

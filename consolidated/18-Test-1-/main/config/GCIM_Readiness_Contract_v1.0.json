@@ -1,0 +1,30 @@
+{
+  "contract_id": "GCIM_READINESS_V1.0",
+  "description": "Standardized output structure required for all systems reporting readiness status to the GCIM Gate Monitor, ensuring compliance with required_status checks.",
+  "expected_payload": {
+    "status": {
+      "type": "string",
+      "enum": ["Ready", "Waiting", "Degraded", "Error"],
+      "description": "The current readiness state of the specific subsystem, matching gate configuration requirements."
+    },
+    "gate_id": {
+      "type": "string",
+      "description": "Must match the gate_id requested (e.g., S2) for confirmation."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "iso8601",
+      "description": "Time of status generation."
+    },
+    "metrics": {
+      "type": "object",
+      "optional": true,
+      "description": "Operational metrics supporting the status (e.g., service latency, data age)."
+    },
+    "evidence_link": {
+      "type": "string",
+      "optional": true,
+      "description": "Link to detailed logs or evidence required for CRITICAL gate verification."
+    }
+  }
+}

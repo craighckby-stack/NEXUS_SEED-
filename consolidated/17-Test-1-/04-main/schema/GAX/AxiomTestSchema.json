@@ -1,0 +1,67 @@
+{
+  "$id": "http://gax.sovereign.v94/AxiomTestSchema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GAX Axiom Verification Test Schema",
+  "description": "Defines structured test cases to verify the correct functioning and non-regression of a defined Axiom.",
+  "type": "object",
+  "required": ["testId", "axiomId", "axiomVersion", "testCases"],
+  "properties": {
+    "testId": {
+      "type": "string",
+      "description": "Unique immutable identifier for this test suite (e.g., 'TEST-AXIOM-0042')."
+    },
+    "axiomId": {
+      "type": "string",
+      "description": "Reference to the axiom being tested."
+    },
+    "axiomVersion": {
+      "type": "integer",
+      "description": "The specific version of the axiom definition being tested."
+    },
+    "testCases": {
+      "type": "array",
+      "description": "List of individual tests for validation.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "inputContext", "expectedOutcome"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "testType": {
+            "type": "string",
+            "enum": ["POSITIVE_MATCH", "NEGATIVE_NON_MATCH", "MUTATION_VERIFICATION"],
+            "description": "Defines whether the test expects the condition to be met, missed, or a transformation to occur."
+          },
+          "inputContext": {
+            "type": "object",
+            "description": "The code snippet, JSON blob, or system state that acts as input for the axiom evaluation."
+          },
+          "expectedOutcome": {
+            "type": "object",
+            "description": "The expected result, including match status and resulting action payload.",
+            "properties": {
+              "matches": {
+                "type": "boolean",
+                "description": "True if the condition must fire."
+              },
+              "actionType": {
+                "type": "string",
+                "description": "Expected action taken (e.g., HALT)."
+              },
+              "transformedOutputHash": {
+                "type": "string",
+                "description": "Required if testType is MUTATION_VERIFICATION. Hash of the expected post-mutation output."
+              }
+            },
+            "required": ["matches"]
+          }
+        }
+      }
+    }
+  }
+}

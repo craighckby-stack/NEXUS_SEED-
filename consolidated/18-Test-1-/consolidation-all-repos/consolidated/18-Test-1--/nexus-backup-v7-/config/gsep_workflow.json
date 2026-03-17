@@ -1,0 +1,12 @@
+{
+  "version": "GSEP-C V1.2",
+  "description": "Executable workflow definition for the State Governance Execution Pipeline.",
+  "stages": [
+    { "id": "S00-S01", "phase": "P1", "agent": "CRoT/SGS", "objective": "CSR Lock & Environment Check" },
+    { "id": "S02-S04", "phase": "P2", "agent": "GAX", "fail_condition": "PVLM == true", "objective": "Constraint Vetting" },
+    { "id": "S05-S07", "phase": "P3", "agent": "SGS", "fail_condition": "ECVM == false", "objective": "State Execution & ASM Generation" },
+    { "id": "S08-S10", "phase": "P4", "agent": "SGS/GAX", "fail_condition": "MPAM == true || ADTM == true", "objective": "Metric Validation" },
+    { "id": "S11", "phase": "P5", "agent": "GAX", "fail_condition": "P01 == fail", "objective": "Atomic Finality Calculation" },
+    { "id": "S12-S14", "phase": "P6", "agent": "CRoT/SGS", "objective": "Commitment & State Transition" }
+  ]
+}

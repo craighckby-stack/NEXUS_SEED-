@@ -1,0 +1,20 @@
+{
+  "TEMM_Weights_V1": {
+    "description": "Canonical weights and ranges for Total Evolved Mandate Metric (TEMM). Should be adjustable based on mandate Complexity, Scope, and Risk (CSR assessment).",
+    "metrics": {
+      "EfficiencyScore": {
+        "range": [0.0, 100.0],
+        "weight": 0.45
+      },
+      "ResourceUtilization": {
+        "range": [0.0, 1.0],
+        "weight": 0.30
+      },
+      "MandateFulfillmentRatio": {
+        "range": [0.5, 1.0],
+        "weight": 0.25
+      }
+    },
+    "target_version": "v94.1"
+  }
+}

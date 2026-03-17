@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://sag.v94.2/TEDS_event_schema.json",
+  "title": "Trusted Event Data Stream (TEDS) Event Contract (V94.2 Compliance)",
+  "type": "object",
+  "required": [
+    "timestamp_utc",
+    "sag_version",
+    "event_id",
+    "trace_id",
+    "agent_id",
+    "source_module",
+    "pipeline_stage_id",
+    "status_code",
+    "event_metrics_hash"
+  ],
+  "properties": {
+    "timestamp_utc": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp (UTC) of event generation, immutable."
+    },
+    "sag_version": {
+      "type": "string",
+      "pattern": "^V[0-9]{2}\\.[0-9]$",
+      "description": "The specific Sovereign AGI specification version governing the pipeline run (e.g., V94.2)."
+    },
+    "event_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "A unique, globally identifiable UUID for this specific event instance."
+    },
+    "trace_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "A persistent UUID linking all related events across a single pipeline execution (traceability)."
+    },
+    "agent_id": {
+      "type": "string",
+      "enum": [
+        "CRoT",
+        "GAX",
+        "SGS",
+        "HUMN"
+      ],
+      "description": "The high-level GSEP-C Agent responsible for generating the event. Added 'HUMN' for external interactions."
+    },
+    "source_module": {
+      "type": "string",
+      "minLength": 3,
+      "description": "The internal subsystem or module (e.g., 'TEMM-Scorer', 'IH-Validator') within the Agent generating the event."
+    },
+    "pipeline_stage_id": {
+      "type": "string",
+      "pattern": "^S(0[0-9]|1[0-4])$",
+      "description": "The mandatory GSEP-C stage (S00-S14) where the event occurred. Format: S##."
+    },
+    "status_code": {
+      "type": "integer",
+      "minimum": 100,
+      "maximum": 599,
+      "description": "Standardized system event status code (3-digit categorization, 1xx informational, 2xx success, 4xx/5xx failure)."
+    },
+    "payload_detail": {
+      "type": "object",
+      "description": "Detailed contextual, mutable information specific to the event type (e.g., TEMM score, CSR value, IH Flag status).",
+      "additionalProperties": true
+    },
+    "event_metrics_hash": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{64}$",
+      "description": "Cryptographic SHA-256 hash of the essential payload details for immutable integrity checking."
+    }
+  },
+  "additionalProperties": false
+}
