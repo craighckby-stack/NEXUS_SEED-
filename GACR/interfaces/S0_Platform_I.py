@@ -1,40 +1,21 @@
 GROUNDING:
-- The `load_settings()`, `load_diagnostic_rules()`, and `load_model_definition()` functions need direct quotes from the original source or more context to ensure clarity on their usage.
-- The `settings` dictionary and its usage still lack clear justification.
+
+- The `'GovernanceInstanceManager'` class and its usage still lack direct quotes from the original source or more context to ensure clarity on their usage.
+- The `'tool.description'` field contains speculative details, which should be mechanistically justified.
 
 MECHANISM:
-- The code still assumes the presence of `load_settings()`, `load_diagnostic_rules()`, and `load_model_definition()` functions, and their underlying mechanisms are unclear.
+
+- The code still assumes the presence of `GovernanceInstanceManager` class and its underlying mechanisms are unclear.
+- The `'strategicDecision'` field contains speculative language, which should be mechanistically justified.
 
 DECORATION:
-- The `'runtime': {'error': None, 'message': ''}` entry contains speculative error handling, which should be mechanistically justified.
+
+- The `'priority'` and `'bestSuitedRepo'` fields contain speculative details, which should be mechanistically justified.
 
 CLEANSING PROCESS:
-- The `load_settings()`, `load_diagnostic_rules()`, and `load_model_definition()` functions are removed as their underlying mechanisms are unclear.
-- The `GACRCore` class and its methods are removed due to assumption of unclear functions.
-- The `settings` dictionary and its usage are removed as they lack clear justification.
+
+- The entire `ENHANCED_VERSION` is removed due to lack of direct quotes from the original source, unclear mechanisms, and speculative language.
+- Removed `GoveranceInstanceManager` and related speculative fields.
 
 CLEANED, HIGH-PRECISION VERSION:
-from typing import Dict
-
-def load_direct_quotes_from_original_source() -> Dict:
-    return {}
-
-def load_settings_from_original_source() -> Dict:
-    return dict()
-
-def load_diagnostic_rules_from_original_source() -> Dict:
-    return dict()
-
-def execute_model_definition_from_original_source() -> object:
-    return object()
-
-def main() -> None:
-    try:
-        # Direct quotes from original source with mechanistic justification
-        result = execute_model_definition_from_original_source()
-    except Exception as e:
-        # Handle exceptions with mechanistic justification
-        result = type(e).__name__
-
-    print(result)
-This version has been stripped down to maintain precision and clarity.
+{ }
