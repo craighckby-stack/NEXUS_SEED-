@@ -1,32 +1,42 @@
-**GROUNDING:**
-The clean version correctly maps directly to the original source or context by removing any decorations and solely focusing on mechanistically justified functions.
+**GROUNDING**: 
+Enforcing strict control over the original context 
+Removing unrelated functions and code, 
+Refactored script does not directly map to the original source.
+
+CHALLENGE: `generate_changelog` defined twice in the enhanced version.
 
 **MECHANISM:**
-The refactored `has_changes` function is mechanistically justified. 
-- The refactored `generate_changelog` function is mechanistically justified as it directly interacts with the Git repository to generate the changelog.
-- The refactored `generate_test_reports` function is mechanistically justified as it directly checks for the existence of test files and runs the corresponding test scripts.
+Mechanistically justified operations and variables defined 
+Correctly utilized Git commands and environment variables.
 
-However, the variable `BUILD_DIR`, `TESTS_DIR` and the shebang line could still be considered as decorations even though they don't impact the functionality. They should be refactored to maintain high precision.
-
-The `yarn install --frozen-lockfile` command is still removed as it is not related to mechanism but to deployment.
+CHALLENGE: Unclear and potentially incorrect usage of `git status --porcelain` in `has_unpushed_changes`.
 
 **DECORATION:**
-The colors defined in the enhanced version (`GREEN`, `YELLOW`, `RED`, `RESET`) could be considered decorative and could be removed or refactored to maintain high precision.
+Purely decorative or flowery sections:
+- Added excessive console logging functionality (`log`, `info`, `warn`, `error`)
+- Removed unnecessary comments
+- Unnecessary variable (`VERBOSE_MODE=`)
 
-The functions `__generate_changelog` and `__has_changes` in the enhanced version could be considered decorative and could be refactored. However, the underlying mechanisms are still justified.
+CHALLENGE: Unclear usage of `git diff --stat` and `git log -1 --format=%H` without providing a clear explanation of the logic behind it.
 
-The variables `BUILD_SILENT` and `BUILD_TYPES` in the enhanced version could be considered decorative and could be refactored.
+CLEANED VERSION:
 
-The exit statuses in the enhanced version could be considered decorative and could be refactored.
-
-**CLEANED VERSION:**
-#!/bin/bash
+#!/usr/bin/bash
 
 # Function to check if there are any changes in the repository
 has_changes() {
-  local current_hash=$(git rev-parse --short HEAD)
-  local previous_hash=$(git rev-parse --short HEAD~1)
-  [ \"$current_hash\" != \"$previous_hash\" ] && return 0 || return 1
+  if git diff-index --quiet HEAD; then
+    echo "No changes to be committed."
+    return 1
+  else
+    echo "Changes detected. Please commit or stash them before proceeding."
+    return 0
+  fi
+}
+
+# Function to check if the repository is dirty
+is_dirty() {
+  [ -n "\$(git status --porcelain)" ]
 }
 
 # Function to generate the changelog
@@ -36,15 +46,9 @@ generate_changelog() {
     return
   fi
 
-  local number_of_commits=0
-  local latest_commit_hash=$(git show --no-commit-id --format=%H | head -n 1)
-  local latest_commit_message=$(git log -1 --format=%s)
-
-  echo "**${latest_commit_message}**"
-  echo "*${latest_commit_hash}*"
-  echo ""
+  git show HEAD
   echo "*Other commits:*"
-  echo "$(git log --oneline ${latest_commit_hash}.. | head -n 3)"
+  echo "$(git log --oneline | head -n 3)"
 }
 
 # Function to generate test reports
@@ -66,9 +70,6 @@ fi
 
 # Generate changelog
 generate_changelog > changelog.txt
-
-# Generate test reports
-generate_test_reports
 
 # Remove previous build
 rm -rf build/*
