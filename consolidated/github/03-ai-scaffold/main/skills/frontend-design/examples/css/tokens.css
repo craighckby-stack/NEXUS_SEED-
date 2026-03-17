@@ -1,0 +1,150 @@
+/* ============================================
+   COLOR SYSTEM - Semantic Tokens
+   ============================================ */
+
+:root {
+  /* Global Color Variables */
+  --color-brand: oklch(55% 0.18 250);
+  --color-text: oklch(20% 0.01 250);
+  --color-text-inverse: oklch(98% 0 0);
+  --color-background: oklch(99% 0 0);
+  --color-surface: oklch(100% 0 0);
+  --color-surface-subtle: oklch(98% 0.005 250);
+  --color-border: oklch(90% 0.005 250);
+  --color-primary: var(--color-brand);
+  --color-secondary: oklch(65% 0.08 280);
+  --color-accent: oklch(70% 0.15 160);
+  --color-success: oklch(65% 0.15 145);
+  --color-warning: oklch(75% 0.15 85);
+  --color-danger: oklch(60% 0.20 25);
+  --color-info: oklch(65% 0.12 230);
+  --color-overlay: oklch(0% 0 0 / 0.5);
+  --color-scrim: oklch(0% 0 0 / 0.3);
+}
+
+/* Dark Mode Color Adjustments */
+[data-theme="dark"] {
+  :root {
+    --color-text: oklch(95% 0.01 250);
+    --color-text-inverse: oklch(15% 0 0);
+    --color-background: oklch(15% 0.01 250);
+    --color-surface: oklch(20% 0.015 250);
+    --color-surface-subtle: oklch(25% 0.02 250);
+    --color-border: oklch(35% 0.01 250);
+    --color-primary: oklch(65% 0.18 250);
+    --color-secondary: oklch(70% 0.08 280);
+    --color-accent: oklch(75% 0.15 160);
+    --color-success: oklch(70% 0.15 145);
+    --color-warning: oklch(80% 0.15 85);
+    --color-danger: oklch(65% 0.20 25);
+    --color-info: oklch(70% 0.12 230);
+  }
+}
+
+/* ============================================
+   TYPOGRAPHY SCALE
+   ============================================ */
+
+:root {
+  /* Font Families */
+  --font-family-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-family-serif: 'Merriweather', Georgia, serif;
+  --font-family-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  
+  /* Font Sizes - Using clamp() for fluid typography */
+  --font-size-xs: clamp(0.75rem, 0.7rem + 0.15vw, 0.875rem);      /* 12-14px */
+  --font-size-sm: clamp(0.875rem, 0.8rem + 0.2vw, 1rem);          /* 14-16px */
+  --font-size-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);      /* 16-18px */
+  --font-size-lg: clamp(1.125rem, 1.05rem + 0.3vw, 1.25rem);      /* 18-20px */
+  --font-size-xl: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem);        /* 20-24px */
+  --font-size-2xl: clamp(1.5rem, 1.35rem + 0.6vw, 2rem);          /* 24-32px */
+  --font-size-3xl: clamp(1.875rem, 1.65rem + 0.9vw, 2.5rem);      /* 30-40px */
+  --font-size-4xl: clamp(2.25rem, 1.95rem + 1.2vw, 3.5rem);       /* 36-56px */
+  --font-size-5xl: clamp(3rem, 2.5rem + 2vw, 4.5rem);             /* 48-72px */
+  
+  /* Line Heights */
+  --line-height-none: 1;
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
+  
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  
+  /* Letter Spacing */
+  --letter-spacing-tighter: -0.05em;
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+  --letter-spacing-widest: 0.1em;
+}
+
+/* Typography Presets */
+.text-display {
+  font-size: var(--font-size-5xl);
+  line-height: var(--line-height-tight);
+  font-weight: var(--font-weight-extrabold);
+  letter-spacing: var(--letter-spacing-tighter);
+}
+
+.text-h1 {
+  font-size: var(--font-size-4xl);
+  line-height: var(--line-height-tight);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.text-h2 {
+  font-size: var(--font-size-3xl);
+  line-height: var(--line-height-snug);
+  font-weight: var(--font-weight-bold);
+}
+
+.text-h3 {
+  font-size: var(--font-size-2xl);
+  line-height: var(--line-height-snug);
+  font-weight: var(--font-weight-semibold);
+}
+
+.text-h4 {
+  font-size: var(--font-size-xl);
+  line-height: var(--line-height-normal);
+  font-weight: var(--font-weight-semibold);
+}
+
+.text-body {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  font-weight: var(--font-weight-normal);
+}
+
+.text-small {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  font-weight: var(--font-weight-normal);
+}
+
+.text-caption {
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+  font-weight: var(--font-weight-normal);
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+/* ============================================
+   SPACING SCALE (8px System)
+   ============================================ */
+
+:root {
+  --spacing-0: 0;
+  --spacing-px: 1px;
+  --spacing-0-5: 0.125rem;   /* 2px */
+  --spacing-1: 0.25rem;
