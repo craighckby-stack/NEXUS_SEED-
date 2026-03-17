@@ -1,7 +1,7 @@
 /**
  * @file nexus_core.js
- * @version 6.0.0-alpha.refactor
- * @description Task orchestrator implementing a Bind-Check-Execute pipeline with hierarchical symbol resolution, schema validation, and middleware execution.
+ * @version 8.0.0
+ * @description Task orchestrator implementing a Bind-Check-Execute pipeline with symbol resolution, hierarchical cancellation, and diagnostic reporting.
  */
 
 import { z } from 'zod';
@@ -14,8 +14,14 @@ export const NexusSymbolFlags = {
   None: 0,
   Function: 1 << 0,
   Variable: 1 << 1,
-  Async: 1 << 2,
-  Flow: 1 << 3
+  Property: 1 << 2,
+  Class: 1 << 3,
+  Interface: 1 << 4,
+  Async: 1 << 9,
+  Flow: 1 << 10,
+  Export: 1 << 11,
+  Merged: 1 << 12,
+  Value: (1 << 0) | (1 << 1) | (1 << 2) | (1 << 3)
 };
 
 /**
@@ -33,14 +39,38 @@ export const NexusDiagnosticCategory = {
 
 /**
  * @class NexusDiagnosticChain
- * Linked-list structure for nested diagnostic messages.
+ * Linked-list for nested diagnostic messages.
  */
 export class NexusDiagnosticChain {
   constructor(message, code, category, next = null) {
     this.message = message;
     this.code = code;
     this.category = category;
-    this.next = next;
+    this.next = Array.isArray(next) ? next : (next ? [next] : []);
+  }
+
+  /**
+   * Flattens the recursive chain into a linear array.
+   * @returns {Array<Object>}
+   */
+  flatten() {
+    const result = [];
+    const stack = [this];
+    
+    while (stack.length > 0) {
+      const node = stack.pop();
+      result.push({
+        message: node.message,
+        code: node.code,
+        category: node.category
+      });
+      if (node.next) {
+        for (let i = node.next.length - 1; i >= 0; i--) {
+          stack.push(node.next[i]);
+        }
+      }
+    }
+    return result;
   }
 }
 
@@ -69,7 +99,7 @@ export class NexusCancellationToken {
 
   get isCancelled() {
     return this.#isCancelled || (this.#parentToken?.isCancelled ?? false);
-  }
+  } 
 
   get signal() {
     return this.#abortController.signal;
@@ -116,7 +146,7 @@ export class NexusCancellationToken {
   }
 
   link(otherToken) {
-    if (otherToken instanceof NexusCancellationToken) {
+    if (otherToken instanceof NexusCancellationToken && otherToken !== this) {
       this.#linkedTokens.add(otherToken);
     }
     return this;
@@ -137,12 +167,13 @@ export class NexusCancellationToken {
     this.#listeners.clear();
     this.#linkedTokens.clear();
     this.#cleanupHooks.clear();
+    this.#parentToken = null;
   }
 }
 
 /**
  * @class NexusSymbol
- * Named entity within the Nexus environment supporting declaration merging.
+ * Named entity supporting declaration merging.
  */
 class NexusSymbol {
   constructor(name, flags) {
@@ -150,24 +181,28 @@ class NexusSymbol {
     this.flags = flags;
     this.declarations = [];
     this.valueDeclaration = null;
+    this.members = new Map();
     this.parent = null;
   }
 
   addDeclaration(decl) {
     this.declarations.push(decl);
     if (decl.flags) this.flags |= decl.flags;
-    if (!this.valueDeclaration && (decl.flags & (NexusSymbolFlags.Variable | NexusSymbolFlags.Function))) {
+    
+    if (!this.valueDeclaration && (decl.flags & NexusSymbolFlags.Value)) {
       this.valueDeclaration = decl;
+    }
+
+    if (decl.members) {
+      for (const [key, sym] of Object.entries(decl.members)) {
+        this.members.set(key, sym);
+      }
     }
   }
 
-  get isAsync() {
-    return !!(this.flags & NexusSymbolFlags.Async);
-  }
-
-  get isFlow() {
-    return !!(this.flags & NexusSymbolFlags.Flow);
-  }
+  get isAsync() { return !!(this.flags & NexusSymbolFlags.Async); }
+  get isFlow() { return !!(this.flags & NexusSymbolFlags.Flow); }
+  get isExported() { return !!(this.flags & NexusSymbolFlags.Export); }
 }
 
 /**
@@ -184,19 +219,17 @@ class NexusSymbolTable {
     this.#scopeName = scopeName;
   }
 
-  get parent() {
-    return this.#parent;
-  }
+  get parent() { return this.#parent; }
+  get scopeName() { return this.#scopeName; }
 
-  declare(name, flags, metadata) {
+  declare(name, flags, metadata = {}) {
     let sym = this.#symbols.get(name);
     if (sym) {
       sym.addDeclaration(metadata);
-      sym.flags |= flags;
+      sym.flags |= (flags | NexusSymbolFlags.Merged);
     } else {
       sym = new NexusSymbol(name, flags);
       sym.addDeclaration(metadata);
-      sym.parent = this.#parent ? this.#parent.resolve(this.#scopeName) : null;
       this.#symbols.set(name, sym);
     }
     return sym;
@@ -212,10 +245,6 @@ class NexusSymbolTable {
     return null;
   }
 
-  getSymbols() {
-    return Array.from(this.#symbols.values());
-  }
-
   createChildScope(name) {
     return new NexusSymbolTable(this, name);
   }
@@ -223,56 +252,24 @@ class NexusSymbolTable {
 
 /**
  * @class NexusDiagnosticReporter
- * Aggregator for diagnostics with trace identification and performance timing.
+ * Storage and subscription system for diagnostics.
  */
 class NexusDiagnosticReporter {
   #diagnostics = [];
   #subscribers = new Set();
-  #timers = new Map();
 
-  report(category, code, message, relatedInformation = []) {
+  report(category, code, message) {
     const diagnostic = {
-      category,
-      code,
-      message,
-      relatedInformation,
-      timestamp: performance.now(),
-      traceId: crypto.randomUUID()
+      category, 
+      code, 
+      message, 
+      timestamp: performance.now() 
     };
     this.#diagnostics.push(diagnostic);
-    this.#broadcast(diagnostic);
-    return diagnostic;
-  }
-
-  reportChain(chain) {
-    let current = chain;
-    while (current) {
-      this.report(current.category, current.code, current.message);
-      current = current.next;
-    }
-  }
-
-  startTimer(label) {
-    this.#timers.set(label, performance.now());
-  }
-
-  stopTimer(label) {
-    const start = this.#timers.get(label);
-    if (start) {
-      const duration = performance.now() - start;
-      this.report(NexusDiagnosticCategory.Performance, 8000, `Timer [${label}]: ${duration.toFixed(4)}ms`);
-      this.#timers.delete(label);
-      return duration;
-    }
-    return 0;
-  }
-
-  #broadcast(diag) {
     for (const sub of this.#subscribers) {
-      try {
-        sub(diag);
-      } catch (e) {}
+      try { sub(diagnostic); } catch (e) {}
     }
+    return diagnostic;
   }
 
   subscribe(fn) {
@@ -280,82 +277,15 @@ class NexusDiagnosticReporter {
     return () => this.#subscribers.delete(fn);
   }
 
-  getDiagnostics() {
-    return Object.freeze([...this.#diagnostics]);
+  getErrors() { 
+    return this.#diagnostics.filter(d => d.category === NexusDiagnosticCategory.Error); 
   }
 
-  getErrors() {
-    return this.#diagnostics.filter(d => d.category === NexusDiagnosticCategory.Error);
+  hasErrors() { 
+    return this.#diagnostics.some(d => d.category === NexusDiagnosticCategory.Error); 
   }
 
-  clear() {
-    this.#diagnostics = [];
-  }
-}
-
-/**
- * @class NexusTypeChecker
- * Validation system using Zod schemas for structural integrity.
- */
-class NexusTypeChecker {
-  #schemas = new Map();
-  #reporter;
-  #symbolTable;
-
-  constructor(reporter, symbolTable) {
-    this.#reporter = reporter;
-    this.#symbolTable = symbolTable;
-  }
-
-  registerSchema(name, schema) {
-    if (this.#schemas.has(name)) {
-      this.#reporter.report(NexusDiagnosticCategory.Warning, 3001, `Schema '${name}' overwritten.`);
-    }
-    this.#schemas.set(name, schema);
-  }
-
-  validate(schemaRef, data, location) {
-    this.#reporter.startTimer(`validate:${location}`);
-    const schema = typeof schemaRef === 'string' ? this.#schemas.get(schemaRef) : schemaRef;
-
-    if (!schema) {
-      this.#reporter.report(NexusDiagnosticCategory.Internal, 2002, `Missing schema reference: ${schemaRef} at ${location}`);
-      this.#reporter.stopTimer(`validate:${location}`);
-      return { success: true, data };
-    }
-
-    try {
-      const result = schema.safeParse(data);
-      if (!result.success) {
-        const chain = result.error.issues.reduce((acc, issue) => {
-          return new NexusDiagnosticChain(issue.message, 2001, NexusDiagnosticCategory.Error, acc);
-        }, null);
-        this.#reporter.reportChain(chain);
-      }
-      this.#reporter.stopTimer(`validate:${location}`);
-      return result;
-    } catch (e) {
-      this.#reporter.report(NexusDiagnosticCategory.Error, 5000, `TypeChecker Error: ${e.message}`);
-      this.#reporter.stopTimer(`validate:${location}`);
-      return { success: false, error: e };
-    }
-  }
-}
-
-/**
- * @class NexusMiddlewarePipeline
- * Sequential execution logic for task middleware.
- */
-class NexusMiddlewarePipeline {
-  #middleware = [];
-  #interceptors = { pre: [], post: [] };
-
-  use(fn) {
-    if (typeof fn !== 'function') throw new Error('Middleware must be a function');
-    this.#middleware.push(fn);
-  }
-
-  intercept(phase, fn) {
-    if (this.#interceptors[phase]) this.#interceptors[phase].push(fn);
+  clear() { 
+    this.#diagnostics = []; 
   }
 }
