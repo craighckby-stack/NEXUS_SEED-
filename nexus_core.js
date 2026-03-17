@@ -1,272 +1,313 @@
 /**
  * @file nexus_core.js
- * @description Core kernel for the Nexus architecture, implementing advanced design patterns (Observer, Factory, Decorator) 
- * to establish a high-performance, asynchronous, and modular foundation.
+ * @version 2.1.0
+ * @description High-performance asynchronous execution kernel for the Nexus architecture.
+ * Mechanistic Justification: Implements a tiered service container, priority-weighted task scheduling, 
+ * and a diagnostic reporting pipeline modeled after the TypeScript compiler's diagnostic sink.
  */
 
 const { performance } = require('perf_hooks');
 
 /**
- * ==========================================
- * DIAGNOSTICS & DECORATORS
- * ==========================================
+ * DIAGNOSTIC INFRASTRUCTURE
+ * Mechanistic Justification: Separates diagnostic generation from presentation, 
+ * allowing for pluggable formatters and severity-based filtering.
  */
+const DiagnosticCategory = {
+    Message: 0,
+    Suggestion: 1,
+    Warning: 2,
+    Error: 3,
+    Fatal: 4
+};
 
 /**
- * Mechanistic Justification: Centralized diagnostic registry prevents silent failures 
- * and categorizes system state, akin to TypeScript's ts.Diagnostic.
+ * @typedef {Object} NexusDiagnostic
+ * @property {number} category
+ * @property {number} code
+ * @property {string} messageText
+ * @property {number} [start]
+ * @property {number} [length]
  */
-class DiagnosticReporter {
+
+class NexusDiagnosticReporter {
     constructor() {
-        this.diagnostics = [];
+        this._diagnostics = [];
+        this._modificationListeners = [];
     }
 
-    report(level, message, context = {}) {
-        const entry = { timestamp: Date.now(), level, message, context };
-        this.diagnostics.push(entry);
-        if (level === 'ERROR' || level === 'FATAL') {
-            console.error(`[${level}] ${message}`, context);
+    /**
+     * Reports a diagnostic entry with mechanistic metadata.
+     */
+    report(category, messageText, code = 0, metadata = {}) {
+        const diagnostic = {
+            category,
+            code,
+            messageText,
+            timestamp: performance.now(),
+            ...metadata
+        };
+
+        this._diagnostics.push(diagnostic);
+        this._notifyListeners(diagnostic);
+
+        if (category >= DiagnosticCategory.Error) {
+            this._emitToStderr(diagnostic);
         }
+    }
+
+    _notifyListeners(diagnostic) {
+        for (const listener of this._modificationListeners) {
+            listener(diagnostic);
+        }
+    }
+
+    _emitToStderr(diagnostic) {
+        const prefix = `[NEX${diagnostic.code.toString().padStart(4, '0')}]`;
+        process.stderr.write(`${prefix} ${DiagnosticCategory[diagnostic.category].toUpperCase()}: ${diagnostic.messageText}\n`);
     }
 
     getDiagnostics() {
-        return [...this.diagnostics];
+        return Object.freeze([...this._diagnostics]);
+    }
+
+    clear() {
+        this._diagnostics = [];
     }
 }
 
-const globalReporter = new DiagnosticReporter();
+const diagnostics = new NexusDiagnosticReporter();
 
 /**
- * Higher-Order Function Decorator: withPerformanceTracking
- * Mechanistic Justification: Wraps an asynchronous method to track its execution time 
- * and report anomalies.
- * @param {Function} fn - The asynchronous function to decorate.
- * @param {string} name - Identifier for the diagnostic log.
- * @returns {Function} Decorated function.
+ * CANCELLATION ABSTRACTION
+ * DNA: TypeScript CancellationToken.
+ * Mechanistic Justification: Prevents zombie promises by propagating termination signals through the call stack.
  */
-function withPerformanceTracking(fn, name) {
-    return async function (...args) {
-        const start = performance.now();
-        try {
-            return await fn.apply(this, args);
-        } catch (error) {
-            globalReporter.report('ERROR', `Execution failed in ${name}`, { error: error.message, stack: error.stack });
-            throw error;
-        } finally {
-            const duration = performance.now() - start;
-            if (duration > 50) { // Threshold for performance warning (50ms)
-                globalReporter.report('WARN', `Slow execution detected in ${name}`, { duration: `${duration.toFixed(2)}ms` });
-            }
+class CancellationToken {
+    constructor(parentToken = null) {
+        this._isCancelled = false;
+        this._reason = null;
+        this._listeners = new Set();
+
+        if (parentToken) {
+            parentToken.onCancellationRequested((reason) => this.cancel(reason));
         }
-    };
-}
-
-/**
- * Higher-Order Function Decorator: withAsyncRetry
- * Mechanistic Justification: Ensures transient failures in network/IO operations do not crash the kernel.
- */
-function withAsyncRetry(fn, retries = 3, delayMs = 100) {
-    return async function (...args) {
-        let attempt = 0;
-        while (attempt < retries) {
-            try {
-                return await fn.apply(this, args);
-            } catch (error) {
-                attempt++;
-                globalReporter.report('WARN', `Retry attempt ${attempt}/${retries} for function`, { error: error.message });
-                if (attempt >= retries) throw error;
-                await new Promise(res => setTimeout(res, delayMs * attempt)); // Exponential-ish backoff
-            }
-        }
-    };
-}
-
-/**
- * ==========================================
- * OBSERVER PATTERN: ASYNC EVENT BUS
- * ==========================================
- */
-
-/**
- * NexusEventBus
- * Mechanistic Justification: Decouples subsystems. Uses priority queues for deterministic execution 
- * order during asynchronous event broadcasting.
- */
-class NexusEventBus {
-    constructor() {
-        /* Map<string, Array<{ priority: number, handler: Function }>> */
-        this.channels = new Map();
     }
 
-    /**
-     * Subscribes a handler to a specific event channel.
-     * Mechanistic Justification: Ensures deterministic behavior and prevents event loops 
-     * or lost events by maintaining a centralized subscription mechanism.
-     * @param {string} event - The event identifier.
-     * @param {Function} handler - The callback function.
-     * @param {number} priority - Higher priority executes first.
-     */
-    subscribe(event, handler, priority = 0) {
-        if (!this.channels.has(event)) {
-            this.channels.set(event, []);
+    cancel(reason = 'Operation aborted by host') {
+        if (this._isCancelled) return;
+        this._isCancelled = true;
+        this._reason = reason;
+        this._listeners.forEach(fn => fn(reason));
+        this._listeners.clear();
+    }
+
+    get isCancelled() {
+        return this._isCancelled;
+    }
+
+    onCancellationRequested(callback) {
+        if (this._isCancelled) {
+            callback(this._reason);
+        } else {
+            this._listeners.add(callback);
         }
-        const listeners = this.channels.get(event);
-        listeners.push({ priority, handler });
-        // Sort descending by priority to ensure deterministic execution
-        listeners.sort((a, b) => b.priority - a.priority);
-        globalReporter.report('INFO', `Subscribed to event: ${event}`, { priority });
+        return () => this._listeners.delete(callback);
+    }
+
+    throwIfCancelled() {
+        if (this._isCancelled) {
+            const err = new Error(`CancellationRequested: ${this._reason}`);
+            err.name = 'OperationCanceledException';
+            throw err;
+        }
+    }
+}
+
+/**
+ * TASK SCHEDULER (CONCURRENCY CONTROL)
+ * Mechanistic Justification: Prevents event-loop starvation by limiting concurrent async operations
+ * and prioritizing critical path tasks.
+ */
+class NexusTaskScheduler {
+    constructor(maxConcurrency = 5) {
+        this.maxConcurrency = maxConcurrency;
+        this.runningTasks = 0;
+        this.queue = [];
     }
 
     /**
-     * Asynchronously publishes an event to all subscribers.
-     * Mechanistic Justification: Efficiently disseminates events without blocking or 
-     * deadlocking, preserving kernel responsiveness.
-     * @param {string} event - The event identifier.
-     * @param {Object} payload - Data to pass to handlers.
+     * Enqueues a task with priority-based execution.
+     * @param {() => Promise<any>} task
+     * @param {number} priority Higher is executed sooner.
      */
-    async publish(event, payload = {}) {
-        if (!this.channels.has(event)) return;
-        
-        const listeners = this.channels.get(event);
-        const executionPromises = listeners.map(async (listener) => {
-            try {
-                await listener.handler(payload);
-            } catch (error) {
-                globalReporter.report('ERROR', `Event handler failed for ${event}`, { error: error.message });
-            }
+    async schedule(task, priority = 0) {
+        return new Promise((resolve, reject) => {
+            this.queue.push({ task, priority, resolve, reject });
+            this.queue.sort((a, b) => b.priority - a.priority);
+            this._process();
         });
+    }
 
-        await Promise.allSettled(executionPromises);
+    async _process() {
+        if (this.runningTasks >= this.maxConcurrency || this.queue.length === 0) return;
+
+        this.runningTasks++;
+        const { task, resolve, reject } = this.queue.shift();
+
+        try {
+            const result = await task();
+            resolve(result);
+        } catch (error) {
+            reject(error);
+        } finally {
+            this.runningTasks--;
+            this._process();
+        }
     }
 }
 
 /**
- * ==========================================
- * FACTORY PATTERN: SUBSYSTEM REGISTRY
- * ==========================================
+ * SERVICE CONTAINER
+ * Mechanistic Justification: Decouples service instantiation from consumer logic via a centralized registry.
  */
-
-/**
- * SubsystemFactory
- * Mechanistic Justification: Centralizes instantiation logic, allowing the kernel to dynamically 
- * load required modules without hardcoding dependencies.
- */
-class SubsystemFactory {
+class NexusServiceContainer {
     constructor() {
-        this.registry = new Map();
-        this.instances = new Map();
+        this._services = new Map();
+        this._factories = new Map();
     }
 
-    /**
-     * Registers a class constructor with the factory. Mechanistic Justification: 
-     * Ensures type safety and modular design.
-     * @param {string} name - Identifier for the subsystem.
-     * @param {Class} constructorRef - The class reference.
-     */
-    register(name, constructorRef) {
-        if (this.registry.has(name)) {
-            globalReporter.report('WARN', `Overwriting existing subsystem registration: ${name}`);
-        }
-        this.registry.set(name, constructorRef);
-        globalReporter.report('INFO', `Registered subsystem: ${name}`);
+    register(id, factory, dependencies = []) {
+        this._factories.set(id, { factory, dependencies });
     }
 
-    /**
-     * Instantiates or retrieves a singleton instance of a subsystem. Mechanistic 
-     * Justification: Preserves memory efficiency by avoiding unnecessary instance duplication.
-     * @param {string} name - Identifier for the subsystem.
-     * @param {Object} config - Configuration object passed to the constructor.
-     */
-    create(name, config = {}) {
-        if (this.instances.has(name)) {
-            return this.instances.get(name);
-        }
+    async get(id) {
+        if (this._services.has(id)) return this._services.get(id);
+
+        const entry = this._factories.get(id);
+        if (!entry) throw new Error(`ServiceNotFound: ${id}`);
+
+        const resolvedDeps = await Promise.all(entry.dependencies.map(d => this.get(d)));
+        const instance = await entry.factory(...resolvedDeps);
         
-        const ConstructorRef = this.registry.get(name);
-        if (!ConstructorRef) {
-            throw new Error(`Subsystem [${name}] not found in registry.`);
+        this._services.set(id, instance);
+        
+        if (instance.onInitialize) {
+            await instance.onInitialize();
         }
 
-        const instance = new ConstructorRef(config);
-        this.instances.set(name, instance);
-        globalReporter.report('INFO', `Instantiated subsystem: ${name}`);
         return instance;
     }
 }
 
 /**
- * ==========================================
- * CORE KERNEL
- * ==========================================
+ * KERNEL CORE
+ * Mechanistic Justification: Manages the absolute lifecycle of the Nexus environment.
  */
+const KernelState = {
+    Uninitialized: 0,
+    Initializing: 1,
+    Running: 2,
+    Degraded: 3,
+    Shutdown: 4
+};
 
-/**
- * NexusKernel
- * Mechanistic Justification: The orchestrator. Manages the lifecycle phases (Boot, Bind, Execute) 
- * and holds the central EventBus and Factory.
- */
-class NexusKernel {
-    constructor() {
-        this.bus = new NexusEventBus();
-        this.factory = new SubsystemFactory();
-        this.state = 'INITIALIZED';
+class NexusCoreKernel {
+    constructor(hostConfig = {}) {
+        this.state = KernelState.Uninitialized;
+        this.services = new NexusServiceContainer();
+        this.dispatcher = new NexusAsyncDispatcher();
+        this.scheduler = new NexusTaskScheduler(hostConfig.concurrency || 10);
+        this.host = hostConfig;
+
+        this._setupPerformanceObserver();
+    }
+
+    _setupPerformanceObserver() {
+        const obs = new PerformanceObserver((items) => {
+            items.getEntries().forEach((entry) => {
+                if (entry.duration > 200) {
+                    diagnostics.report(DiagnosticCategory.Warning, `LongTaskDetected: ${entry.name}`, 8001, {
+                        duration: entry.duration
+                    });
+                }
+            });
+        });
+        obs.observe({ entryTypes: ['measure'], buffered: true });
+    }
+
+    async startup() {
+        this.state = KernelState.Initializing;
+        performance.mark('nexus-start');
+
+        await this.dispatcher.dispatch('system:startup:begin', { timestamp: Date.now() });
+        
+        this.state = KernelState.Running;
+        performance.mark('nexus-ready');
+        performance.measure('NexusBootTime', 'nexus-start', 'nexus-ready');
     }
 
     /**
-     * Phase 1: Boot
-     * Registers foundational systems.
+     * Executes an atomic unit of work through the scheduler.
      */
-    async boot() {
-        this.state = 'BOOTING';
-        globalReporter.report('INFO', 'Nexus Kernel booting...');
-        
-        // Example: Registering a dummy built-in subsystem to demonstrate Factory usage
-        class TelemetrySubsystem {
-            constructor(config) { this.endpoint = config.endpoint; }
-            async send(data) { return true; }
+    async runTask(taskFn, priority = 0, token = new CancellationToken()) {
+        if (this.state !== KernelState.Running) {
+            throw new Error("KernelNotRunning");
         }
-        
-        // Decorate the send method
-        TelemetrySubsystem.prototype.send = withPerformanceTracking(
-            withAsyncRetry(TelemetrySubsystem.prototype.send, 3, 50),
-            'TelemetrySubsystem.send'
-        );
 
-        this.factory.register('Telemetry', TelemetrySubsystem);
-        
-        await this.bus.publish('system:booted', { timestamp: Date.now() });
-        this.state = 'READY';
+        return this.scheduler.schedule(async () => {
+            token.throwIfCancelled();
+            return await taskFn(token);
+        }, priority);
     }
 
-    /**
-     * Phase 2: Execute
-     * Begins main event loop or processes initial payloads.
-     */
-    async execute(initialPayload) {
-        if (this.state !== 'READY') {
-            throw new Error('Kernel must be booted before execution.');
-        }
-        
-        globalReporter.report('INFO', 'Nexus Kernel executing payload.');
-        
-        // Simulate processing
-        const processPayload = withPerformanceTracking(async (payload) => {
-            // Truncation safeguard logic (Mechanistic response to API limits)
-            if (typeof payload === 'string' && payload.startsWith('PK')) {
-                globalReporter.report('WARN', 'Binary/Corrupted payload detected. Truncating to prevent memory/limit overflow.');
-                payload = payload.substring(0, 100) + '...[TRUNCATED]';
-            }
-            await this.bus.publish('system:process', { payload });
-        }, 'Kernel.processPayload');
-
-        await processPayload(initialPayload);
+    async shutdown() {
+        this.state = KernelState.Shutdown;
+        await this.dispatcher.dispatch('system:shutdown', { exitCode: 0 });
+        diagnostics.report(DiagnosticCategory.Message, "Kernel gracefully terminated.");
     }
 }
 
-module.exports = {
-    NexusKernel,
-    DiagnosticReporter,
-    globalReporter,
-    withPerformanceTracking,
-    withAsyncRetry
-};
+class NexusAsyncDispatcher {
+    constructor() {
+        this._handlers = new Map();
+        this._interceptors = [];
+    }
+
+    addInterceptor(fn) {
+        this._interceptors.push(fn);
+    }
+
+    subscribe(channel, handler, priority = 0) {
+        if (!this._handlers.has(channel)) this._handlers.set(channel, []);
+        const list = this._handlers.get(channel);
+        list.push({ handler, priority });
+        list.sort((a, b) => b.priority - a.priority);
+        
+        return () => {
+            const filtered = this._handlers.get(channel).filter(h => h.handler !== handler);
+            this._handlers.set(channel, filtered);
+        };
+    }
+
+    async dispatch(channel, payload, token = null) {
+        if (token) token.throwIfCancelled();
+
+        let currentPayload = payload;
+        for (const interceptor of this._interceptors) {
+            currentPayload = await interceptor(channel, currentPayload);
+        }
+
+        const handlers = this._handlers.get(channel) || [];
+        const tasks = handlers.map(async ({ handler }) => {
+            try {
+                if (token) token.throwIfCancelled();
+                await handler(currentPayload);
+            } catch (e) {
+                diagnostics.report(DiagnosticCategory.Error, `DispatchFault in ${channel}`, 5001, { context: e.message });
+            }
+        });
+
+        await Promise.allSettled(tasks);
+    }
+}
