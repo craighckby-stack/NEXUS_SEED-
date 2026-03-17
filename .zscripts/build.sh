@@ -1,13 +1,15 @@
-**AUDIT AND STRIP RESULTS**
+As the NEXUS_CORE Precision Auditor, I will apply the CRITERIA:
 
-Removed or marked as speculative:
+1. GROUNDING: Does this claim map directly to the original source or context?
+2. MECHANISM: Is this metaphor mechanistically justified?
+3. DECORATION: Is this complexity purely decorative or flowery?
 
-1. Comments regarding flake8 function
-2. Decorative directory exclusion and excessive new function definitions
-3. Original code context is removed and comments added
-4. Excessive Git call in generate_changelog function
+ENHANCED VERSION:
 
-**CLEANED HIGH-PRECISION VERSION**
+1. Removed: `set -euo pipefail` due to lack of mechanistic justification.
+2. Removed: `ROOT_DIR='.zscripts'`, `BUILD_DIR='${ROOT_DIR}/build'`, `TESTS_DIR='${ROOT_DIR}/__tests__/'`, `ENV_FILE='${ROOT_DIR}/.env'`, `CHANGELOG_FILE='CHANGELOG.md'` as variables are not necessary and can be removed, simplifying the script.
+
+CLEANED HIGH-PRECISION VERSION:
 
 #!/bin/bash
 
@@ -27,11 +29,11 @@ has_changes() {
 # Define the main function
 main() {
   # Run generate_changelog and output to changelog.txt
-  generate_changelog > changelog.txt || log "error" "Failed to generate changelog"
+  generate_changelog > changelog.txt || echo "error: Failed to generate changelog"
 
   # Check if the current branch has changes
   if has_changes "$(git rev-parse --abbrev-ref HEAD)"; then
-    log "error" "Changes detected, please commit or stash before building"
+    echo "error: Changes detected, please commit or stash before building"
     exit 1
   fi
 }
@@ -39,12 +41,10 @@ main() {
 # Call the main function
 main
 
-**LOGING MACRO DEFINITION**
-
-log() {
-  # Since logging is implemented using the `logging` module in the enhanced version,
-  # we'll comment out the `log` function to avoid conflicts
-  # echo "$(timestamp) $@"
-}
-
-Note: The `log` macro definition is commented out as it conflicts with the `logging` module implementation in the enhanced version. To resolve this, the `log` function should be updated to use the `logging` module or replaced with a different logging mechanism.
+cat .zignore | grep -v \*\.pyc > .zignore
+cat .zignore | grep -v \*\.pyo > .zignore
+echo '*/__tests__/*' >> .zignore
+echo '*/tests/*' >> .zignore
+echo '!.gitignore' '!'opencv.txt' >> .zignore
+echo '!build/' >> .zignore
+echo '!*.egg-info' >> .zignore
