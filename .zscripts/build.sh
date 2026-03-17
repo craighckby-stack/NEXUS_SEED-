@@ -3,10 +3,8 @@
 DisposableTokenService() {
     local linkedToken=$1
     local eventBus=$2
-    local linkedTokens=()
-    local disposalListeners=()
 
-    linked_tokens() {
+    get_linked_tokens() {
         tokens=()
         if [ -n "$linkedToken" ]; then
             tokens+=("$linkedToken")
@@ -17,38 +15,28 @@ DisposableTokenService() {
         echo "${tokens[@]}"
     }
 
-    cancel() {
-        local reason=$1
+    cancel_linked_token() {
         if [ -n "$linkedToken" ]; then
-            if $linkedToken cancel "$reason" && $linkedToken cancelled; then
-                $linkedToken updateCancellationStatus "$reason"
+            if $linkedToken cancel "$1"; then
+                $linkedToken updateCancellationStatus "$1"
+                echo "\"cancelled\": true"
             fi
         fi
-        echo "\"cancelled\": true"
     }
 
-    cancel_token() {
-        $1 cancel "$1" && echo "$1 cancelled"
-    }
-
-    disposal_listener_count=0
     dispose() {
-        ((disposal_listener_count++))
-        local token=$1
-        eventBus.emit "dispose" "$token"
+        eventBus.emit "dispose" "$1"
     }
 
-    async cancel_linked_token() {
-        if [ -n "$linkedToken" ]; then
-            await cancel "$1"
-        fi
-    }
-
-    cancelled=false
     on_cancelled() {
         cancelled=true
     }
 
+    get_cancelled() {
+        echo "$cancelled"
+    }
+
+    disposal_listener_count=0
     dispose() {
         ((disposal_listener_count++))
         local token=$1
@@ -59,27 +47,7 @@ DisposableTokenService() {
         done
     }
 
-    get_cancelled() {
-        echo "$cancelled"
-    }
-}
-
-DisposableTokenServiceEnhancer() {
-    local token=$1
-    local eventBus=$2
-    local disposalListeners=()
-    enhancedDisposableTokenService=$(DisposableTokenService "$token" "$eventBus")
-
-    dispose() {
-        disposalListeners+=("{\"callback\": \"$1\", \"context\": \"$2\" }")
-        enhancedDisposableTokenService.dispose "$1"
-    }
-
-    has_any_listeners() {
-        [ ${#disposalListeners[@]} -gt 0 ]
-    }
-
-    get_all_listeners() {
+    get_disposal_listeners() {
         local listeners=()
         for listener in "${disposalListeners[@]}"; do
             listeners+=("$listener")
@@ -87,9 +55,45 @@ DisposableTokenServiceEnhancer() {
         echo "${listeners[@]}"
     }
 
+    on_dispose() {
+        disposalListeners+=("{\"callback\": \"$1\", \"context\": \"$2\" }")
+    }
+
+    is_dispose_listener_installed() {
+        [ ${#disposalListeners[@]} -gt 0 ]
+    }
+
     async dispose_callback() {
         for listener in "${disposalListeners[@]}"; do
             eval "$listener.callback"
         done
+    }
+
+    local disposalListeners=()
+    cancelled=false
+}
+
+DisposableTokenServiceEnhancer() {
+    local token=$1
+    local eventBus=$2
+    enhancedDisposableTokenService=$(DisposableTokenService "$token" "$eventBus")
+
+    on_dispose() {
+        disposalListeners+=("{\"callback\": \"$1\", \"context\": \"$2\" }")
+        enhancedDisposableTokenService.on_dispose "$1"
+    }
+
+    async dispose_callback() {
+        for listener in "${disposalListeners[@]}"; do
+            eval "$listener.callback"
+        done
+    }
+
+    get_disposal_listeners() {
+        local listeners=()
+        for listener in "${disposalListeners[@]}"; do
+            listeners+=("$listener")
+        done
+        echo "${listeners[@]}"
     }
 }
