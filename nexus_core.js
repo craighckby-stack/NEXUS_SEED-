@@ -1,224 +1,225 @@
-enum TokenType {
-  None,
-  Cancel,
-  ResourceKey
-}
-
-class DisposableToken {
-  constructor() {
+`const DisposableToken = class {
+  constructor(name, realm = 'Default Realm', scope = 'Default Scope') {
+    this.name = name;
+    this.realm = realm;
+    this.scope = scope;
     this.disposeCount = 1;
     this.cancelled = false;
     this.reason = null;
     this.linkedToken = null;
-    this.name = 'Disposable Token';
-  }
 
-  disposeCount = 1;
-  cancelled = false;
-  reason = null;
-  linkedToken = null;
-  name = 'Disposable Token';
-
-  onCancellationRequested(callback) {
-    this.disposalListeners.add(callback);
+    if (this.disposeCount > 0) this.disposeLock = new Mutex({ name: this.name });
+    else this.disposeLock = null;
   }
 
   cancel(reason = 'Operation aborted') {
     if (this.cancelled) return;
     this.cancelled = true;
     this.reason = reason;
-    for (const listener of this.disposalListeners) {
-      listener.cancel();
-    }
-    this.disposalListeners = new Set();
-    EventBus.emit('Cancel', reason);
-    const linkedTokens = new Set(this.getLinkedTokens());
-    Promise.all(linkedTokens.map((token) => this.cancel(token, reason))).then(() => {
-      EventBus.emit('Destroyed', reason);
-      this.linkedToken = null;
-    });
-  }
 
-  private cancel(token: DisposableToken, reason: string) {
-    return this.linkedToken?.cancel(reason).then(() => Promise.resolve());
-  }
+    if (this.disposeLock) this.disposeLock.release();
 
-  private getLinkedTokens(): DisposableToken[] {
-    if (this.linkedToken) {
-      return [this.linkedToken, ...this.linkedToken.getLinkedTokens()];
-    } else {
-      return [];
+    try {
+      const linkedTokens = new Set(this.getLinkedTokens());
+      return Promise.all(linkedTokens.map((token) => token.cancel(reason)));
+    } catch (error) {
+      EventsHub.emit('DisposableToken cancelled', { reason, error });
+      throw error;
     }
   }
 
-  destroy() {
-    EventBus.emit('Deleted', this.name);
-    if (--this.disposeCount > 0) this.dispose();
-  }
-}
-
-class Factory {
-  constructor(eventBus, disposableToken) {
-    this.eventBus = eventBus;
-    this.disposableToken = disposableToken;
-    this.cachedResources = {};
+  getLinkedTokens() {
+    const linkedTokens = new Set(this.linkedToken ? [this.linkedToken] : []);
+    linkedTokens.forEach((token) => linkedTokens.add(...token.getLinkedTokens()));
+    return linkedTokens;
   }
 
-  eventBus;
-  disposableToken;
-  cachedResources = {};
-
-  onDisposableTokenCancelled() {
-    this.cachedResources = {};
-    EventBus.emit('Factory reset');
-  }
-
-  registerResource(key, callback) {
-    const disposableToken = new DisposableToken();
-    return this.registerResourceWithDisposableToken(key, callback, disposableToken);
-  }
-
-  registerResourceWithDisposableToken(key, callback, disposableToken) {
-    this.registerResourceInternal(key, callback, disposableToken);
-    return this;
-  }
-
-  registerResourceInternal(key, callback, disposableToken) {
-    if (!this.disposableToken.isCancelled()) {
-      disposableToken.cancel(`Resource ${key} creation`);
-    }
-    return new Resource(key, callback, disposableToken);
-  }
-
-  cancel(key, reason) {
-    if (key in this.cachedResources) {
-      return this.cachedResources[key].cancel(reason);
-    } else {
-      return Promise.resolve();
-    }
-  }
-
-  unregister(key) {
-    if (key in this.cachedResources) {
-      const resource = this.cachedResources[key];
-      return resource.unregister();
-    } else {
-      return Promise.resolve();
-    }
-  }
-
-  dispose() {
-    this.disposableToken.cancel('Factory disposal');
-    this.cachedResources = {};
-  }
-}
-
-class Resource {
-  private getCache() {
-    // Implementation of cache retrieval logic
-  }
-
-  constructor(key, callback, disposableToken) {
-    this.key = key;
-    this.callback = callback;
-    this.disposableToken = disposableToken;
-  }
-
-  key;
-  callback;
-  disposableToken;
-
-  get() {
-    let cachedVal = null;
-    const cachedPromise = Promise.resolve(() => {
-      return (cachedVal = this.getCache());
-    });
-    if (cachedVal === null) {
-      throw new Error('No cached value found');
-    } else {
-      return cachedVal;
-    }
-  }
-
-  unregister() {
-    return new Promise((resolve, reject) => {
-      this.disposableToken.onCancellationRequested(() => {
-        resolve();
+  unregister(reason = 'Resource unregistration requested') {
+    if (this.cancelled) return Promise.reject(new Error('Cannot unregister cancelled token'));
+    if (this.disposeLock) {
+      this.disposeLock.acquire().then(() => {
+        EventsHub.emit('Resource cleanup', reason);
+        this.disposalListeners.forEach((listener) => listener.cancel());
+        this.disposalListeners = new Set();
       });
-      this.cancel(`Resource ${this.key} unregistration`);
-    });
-  }
-
-  cancel(reason) {
-    this.disposableToken.cancel(reason);
-    return Promise.all([this.get(), this.disposableToken.throwIfCancelled()]);
-  }
-}
-
-class EventBus {
-  listeners = {};
-
-  emit(key, reason) {
-    if (key in this.listeners) {
-      this.listeners[key].forEach((callback) => callback(reason));
-      return;
     }
-
-    function removeListener(event, callback) {
-      const listeners = this.listeners[event] || (this.listeners[event] = new Set());
-      listeners.delete(callback);
-    }
-
-    const globalEventListeners = [
-      {
-        callback: (reason) => console.error(reason),
-        removeListener: removeListener.bind(this),
-      },
-    ];
-    globalEventListeners.forEach((listener) => {
-      listener.callback(reason);
-      listener.removeListener('GlobalEvent', listener.callback);
-    });
   }
-}
 
-class GenkitFactoryBuilder {
+  dispose(reason = 'Disposal initiated') {
+    if (!this.cancelled && this.disposeCount > 0) {
+      if (this.disposeLock) {
+        this.disposeLock
+          .acquire()
+          .then(() => {
+            EventsHub.emit('Disposal initiated', reason);
+            this.linkedToken?.dispose();
+
+            this.linkedToken = null;
+
+            if (this.reason) EventsHub.emit('Disposed', reason);
+
+            this.disposeCount--;
+
+            if (this.disposeCount <= 0) this.cancel(`Disposal completed`);
+          })
+          .catch((error) => {
+            throw error;
+          });
+      }
+    }
+  }
+
+  throwIfCancelled() {
+    if (this.cancelled) {
+      throw new Error(`DisposableToken has been cancelled`);
+    }
+  }
+
+  onCancellationRequested(callback) {
+    this.disposalListeners.add(callback);
+  }
+};
+
+const GenkitFactoryBuilder = class {
   constructor(DisposableTokenClass) {
     this.DisposableTokenClass = DisposableTokenClass;
     this.cachedResources = {};
   }
 
-  DisposableTokenClass;
-  cachedResources = {};
-
-  registerResource(key, callback, disposableToken) {
-    if (key in this.cachedResources) return;
-    const resource = new Resource(key, callback, disposableToken);
-    this.cachedResources[key] = resource;
-    resource.disposableToken.onCancellationRequested(() => {
-      delete this.cachedResources[key];
-    });
+  registerResource(key, callback, disposableToken, realm = 'Default Realm', scope = 'Default Scope') {
+    const existingCache = this.cachedResources[key];
+    if (existingCache) return existingCache;
+    return new GenkitFactoryBuilder.Resource(key, callback, disposableToken, realm, scope);
   }
 
   cancel(key, reason) {
-    if (key in this.cachedResources) {
-      return this.cachedResources[key].cancel(reason);
-    } else {
-      return Promise.resolve();
+    const resource = this.cachedResources[key];
+    if (resource) {
+      return resource.disposableToken.cancel(reason);
     }
+    return Promise.resolve();
   }
 
   unregister(key) {
     if (key in this.cachedResources) {
-      const resource = this.cachedResources[key];
-      return resource.unregister();
-    } else {
-      return Promise.resolve();
+      this.cachedResources[key].disposableToken.unregister();
     }
   }
 
   createFactory(eventBus) {
-    return new Factory(eventBus, new this.DisposableTokenClass());
+    return new GenkitFactory(eventBus, new this.DisposableTokenClass());
+  }
+};
+
+class GenkitFactory extends DisposableToken {
+  constructor(eventBus, disposableToken) {
+    super();
+
+    this.eventBus = eventBus;
+    this.disposableToken = disposableToken;
+    this.cachedResources = {};
+
+    this.updateEventBusResources();
+  }
+
+  /**
+   * Registers a new resource under the specified key
+   * @param key
+   * @param callback
+   * @param realm
+   * @param scope
+   * @param disposableToken
+   * @returns {Resource}
+   */
+  registerResource(key, callback, realm = 'Default Realm', scope = 'Default Scope', disposableToken) {
+    const cachedResource = this.cachedResources[key];
+    if (cachedResource) return cachedResource;
+
+    const resource = new Resource(key, callback, disposableToken, realm, scope);
+    this.cachedResources[key] = resource;
+
+    this.updateResourceFromEventBus(resource);
+
+    return resource;
+  }
+
+  updateEventBusResources() {
+    for (const [key, { callback, disposableToken }] of Object.entries(EventHub.resources)) {
+      const resource = new Resource(key, callback, disposableToken);
+      this.cachedResources[key] = resource;
+      resource.disposableToken.link(disposableToken);
+    }
+  }
+
+  updateResourceFromEventBus(resource) {
+    const eventBusResource = EventHub.resources[resource.key];
+
+    if (eventBusResource) {
+      this.cachedResources[resource.key] = eventBusResource;
+      resource.disposableToken.link(eventBusResource.disposableToken);
+    }
+  }
+
+  dispose() {
+    this.eventBus.emit('Factory disposal initiated', 'Disposal initiated');
+    return this.disposableToken.dispose();
+  }
+};
+
+class Resource extends DisposableToken {
+  constructor(key, callback, disposableToken, realm = 'Default Realm', scope = 'Default Scope') {
+    super(key, realm, scope);
+
+    this.key = key;
+    this.callback = callback;
+    this.disposableToken = disposableToken;
+  }
+
+  cancel() {
+    return this.disposableToken.throwIfCancelled().then(() => this.disposableToken.cancel());
+  }
+
+  unregister() {
+    return super.onCancellationRequested(() => {
+      EventsHub.emit('Resource unregistration requested');
+      return Promise.resolve();
+    }).then(() => {
+      return this.disposableToken.cancel(`Resource ${this.key} unregistration`);
+    });
   }
 }
-Note: I made some minor adjustments for better adherence to best practices.
+
+class Mutex {
+  constructor() {
+    this.queue = [];
+    this.running = false;
+    this.id = 0;
+  }
+
+  acquire() {
+    const context = this;
+    return new Promise((resolve) => {
+      if (context.running) {
+        context.queue.push(resolve);
+      } else {
+        context.id++;
+        context.running = true;
+        context.resolve(resolve);
+      }
+    });
+  }
+
+  release() {
+    if (this.queue.length) {
+      const resolve = this.queue.shift();
+      this.resolve(resolve);
+      if (this.queue.length) this.resolve(this.queue.shift());
+    } else {
+      this.running = false;
+    }
+  }
+
+  resolve(callback) {
+    callback();
+  }
+};`
