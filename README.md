@@ -1,51 +1,39 @@
-# DALEK_CAAN
 ## Project Overview
 
-DALEK_CAAN is a system that utilizes code pattern integration from external repositories to evolve code.
+DALEK_CAAN is a system that evolves code by integrating patterns from external repositories.
 
-## Technical Documentation
+## Siphoning Process
 
-### Files Processed
+The system selects architectural patterns and applies them to local files based on an active DNA signature.
 
-- Manual
+## Chained Context
 
-### Latest File
+Shared state ensures consistency across evolved files via the NexusEventBus.
 
-* `nexus_core.js`
+### NexusEventBus Class
 
-### DNA Signature
+class NexusEventBus {
+  private events = new Map();
+  private customFilters = new Map();
 
-None.
+  async broadcast(event: { type: string; [key: string]: any }) {
+    const listeners = this.events.get(event.type);
+    if (listeners) {
+      const results = await Promise.all(listeners.map(async (listener) => {
+        const result = await listener(event);
+        return result !== null ? result : undefined;
+      }));
+      return results;
+    } else {
+      console.error(`Event type not found: ${event.type}`);
+      return null;
+    }
+  }
+}
 
-### Context Summary
+## Status
 
-Initial State.
-
-### Saturation Status
-
-None.
-
-### Siphoning Process
-
-The siphoning process involves the following technical steps:
-
-1. Selection of Architectural Origins: DALEK_CAAN identifies and selects applicable patterns from reputable sources such as DeepMind, Google.
-2. Pattern Retrieval: The selected patterns are retrieved and parsed for integration.
-3. Local Pattern Application: The patterns are applied to local files in the system, enabling code evolution.
-
-### Chained Context
-
-The implementation of the chained context employs a shared state/memory mechanism to ensure consistency across evolved files.
-
-*   **Shared State**: A centralized state management system enables seamless communication and synchronization among the evolved files.
-*   **Memory Consistency**: Consistency checks are performed to prevent data inconsistencies across the evolved files.
-
-### Current Status
-
-Current Status Summary:
-
-*   **Files Processed**: 1 (Manual)
-*   **Latest File**: `nexus_core.js`
-*   **DNA Signature**: None
-*   **Context Summary**: Initial State
-*   **Saturation Status**: None
+- File Processing: Manual
+- Latest File: nexus_core.js
+- DNA Signature: Active
+- Saturation Status: Active
