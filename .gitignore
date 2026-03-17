@@ -1,79 +1,67 @@
-class DisposableToken {
-  private _linkedToken: DisposableToken | null;
-  private _disposeListeners: Set<DisposableTokenCallback> = new Set();
-  private _disposeCount: number;
-  private reason: string;
+class DisposableTokenService {
+  constructor(public linkedToken: DisposableToken | null, private readonly eventBus: EventBus) {}
 
-  constructor(linkedToken: DisposableToken | null = null, reason: string = '') {
-    this._linkedToken = linkedToken;
-    this._disposeCount = 1;
-    this.reason = reason;
-  }
-
-  get linkedTokens(): DisposableToken[] {
-    const tokens: Set<DisposableToken> = new Set([this._linkedToken]);
-    if (this._linkedToken) {
-      const linkedTokens = this._linkedToken.getLinkedTokens();
+  private get linkedTokens(): DisposableToken[] {
+    const tokens = new Set([this.linkedToken]);
+    if (this.linkedToken) {
+      const linkedTokens = this.linkedToken.getLinkedTokens();
       linkedTokens.forEach((token) => tokens.add(token));
     }
     return Array.from(tokens);
   }
 
   async cancel(reason: string): Promise<void> {
-    const cancelPromises: Promise<void>[] = [this.cancelToken(this._linkedToken, reason)];
-    if (this._linkedToken) {
-      cancelPromises.push(this._linkedToken.cancel(reason));
+    if (this.linkedToken) {
+      this.linkedToken.cancel(reason);
     }
-    await Promise.all(cancelPromises).then(() => {
-      if (this._linkedToken?.cancelled) {
-        this._disposeListeners.add({ callback: this._linkedToken.cancel, context: this._linkedToken });
-      }
-    });
+    this.cancelled = true;
+  }
+
+  public get cancelled(): boolean {
+    return this.cancelled || this.linkedToken?.cancelled;
+  }
+
+  private disposalListeners: Set<{ callback: (token: DisposableToken) => void; context: DisposableToken }> = new Set();
+  private disposeCount: number;
+
+  constructor() {
+    this.disposeCount = 1;
   }
 
   private async cancelToken(token: DisposableToken, reason: string): Promise<void> {
     if (token === null) return Promise.resolve();
     await token.cancel(reason);
-    this._disposeListeners.delete({ callback: token.cancel, context: token });
+    this.disposalListeners.delete({ callback: token.cancel, context: token });
   }
 
-  cancelToken(reason: string, token: DisposableToken): void {
-    this.cancelToken(token, reason).catch((error) => {
-      console.error('Error canceling token:', error);
-    });
+  private async cancelLinkedToken(reason: string): Promise<void> {
+    const linkedTokens = await this.getLinkedTokens();
+    for (const token of linkedTokens) {
+      if (token !== this.linkedToken) {
+        await token.cancel(reason);
+      }
+    }
+  }
+
+  private async getLinkedTokens(): Promise<DisposableToken[]> {
+    const linkedTokens = (await (this.linkedToken?.getLinkedTokens() ?? [])).concat(this.linkedToken ?? []);
+    return linkedTokens;
   }
 
   dispose(): void {
-    EventBus.emit('Destroyed', this.reason);
-    if (this._linkedToken) {
-      this._linkedToken.dispose();
+    this.eventBus.emit('Destroyed');
+    awaitingCancel();
+    this.disposalListeners.add({ callback: token.dispose, context: token });
+    this.disposeCount--;
+  }
+
+  private async awaitingCancel() {
+    if (this.disposeCount === 0) {
+      if (this.linkedToken?.cancelled || this.cancelled) {
+        this.disposalListeners.add({ callback: this.cancelToken, context: this });
+      } else {
+        await this.cancelLinkedToken();
+      }
     }
-    this._disposeCount--;
-    if (this._disposeCount === 0) {
-      this.cancel();
-    }
-  }
-}
-
-class Factory {
-  constructor(private _eventBus: EventBus, private _disposableToken: DisposableToken) {
-    this._disposableToken.disposeCount = 1;
-    this._cachedResources = new Map();
-  }
-
-  getSiphonGate(): EventSiphon {
-    const siphonGate = new EventSiphon();
-    this._disposableToken.linkedToken?.disposalListeners.add({
-      callback: () => {
-        this._disposableToken.cancel();
-        siphonGate.siphonGate = false;
-      },
-      context: this._disposableToken,
-    });
-    return siphonGate;
-  }
-
-  dispose(): void {
-    this._disposableToken.dispose();
   }
 }
