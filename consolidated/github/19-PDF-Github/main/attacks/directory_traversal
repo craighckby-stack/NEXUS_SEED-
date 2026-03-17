@@ -1,0 +1,2 @@
+{"import requests\nfrom urllib.parse import urljoin, quote
+def test_directory_traversal(base_url: str, payload: str, follow_redirects: bool = True) -> str:\n    # ..."}
