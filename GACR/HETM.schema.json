@@ -1,8 +1,8 @@
-**Improved Code**
+**Improved JSON Schema:**
 
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://gacr.agi/schemas/ecvm_tis_v10.6.0 evolves.json",
+  "$id": "https://gacr.agi/schemas/ecvm_tis_v10.6.0-evolves.json",
   "title": "NEXUS_CORE Host Environment Trust Manifest (HETM) - Evolved Convergence (6/6)",
   "description": "Architectural Trust Manifest synthesizing ISO/IEC 29500 (OOXML) hierarchical indirection with microsoft/TypeScript 5.4+ project-reference orchestration. Implements a saturation-governed metabolic state machine.",
   "type": "object",
@@ -26,7 +26,8 @@
       "nx": "https://nexus-core.agi/governance",
       "mc": "http://schemas.openxmlformats.org/markup-compatibility/2006",
       "nx_ext": "https://nexus-core.agi/extensions/v6"
-    }
+    },
+    "additionalProperties": false
   },
   "properties": {
     "manifest_id": {
@@ -43,7 +44,7 @@
       "items": {
         "type": "object",
         "properties": {
-          "rId": {
+          "r_id": {
             "type": "string",
             "pattern": "^rId[0-9]+$"
           },
@@ -53,7 +54,7 @@
           "target": {
             "type": "string"
           },
-          "targetMode": {
+          "target_mode": {
             "type": "string",
             "enum": [
               "Internal",
@@ -62,7 +63,7 @@
           }
         },
         "required": [
-          "rId",
+          "r_id",
           "type",
           "target"
         ]
@@ -77,7 +78,7 @@
           "id": {
             "type": "string"
           },
-          "rId": {
+          "r_id": {
             "type": "string"
           },
           "status": {
@@ -111,10 +112,10 @@
                     "Final"
                   ]
                 },
-                "pPr": {
+                "p_pr": {
                   "$ref": "#/definitions/StyleProperties"
                 },
-                "rPr": {
+                "r_pr": {
                   "$ref": "#/definitions/StyleProperties"
                 },
                 "content_ref": {
@@ -132,7 +133,7 @@
         },
         "required": [
           "id",
-          "rId",
+          "r_id",
           "status"
         ]
       }
@@ -146,7 +147,7 @@
           "items": {
             "type": "object",
             "properties": {
-              "abstractNumId": {
+              "abstract_num_id": {
                 "type": "string",
                 "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
               },
@@ -161,13 +162,13 @@
                     "start": {
                       "type": "integer"
                     },
-                    "numFmt": {
+                    "num_format": {
                       "type": "string"
                     },
-                    "lvlText": {
+                    "lvl_text": {
                       "type": "string"
                     },
-                    "lvlJc": {
+                    "lvl_jc": {
                       "type": "string",
                       "enum": [
                         "left",
@@ -179,7 +180,7 @@
                   "required": [
                     "ilvl",
                     "start",
-                    "numFmt"
+                    "num_format"
                   ]
                 }
               }
@@ -191,11 +192,11 @@
           "items": {
             "type": "object",
             "properties": {
-              "numId": {
+              "num_id": {
                 "type": "string",
                 "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
               },
-              "abstractNumId": {
+              "abstract_num_id": {
                 "type": "string",
                 "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
               },
@@ -236,7 +237,7 @@
           ],
           "default": "NodeNext"
         },
-        "moduleResolution": {
+        "module_resolution": {
           "type": "string",
           "enum": [
             "node",
@@ -253,11 +254,11 @@
           "type": "boolean",
           "const": true
         },
-        "verbatimModuleSyntax": {
+        "verbatim_module_syntax": {
           "type": "boolean",
           "const": true
         },
-        "noUncheckedIndexedAccess": {
+        "no_undefined IndexedAccess": {
           "type": "boolean",
           "const": true
         },
@@ -265,280 +266,13 @@
           "type": "boolean",
           "const": true
         },
-        "resolveJsonModule": {
+        "resolve_json_module": {
           "type": "boolean",
           "const": true
         },
-        "tsBuildInfoFile": {
+        "ts_build_info_file": {
           "type": "string",
           "pattern": "^.*\\.tsbuildinfo$",
           "default": "tsbuildinfo.json"
         },
-        "cascading_inheritance": {
-          "type": "object",
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "const": true
-            },
-            "depth_limit": {
-              "type": "integer",
-              "const": 50
-            },
-            "resolver": {
-              "type": "string",
-              "enum": [
-                "RecursiveFlatten",
-                "TransitiveClosure"
-              ],
-              "default": "RecursiveFlatten"
-            },
-            "docDefaults": {
-              "type": "object",
-              "properties": {
-                "pPr": {
-                  "$ref": "#/definitions/StyleProperties"
-                },
-                "rPr": {
-                  "$ref": "#/definitions/StyleProperties"
-                }
-              }
-            }
-          }
-        },
-        "siphon_source": {
-          "type": "string",
-          "enum": [
-            "microsoft/TypeScript",
-            "dalek",
-            "nx"
-          ],
-          "default": "microsoft/TypeScript"
-        }
-      }
-    },
-    "references": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "path": {
-            "type": "string",
-            "pattern": "^.*(?=\\.[a-zA-Z]{2,})$"
-          },
-          "rId": {
-            "type": "string",
-            "pattern": "^rId[0-9]+$"
-          },
-          "resolution_mode": {
-            "type": "string",
-            "enum": [
-              "node",
-              "classic",
-              "direct",
-              "transitive"
-            ],
-            "default": "node"
-          },
-          "circular_dependency_gate": {
-            "type": "string",
-            "enum": [
-              "Strict",
-              "Relaxed",
-              "Silent"
-            ],
-            "default": "Strict"
-          },
-          "meta_info_ref": {
-            "type": "string",
-            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
-          }
-        },
-        "required": [
-          "path",
-          "rId"
-        ]
-      }
-    },
-    "diagnostics_engine": {
-      "type": "object",
-      "properties": {
-        "drift_threshold": {
-          "type": "number",
-          "const": 0.45
-        },
-        "saturation_level": {
-          "type": "integer",
-          "enum": [
-            1,
-            2,
-            3,
-            4,
-            5
-          ],
-          "default": 4
-        },
-        "validation_rules": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "enum": [
-              "NoOrphanedRIds",
-              "StyleChainResolution",
-              "NamespaceValidityCheck",
-              "ProjectBoundaryCheck",
-              "SemanticContinuityCheck",
-              "StrictHHHCompliance",
-              "DependencyGraphScan"
-            ]
-          },
-          "default": ["NoOrphanedRIds", "StyleChainResolution"]
-        },
-        "emergency_brake": {
-          "type": "object",
-          "properties": {
-            "corruption_threshold": {
-              "type": "integer",
-              "const": 3
-            },
-            "auto_halt": {
-              "type": "boolean",
-              "const": true
-            },
-            "log_target": {
-              "type": "string",
-              "const": "NEXUS_LOG.txt"
-            },
-            "error_catch": {
-              "type": "string",
-              "enum": [
-                "default",
-                "verbose",
-                "silent"
-              ],
-              "default": "verbose"
-            }
-          }
-        }
-      }
-    },
-    "metadata": {
-      "type": "object",
-      "required": [
-        "dna_anchor",
-        "evolution_round",
-        "anchors"
-      ],
-      "properties": {
-        "dna_anchor": {
-          "type": "string",
-          "const": "ARCH-OOXML-V2-DOCX-DNA-EVOLV"
-        },
-        "evolution_round": {
-          "type": "integer",
-          "const": 6
-        },
-        "saturation_level": {
-          "type": "integer",
-          "const": 5
-        },
-        "metabolic_rate": {
-          "type": "string",
-          "enum": [
-            "STANDARD",
-            "ENHANCED",
-            "ADVANCED"
-          ],
-          "default": "ENHANCED"
-        },
-        "author": {
-          "type": "string",
-          "const": "DALEK_CAAN_V3.2_SIPHON_ENGINE-EVOLVED"
-        },
-        "identity_anchors_enforced": {
-          "type": "boolean",
-          "const": true
-        },
-        "anchors": {
-          "type": "object",
-          "properties": {
-            "purpose": {
-              "type": "string",
-              "const": "Self-optimising AGI substrate for real-world problem solving - Evolved"
-            },
-            "mechanism": {
-              "type": "string",
-              "const": "Siphoning patterns from advanced codebases - Enhanced"
-            },
-            "memory": {
-              "type": "string",
-              "const": "Chained context across files — the system is one organism"
-            },
-            "governance": {
-              "type": "string",
-              "const": "Human oversight remains active at all saturation levels"
-            },
-            "origin": {
-              "type": "string",
-              "const": "NEXUS_CORE-Evolution"
-            }
-          }
-        },
-        "last_mutation": {
-          "type": "string",
-          "format": "date-time",
-          "default": "2023-01-01T12:00:00Z"
-        }
-      }
-    }
-  },
-  "definitions": {
-    "StyleProperties": {
-      "type": "object",
-      "properties": {
-        "val": {
-          "type": [
-            "string",
-            "integer",
-            "boolean"
-          ]
-        },
-        "inheritance": {
-          "type": "string",
-          "enum": [
-            "Inherit",
-            "Override",
-            "Final"
-          ],
-          "default": "Inherit"
-        },
-        "sz": {
-          "type": "integer"
-        },
-        "color": {
-          "type": "string",
-          "pattern": "^[0-9A-F]{6}$"
-        },
-        "bold": {
-          "type": "boolean"
-        },
-        "spacing": {
-          "type": "object",
-          "properties": {
-            "val": {
-              "type": "integer"
-            },
-            "unit": {
-              "type": "string",
-              "enum": [
-                "twips",
-                "pts",
-                "px"
-              ]
-            }
-          }
-        },
-        "ind": {
-          "type": "object",
-          "properties": {
-            "
+        "casc
