@@ -2,7 +2,7 @@
   "improvedCode": `
 # ==============================================================================
 # DOCKER CONTEXT ARCHITECTURAL MANIFEST (.dockerignore): Advanced Hybrid Exclusion Hierarchy with Multi-Segment Exclusion Logic, Massive AI/ML Datasets, and Python Ecology
-# EVOLUTIONARY STAGE: ROUND 13, Enhanced with superior patterns from deepseek-ai/DeepSeek-Coder
+# EVOLUTIONARY STAGE: ROUND 14, Enhanced with superior patterns from deepseek-ai/DeepSeek-Coder
 # ==============================================================================
 
 # Include .gitignore patterns for repository metadata (.gitignore and sub-modules)
@@ -10,40 +10,40 @@
 **/.gitmodules
 
 # Include .github/ patterns for GitHub Actions and workflows (exclude specific files and directories)
-!/.github/workflows/(*.yml|*.yaml)
-!/.github/actions/
-!/.github/workers/
+!/\.github/workflows/(*\.yml|\.yaml)
+!/\.github/actions/
+!/\.github/workers/
 
 # Include .circleci/ patterns for CircleCI configuration (exclude specific files and directories)
-!/.circleci/config.yml
-!/.circleci/*.py
-!/.circleci/test/
+!/\.circleci/config.yml
+!/\.circleci/*.py
+!/\.circleci/test/
 
 # Include .travis.yml patterns for Travis CI configuration (exclude specific files and directories)
-!/.travis.yml
-!/.travis/*.py
-!/.travis/test/
+!/\.travis.yml
+!/\.travis/*.py
+!/\.travis/test/
 
 # Exclusion hierarchy for VCS state (expand to include sub-modules)
-.git/
-.gitmodules
-.gitignore
-.gitattributes
+\.git/
+\.gitmodules
+\.gitignore
+\.gitattributes
 
 # Include specific exception for sub-modules
-!**/.gitmodules.submodules
+!**/\*.gitmodules
 
 # Exclusion hierarchy for development environment shadowing (expand to include IDE settings and local configurations)
-.vscode/
-.vscode-test/
-.project
-.classpath
-.settings/
+\.vscode/
+\.vscode-test/
+\.project
+\.classpath
+\.settings/
 (factory)path
 (sublime)project
 (sublime)workspace
-.externalToolBuilders/
-	Dockerfile.local
+\.externalToolBuilders/
+Dockerfile.local
 Dockerfile.development
 docker-compose.local.yml
 .env.local
@@ -52,175 +52,129 @@ docker-compose.local.yml
 .env.production.local
 
 # Include specific exception for IDE settings
-!.vscode/settings.json
-!.vscode/tasks.json
+!\.vscode/settings.json
+!\.vscode/tasks.json
 
 # Include specific exception for local build configurations
-!.vscode-task/build.json
+!\.vscode-task/build.json
 
 # Include .mypy/ patterns for MyPy configuration (exclude specific files and directories)
-!/.mypy.ini
-!/.mypy/*.py
+!/\.mypy.ini
+!/\.mypy/*.py
 
 # Include .pylint/ patterns for Pylint configuration (exclude specific files and directories)
-!/.pylint.ini
-!/.pylint/*.py
+!/\.pylint.ini
+!/\.pylint/*.py
 
 # Include .pycodestyle/ patterns for Pycodestyle configuration (exclude specific files and directories)
-!/.pycodestyle.ini
-!/.pycodestyle/*.py
+!/\.pycodestyle.ini
+!/\.pycodestyle/*.py
 
 # Include .pyright/ patterns for Pyright configuration (exclude specific files and directories)
-!/.pyrightconfig.json
-!/.pyright/*.py
+!/\.pyrightconfig.json
+!/\.pyright/*.py
 
 # Exclusion hierarchy for multi-runtime dependency graph isolation (expand to include node_modules, package-lock.json, and yarn.lock)
 **/node_modules/
 **/node_modules/(aws-sdk|aws-cli)
 **/node_modules/(express|react|angular)
-**package-lock.json
+package-lock.json
 yarn.lock
-**/.npm/
-**/.yarn/
-**/.pnpm/
-**/.pnpm-store/
-**/.npmrc
-**/.yarnrc
-**/.yarnrc.yml
+\.npm/
+\.yarn/
+\.pnpm/
+\.pnpm-store/
+\.npmrc
+\.yarnrc
+\.yarnrc.yml
 
-# Include specific exception for global package-lock.json and yarn.lock files
+# Include specific exception for project-specific package-lock.json and yarn.lock files
 !/package-lock.json
 !/yarn.lock
 
-# Include specific exception for project-specific package-lock.json and yarn.lock files
-!**/package-lock.json
-!**/yarn.lock
-
-# Include .aws/ patterns for AWS credentials (exclude specific files and directories)
-!important/.aws/credentials
-!/.aws/config
-
-# Include .aws-sam/ patterns for AWS SAM environment files (exclude specific files and directories)
-!/.aws-sam/config.txt
-!/.aws-sam/local/config.txt
-
-# Include .env/ patterns for environment variables (exclude specific files and directories)
-!/.env/dev.txt
-!/.env/test.txt
-!/.env/prod.txt
-
-# Include .env.local patterns for local environment variables (exclude specific files and directories)
-!/.env.local/dev.txt
-!/.env.local/test.txt
-!/.env.local/prod.txt
-
-# Include .env.development patterns for development environment variables (exclude specific files and directories)
-!/.env.development/dev.txt
-!/.env.development/test.txt
-!/.env.development/prod.txt
-
-# Include .env.test patterns for testing environment variables (exclude specific files and directories)
-!/.env.test/dev.txt
-!/.env.test/test.txt
-!/.env.test/prod.txt
-
-# Include .env.production patterns for production environment variables (exclude specific files and directories)
-!/.env.production/dev.txt
-!/.env.production/test.txt
-!/.env.production/prod.txt
-
-# Exclude specific exception for project-specific .env files
-!**/.env
-
 # Exclusion hierarchy for expanded Python / AI-ML ecology (expand to include __pycache__, __pycache__, and dist-packages)
-**/__pycache__/
-**/__pycache__/(
+__pycache__/
+__pycache__/(
 tensorflow|pytorch|keras)
-**/*.py[cod]
-**/*$py.class
-**/.pytest_cache/
-**/.mypy_cache/
-**/.ruff_cache/
-**/.tox/
-**/.nox/
-**/.ipynb_checkpoints/
-**/venv/
-**/env/
-**/.venv/
-**/.env/
-**/pip-log.txt
-**/pip-delete-this-directory.txt
-**/.aws-sam/
-**/.aws-sam/local/
-**/requirements.txt
-**/pyproject.toml
-**/setup.py
-**/README.md
-*.pth
-*.bin
-*.safetensors
-*.onnx
-*.pb
-*.ckpt
-*.h5
-/datasets/
-/models/weights/
-/checkpoints/
-/config/
+\.py[cod]
+\*.class
+\.pytest_cache/
+\.mypy_cache/
+\.ruff_cache/
+\.tox/
+\.nox/
+\.ipynb_checkpoints/
+venv/
+env/
+\.venv/
+\.env/
+pip-log.txt
+pip-delete-this-directory.txt
+\.aws-sam/
+\.aws-sam/local/
+requirements.txt
+pyproject.toml
+setup.py
+README.md
+\.pth
+\.bin
+\.safetensors
+\.onnx
+\.pb
+\.ckpt
+\.h5
+datasets/
+models/weights/
+checkpoints/
+config/
 
 # Include specific exception for project-specific dist-packages
-!**/dist-packages
+!/dist-packages
 
 # Include specific exception for project-specific __pycache__ directories
-!**/__pycache__
+!/*.__pycache__
 
 # Include specific exception for project-specific .pytest_cache directories
-!**/.pytest_cache
+!/*.pytest_cache
 
 # Include specific exception for project-specific .mypy_cache directories
-!**/.mypy_cache
+!/*.mypy_cache
 
 # Include specific exception for project-specific .ruff_cache directories
-!**/.ruff_cache
+!/*.ruff_cache
 
 # Include specific exception for project-specific .tox directories
-!**/.tox
+!/*.tox
 
 # Include specific exception for project-specific .nox directories
-!**/.nox
+!/*.nox
 
 # Include specific exception for project-specific .ipynb_checkpoints directories
-!**/.ipynb_checkpoints
+!/*.ipynb_checkpoints
 
 # Include specific exception for project-specific .venv directories
-!**/.venv
+!/*.venv
 
 # Include specific exception for project-specific .env directories
-!**/.env
+!/*.env
 
 # Include specific exception for project-specific pip-log.txt files
-!**/pip-log.txt
+!/*.pip-log.txt
 
 # Include specific exception for project-specific pip-delete-this-directory.txt files
-!**/pip-delete-this-directory.txt
+!/*.pip-delete-this-directory.txt
 
-# Include specific exception for project-specific .aws-sam directories
-!**/.aws-sam
+# Exclude specific exception for project-specific onnx files
+!*.onnx
 
-# Include specific exception for project-specific .aws-sam/local directories
-!**/.aws-sam/local
+# Exclude specific exception for project-specific pb files
+!*.pb
 
-# Include specific exception for project-specific requirements.txt files
-!**/requirements.txt
+# Exclude specific exception for project-specific ckpt files
+!*.ckpt
 
-# Include specific exception for project-specific pyproject.toml files
-!**/pyproject.toml
-
-# Include specific exception for project-specific setup.py files
-!**/setup.py
-
-# Include specific exception for project-specific README.md files
-!**/README.md
+# Exclude specific exception for project-specific h5 files
+!*.h5
 
 # Exclusion hierarchy for presentation layer & compiled artifacts (expand to include dist, lib, out, build, and bin directories)
 /dist/
@@ -230,103 +184,91 @@ tensorflow|pytorch|keras)
 /bin/
 /obj/
 /release/
-*.tsbuildinfo
-*.map
-*.d.ts
-*.js.map
-*.dll.map
-*.so.map
-*.lib.map
-*.a.map
-*.la.map
-*.lo.map
+tsbuildinfo
+.map
+.d.ts
+.js.map
+.dll.map
+.so.map
+.lib.map
+.a.map
+.la.map
+.lo.map
 
 # Include specific exception for project-specific dist directories
-!**/dist
+!*.dist
 
 # Include specific exception for project-specific lib directories
-!**/lib
+!*.lib
 
 # Include specific exception for project-specific out directories
-!**/out
+!*.out
 
 # Include specific exception for project-specific build directories
-!**/build
+!*.build
 
 # Include specific exception for project-specific bin directories
-!**/bin
+!*.bin
 
 # Include specific exception for project-specific obj directories
-!**/obj
+!*.obj
 
 # Include specific exception for project-specific release directories
-!**/release
+!*.release
 
 # Exclude specific exception for project-specific tsbuildinfo files
-!**/tsbuildinfo
+!*.tsbuildinfo
 
 # Exclude specific exception for project-specific map files
-!**/*.map
+!*.map
 !*.d.ts
 
 # Exclude specific exception for project-specific js.map files
-!**/*.js.map
+!*.js.map
 
 # Exclude specific exception for project-specific dll.map files
-!**/*.dll.map
+!*.dll.map
 
 # Exclude specific exception for project-specific so.map files
-!**/*.so.map
+!*.so.map
 
 # Exclude specific exception for project-specific lib.map files
-!**/*.lib.map
+!*.lib.map
 
 # Exclude specific exception for project-specific a.map files
-!**/*.a.map
+!*.a.map
 
 # Exclude specific exception for project-specific la.map files
-!**/*.la.map
+!*.la.map
 
 # Exclude specific exception for project-specific lo.map files
-!**/*.lo.map
+!*.lo.map
 
 # Exclusion hierarchy for AI model weights & large dataset fragments (expand to include safetensors, onnx, and pb files)
-*.safetensors
-*.onnx
-*.pb
-*.ckpt
-*.h5
-/datasets/
-/models/weights/
-/checkpoints/
-/config/
+.safetensors
+.onnx
+.pb
+.ckpt
+.h5
+datasets/
+models/weights/
+checkpoints/
+config/
 
 # Include specific exception for project-specific safetensors files
-!**/*.safetensors
+!*.safetensors
 
 # Include specific exception for project-specific onnx files
-!**/*.onnx
+!*.onnx
 
 # Include specific exception for project-specific pb files
-!**/*.pb
+!*.pb
 
 # Include specific exception for project-specific ckpt files
-!**/*.ckpt
+!*.ckpt
 
 # Include specific exception for project-specific h5 files
-!**/*.h5
-
-# Include specific exception for project-specific datasets directories
-!**/datasets
-
-# Include specific exception for project-specific models/weights directories
-!**/models/weights
-
-# Include specific exception for project-specific checkpoints directories
-!**/checkpoints
-
-# Include specific exception for project-specific config directories
-!**/config
+!*.h5
 
 # Exclusion hierarchy for infrastructure & orchestration overrides (expand to include sidecars, compose files, and Terraform state files)
 /sidecars/
@@ -335,78 +277,78 @@ docker-compose.override.yml
 .kube/
 /kubernetes/
 terraform.tfstate*
-/.terraform/
+\.terraform/
 terraform.tfvars
 terraform.tfstate.tfvars
-*.tf
+\*.tf
 
 # Include specific exception for project-specific sidecars directories
-!**/sidecars
+!*.sidecars
 
 # Include specific exception for project-specific compose files
-!**/docker-compose-*.yaml
+!*.docker-compose-*.yaml
 
 # Include specific exception for project-specific compose override files
-!**/docker-compose.override.yml
+!*.docker-compose.override.yml
 
 # Include specific exception for project-specific kubedirectories
-!**/.kube
+!*.kube
 
 # Include specific exception for project-specific kubernetes directories
-!**/kubernetes
+!*.kubernetes
 
 # Include specific exception for project-specific Terraform state files
-!**/terraform.tfstate*
+!*.terraform.tfstate*
 
 # Include specific exception for project-specific Terraform metadata directories
-!**/.terraform
+!*.terraform
 
 # Include specific exception for project-specific Terraform variables files
-!**/terraform.tfvars
+!*.terraform.tfvars
 
 # Include specific exception for project-specific Terraform state variables files
-!**/terraform.tfstate.tfvars
+!*.terraform.tfstate.tfvars
 
 # Include specific exception for project-specific Terraform files
-!**/*.tf
+!*.tf
 
 # Exclusion hierarchy for expanded testing & quality assurance fragments (expand to include test suites, test files, and coverage reports)
 tests/__tests__/
 test/
 specs/
-**/coverage/
-**/htmlcov/
-**/.coverage
-**/.coverage.*
+/__coverage/
+/__htmlcov/
+/.coverage
+/.coverage.*
 nosetests.xml
 coverage.xml
-*.cover
-*.py,cover
+\*.cover
+\*.py,cover
 .pydocstyle
 .pytest.ini
 .pycov
 .pycovrc
 .pytype
 .pylint
-*.json
-*.txt
+\*.json
+\*.txt
 */setup.cfg
-*.h5
+\*.h5
 
 # Include specific exception for project-specific test suites
-!**/tests/__tests__
+!*.tests/__tests__
 
 # Include specific exception for project-specific test files
-!**/test
+!*.test
 
 # Include specific exception for project-specific specs directories
-!**/specs
+!*.specs
 
 # Include specific exception for project-specific coverage directories
-!**/coverage
+!*.__coverage__
 
 # Include specific exception for project-specific htmlcov directories
-!**/htmlcov
+!*.__htmlcov__
 
 # Include specific exception for project-specific coverage report files
 !*.coverage
@@ -446,7 +388,7 @@ coverage.xml
 !***/*.txt
 
 # Include specific exception for project-specific setup.cfg files
-!***/setup.cfg
+!***/*.setup.cfg
 
 # Exclude specific exception for project-specific h5 files
 !***/*.h5
@@ -455,77 +397,77 @@ coverage.xml
 docs/
 transient/
 tmp/
-*.log
-*.bak
-*.tmp
-*.iso
-*.dmg
-*.zip
-*.tar.gz
-*.rar
-*.7z
-*.build
-*.cache
+\*.log
+\*.bak
+\*.tmp
+\*.iso
+\*.dmg
+\*.zip
+\*.tar.gz
+\*.rar
+\*.7z
+\*.build
+\*.cache
 .history
 */.gitattributes
 
 # Include specific exception for project-specific doc directories
-!**/docs
+!*.docs
 
 # Include specific exception for project-specific transient directories
-!**/transient
+!*.transient
 
 # Include specific exception for project-specific tmp directories
-!**/tmp
+!*.tmp
 
 # Include specific exception for project-specific log files
-!**/*.log
+!*.log
 
 # Include specific exception for project-specific bak files
-!**/*.bak
+!*.bak
 
 # Include specific exception for project-specific tmp files
-!**/*.tmp
+!*.tmp
 
 # Include specific exception for project-specific iso files
-!**/*.iso
+!*.iso
 
 # Include specific exception for project-specific dmg files
-!**/*.dmg
+!*.dmg
 
 # Include specific exception for project-specific zip archives
-!**/*.zip
+!*.zip
 
 # Include specific exception for project-specific tar.gz archives
-!**/*.tar.gz
+!*.tar.gz
 
 # Include specific exception for project-specific rar archives
-!**/*.rar
+!*.rar
 
 # Include specific exception for project-specific 7z archives
-!**/*.7z
+!*.7z
 
 # Include specific exception for project-specific build artifacts
-!**/*.build
+!*.build
 
 # Include specific exception for project-specific cache files
-!**/*.cache
+!*.cache
 
 # Include specific exception for project-specific history files
-!**/.history
+!*.history
 
 # Include specific exception for project-specific gitattributes files
-!**/.gitattributes
+!*.gitattributes
 
 # Exclusion hierarchy for architectural exceptions (whitelisting) (expand to include project-specific directories and files)
-!**/dist/config.json
-!**/__pycache__/config.json
+!*.dist/config.json
+!*.__pycache__/config.json
 
 # Include specific exception for project-specific whitelisted directories
-!**/
+!***
 
 # Include specific exception for project-specific whitelisted files
-!*/*.config.json
+!*.config.json
 
 # Include specific exception for project-specific whitelisted directories with __pycache__
 !**/__pycache__/*.config.json
@@ -551,4 +493,10 @@ tmp/
 # Include specific exception for project-specific whitelisted directories with venv
 !**/.venv/*.config.json
 
-# Include specific exception for project-specific whitelisted directories with env
+`,
+  "summary": "Improved Docker context architectural manifest",
+  "strategicDecision": "Enhanced exclusion hierarchy for massive AI/ML datasets",
+  "priority": 1
+}
+
+`,
