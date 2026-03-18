@@ -1,256 +1,202 @@
-class GenkiNexusCoreFactoryEvolutor extends EventDispatcher implements GenkiDisposable {
-  private readonly _configRegistry = new Map<string, GenkiConfigFactory>();
-  private readonly _eventBus: EventBus;
-  private readonly _factoryRegistration = new Map<string, GenkiDisposableStoreFactoryFactory>();
-  private readonly _decoratorRegistry = new Map<string, GenkiDisposableStoreFactoryDecorator>();
-  private readonly _disposeCache = new Map<DisposeMode, GenkiDisposableStoreFactory>();
-  private readonly _strategyFactoryCache = new Map<string, CancelationStrategyFactory>();
+class GenkiNexusCoreFactoryEvolutor extends hooksConsumer {
+  static disposeModeCache = new Map<DisposeMode, FactoryFactory>();
+  static strategyFactoryCache = new Map<string, CancelationStrategyFactory>();
+  static bus = new EventBus();
+  static logger = new GenkiLogger();
+
+  private readonly _configRegistry = new Map<string, ConfigFactory>();
+  private readonly _factoryRegistration = new Map<string, FactoryFactory>();
+  private readonly _decoratorRegistry = new Map<string, DecoratorFactory>();
+  private readonly _disposeCache = disposeModeCache;
+  private readonly _strategyFactoryCache = strategyFactoryCache;
   private readonly _observers = new Map<string, GenkiDisposableObserver>();
 
-  constructor(
-    private readonly _eventBus: EventBus,
-    private readonly _context: ApplicationContext
-  ) {
+  constructor(bus: EventBus, context: ApplicationContext, options?: Options) {
     super();
-    this._eventBus = _eventBus;
+    this._bus = bus;
+    this._context = context;
+    this._options = options;
     this._registerConfigFactory();
     this._registerFactoryRegistration();
     this._registerDecoratorRegistry();
   }
 
-  private async _registerConfigFactory() {
-    const configFactories = await this._getConfigFactories();
-    configFactories.forEach(factory => this._configRegistry.set(factory.constructor.name, factory));
-  }
-
-  private async _getConfigFactories(): Promise<GenkiConfigFactory[]> {
-    return [
-      await this._eventBus.subscribe(StrategiesEventName, this._context).then(
-        factoryObserver => factoryObserver.filter(factory => factory instanceof GenkiConfigFactory)
-      )
-    ];
-  }
-
-  private async _registerFactoryRegistration() {
-    const factoryRegistrations = await this._getFactoryRegistrations();
-    factoryRegistrations.forEach(factory => this._factoryRegistration.set(factory.constructor.name, factory));
-  }
-
-  private async _getFactoryRegistrations(): Promise<GenkiDisposableStoreFactoryFactory[]> {
-    return [
-      await this._eventBus.subscribe(StrategiesEventName, this._context).then(
-        factoryObserver => factoryObserver.getStrategy() instanceof GenkiDisposableStoreFactoryFactory
-      )
-    ];
-  }
-
-  private async _registerDecoratorRegistry() {
-    const decorators = await this._getDecorators();
-    decorators.forEach(decorator => this._decoratorRegistry.set(decorator.constructor.name, decorator));
-  }
-
-  private async _getDecorators(): Promise<GenkiDisposableStoreFactoryDecorator[]> {
-    return [
-      await this._eventBus.subscribe(StrategiesEventName, this._context).then(
-        observer => observer.getStrategy() instanceof GenkiDisposableStoreFactoryDecorator
-      )
-    ];
-  }
-
   attach(observer: GenkiDisposableObserver): void {
-    this._observers.set(observer.constructor.name, observer);
+    this._observers.set(observer.getFactoryName(), observer);
   }
 
   detach(observer: GenkiDisposableObserver): void {
-    this._observers.delete(observer.constructor.name);
+    this._observers.delete(observer.getFactoryName());
   }
 
   async emit(event: string): Promise<void> {
-    this._observers.forEach(async (observer: GenkiDisposableObserver) => {
-      await observer.observe(event);
+    this._observers.forEach(async observer => {
+      await observer.getFactory().observe(event);
     });
   }
 
-  async getDisposableStoreFactory(
-    disposeMode: DisposeMode,
-    options?: Options
-  ): Promise<GenkiDisposableStoreFactory> {
-    if (this._disposeCache.has(disposeMode)) {
-      return this._disposeCache.get(disposeMode);
+  async getDisposableStoreFactory(disposeMode: DisposeMode, options?: Options): Promise<FactoryFactory> {
+    const disposeModeFactory = await this._getDisposeModeFactory(disposeMode);
+    if (disposeModeFactory) {
+      return disposeModeFactory;
     }
-
-    const disposables = await this._getDisposableStoreFactories(disposeMode, options);
-    const disposableStoreFactory = await this._createDisposableStoreFactory(disposeMode, options, disposables);
-    this._disposeCache.set(disposeMode, disposableStoreFactory);
-    return disposableStoreFactory;
+    try {
+      const disposables = await this._getDisposableStoreFactories(disposeMode, options);
+      const disposableStoreFactory = await this._createDisposableStoreFactory(disposeMode, options, disposables);
+      this.disposeModeCache.set(disposeMode.getDisposeModeName(), disposableStoreFactory);
+      return disposableStoreFactory;
+    } catch (error) {
+      GenkiNexusCoreFactoryEvolutor.logger.error(error);
+    }
   }
 
-  private async _getDisposableStoreFactories(
-    disposeMode: DisposeMode,
-    options?: Options
-  ): Promise<GenkiDisposableStoreFactory[]> {
-    const disposeModes = await this.getAllDisposeModes(disposeMode);
-    return Promise.all(disposeModes.map(async (disposeMode) => {
-      return this._createDisposableStoreFactory(disposeMode, options, disposeMode.strategy);
-    }));
+  private async _getDisposeModeFactory(disposeMode: DisposeMode): Promise<FactoryFactory> {
+    const disposeModeFactory = this.disposeModeCache.get(disposeMode.getDisposeModeName());
+    if (disposeModeFactory) {
+      return disposeModeFactory;
+    } else {
+      const disposables = await this._getDisposableStoreFactories(disposeMode, this._options);
+      return this._createDisposeModeFactory(disposeMode, disposables);
+    }
   }
 
-  private async _createDisposableStoreFactory(
-    disposeMode: DisposeMode,
-    options?: Options,
-    strategy?: CancelationStrategy
-  ): Promise<GenkiDisposableStoreFactory> {
+  private async _getDisposableStoreFactories(disposeMode: DisposeMode, options?: Options): Promise<FactoryFactory[]> {
+    return this._bus.subscribe(StrategiesEventName, this._context).then(eventTarget =>
+      eventTarget.getEventListeners().map(listener => listener.getFactory())
+    );
+  }
+
+  private async _createDisposableStoreFactory(disposeMode: DisposeMode, options?: Options, strategy?: CancelationStrategyName): Promise<FactoryFactory> {
     const configFactory = this._getConfigFactory(disposeMode);
-    return configFactory.getConfig(disposeMode, options).then((config) => {
-      const disposableStoreFactory = new GenkiDisposableStoreFactory(strategy, disposeMode, options, this._eventBus);
-      this._eventBus.publish(STRATEGY_EVENT_NAME, disposableStoreFactory);
+    return configFactory.getConfig(disposeMode, options).then(config => {
+      const disposableStoreFactory = new GenkiDisposableStoreFactory(strategy, disposeMode, options, this._bus);
+      GenkiNexusCoreFactoryEvolutor.bus.publish(STRATEGY_EVENT_NAME, disposableStoreFactory);
       return disposableStoreFactory;
     });
   }
 
-  private _getConfigFactory(disposeMode: DisposeMode): GenkiConfigFactory {
-    const configFactoryName = disposeMode.strategy.getDisposeModeName();
-    return this._configRegistry.get(configFactoryName);
+  private _getConfigFactory(disposeMode: DisposeMode): ConfigFactory {
+    const configFactoryName = disposeMode.getDisposeModeName();
+    if (this._configRegistry.has(configFactoryName)) {
+      return this._configRegistry.get(configFactoryName);
+    } else {
+      throw new Error(`No config factory found for dispose mode ${disposeMode.getDisposeModeName()}`);
+    }
   }
 
-  decorate(disposeMode: DisposeMode, options?: Options): GenkiDisposableStoreFactoryDecorator {
-    const decoratedFactory = new GenkiDisposableStoreFactoryDecorator(this, disposeMode, options);
-    return decoratedFactory;
+  getDisposedFactories(): Promise<DisposedFactory[]> {
+    return GenkiNexusCoreFactoryEvolutor.bus.subscribe(StrategiesEventName, this._context).then(eventTarget =>
+      eventTarget.getDisposedFactories());
   }
 
-  private async getAllDisposeModes(disposeMode?: DisposeMode): Promise<DisposeMode[]> {
-    const disposeModeFactories = await this._getDisposeModeFactories();
-    return Promise.all(disposeModeFactories.map(async (disposeMode) => {
-      const disposeModeFactory = new DisposeModeFactory(disposeMode);
-      try {
-        return disposeModeFactory.createDisposableStoreFactory(this._context, disposeMode);
-      } catch (error) {
-        this._eventBus.publish(STRATEGY_EVENT_NAME, disposeModeFactory);
-        return new DisposeMode();
-      }
-    }));
+  private getAllStrategies(strategyName: CancelationStrategyName): Promise<CancelationStrategy[]> {
+    return GenkiNexusCoreFactoryEvolutor.bus.subscribe(StrategiesEventName, this._context).then(eventTarget =>
+      eventTarget.getEventListeners().map(listener => listener.getCancelationStrategies()));
   }
 
-  private async _getDisposeModeFactories(): Promise<DisposablesObserver[]> {
-    return [
-      await this._eventBus.subscribe(StrategiesEventName, this._context).then(
-        factoryObserver => factoryObserver.getStrategy() instanceof DisposablesObserver
-      )
-    ];
+  getFactoryType(disposeMode: DisposeMode, options?: Options): string {
+    return this._getFactoryType(disposeMode, options);
   }
 
-  private async ensureStrategyFactory(strategyName: CancellationStrategyName): Promise<CancelationStrategy> {
+  private _getFactoryType(disposeMode: DisposeMode, options?: Options): string {
+    if (options && options.factoryType) {
+      return options.factoryType;
+    }
+    return this._getConfigFactory(disposeMode).getType();
+  }
+
+  getDecoratedFactory(disposeMode: DisposeMode, options?: Options): DecoratorFactory {
+    return new GenkiDisposableStoreFactoryDecorator(this, disposeMode, options);
+  }
+
+  getAllDisposeModes(disposeMode?: DisposeMode): Promise<DisposeMode[]> {
+    return GenkiNexusCoreFactoryEvolutor.bus.subscribe(StrategiesEventName, this._context).then(eventTarget =>
+      eventTarget.getEventListeners().map(listener => listener.getDisposeModes()));
+  }
+
+  getDisposeModes(): DisposeMode[] {
+    return GenkiNexusCoreFactoryEvolutor.bus.getDisposeModes();
+  }
+
+  createGenkiFactoryFactoryFactory(disposeMode: DisposeMode, options: Options): Promise<FactoryFactory> {
+    return this._createFactoryFactory(disposeMode, options);
+  }
+
+  private async _createFactoryFactory(disposeMode: DisposeMode, options: Options): Promise<FactoryFactory> {
+    const strategyFactory = await this._getStrategyFactory(disposeMode, options);
+    if (strategyFactory) {
+      return strategyFactory;
+    }
+    const strategyFactoryFactory = await this.createStrategyFactoryFactory(disposeMode.getDisposeModeName(), options);
+    return await strategyFactoryFactory.createStrategyFactory();
+  }
+
+  private async _getStrategyFactory(disposeMode: DisposeMode, options: Options): Promise<StrategyFactoryFactory> {
+    return GenkiNexusCoreFactoryEvolutor.bus.subscribe(StrategiesEventName, this._context).then(eventTarget =>
+      eventTarget.getEventListeners().map(listener => listener.getStrategyFactory()));
+  }
+
+  private async getDisposedFactory(disposeMode: DisposeMode, options?: Options): Promise<DisposedFactory> {
+    return GenkiNexusCoreFactoryEvolutor.bus.subscribe(StrategiesEventName, this._context).then(eventTarget =>
+      eventTarget.getDisposedFactory());
+  }
+}
+
+class GenkiDependency {
+  static container = new Container();
+
+  static registerSingleton(token: Token, factory: () => Instance): void {
+    GenkiDependency.container.registerSingleton(token, factory);
+  }
+
+  static registerTransient(token: Token, factory: () => Instance): void {
+    GenkiDependency.container.registerTransient(token, factory);
+  }
+
+  static resolve<T>(token: Token): T {
+    return GenkiDependency.container.resolve(token);
+  }
+}
+
+class Container {
+  private _singletons = new Map<Token, Instance>();
+  private _transients = new Map<Token, Instance>();
+
+  registerSingleton(token: Token, factory: () => Instance): void {
+    this._singletons.set(token, factory());
+  }
+
+  registerTransient(token: Token, factory: () => Instance): void {
+    this._transients.set(token, factory());
+  }
+
+  resolve<T>(token: Token): Instance {
+    return this._singletons.get(token) || this._transients.get(token);
+  }
+}
+
+class GenkiLogger {
+  static log(level: string, message: string, ...args: any[]): void {
+    console[level](message, ...args);
+  }
+}
+
+class GenkiStrategyFactory {
+  private _strategyFactoryCache = new Map<string, CancelationStrategyFactory>();
+
+  createStrategyFactory(strategyName: CancelationStrategyName, options?: Options): CancelationStrategyFactory {
     const strategyFactoryKey = `${strategyName}_hashCode`;
     if (strategyFactoryKey in this._strategyFactoryCache) {
       return this._strategyFactoryCache.get(strategyFactoryKey);
     } else {
-      const strategyFactory = await this.getAllStrategies(strategyName);
+      const strategyFactory = this._getStrategyFactory(strategyName, options);
       this._strategyFactoryCache.set(strategyFactoryKey, strategyFactory);
       return strategyFactory;
     }
   }
 
-  private async getAllStrategies(strategyName: CancellationStrategyName): Promise<CancelationStrategy[]> {
-    const strategyFactories = await this._getStrategyFactories();
-    return Promise.all(strategyFactories.map(async (strategyFactory) => {
-      const strategyFactoryImpl = new GenkiStrategyFactoryImpl(strategyFactory);
-      try {
-        return strategyFactoryImpl.getFactory(strategyName);
-      } catch (error) {
-        return error;
-      }
-    }));
-  }
-
-  private async _getStrategyFactories(): Promise<GenkiStrategyFactoryImpl[]> {
-    return [
-      await this._eventBus.subscribe(StrategiesEventName, this._context).then(
-        factoryObserver => factoryObserver.getStrategy() instanceof GenkiStrategyFactoryImpl
-      )
-    ];
-  }
-
-  private async createGenkiFactoryFactoryFactory(disposeMode: DisposeMode, options: Options): Promise<GenkiDisposableStoreFactoryFactory> {
-    const factoryFactory = await this._createFactoryFactory(disposeMode, options);
-    return factoryFactory;
-  }
-
-  private async _createFactoryFactory(disposeMode: DisposeMode, options: Options): Promise<GenkiDisposableStoreFactoryFactory> {
-    const factoryFactory = new GenkiFactoryFactoryImpl(this, disposeMode, options);
-    const disposeModeStoreFactoryFactory = await factoryFactory.createFactory();
-    return disposeModeStoreFactoryFactory;
-  }
-}
-
-class GenkiNexusCoreFactoryEvolutorDecoratorImpl implements GenkiDisposable {
-  private readonly _genkiNexusCoreFactoryEvolutor: GenkiNexusCoreFactoryEvolutor;
-  private readonly _eventBus: EventBus;
-  private _genkiObserver: GenkiObserver;
-
-  constructor(genkiNexusCoreFactoryEvolutor: GenkiNexusCoreFactoryEvolutor, eventBus: EventBus) {
-    this._genkiNexusCoreFactoryEvolutor = genkiNexusCoreFactoryEvolutor;
-    this._eventBus = eventBus;
-    this._genkiObserver = new GenkiObserver(eventBus);
-  }
-
-  get genkiNexusCoreFactoryEvolutor(): GenkiNexusCoreFactoryEvolutor {
-    return this._genkiNexusCoreFactoryEvolutor;
-  }
-
-  get genkiObserver(): GenkiObserver {
-    return this._genkiObserver;
-  }
-
-  get eventBus(): EventBus {
-    return this._eventBus;
-  }
-}
-
-class GenkiDisposableStoreFactoryDecorator implements GenkiDisposableStoreFactory {
-  private readonly _factoryDecorator: GenkiNexusCoreFactoryEvolutorDecoratorImpl;
-  private readonly _disposeMode: DisposeMode;
-  private readonly _options?: Options;
-
-  constructor(factoryDecorator: GenkiNexusCoreFactoryEvolutorDecoratorImpl, disposeMode: DisposeMode, options?: Options) {
-    this._factoryDecorator = factoryDecorator;
-    this._disposeMode = disposeMode;
-    this._options = options;
-  }
-
-  async createGenkiDisposableStoreFactory(strategy: CancelationStrategy, disposeMode: DisposeMode, options: Options): Promise<GenkiDisposableStoreFactory> {
-    const disposeModeStoreFactory = new GenkiDisposeModeStoreFactory(strategy, disposeMode, options, this._factoryDecorator.eventBus);
-    this._factoryDecorator.genkiNexusCoreFactoryEvolutor._constables.set(disposeMode.getDisposeModeName(), disposeModeStoreFactory);
-    return disposeModeStoreFactory;
-  }
-}
-
-class GenkiConfigFactory {
-  private readonly _eventBus: EventBus;
-
-  constructor(eventBus: EventBus) {
-    this._eventBus = eventBus;
-  }
-
-  async getConfig(
-    disposeMode: DisposeMode,
-    options?: Options
-  ): Promise<Config> {
-    return { disposeMode, options };
-  }
-}
-
-class GenkiFactoryFactoryImpl implements GenkiDisposableStoreFactoryFactory {
-  private readonly _factoryFactory: GenkiNexusCoreFactoryEvolutor;
-  private readonly _disposeMode: DisposeMode;
-  private readonly _options?: Options;
-
-  constructor(factoryFactory: GenkiNexusCoreFactoryEvolutor, disposeMode: DisposeMode, options?: Options) {
-    this._factoryFactory = factoryFactory;
-    this._disposeMode = disposeMode;
-    this._options = options;
-  }
-
-  async createFactory(): Promise<GenkiDisposableStoreFactoryFactory> {
-    return new GenkiDisposableStoreFactoryFactory();
+  private _getStrategyFactory(strategyName: CancelationStrategyName, options?: Options): CancelationStrategyFactory {
+    return GenkiNexusCoreFactoryEvolutor.bus.subscribe(StrategiesEventName, GenkiNexusCoreFactoryEvolutor.context).then(eventTarget =>
+      eventTarget.getCancelationStrategyFactory(strategyName));
   }
 }
