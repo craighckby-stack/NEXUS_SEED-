@@ -33,5 +33,10 @@
     "timestamp": "2026-03-18T23:11:25.177Z",
     "error": "AUDIT_FAILURE: NAMESPACE_COLLISION: Symbol 'SiphonLogger' is both imported and locally defined.",
     "context": ".zscripts/mini-services-install.sh"
+  },
+  {
+    "timestamp": "2026-03-18T23:11:41.012Z",
+    "error": "AUDIT_FAILURE: NAMESPACE_COLLISION: Symbol 'GrogCognitiveCore' is both imported and locally defined.",
+    "context": ".zscripts/mini-services-start.sh"
   }
 ]
