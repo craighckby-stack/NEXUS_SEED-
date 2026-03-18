@@ -1,36 +1,68 @@
-**README.md**
+# DALEK_CAAN
+================
 
-# DALEK_CAAN Project Overview
-### v1.0.0
+## Project Overview
+----------------
 
-DALEK_CAAN is a system designed to evolve code by integrating patterns from external repositories.
+DALEK_CAAN is a system that evolves code by integrating patterns from external repositories.
 
-## Technical Overview
-### Files Processed and Latest File
-The system currently processes `Manual` files and maintains references to `nexus_core.js` as the latest file.
+## Files Processed
+-----------------
 
-### DNA Signature and Saturation Status
-* **DNA Signature**: None
-* **Saturation Status**: None
+* Manual
 
-## SIPHONING PROCESS
+## Latest File
+--------------
 
-The Siphoning process enables the DALEK_CAAN system to select architectural origins (e.g., DeepMind, Google) and apply their patterns to local files.
-This process involves:
+* nexus_core.js
 
-* **Pattern Identification**: Retrieving patterns from external repositories, such as GitHub or code repositories associated with influential AI organizations (DeepMind, Google).
-* **Local Pattern Application**: Applying the identified patterns to local files.
+## DNA Signature
+----------------
 
-## CHAINED CONTEXT
+* None
 
-Chained Context is a critical component of the DALEK_CAAN system. It enables a shared state/memory that ensures consistency across evolved files. This is achieved through the implementation of:
+## Context Summary
+-----------------
 
-* **Distributed Shared Memory**: Shared variables maintained across evolved files, ensuring consistency and reliability in the system.
+* Initial State
 
-## CURRENT STATUS
+## Saturation Status
+-------------------
 
-- **Files Processed**: `Manual`
-- **Latest File**: `nexus_core.js`
-- The system is currently in the **Initial State Context Summary**
+* None
 
-This document serves as an initial technical overview of the DALEK_CAAN project.
+## Siphoning Process
+-------------------
+
+The siphoning process involves the following technical components:
+
+### Selecting Architectural Origins
+
+* DALEK_CAAN interfaces with external repositories, such as DeepMind and Google, to retrieve patterns and architectural inspirations.
+* A configurable repository framework enables the addition or removal of external sources.
+
+### Applying Patterns to Local Files
+
+* The system employs a pattern recognition algorithm to identify relevant elements from selected architectural patterns.
+* Local files are analyzed and transformed to incorporate the applied patterns, resulting in evolved code.
+
+## Chained Context
+-----------------
+
+The chained context implementation ensures consistency across evolved files by maintaining a shared state/memory:
+
+* A data management framework stores and updates the evolving state, enabling concurrent access and synchronization.
+* A context propagation mechanism ensures that all evolved files adhere to the shared state, maintaining consistency throughout the evolution process.
+
+## Current Status
+-----------------
+
+* Files processed: Manual
+* Latest file: nexus_core.js
+* DNA signature: None
+* Context summary: Initial State
+* Saturation status: None
+
+### Evolution Status
+
+The system is currently operating within the initial state, having processed the manual file. The latest file processed is nexus_core.js, and no DNA signature has been applied. The evolution process is awaiting saturation status indicators.
