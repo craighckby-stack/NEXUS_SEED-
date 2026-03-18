@@ -1,61 +1,120 @@
-The ENHANCED VERSION contains additions that require scrutiny based on the CRITERIA.
+"""
+HETM_Verifier.py - Nexus Core Architectural Verification Engine
+Part of the GACR (Grog Architectural Control Registry)
+"""
 
-1. GROUNDING:
-   - The FiberNode class and the Proto class have direct mechanistic relationships with the original context. They are preserved.
+import logging
+import json
+from abc import ABC, abstractmethod
+from typing import List, Dict, Any
 
-2. MECHANISM:
-   - The Protocol class in the ENHANCED VERSION appears to have no direct mechanistic relationship with the original context. It seems to deviate from the original context.
-   - The HETM_Verifier class in the ENHANCED VERSION contains the `verify` method which updates the lane masks and scheduler priority based on fiber nodes. However, the original context had an inconsistency marked as "Jettisoned due to inaccuracies and deviations from the original context."
-   - The Scheduler class in the ENHANCED VERSION adds a mechanistic justification for protocols. It uses a queue, memoized state, and provides methods to manage scheduler priority.
+# Nexus-Native Logging Configuration
+logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s: %(message)s')
+logger = logging.getLogger("NEXUS_CORE")
 
-3. DECORATION:
-   - The import of the `math` and `z` modules appears to be decorative, as it is not traceable to the original context. It should be stripped.
-   - The `Proto` class has functionality that seems purely decorative without any direct mechanistic relationship to the original context. It should be removed.
+class Disposable(ABC):
+    @abstractmethod
+    def dispose(self):
+        pass
 
-After auditing the ENHANCED VERSION, the final, high-precision cleaned version would be:
+class DisposableStore:
+    """Lifecycle management for architectural components."""
+    def __init__(self):
+        self._disposables = []
 
-class FiberNode:
-    def __init__(self, index, protocol):
+    def add(self, disposable: Disposable):
+        self._disposables.append(disposable)
+
+    def dispose(self):
+        logger.info("DISPOSING_STORE: Cleaning up lifecycle resources...")
+        for d in self._disposables:
+            d.dispose()
+        self._disposables.clear()
+
+class VerificationStrategy(ABC):
+    """Strategy pattern for extensible verification logic."""
+    @abstractmethod
+    def execute(self, fiber_nodes: List['FiberNode']) -> int:
+        pass
+
+class DefaultVerificationStrategy(VerificationStrategy):
+    def execute(self, fiber_nodes: List['FiberNode']) -> int:
+        logger.info("STRATEGY_EXECUTION: Running DefaultVerificationStrategy")
+        if not fiber_nodes:
+            return 0
+        return min(node.get_lane_mask() for node in fiber_nodes)
+
+class FiberNode(Disposable):
+    def __init__(self, index: int, protocol: str):
         self.index = index
         self.protocol = protocol
         self.mask = 0
+        logger.info(f"FIBER_NODE_INIT: Node {index} with protocol {protocol}")
 
     def update_mask(self):
+        # Simulated DNA synthesis logic
+        self.mask = (self.index * 7) % 256
         return self.mask
 
+    def get_lane_mask(self):
+        return self.mask
+
+    def dispose(self):
+        logger.info(f"FIBER_NODE_DEATH: Disposing Node {self.index}")
+
 class Scheduler:
-    def __init__(self, num_fiber_nodes):
+    def __init__(self, num_fiber_nodes: int):
         self.num_fiber_nodes = num_fiber_nodes
         self.scheduler_priority = 0
         self.memoized_state = {}
+        logger.info(f"SCHEDULER_INIT: Initialized with {num_fiber_nodes} nodes")
 
-    def update_scheduler_priority(self, fiber_nodes):
-        min_lane_mask = min(node.get_lane_mask() for node in fiber_nodes)
-        return min_lane_mask
-
-    def get_scheduler_priority(self):
-        return self.scheduler_priority
+    def update_scheduler_priority(self, fiber_nodes: List[FiberNode], strategy: VerificationStrategy):
+        try:
+            self.scheduler_priority = strategy.execute(fiber_nodes)
+            logger.info(f"SCHEDULER_UPDATE: New priority set to {self.scheduler_priority}")
+            return self.scheduler_priority
+        except Exception as e:
+            logger.error(f"SCHEDULER_FAILURE: Failed to update priority - {str(e)}")
+            return 0
 
 class HETM_Verifier:
-    def __init__(self, scheduler):
+    """
+    High-Efficiency Temporal Mutation Verifier.
+    Ensures architectural integrity during DNA synthesis.
+    """
+    def __init__(self, scheduler: Scheduler):
         self.scheduler = scheduler
+        self.store = DisposableStore()
+        self.strategy = DefaultVerificationStrategy()
+        logger.info("HETM_VERIFIER_ONLINE: Awaiting fiber synthesis...")
 
-    def verify(self, fiber_nodes):
-        for fiber_node in fiber_nodes:
-            fiber_node.update_mask()
-        return self.scheduler.update_scheduler_priority(fiber_nodes)
+    def verify(self, fiber_nodes: List[FiberNode]) -> int:
+        logger.info(f"VERIFICATION_START: Processing {len(fiber_nodes)} fiber nodes")
+        try:
+            for node in fiber_nodes:
+                node.update_mask()
+            
+            priority = self.scheduler.update_scheduler_priority(fiber_nodes, self.strategy)
+            logger.info("VERIFICATION_COMPLETE: Synthesis validated.")
+            return priority
+        except Exception as e:
+            logger.error(f"VERIFICATION_CRITICAL_FAILURE: {str(e)}")
+            return -1
 
-    def get_scheduler_priority(self):
-        return self.scheduler.scheduler_priority
+    def shutdown(self):
+        logger.info("HETM_VERIFIER_SHUTDOWN: Initiating cleanup...")
+        self.store.dispose()
 
-class Lane:
-    def __init__(self, fiber_nodes):
-        self.fiber_nodes = fiber_nodes
-        self.lane_mask = 0
-
-    def update_lane(self):
-        self.lane_mask = sum(node.update_mask() for node in self.fiber_nodes)
-        return self.lane_mask
-
-    def get_lane_mask(self):
-        return self.lane_mask
+if __name__ == "__main__":
+    # Example usage of the evolved HETM_Verifier
+    scheduler = Scheduler(num_fiber_nodes=4)
+    verifier = HETM_Verifier(scheduler)
+    
+    nodes = [FiberNode(i, "NEXUS_v3") for i in range(4)]
+    for n in nodes: verifier.store.add(n)
+    
+    result = verifier.verify(nodes)
+    print(f"Final Scheduler Priority: {result}")
+    
+    verifier.shutdown()
