@@ -1,139 +1,182 @@
-**EVOLVED CODE**
-#!/bin/bash
-
-#!/usr/bin/env bash
-
-# Import required dependencies
-import timers from 'timers';
-import { z } from 'zod';
-import { GovernanceInstance, Evaluators } from './governance_layer.ts';
-
-DisposalTokenService() {
-  local linkedToken=$1
-  local eventBus=$2
-  local disposalListeners=()
-
-  # Define the dispose function
-  dispose() {
-    eventBus.emit "dispose" "$1"
-  }
-
-  # Define the get_disposal_listeners function
-  get_disposal_listeners() {
-    local listeners=()
-    for listener in "${disposalListeners[@]}"; do
-      listeners+=("$listener")
-    done
-    echo "${listeners[@]}"
-  }
-
-  # Define the on_dispose function
-  on_dispose() {
-    disposalListeners+=("{\"callback\": \"$1\", \"context\": \"$2\" }")
-  }
-
-  # Define the is_dispose_listener_installed function
-  is_dispose_listener_installed() {
-    [ ${#disposalListeners[@]} -gt 0 ]
-  }
-
-  # Define the async dispose_callback function
-  async dispose_callback() {
-    for listener in "${disposalListeners[@]}"; do
-      eval "$listener.callback"
-    done
-  }
-
-  # Define the cancel_linked_token function
-  cancel_linked_token() {
-    if [ -n "$linkedToken" ]; then
-      if $linkedToken cancel "$1"; then
-        $linkedToken updateCancellationStatus "$1"
-        echo "\"cancelled\": true"
-      fi
-    fi
-  }
-
-  # Define the get_linked_tokens function
-  get_linked_tokens() {
-    tokens=()
-    if [ -n "$linkedToken" ]; then
-      tokens+=("$linkedToken")
-      eval "$linkedToken getLinkedTokens" | while read -r linkedToken; do
-        tokens+=("$linkedToken")
-      done
-    fi
-    echo "${tokens[@]}"
-  }
-
-  # Define the get_cancelled function
-  get_cancelled() {
-    echo "$cancelled"
-  }
-
-  # Define internal constants and variables
-  disposal_listener_count=0
-  cancelled=false
-
-  # Define an async function to handle token disposal
-  async dispose_token() {
-    disposal_listener_count=0
-    # Check if there are any disposal listeners attached
-    if is_dispose_listener_installed; then
-      # Get the disposal listeners and execute their callback functions
-      local disposalListeners=($(get_disposal_listeners))
-      for listener in "${disposalListeners[@]}"; do
-        eval "$listener.callback $token"
-      done
-    fi
-  }
-
-  # Return the service object
-  local service=$(printf "DisposalTokenService() { $(declare -f dispose_callback) $(declare -f dispose) $(declare -f get_linked_tokens) $(declare -f get_cancelled) }")
-  eval "$service"
-}
-
-DisposeTokenServiceEnhancer() {
-  local token=$1
-  local eventBus=$2
-  local disposalService=$(DisposalTokenService "$token" "$eventBus")
-}
-
-DisposeToken() {
-  local action_id=$1
-  local input_json=$2
-
-  # Check if the disposal service is already initialized
-  if [ -z "$1" ]; then
-    echo "\"error\": \"Disposal service not initialized\""
-    return
-  fi
-
-  # Emit the dispose event
-  echo "DisposeTokenService disposed $action_id"
-  dispose_callback()
-
-  # Return a message indicating the disposal of the token
-  echo "\"disposal_complete\": true"
-}
-
-DisposeTokenServiceCallback() {
-  local disposalService=$1
-  local token=$2
-  # Handle the disposal of the token
-  disposalService.dispose_token "$token"
-}
-
-DisposeTokenEnhancer() {
-  local disposalService=$1
-  local token=$2
-  eventBus.emit "dispose" "$token"
-}
-
-**OUTPUT**
 {
-  "improvedCode": "The evolved code",
-  "summary": "Expanded functionality and improved code quality while maintaining the core architecture and intent.",
-  "strategicDecision": "To enhance the DisposalTokenService and DisposeTokenServiceEnhancer functionality while adhering to the saturation guidelines and avoiding previous mistakes.",
+  "improvedCode": """
+
+#!/usr/bin/env node
+
+import { z } from 'zod';
+import timers from 'timers';
+import { GovernanceInstance, Evaluators } from './governance_layer.ts';
+import { GrogCognitiveCore } from './GrogCognitiveCore.ts';
+import { GrogGovernanceSynapse } from './GrogGovernanceSynapse.ts';
+import { GrogLogger } from './GrogLogger.ts';
+
+/**
+ * Service for managing disposal tokens.
+ */
+class DisposalTokenService {
+  private linkedToken: any;
+  private eventBus: any;
+  private disposalListeners: Array<{ callback: () => void; context: any }> = [];
+
+  constructor(linkedToken: any, eventBus: any) {
+    this.linkedToken = linkedToken;
+    this.eventBus = eventBus;
+  }
+
+  /**
+   * Dispose of the linked token.
+   */
+  async dispose() {
+    if (this.linkedToken) {
+      this.eventBus.emit('dispose', this.linkedToken);
+      await this.disposeCallback();
+    }
+  }
+
+  /**
+   * Get the disposal listeners.
+   */
+  getDisposalListeners() {
+    return this.disposalListeners;
+  }
+
+  /**
+   * Add a disposal listener.
+   */
+  onDispose(callback: () => void, context: any) {
+    this.disposalListeners.push({ callback, context });
+  }
+
+  /**
+   * Check if a disposal listener is installed.
+   */
+  isDisposeListenerInstalled() {
+    return this.disposalListeners.length > 0;
+  }
+
+  /**
+   * Handle the disposal of the token.
+   */
+  async disposeCallback() {
+    for (const listener of this.disposalListeners) {
+      listener.callback();
+    }
+  }
+
+  /**
+   * Cancel a linked token.
+   */
+  cancelLinkedToken(token: any) {
+    if (this.linkedToken) {
+      this.linkedToken.cancel(token);
+      this.linkedToken.updateCancellationStatus(token);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Get the linked tokens.
+   */
+  getLinkedTokens() {
+    const tokens = [];
+    if (this.linkedToken) {
+      tokens.push(this.linkedToken);
+      const linkedTokens = this.linkedToken.getLinkedTokens();
+      linkedTokens.forEach((token) => tokens.push(token));
+    }
+    return tokens;
+  }
+
+  /**
+   * Get the cancelled status.
+   */
+  getCancelled() {
+    return this.cancelled;
+  }
+
+  private _cancelled = false;
+
+  /**
+   * Dispose of the token and update the cancelled status.
+   */
+  async disposeToken(token: any) {
+    this._cancelled = true;
+    const disposalListeners = this.getDisposalListeners();
+    disposalListeners.forEach((listener) => listener.callback());
+  }
+}
+
+/**
+ * Dispose token service enhancer.
+ */
+class DisposeTokenServiceEnhancer {
+  private disposalService: DisposalTokenService;
+  private token: any;
+  private eventBus: any;
+
+  constructor(token: any, eventBus: any) {
+    this.disposalService = new DisposalTokenService(token, eventBus);
+  }
+
+  /**
+   * Dispose of the token.
+   */
+  async dispose() {
+    await this.disposalService.dispose();
+  }
+}
+
+/**
+ * Dispose token service callback.
+ */
+function DisposeTokenServiceCallback(disposalService: DisposalTokenService, token: any) {
+  disposalService.disposeToken(token);
+}
+
+/**
+ * Dispose token enhancer.
+ */
+class DisposeTokenEnhancer {
+  private disposalService: DisposalTokenService;
+  private token: any;
+
+  constructor(disposalService: DisposalTokenService, token: any) {
+    this.disposalService = disposalService;
+    this.token = token;
+  }
+
+  /**
+   * Dispose of the token.
+   */
+  async dispose() {
+    await this.disposalService.dispose();
+  }
+}
+
+/**
+ * Dispose token.
+ */
+async function DisposeToken(actionId: string, inputJson: any) {
+  if (!inputJson) {
+    throw new Error('Input json is required');
+  }
+
+  try {
+    // Dispose token service enhancement
+    const disposalService = new DisposeTokenServiceEnhancer(inputJson.token, inputJson.eventBus);
+    await disposalService.dispose();
+  } catch (error) {
+    GrogLogger.logError(error);
+  }
+
+  // Return a message indicating the disposal of the token
+  return { disposalComplete: true };
+}
+
+export { DisposeTokenService, DisposeTokenServiceEnhancer, DisposeTokenEnhancer, DisposeToken };
+""",
+  "summary": "Enhanced the disposal token service functionality to handle token disposal, cancellation, and link management while improving code quality and structure.",
+  "strategicDecision": "To adopt a more robust and maintainable architecture by incorporating Typeahead suggestions and decoupling concerns into separate entities.",
   "priority": 1
 }
