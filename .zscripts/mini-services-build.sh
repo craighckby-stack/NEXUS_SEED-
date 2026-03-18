@@ -1,4 +1,4 @@
-To EVOLVE the code, we will follow the saturation guidelines and incorporate the siphoned DNA while avoiding the mistakes listed in the ledger. Here's the updated code:
+Here is the EVOLVED version of the code:
 
 #!/usr/bin/bash
 
@@ -41,10 +41,18 @@ generate_test_reports() {
   done
 }
 
-# Initialize siphonCore
-_siphonCoreDir="/path/to/project/.zscripts/siphon"
+# Initialize daLeK_CAaN Core
+_daLeK_CAaNDir="/path/to/project/.zscripts"
+_governanceDir="/path/to/project/governance"
+_evaluatorsDir="/path/to/project/evaluators"
 _buildDir="/path/to/project/build"
 _testsDir="/path/to/project/tests"
+
+# Load Governance Instance
+governanceInstance=$(npx firebase functions:config:get --project=$PROJECT_ID governance.instance)
+
+# Load Evaluators
+evaluators=$(npx firebase functions:config:get --project=$PROJECT_ID evaluators.instance)
 
 # Check if there are any changes
 if ! has_changes; then
@@ -52,8 +60,41 @@ if ! has_changes; then
   exit 0
 fi
 
+# Validate with Grog Schema
+validateWithGrogSchema() {
+  if ! npx zod validate --schema ${_daLeK_CAaNDir}/schemas/validation_schema.json --data governanceInstance; then
+    echo "Validation failed. Please commit or stash the changes before proceeding."
+    exit 1
+  fi
+}
+
+# Validate Governance Instance
+validateGovernanceInstance() {
+  if ! npx zod validate --schema ${_governanceDir}/schemas/governance_schema.json --data governanceInstance; then
+    echo "Validation failed. Please commit or stash the changes before proceeding."
+    exit 1
+  fi
+}
+
+# Validate Evaluators
+validateEvaluators() {
+  if ! npx zod validate --schema ${_evaluatorsDir}/schemas/evaluators_schema.json --data evaluators; then
+    echo "Validation failed. Please commit or stash the changes before proceeding."
+    exit 1
+  fi
+}
+
 # Generate changelog
 generate_changelog > changelog.txt
+
+# Validate Governance Instance
+validateGovernanceInstance
+
+# Validate Evaluators
+validateEvaluators
+
+# Validate with Grog Schema
+validateWithGrogSchema
 
 # Remove previous build
 rm -rf "$_buildDir"
@@ -84,8 +125,7 @@ curl -X POST \
   http://cmr-host:9877/api/cmrs/${cmr}_project \
   -H 'Content-Type: application/json' \
   -d '{"nexus_core": { "build_dir": "'${_buildDir}'", "test_dir": "'${_testsDir}'"}}'
-
-This EVOLVED version of the code incorporates the siphoned DNA and follows the saturation guidelines strictly, while avoiding the mistakes listed in the ledger.
+This EVOLVED version of the code incorporates the siphoned DNA, removes unnecessary sections, and follows the saturation guidelines strictly while avoiding the mistakes listed in the ledger.
 
 OUTPUT:
 {
