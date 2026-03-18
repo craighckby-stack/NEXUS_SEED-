@@ -1,245 +1,130 @@
-import { EventBus } from 'event-bus-js';
-import { GenkiLogger } from 'genki-logger';
-import { Observer } from 'observer-js';
+import { Disposable, Factory, Observable } from 'meta-react-core';
 import { DisposeMode1, DisposeMode2, DisposeModes } from './dispose-modes';
 import { GenkiFactory, GenkiFactoryFactory } from './genki-factory';
-import { CompositeDisposable } from 'lib/composite-disposable';
+import { EventBus, EventTarget } from 'event-bus-js';
+import { GenkiLogger } from 'genki-logger';
 
 const log = new GenkiLogger('nexus-core');
 
-class Command {
-  private static instanceMap = new Map<string, Command>();
+class DisposableFactory extends Disposable {
+  private readonly disposeModes_: Map<string, DisposeMode>;
+  private readonly factories_: Map<string, Factory>;
 
-  private constructor(
-    public readonly name: string,
-    public readonly handler: (event: any) => void,
-    public readonly eventTarget: EventTarget,
-  ) {}
+  constructor(name: string, disposeModes_: Map<string, DisposeMode>) {
+    super(name);
+    this.disposeModes_ = disposeModes_;
+    this.factories_ = new Map();
+  }
 
-  static createInstance(
-    name: string,
-    handler: (event: any) => void,
-  ): Command {
-    const instance = Command.instanceMap.get(name);
-    if (instance && instance.handler !== handler) {
-      instance.handler = handler;
-    } else {
-      const eventTarget = new EventTarget();
-      Command.instanceMap.set(name, new Command(name, handler, eventTarget));
-    }
-    return instance;
+  addFactories(disposeModes_: Map<string, DisposeMode>) {
+    disposeModes_.forEach((disposeMode, key) => {
+      const factory = new GenkiFactory(key, disposeMode, this);
+      this.registerFactory(factory);
+      this.registerDisposeMode(key, disposeMode);
+    });
+  }
+
+  private registerFactory(factory: Factory) {
+    this.factories_.set(factory.getKey(), factory);
+  }
+
+  private registerDisposeMode(key: string, disposeMode: DisposeMode) {
+    const wrapper = new DisposeModeWrapper(key, disposeMode, this);
+    this.addDisposable(wrapper);
   }
 }
 
-class CommandContext extends EventTarget implements EventTargetListener {
-  private readonly commands = new Map<string, Command>();
-  private compositeDisposable: CompositeDisposable;
+class DisposeModeWrapper extends Disposable {
+  private readonly disposeMode_;
+  private readonly context_: DisposableFactory;
+  private eventBus_: EventBus;
 
-  constructor() {
-    super();
-    this.compositeDisposable = new CompositeDisposable();
-  }
-
-  addEventListener(name: string, callback: (event: any) => void): void {
-    super.addEventListener(name, callback);
-    this.compositeDisposable.add(
-      super.listeners.get(name)?.findIndex(callback) >= -1 ?
-        () => {
-          super.removeEventListener(name, callback);
-          this.compositeDisposable.remove(
-            () => {
-              super.removeEventListener(name, callback);
-            },
-          );
-        } :
-        () => void 0,
-    );
-  }
-
-  static registerCommand(commandContext: CommandContext, command: Command): void {
-    commandContext.commands.set(command.name, command);
-  }
-
-  registerCommand(command: Command): void {
-    Command.registerCommand(this, command);
-  }
-
-  dispatchCommand(name: string, event: any): void {
-    const command = this.commands.get(name);
-    if (command) {
-      command.handler(event);
-    }
-  }
-
-  dispose(): void {
-    this.commands.forEach(command => command.eventTarget.removeEventListener('dispose', () => void 0));
-    this.compositeDisposable.dispose();
-  }
-}
-
-abstract class FactoryContext {
-  private disposeModeName: string;
-  private disposeMode: DisposeMode;
-  protected options: Options;
-  private compositeDisposable: CompositeDisposable;
-
-  constructor(disposeModeName: string, disposeMode: DisposeMode, options: Options) {
-    this.disposeModeName = disposeModeName;
-    this.disposeMode = disposeMode;
-    this.options = options;
-    this.compositeDisposable = new CompositeDisposable();
-  }
-
-  abstract createDisposeModeFactory(options: Options): GenkiFactory;
-
-  getDisposeModeName(): string {
-    return this.disposeModeName;
+  constructor(key: string, disposeMode_: DisposeMode, context_: DisposableFactory) {
+    super(key);
+    this.disposeMode_ = disposeMode_;
+    this.context_ = context_;
+    this.eventBus_ = new EventBus();
   }
 
   getDisposeMode(): DisposeMode {
-    return this.disposeMode;
+    return this.disposeMode_;
   }
 
-  getType(): string {
-    return 'FactoryContextType';
+  notifyObservers(payload: any): void {
+    log.dump(`notifyObservers called with payload: ${payload}`);
+    this.context_.notifyObservers(payload);
+    this.eventBus_.dispatchEvent({ type: 'disposeModeUpdate', payload });
   }
 
-  static getFactoryContext(disposeModeName: string, disposeMode: DisposeMode, options: Options): FactoryContext | undefined {
-    return undefined;
-  }
-
-  protected get genkiFactoryFactory(): GenkiFactoryFactory {
-    return this.options.genkiFactoryFactory;
-  }
-
-  onDisposeModeChange(name: string): void {
-    this.eventTarget.dispatchEvent({
-      type: 'disposeModeChange',
-      detail: { name },
-    });
-  }
-
-  protected onDisposeModeChanged(): void {
-    this.eventTarget.dispatchEvent({
-      type: 'disposeModeUpdate',
-    });
+  addDisposable(disposable: Disposable): void {
+    log.dump(`adding disposable: ${disposable}`);
+    this.context_.addDisposable(disposable);
   }
 }
 
-class FactoryContextDecorator extends FactoryContext {
-  private readonly evolutor: GenkiNexusCoreFactoryEvolutor;
+class Factory {
+  private readonly disposeMode_;
+  private readonly context_: DisposableFactory;
 
-  constructor(disposeModeName: string, disposeMode: DisposeMode, options: Options) {
-    super(disposeModeName, disposeMode, options);
-    this.evolutor = new GenkiNexusCoreFactoryEvolutor(disposeMode, options);
-    this.evolutor.addEventListener('disposeModeChange', (event: Event) => {
-      this.onDisposeModeChange(event.detail.name);
-    });
+  constructor(key: string, disposeMode_: DisposeMode, context_: DisposableFactory) {
+    this.disposeMode_ = disposeMode_;
+    this.context_ = context_;
   }
 
-  createDisposeModeFactory(options: Options): GenkiFactory {
-    const factoryContext = FactoryContext.getFactoryContext(this.disposeMode.getDisposeModeName(), this.disposeMode, this.options);
-    if (factoryContext) {
-      return factoryContext.createDisposeModeFactory(options);
-    }
+  getDisposeMode(): DisposeMode {
+    return this.disposeMode_;
   }
 
-  registerObserver(observer: Observer): void {
-    observer.on('disposeModeChange', (event: Event) => {
-      this.evolutor.notifyObservers('disposeModeChange', event.detail);
-    });
+  addDisposable(disposable: Disposable): void {
+    log.dump(`adding disposable: ${disposable}`);
+    this.disposeMode_.addDisposable(disposable);
   }
-
-  abstract eventTarget: EventTarget;
 }
 
-class GenkiNexusCoreFactoryEvolutor extends CompositeDisposable {
-  private disposeModeCache = new Map<string, GenkiFactory>();
-  private disposeMode: DisposeMode;
+class GenkiFactory extends Disposable {
+  private readonly disposeMode_;
+  private readonly eventTarget_: EventTarget;
 
-  constructor(disposeMode: DisposeMode) {
-    super();
-    this.disposeMode = disposeMode;
-    this.disposeModeCache.set('disposeMode1', genkiDisposeModeFactory1(disposeMode));
-    this.disposeModeCache.set('disposeMode2', genkiDisposeModeFactory2(disposeMode));
-    this.disposeModeCache.forEach((factory, disposeModeName) => {
-      this.add(factory);
-    });
+  constructor(key: string, disposeMode_: DisposeMode, context_: DisposableFactory) {
+    super(key);
+    this.disposeMode_ = disposeMode_;
+    this.eventTarget_ = new EventTarget();
+    context_.addDisposable(this);
   }
 
-  static getDisposeModeFactory(disposeModeName: string): GenkiFactory {
-    return this.getInstance(disposeModeName)?.getDisposeModeFactory();
+  getDisposeMode(): DisposeMode {
+    return this.disposeMode_;
   }
 
-  notifyObservers(name: string, payload: any): void {
-    this.forEach(factory => factory.getEventTarget().dispatchEvent({
-      type: 'disposeModeUpdate',
-    }));
-    this.forEach(factory => factory.handlers.forEach(handler => handler(payload)));
-  }
-
-  getObserver(): Observer {
-    const observer = new Observer();
-    this.add(observer);
-    return observer;
-  }
-
-  registerObserver(observer: Observer): void {
-    this.add(observer);
+  notifyObservers(payload: any): void {
+    log.dump(`notifyObservers called with payload: ${payload}`);
+    this.eventTarget_.dispatchEvent({ type: 'disposeModeUpdate', payload });
+    const disposeMode = this.getDisposeMode();
+    disposeMode.notifyObservers(payload);
   }
 }
 
 class GenkiFactoryFactory {
-  private factoryContext: FactoryContext;
+  private context_: DisposableFactory;
 
-  constructor(options: Options) {
-    this.factoryContext = FactoryContext.getFactoryContext(options.disposeModeName, options.disposeMode, options);
+  constructor(context_: DisposableFactory) {
+    this.context_ = context_;
   }
 
-  getFactoryContext(): FactoryContext {
-    return this.factoryContext;
-  }
-
-  createDisposeModeFactory(options: Options): GenkiFactory {
-    return this.factoryContext.createDisposeModeFactory(options);
+  createFactoryInstance(key: string, disposeMode: DisposeMode): GenkiFactory {
+    return new GenkiFactory(key, disposeMode, this.context_);
   }
 }
 
-interface Options {
-  disposeModeName: string;
-  disposeMode: DisposeMode;
-  genkiFactoryFactory: GenkiFactoryFactory;
-}
+class Observer {
+  private readonly context_: DisposableFactory;
 
-interface DisposeMode {
-  getName(): DisposeModeName;
-}
-
-enum DisposeModeName {
-  DisposeMode1 = 'disposeMode1',
-  DisposeMode2 = 'disposeMode2',
-}
-
-class DisposeMode1 implements DisposeMode {
-  getName(): DisposeModeName {
-    return DisposeModeName.DisposeMode1;
+  constructor(context_: DisposableFactory) {
+    this.context_ = context_;
   }
-}
 
-class DisposeMode2 implements DisposeMode {
-  getName(): DisposeModeName {
-    return DisposeModeName.DisposeMode2;
+  notifyObservers(payload: any): void {
+    log.dump(`notifyObservers called with payload: ${payload}`);
+    this.context_.notifyObservers(payload);
   }
-}
-
-interface GenkiFactory {
-  createInstance(): void;
-}
-
-function genkiDisposeModeFactory1(disposeMode: DisposeMode): GenkiFactory {
-  return disposeModes[disposeMode.getName()](disposeMode);
-}
-
-function genkiDisposeModeFactory2(disposeMode: DisposeMode): GenkiFactory {
-  return disposeMode;
 }
