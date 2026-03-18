@@ -3,51 +3,88 @@
  * @description Core infrastructure for asynchronous resource management, concurrency control, and lifecycle orchestration.
  */
 
-class IDisposable {
+class Disposable {
   dispose() {}
 }
 
-class NexusDisposableStore {
+class DisposableStore extends Disposable {
   constructor() {
     this._toDispose = new Set();
-    this._isDisposed = false;
+    this._disposed = false;
+    this._isDisposing = false;
   }
 
   add(t) {
-    if (!t) return t;
-    if (this._isDisposed) {
-      NexusDisposableStore._cleanup(t);
-      return t;
-    }
-    this._toDispose.add(t);
     return t;
   }
 
-  static _cleanup(t) {
-    try {
-      if (typeof t.dispose === 'function') t.dispose();
-      else if (typeof t === 'function') t();
-    } catch (e) {
-      console.error('DisposableStore cleanup error:', e);
-    }
+  addMany(...disposables) {
+    return disposables.reduce((acc, d) => acc.add(d), this);
+  }
+
+  static cleanup(t) {
+    t?.dispose?.();
   }
 
   dispose() {
-    if (this._isDisposed) return;
-    this._isDisposed = true;
-    for (const item of this._toDispose) {
-      NexusDisposableStore._cleanup(item);
-    }
+    this._disposed = true;
+  }
+
+  clear() {
+    this._toDispose.forEach((item) => DisposableStore.cleanup(item));
     this._toDispose.clear();
   }
 }
 
-class NexusCancellationToken {
-  static None = Object.freeze(new (class extends NexusCancellationToken {
-    constructor() { super(); }
-    get isCancellationRequested() { return false; }
-    onCancellationRequested() { return { dispose: () => {} }; }
-  })());
+class MutableDisposable extends Disposable {
+  constructor() {
+    super();
+    this._value = undefined;
+  }
+
+  get value() {
+    return this._value;
+  }
+
+  set value(newValue) {
+    if (this._value && newValue !== this._value) {
+      this._value.dispose();
+    }
+    this._value = newValue;
+  }
+
+  dispose() {
+    this._value?.dispose();
+    this._value = undefined;
+  }
+}
+
+class CancellationToken {
+  static None = new class extends CancellationToken {
+    isCancellationRequested() {
+      return false;
+    }
+
+    onCancellationRequested() {
+      return { dispose: () => {} };
+    }
+  }();
+
+  static Cancelled = new class extends CancellationToken {
+    constructor() {
+      super();
+      this._isCancelled = true;
+    }
+
+    get isCancellationRequested() {
+      return true;
+    }
+
+    onCancellationRequested(callback) {
+      callback.call(null);
+      return { dispose: () => {} };
+    }
+  }();
 
   constructor() {
     this._onCancellationRequested = null;
@@ -55,53 +92,42 @@ class NexusCancellationToken {
     this._reason = undefined;
   }
 
-  get isCancellationRequested() { return this._isCancelled; }
-  get reason() { return this._reason; }
+  get isCancellationRequested() {
+    return this._isCancelled;
+  }
 
-  onCancellationRequested(callback, thisArg) {
-    if (this._isCancelled) {
-      callback.call(thisArg, this._reason);
-      return { dispose: () => {} };
-    }
-    if (!this._onCancellationRequested) {
-      this._onCancellationRequested = new NexusEventEmitter();
-    }
-    return this._onCancellationRequested.event(callback, thisArg);
+  get reason() {
+    return this._reason;
+  }
+
+  onCancellationRequested(callback) {
+    return this._onCancellationRequested?.fire?.(callback);
   }
 
   throwIfCancelled() {
-    if (this.isCancellationRequested) {
-      const err = new Error(this._reason || 'Canceled');
+    if (this._isCancelled) {
+      const err = new Error(this._reason || 'Operation Canceled');
       err.name = 'AbortError';
       throw err;
     }
   }
 }
 
-class NexusCancellationTokenSource {
+class CancellationTokenSource {
   constructor(parent) {
-    this._token = new NexusCancellationToken();
-    this._parentListener = null;
-    if (parent && parent !== NexusCancellationToken.None) {
-      this._parentListener = parent.onCancellationRequested(reason => this.cancel(reason));
+    this._token = new CancellationToken();
+    if (parent && parent !== CancellationToken.None) {
+      parent.onCancellationRequested(() => this.cancel());
     }
   }
 
-  get token() { return this._token; }
+  get token() {
+    return this._token;
+  }
 
-  cancel(reason = 'Operation cancelled') {
-    if (this._token._isCancelled) return;
+  cancel(reason) {
     this._token._isCancelled = true;
     this._token._reason = reason;
-    if (this._token._onCancellationRequested) {
-      this._token._onCancellationRequested.fire(reason);
-      this._token._onCancellationRequested.dispose();
-      this._token._onCancellationRequested = null;
-    }
-    if (this._parentListener) {
-      this._parentListener.dispose();
-      this._parentListener = null;
-    }
   }
 
   dispose() {
@@ -109,215 +135,142 @@ class NexusCancellationTokenSource {
   }
 }
 
-class NexusEventEmitter {
+class Event {
   constructor() {
     this._listeners = [];
     this._disposed = false;
   }
 
-  get event() {
-    return (callback, thisArg) => {
-      const listener = { callback, thisArg };
-      this._listeners.push(listener);
-      return {
-        dispose: () => {
-          const idx = this._listeners.indexOf(listener);
-          if (idx !== -1) this._listeners.splice(idx, 1);
-        }
-      };
-    };
-  }
-
   fire(data) {
     if (this._disposed) return;
-    const queue = [...this._listeners];
-    for (const l of queue) {
+
+    const fire = () => {
+      this._listeners.forEach((listener) => listener.callback.call(listener.thisArg, data));
+      this._listeners = [];
+      this._isFiring = false;
+    };
+
+    if (this._isFiring) {
+      setTimeout(() => {
+        this._deliveryQueue.push(data);
+      });
+    } else {
+      this._isFiring = true;
       try {
-        l.callback.call(l.thisArg, data);
-      } catch (e) {
-        console.error('EventEmitter fire error:', e);
+        const listeners = [...this._listeners];
+        this._listeners = [];
+        fire();
+      } finally {
+        this._isFiring = false;
       }
     }
   }
 
-  dispose() {
-    this._disposed = true;
-    this._listeners = [];
+  onListener(callback) {
+    if (this._disposed) return { dispose: () => {} };
+
+    const listener = { callback, thisArg };
+    this._listeners.push(listener);
+    return {
+      dispose: () => {
+        const idx = this._listeners.indexOf(listener);
+        if (idx !== -1) {
+          this._listeners.splice(idx, 1);
+        }
+      }
+    };
   }
 }
 
-class NexusAsyncSemaphore {
-  constructor(capacity = 1) {
-    this._capacity = capacity;
-    this._active = 0;
-    this._waiting = [];
+class Semaphore {
+  constructor() {
+    this._semaphore = 0;
   }
 
-  acquire(token = NexusCancellationToken.None) {
-    return new Promise((resolve, reject) => {
-      if (this._active < this._capacity) {
-        this._active++;
-        resolve({ dispose: () => this.release() });
-        return;
+  acquire(token) {
+    return new Promise((resolve) => {
+      if (this._semaphore < this.capacity) {
+        this._semaphore++;
+        resolve(this);
+      } else {
+        token.throwIfCancelled();
+        this._acquireQueue.add(resolve);
       }
-
-      const entry = { resolve, reject, token };
-      const cancellationListener = token.onCancellationRequested((reason) => {
-        const idx = this._waiting.indexOf(entry);
-        if (idx !== -1) {
-          this._waiting.splice(idx, 1);
-          reject(new Error(`Semaphore acquisition cancelled: ${reason}`));
-        }
-      });
-
-      entry.cancellationListener = cancellationListener;
-      this._waiting.push(entry);
     });
   }
 
-  release() {
-    this._active--;
-    if (this._waiting.length > 0 && this._active < this._capacity) {
-      const next = this._waiting.shift();
-      if (next.cancellationListener) next.cancellationListener.dispose();
-      this._active++;
-      next.resolve({ dispose: () => this.release() });
+  release(token) {
+    if (this._acquireQueue.size) {
+      const resolve = this._acquireQueue.pop();
+      resolve();
+      this._semaphore++;
+    } else {
+      this._semaphore--;
     }
   }
-}
 
-class NexusAsyncMutex extends NexusAsyncSemaphore {
-  constructor(id) {
-    super(1);
-    this.id = id;
+  get capacity() {
+    return this._capacity;
   }
 
-  async runExclusive(task, token) {
-    const lock = await this.acquire(token);
-    try {
-      return await task();
-    } finally {
-      lock.dispose();
-    }
+  set capacity(newCapacity) {
+    this._capacity = newCapacity;
   }
 }
 
-class NexusDisposable {
-  constructor(name) {
-    this.name = name;
-    this._store = new NexusDisposableStore();
-    this._isDisposed = false;
-  }
-
-  get isDisposed() { return this._isDisposed; }
-
-  _register(obj) {
-    return this._store.add(obj);
-  }
-
-  dispose() {
-    if (this._isDisposed) return;
-    this._isDisposed = true;
-    this._store.dispose();
-  }
-}
-
-class NexusResourceFactory {
-  static create(baseFactory, decorators = []) {
-    return decorators.reduce((acc, decorator) => decorator(acc), baseFactory);
-  }
-
-  static withLogging(factory) {
-    return async (disposable, options) => {
-      const res = await factory(disposable, options);
-      return res;
-    };
-  }
-}
-
-class NexusResourceRegistry extends NexusDisposable {
+class Mutex {
   constructor() {
-    super('NexusResourceRegistry');
-    this._resources = new Map();
-    this._factories = new Map();
-    this._onResourceChanged = this._register(new NexusEventEmitter());
+    this._mutex = Promise.resolve();
   }
 
-  get onResourceChanged() { return this._onResourceChanged.event; }
-
-  define(type, factoryFn, decorators = []) {
-    const decorated = NexusResourceFactory.create(factoryFn, decorators);
-    this._factories.set(type, decorated);
+  acquire(token) {
+    if (this._mutex === Promise.resolve()) {
+      this._mutex = this._mutex.then(() => token);
+    } else {
+      this._mutex = this._mutex.then(() => this._acquireQueue.add(token));
+    }
+    return this._mutex;
   }
 
-  async acquire(type, key, options = {}, token = NexusCancellationToken.None) {
-    token.throwIfCancelled();
-    const fullKey = `${type}:${key}`;
-    let entry = this._resources.get(fullKey);
-
-    if (entry) {
-      entry.refCount++;
-      return entry.instance;
-    }
-
-    const factory = this._factories.get(type);
-    if (!factory) throw new Error(`Unknown resource type: ${type}`);
-
-    const resourceStore = new NexusDisposableStore();
-    try {
-      const instance = await factory(resourceStore, options);
-      entry = {
-        instance,
-        store: resourceStore,
-        refCount: 1,
-        type,
-        key
-      };
-      this._resources.set(fullKey, entry);
-      this._onResourceChanged.fire({ type: 'acquired', type, key });
-      return instance;
-    } catch (e) {
-      resourceStore.dispose();
-      throw e;
-    }
-  }
-
-  async release(type, key) {
-    const fullKey = `${type}:${key}`;
-    const entry = this._resources.get(fullKey);
-    if (!entry) return;
-
-    entry.refCount--;
-    if (entry.refCount <= 0) {
-      this._resources.delete(fullKey);
-      entry.store.dispose();
-      this._onResourceChanged.fire({ type: 'released', type, key });
-    }
-  }
-
-  dispose() {
-    for (const entry of this._resources.values()) {
-      entry.store.dispose();
-    }
-    this._resources.clear();
-    super.dispose();
+  release(token) {
+    const unlock = () => {
+      if (this._acquireQueue.size) {
+        const token = this._acquireQueue.shift();
+        unlock();
+      } else {
+        this._mutex = Promise.resolve();
+      }
+    };
+    this._acquireQueue.add(lock);
+    unlock();
   }
 }
 
-class NexusLazy {
-  constructor(executor) {
-    this._executor = executor;
-    this._value = undefined;
-    this._didRun = false;
+class Barrier {
+  constructor() {
+    this._barriers = [];
   }
 
-  get value() {
-    if (!this._didRun) {
-      this._value = this._executor();
-      this._didRun = true;
-    }
-    return this._value;
+  open() {
+    return Promise.resolve();
   }
 
-  get hasValue() { return this._didRun; }
+  wait(token) {
+    return this._acquireQueue.add(token).then(() => this._mutex);
+  }
+
+  get size() {
+    return this._barriers;
+  }
+
+  set size(newSize) {
+    this._barriers = newSize;
+  }
+}
+
+// Define a global token store
+class TokenStore extends DisposableStore {
+  constructor() {
+    super();
+  }
 }
