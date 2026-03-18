@@ -1,276 +1,130 @@
-/**
- * @file nexus_core.js
- * @description Core infrastructure for asynchronous resource management, concurrency control, and lifecycle orchestration.
- */
-
-class Disposable {
-  dispose() {}
-}
+import type { CancellationToken, CancellationTokenSource } from 'nexus-core';
 
 class DisposableStore extends Disposable {
-  constructor() {
-    this._toDispose = new Set();
-    this._disposed = false;
-    this._isDisposing = false;
-  }
+  private _cancellationTokens: TokenStore;
 
-  add(t) {
-    return t;
-  }
-
-  addMany(...disposables) {
-    return disposables.reduce((acc, d) => acc.add(d), this);
-  }
-
-  static cleanup(t) {
-    t?.dispose?.();
-  }
-
-  dispose() {
-    this._disposed = true;
-  }
-
-  clear() {
-    this._toDispose.forEach((item) => DisposableStore.cleanup(item));
-    this._toDispose.clear();
-  }
-}
-
-class MutableDisposable extends Disposable {
   constructor() {
     super();
-    this._value = undefined;
+    this._cancellationTokens = new TokenStore();
   }
 
-  get value() {
-    return this._value;
+  dispose(): void {
+    super.dispose();
+    this._cancellationTokens.dispose();
   }
 
-  set value(newValue) {
-    if (this._value && newValue !== this._value) {
-      this._value.dispose();
+  clear(): void {
+    this._cancellationTokens.clear();
+    super.clear();
+  }
+
+  add(disposable: CancellationToken | Disposable): Disposable {
+    if (disposable instanceof CancellationToken) {
+      return this._cancellationTokens.add(disposable);
     }
-    this._value = newValue;
+    return super.add(disposable);
   }
 
-  dispose() {
-    this._value?.dispose();
-    this._value = undefined;
+  addMany(...disposables: CancellationToken[] | Disposable[]): Disposable[] {
+    const cancellationTokens = disposables.filter((d) => d instanceof CancellationToken);
+    const otherDisposables = disposables.filter((d) => !(d instanceof CancellationToken));
+    if (cancellationTokens.length > 0) {
+      const tokenStore = this._cancellationTokens.addMany(...cancellationTokens);
+      return tokenStore.map((item) => ({ disposable: item }));
+    }
+    return super.addMany(...otherDisposables);
+  }
+
+  clearCancellations(): void {
+    this._cancellationTokens.clear();
   }
 }
 
-class CancellationToken {
-  static None = new class extends CancellationToken {
-    isCancellationRequested() {
-      return false;
-    }
-
-    onCancellationRequested() {
-      return { dispose: () => {} };
-    }
-  }();
-
-  static Cancelled = new class extends CancellationToken {
-    constructor() {
-      super();
-      this._isCancelled = true;
-    }
-
-    get isCancellationRequested() {
-      return true;
-    }
-
-    onCancellationRequested(callback) {
-      callback.call(null);
-      return { dispose: () => {} };
-    }
-  }();
-
+class MutableDisposableStore extends DisposableStore {
   constructor() {
-    this._onCancellationRequested = null;
-    this._isCancelled = false;
-    this._reason = undefined;
+    super();
   }
 
-  get isCancellationRequested() {
-    return this._isCancelled;
-  }
-
-  get reason() {
-    return this._reason;
-  }
-
-  onCancellationRequested(callback) {
-    return this._onCancellationRequested?.fire?.(callback);
-  }
-
-  throwIfCancelled() {
-    if (this._isCancelled) {
-      const err = new Error(this._reason || 'Operation Canceled');
-      err.name = 'AbortError';
-      throw err;
-    }
-  }
-}
-
-class CancellationTokenSource {
-  constructor(parent) {
-    this._token = new CancellationToken();
-    if (parent && parent !== CancellationToken.None) {
-      parent.onCancellationRequested(() => this.cancel());
+  set value(value: CancellationToken | Disposable) {
+    if (value instanceof CancellationToken) {
+      super.setDisposable(value);
+    } else {
+      super.value = value;
     }
   }
 
-  get token() {
-    return this._token;
-  }
-
-  cancel(reason) {
-    this._token._isCancelled = true;
-    this._token._reason = reason;
-  }
-
-  dispose() {
-    this.cancel('Source disposed');
+  get value(): CancellationToken | Disposable {
+    return super.getDisposable();
   }
 }
 
 class Event {
+  private listeners: Callback[];
+
   constructor() {
-    this._listeners = [];
-    this._disposed = false;
+    this.listeners = [];
   }
 
-  fire(data) {
-    if (this._disposed) return;
-
-    const fire = () => {
-      this._listeners.forEach((listener) => listener.callback.call(listener.thisArg, data));
-      this._listeners = [];
-      this._isFiring = false;
-    };
-
-    if (this._isFiring) {
-      setTimeout(() => {
-        this._deliveryQueue.push(data);
-      });
-    } else {
-      this._isFiring = true;
-      try {
-        const listeners = [...this._listeners];
-        this._listeners = [];
-        fire();
-      } finally {
-        this._isFiring = false;
-      }
-    }
+  on(callback: Callback): IDisposable {
+    return this.listeners.push(callback);
   }
 
-  onListener(callback) {
-    if (this._disposed) return { dispose: () => {} };
+  fire(data: any): void {
+    this.listeners.forEach((callback) => callback(data));
+  }
+}
 
-    const listener = { callback, thisArg };
-    this._listeners.push(listener);
-    return {
-      dispose: () => {
-        const idx = this._listeners.indexOf(listener);
-        if (idx !== -1) {
-          this._listeners.splice(idx, 1);
-        }
-      }
+class Subject extends Event {}
+
+class TokenStore {
+  private disposables: Disposable[];
+
+  constructor() {
+    this.disposables = new Set();
+  }
+
+  add(disposable: Disposable): IDisposable {
+    this.disposables.add(disposable);
+    return { 
+      disposable, 
+      uninstall: () => this.disposables.delete(disposable) 
     };
   }
-}
 
-class Semaphore {
-  constructor() {
-    this._semaphore = 0;
+  addMany(...disposables: Disposable[]): IDisposable[] {
+    return disposables.map((d) => this.add(d));
   }
 
-  acquire(token) {
-    return new Promise((resolve) => {
-      if (this._semaphore < this.capacity) {
-        this._semaphore++;
-        resolve(this);
-      } else {
-        token.throwIfCancelled();
-        this._acquireQueue.add(resolve);
+  clear(): void {
+    this.disposables.forEach((d) => d.dispose());
+    this.disposables.clear();
+  }
+
+  dispose(): void {
+    this.clear();
+  }
+}
+
+class TokenStoreFactory {
+  private tokenStoreCache: Map<string, TokenStore>;
+
+  constructor() {
+    this.tokenStoreCache = new Map();
+  }
+
+  getTokenStore(tokenStore?: TokenStore): TokenStore {
+    if (tokenStore) {
+      const key = JSON.stringify(tokenStore);
+      if (this.tokenStoreCache.has(key)) {
+        return this.tokenStoreCache.get(key);
       }
-    });
-  }
-
-  release(token) {
-    if (this._acquireQueue.size) {
-      const resolve = this._acquireQueue.pop();
-      resolve();
-      this._semaphore++;
-    } else {
-      this._semaphore--;
+      this.tokenStoreCache.set(key, tokenStore);
+      return tokenStore;
     }
+    return this.createTokenStore();
   }
 
-  get capacity() {
-    return this._capacity;
-  }
-
-  set capacity(newCapacity) {
-    this._capacity = newCapacity;
-  }
-}
-
-class Mutex {
-  constructor() {
-    this._mutex = Promise.resolve();
-  }
-
-  acquire(token) {
-    if (this._mutex === Promise.resolve()) {
-      this._mutex = this._mutex.then(() => token);
-    } else {
-      this._mutex = this._mutex.then(() => this._acquireQueue.add(token));
-    }
-    return this._mutex;
-  }
-
-  release(token) {
-    const unlock = () => {
-      if (this._acquireQueue.size) {
-        const token = this._acquireQueue.shift();
-        unlock();
-      } else {
-        this._mutex = Promise.resolve();
-      }
-    };
-    this._acquireQueue.add(lock);
-    unlock();
-  }
-}
-
-class Barrier {
-  constructor() {
-    this._barriers = [];
-  }
-
-  open() {
-    return Promise.resolve();
-  }
-
-  wait(token) {
-    return this._acquireQueue.add(token).then(() => this._mutex);
-  }
-
-  get size() {
-    return this._barriers;
-  }
-
-  set size(newSize) {
-    this._barriers = newSize;
-  }
-}
-
-// Define a global token store
-class TokenStore extends DisposableStore {
-  constructor() {
-    super();
+  private createTokenStore(): TokenStore {
+    return new TokenStore();
   }
 }
