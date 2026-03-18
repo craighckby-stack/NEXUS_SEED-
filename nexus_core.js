@@ -11,14 +11,22 @@ class GenkiNexusCoreFactoryEvolutor extends EventDispatcher {
     this.eventBus = eventBus;
   }
 
-  async getDisposableStoreFactoryWithStrategies(disposeMode: DisposeMode, options?: Options): Promise<GenkiDisposableStoreFactory> {
+  async getDisposableStoreFactoryWithStrategies(
+    disposeMode: DisposeMode,
+    options?: Options,
+  ): Promise<GenkiDisposableStoreFactory> {
     const strategyFactory = this.disposables.get(CancelationStrategyFactoryName);
     const configFactory = await this.createConfigFactory(disposeMode, options);
 
     if (this.disposables.has(disposeMode.toString())) {
       return this.disposables.get(disposeMode.toString());
     } else {
-      return this.createGenkiDisposableStoreFactory(disposeMode, options, strategyFactory, configFactory);
+      return this.createGenkiDisposableStoreFactory(
+        disposeMode,
+        options,
+        strategyFactory,
+        configFactory,
+      );
     }
   }
 
@@ -42,10 +50,13 @@ class GenkiNexusCoreFactoryEvolutor extends EventDispatcher {
     disposeMode: DisposeMode,
     options?: Options,
   ): Promise<GenkiDisposableStoreFactory> {
+    const strategyFactory = new CancelationStrategyFactory(
+      disposeMode,
+      this.disposables,
+    );
+
     const configFactory = new GenkiDisposableStoreFactory(
-      new CancelationStrategyFactory(disposeMode,
-        this.disposables,
-      ),
+      strategyFactory.getFactory(CancellationStrategyName),
       disposeMode,
       options,
       this.eventBus,
@@ -57,7 +68,10 @@ class GenkiNexusCoreFactoryEvolutor extends EventDispatcher {
   async getDisposableStoreObserver(
     disposalStore: DisposableStore,
   ): Promise<DisposableStoreObserver> {
-    const genkiDisposableStoreObserver = new GenkiDisposableStoreObserver(disposalStore, this.eventBus);
+    const genkiDisposableStoreObserver = new GenkiDisposableStoreObserver(
+      disposalStore,
+      this.eventBus,
+    );
 
     await this.subscribe(genkiDisposableStoreObserver);
 
@@ -69,7 +83,10 @@ class GenkiNexusCoreFactoryEvolutor extends EventDispatcher {
 
     allStrategyFactories.forEach((factory) => {
       const strategy = factory.getFactory(CancellationStrategyName);
-      this.disposables.set(DisposeMode.TRANSACTIONAL_MODE.toString(), new GenkiDisposableStoreFactory(strategy, DisposeMode.TRANSACTIONAL_MODE, null, this.eventBus));
+      this.disposables.set(
+        DisposeMode.TRANSACTIONAL_MODE.toString(),
+        new GenkiDisposableStoreFactory(strategy, DisposeMode.TRANSACTIONAL_MODE, null, this.eventBus),
+      );
     });
   }
 
@@ -110,7 +127,13 @@ class GenkiNexusCoreFactoryEvolutor extends EventDispatcher {
   }
 
   async observerDisposalStore(): Promise<void> {
-    const genkiDisposableStoreObserver = this.getDisposableStoreObserver(new DisposableStore(new CancelationStrategy(), DisposeMode.TRANSACTIONAL_MODE, null));
+    const genkiDisposableStoreObserver = this.getDisposableStoreObserver(
+      new DisposableStore(
+        new CancelationStrategy(),
+        DisposeMode.TRANSACTIONAL_MODE,
+        null,
+      ),
+    );
 
     await genkiDisposableStoreObserver.onDisposeGenkiStore();
   }
@@ -126,54 +149,63 @@ class GenkiNexusCoreFactoryEvolutor extends EventDispatcher {
   }
 }
 
-class StoreManager {
-  private readonly stores: Map<string, GenkiDisposableStore>;
-
-  constructor() {
-    this.stores = new Map();
-  }
-
-  async clear(): Promise<void> {
-    this.stores.clear();
-  }
-
-  getGenkiDisposalStores(): Map<string, GenkiDisposableStore> {
-    return this.stores;
-  }
-
-  getDisposeMode(options: Options): DisposeMode {
-    // Get dispose mode based on options
-  }
-}
-
 class DisposeMode {
-  static TRANSACTIONAL_MODE = new DisposeMode('transactional');
-  static BATCH_MODE = new DisposeMode('batch');
-  static STREAMING_MODE = new DisposeMode('streaming');
+  private disposeMode: string;
+
+  constructor(disposeMode: string) {
+    this.disposeMode = disposeMode;
+  }
+
+  getDisposeModeName(): string {
+    return this.disposeMode;
+  }
+
+  dispose(): void {
+    // Do nothing
+  }
+
+  onDispose(): void {
+    // Do nothing
+  }
 }
 
 class GenkiDisposableStoreFactory implements GenkiDisposable {
   private readonly genkiDisposalStores: Map<string, GenkiDisposableStore>;
+  private readonly disposeMode: DisposeMode;
+  private readonly strategy: CancelationStrategy;
+  private readonly options?: Options;
+  private readonly eventBus: EventBus;
 
   constructor(
-    private readonly strategy: CancelationStrategy,
-    private readonly disposeMode: DisposeMode,
-    private readonly options?: Options,
-    private readonly eventBus: EventBus,
+    strategy: CancelationStrategy,
+    disposeMode: DisposeMode,
+    options?: Options,
+    eventBus: EventBus,
   ) {
     this.genkiDisposalStores = new Map();
+    this.disposeMode = disposeMode;
+    this.strategy = strategy;
+    this.options = options;
+    this.eventBus = eventBus;
   }
 
-  async getGenkiDisposableStoreAsync(disposeMode: DisposeMode, options: Options): Promise<GenkiDisposableStore> {
-    const cachedGenkiDisposableStore = this.genkiDisposalStores.get(disposeMode.toString());
+  async getGenkiDisposableStoreAsync(
+    disposeMode: DisposeMode,
+    options: Options,
+  ): Promise<GenkiDisposableStore> {
+    const cachedGenkiDisposableStore = this.genkiDisposalStores.get(disposeMode.getDisposeModeName());
 
     if (cachedGenkiDisposableStore) {
       return cachedGenkiDisposableStore;
     }
 
-    const genkiDisposableStore = new GenkiDisposableStore(this.strategy, disposeMode, options);
+    const genkiDisposableStore = new GenkiDisposableStore(
+      this.strategy,
+      disposeMode,
+      options,
+    );
 
-    this.genkiDisposalStores.set(disposeMode.toString(), genkiDisposableStore);
+    this.genkiDisposalStores.set(disposeMode.getDisposeModeName(), genkiDisposableStore);
 
     return genkiDisposableStore;
   }
@@ -192,14 +224,20 @@ class GenkiDisposableStoreFactory implements GenkiDisposable {
 }
 
 class GenkiDisposableStore implements GenkiDisposable {
-  private disposeMethod: () => Promise<void>;
+  private readonly disposeMethod: () => Promise<void>;
+  private readonly disposeMode: DisposeMode;
+  private readonly strategy: CancelationStrategy;
+  private readonly options?: Options;
 
   constructor(
-    private readonly strategy: CancelationStrategy,
-    private readonly disposeMode: DisposeMode,
-    private readonly options?: Options,
+    strategy: CancelationStrategy,
+    disposeMode: DisposeMode,
+    options?: Options,
   ) {
     this.disposeMethod = this.disposeGenkiStore;
+    this.disposeMode = disposeMode;
+    this.strategy = strategy;
+    this.options = options;
   }
 
   async disposeGenkiStore(): Promise<void> {
@@ -213,9 +251,11 @@ class GenkiDisposableStore implements GenkiDisposable {
 
 class GenkiDisposableStoreObserver {
   private readonly genkiDisposableStore: GenkiDisposableStore;
+  private readonly eventBus: EventBus;
 
   constructor(genkiDisposableStore: GenkiDisposableStore, eventBus: EventBus) {
     this.genkiDisposableStore = genkiDisposableStore;
+    this.eventBus = eventBus;
   }
 
   async onDisposeGenkiStore(): Promise<void> {
@@ -223,10 +263,43 @@ class GenkiDisposableStoreObserver {
   }
 }
 
-interface GenkiDisposable {
-  disposeGenkiStores(): Promise<void>;
+class CancelationStrategyFactory {
+  private eventBus: EventBus;
+  private disposables: Map<string, GenkiDisposableStoreFactory>;
+
+  constructor(
+    eventBus: EventBus,
+    disposables: Map<string, GenkiDisposableStoreFactory>,
+  ) {
+    this.eventBus = eventBus;
+    this.disposables = disposables;
+  }
+
+  getFactory(CancellationStrategyName: string): CancelationStrategy {
+    // Implement cancellation strategy
+  }
 }
 
-interface Disposable {
-  dispose(): Promise<void>;
+class StoreManager {
+  private stores: Map<string, GenkiDisposableStore>;
+
+  constructor() {
+    this.stores = new Map();
+  }
+
+  async clear(): Promise<void> {
+    this.stores.clear();
+  }
+
+  getGenkiDisposalStores(): Map<string, GenkiDisposableStore> {
+    return this.stores;
+  }
+
+  onDisposeGenkiStores(): Promise<void> {
+    // Implement
+  }
+
+  async getDisposeMode(options: Options): Promise<DisposeMode> {
+    // Implement disposal mode
+  }
 }
