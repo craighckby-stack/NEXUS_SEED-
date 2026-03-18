@@ -1,89 +1,85 @@
-class ImmutableDisposableStoreFactory {
-  private static readonly _availableStrategiesCache: Map<string, ImmutableDisposableStoreStrategy> = new Map();
+class DisposableStoreFactory {
+  private static _availableStrategiesCache: Map<string, DisposableStoreStrategy> = new Map();
 
   public static getAvailableCancellationStrategies(): string[] {
-    const strategies = ImmutableDisposableStoreFactory.getAvailableStrategies([]);
+    const strategies = DisposableStoreFactory.getAvailableStrategies([], false);
     return strategies.map((str) => str.name);
   }
 
-  public static getDefaultCancellationStrategies(): ImmutableDisposableStoreStrategyMap {
-    const strategies = ImmutableDisposableStoreFactory.getAvailableStrategies([]);
-    return new ImmutableDisposableStoreStrategyMap(strategies);
+  public static getDefaultCancellationStrategies(): DisposableStoreStrategyMap {
+    const strategies = DisposableStoreFactory.getAvailableStrategies([], true);
+    return new DisposableStoreStrategyMap(strategies);
   }
 
-  private static getAvailableStrategies(strategies: string[]): ImmutableDisposableStoreStrategy[] {
+  private static getAvailableStrategies(strategies: string[], shouldCache: boolean): DisposableStoreStrategy[] {
     if (_availableStrategiesCache.has('available_strategies')) {
       return _availableStrategiesCache.get('available_strategies');
     }
 
-    const cache = { key: 'available_strategies', value: strategies.map(strategy => new ImmutableDisposableStoreStrategy(strategy)) };
-    _availableStrategiesCache.set(cache.key, cache);
-    return cache.value;
+    const newStrategies = strategies.map(strategy => new DisposableStoreStrategy(strategy));
+    _availableStrategiesCache.set('available_strategies', newStrategies);
+    return newStrategies;
   }
 
   public static async registerCancellationStrategy(strategyName: string, strategyFn: () => void): Promise<void> {
-    const map = ImmutableDisposableStoreFactory.getDefaultCancellationStrategies();
+    const map = DisposableStoreFactory.getDefaultCancellationStrategies();
     if (!map.has(strategyName)) {
-      map.set(strategyName, new ImmutableDisposableStoreStrategy(strategyName, strategyFn));
-      EventEvolvedLazyCallbacks.registerStrategy(strategyName, strategyFn);
+      map.set(strategyName, new DisposableStoreStrategy(strategyName, strategyFn));
     }
   }
 
-  public static getCancellationStrategy(strategyName: string): ImmutableDisposableStoreStrategy | undefined {
-    const map = ImmutableDisposableStoreFactory.getDefaultCancellationStrategies();
+  public static getCancellationStrategy(strategyName: string): DisposableStoreStrategy | undefined {
+    const map = DisposableStoreFactory.getDefaultCancellationStrategies();
     return map.get(strategyName);
   }
 
-  public static async createDisposableStore(strategyName?: string): Promise<ImmutableDisposableStore> {
-    const cache = ImmutableDisposableStoreFactory._availableStrategiesCache.get(strategyName);
+  public static async createDisposableStore(strategyName?: string, options?: DisposableStoreOptions): Promise<DisposableStore> {
+    const cache = DisposableStoreFactory._availableStrategiesCache.get(strategyName);
     if (cache) {
-      return Promise.resolve(cache.value);
+      return Promise.resolve(cache);
     }
 
-    const strategyFn = ImmutableDisposableStoreFactory.getCancellationStrategy(strategyName);
+    const strategyFn = DisposableStoreFactory.getCancellationStrategy(strategyName);
     if (!strategyFn) {
       throw new Error(`Cancellation strategy not found for ${strategyName}.`);
     }
-    return ImmutableDisposableStoreFactory.createDisposableStoreSlow(strategyName, strategyFn);
-  }
 
-  private static async createDisposableStoreSlow(strategyName?: string, strategyFn?: () => void): Promise<ImmutableDisposableStore> {
-    const store = new ImmutableDisposableStore(strategyFn, strategyName);
-    await store.init();
+    const store = new DisposableStore(strategyFn, strategyName, options);
+    await store.init(options);
     await store.persist();
     return store;
   }
 
-  public static async registerLazyCallback(strategyName: string, callback: (strategyFn: () => void) => void): Promise<void> {
-    EventEvolvedLazyCallbacks.registerLazyCallback(strategyName, callback);
-  }
-
-  public static getLazyCallback(strategyName: string): (() => void) | undefined {
-    return EventEvolvedLazyCallbacks.getLazyCallback(strategyName);
+  protected static async createDisposableStoreSlow(options?: DisposableStoreOptions): Promise<DisposableStore> {
+    const store = new DisposableStore();
+    await store.init(options);
+    await store.persist();
+    return store;
   }
 
   public static dispose(): void {
-    ImmutableDisposableStoreFactory.getDefaultCancellationStrategies().clear();
-    ImmutableDisposableStoreFactory._availableStrategiesCache.clear();
-    EventEvolvedLazyCallbacks.clear();
+    DisposableStoreFactory.getDefaultCancellationStrategies().clear();
+    DisposableStoreFactory._availableStrategiesCache.clear();
   }
 }
 
-class ImmutableDisposableStore {
-  private _cancellationStrategy: ImmutableDisposableStoreStrategy | undefined;
+class DisposableStore {
+  private _cancellationStrategy: DisposableStoreStrategy;
   private _managedDispose: boolean;
   private _strategyName: string;
-  private _disposables: ImmutableDisposableStoreDisposable[];
+  private _disposables: DisposableStoreDisposable[];
+  private _options?: DisposableStoreOptions;
 
-  constructor(cancellationStrategy?: ImmutableDisposableStoreStrategy, strategyName?: string) {
+  constructor(cancellationStrategy: DisposableStoreStrategy, strategyName?: string, options?: DisposableStoreOptions) {
     this._cancellationStrategy = cancellationStrategy;
     this._managedDispose = false;
     this._strategyName = strategyName;
     this._disposables = [];
+    this._options = options;
   }
 
-  public async add(disposable: ImmutableDisposableStoreDisposable | CancellationToken): Promise<IDisposable> {
-    if (disposable instanceof ImmutableDisposableStore) {
+  public async add(disposable: DisposableStoreDisposable | CancellationToken): Promise<IDisposable> {
+    if (disposable instanceof DisposableStore) {
       this._disposables.push(disposable);
       return this;
     } else {
@@ -91,7 +87,7 @@ class ImmutableDisposableStore {
     }
   }
 
-  public async addMany(...disposables: ImmutableDisposableStoreDisposable[] | CancellationToken[]): Promise<IDisposable[]> {
+  public async addMany(...disposables: DisposableStoreDisposable[] | CancellationToken[]): Promise<IDisposable[]> {
     const promises = this._disposables.concat(disposables).map((disposable) => disposable.add());
     return Promise.all(promises);
   }
@@ -105,24 +101,19 @@ class ImmutableDisposableStore {
       return;
     }
     this._managedDispose = true;
-    if (this._cancellationStrategy) {
-      this._cancellationStrategy.action();
-    }
+    this._cancellationStrategy.action();
     for (const disposable of this._disposables) {
       await disposable.dispose();
     }
   }
 
-  public getCancellationStrategy(): ImmutableDisposableStoreStrategy | undefined {
-    return this._cancellationStrategy;
+  public async disposeWith(strategyName: string): Promise<void> {
+    await this.dispose();
+    console.log(`Disposing strategy ${strategyName} on store instance`);
   }
 
-  public async dispose(strategyName: string): Promise<void> {
-    this.dispose();
-  }
-
-  public init(): Promise<void> {
-    return Promise.resolve();
+  public async init(options?: DisposableStoreOptions): Promise<void> {
+    // Update strategy cache with new instance
   }
 
   public async persist(): Promise<void> {
@@ -130,30 +121,14 @@ class ImmutableDisposableStore {
   }
 }
 
-class ImmutableDisposableStoreStrategy {
+class DisposableStoreStrategy {
+  public name: string;
+  public action: () => void;
+
   constructor(strategyName: string, strategyFn: () => void) {
     this.name = strategyName;
     this.action = strategyFn;
   }
 }
 
-class ImmutableDisposableStoreStrategyMap extends Map<string, ImmutableDisposableStoreStrategy> {}
-
-class EventEvolvedLazyCallbacks {
-  private static instances: Map<string, () => void> = new Map();
-
-  public static registerStrategy(strategyName: string, strategyFn: () => void): void {
-    EventEvolvedLazyCallbacks.instances.set(strategyName, () => strategyFn());
-  }
-
-  public static registerLazyCallback(strategyName: string, callback: (strategyFn: () => void) => void): void {
-  }
-
-  public static getLazyCallback(strategyName: string): (() => void) | undefined {
-    return () => EventEvolvedLazyCallbacks.instances.get(strategyName)();
-  }
-
-  public static clear(): void {
-    EventEvolvedLazyCallbacks.instances.clear();
-  }
-}
+class DisposableStoreStrategyMap extends Map<string, DisposableStoreStrategy> {}
