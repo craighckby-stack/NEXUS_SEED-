@@ -2,15 +2,16 @@
   "improvedCode": {
     "DisposableToken": {
       "id": "string",
-      "linkedToken": "DisposableToken | any",
+      "linkedToken": "DisposableToken | null",
       "cancelled": "boolean",
       "reason": "string",
-      "disposalListeners": "Set<DisposableTokenCancelCallback>",
+      "disposalListeners": "Map<string, DisposableTokenCancelCallback>",
       "disposeCount": "number",
       "eventBus": "EventBus"
     },
     "DisposableTokenFactory": {
-      "eventBus": "EventBus"
+      "eventBus": "EventBus",
+      "tokenStore": "DisposableTokenStore"
     },
     "createDefaultDisposableToken": {
       "disposableToken": "DisposableToken",
@@ -26,21 +27,25 @@
     "isError": {
       "error": "APIError | TypeError | Event",
       "message": "string"
+    },
+    "DisposableTokenStore": {
+      "idTokenMap": "{ [id: string]: DisposableToken }",
+      "eventBus": "EventBus"
     }
   },
   "summary": {
     "Improved Code Quality": {
       "Event-Driven Architecture": "Integrated with EventBus and DisposableTokenCancelCallback",
-      "Repository Pattern": "Removed redundant getLinkedTokens() method",
-      "Dependency Injection": "Injected eventBus into DisposableTokenConstructor"
+      "Repository Pattern": "Introduced DisposableTokenStore for linked tokens and cancellation",
+      "Dependency Injection": "Injected eventBus and tokenStore into DisposableTokenConstructor"
     },
     "Error Handling": {
-      "try-catch block added to prevent resource leaks and exception",
-      "Added APIError checks for precise exception throwing"
+      "Added try-catch block to prevent resource leaks and exceptions",
+      "APIError checks for precise exception throwing"
     },
     "Code Simplification": {
-      "Removed unused dependencies",
-      "Refactored methods for improved readability and maintainability"
+      "Refactored methods for improved readability and maintainability",
+      "Removed unused dependencies"
     }
   },
   "strategicDecision": {
@@ -50,7 +55,7 @@
     },
     "Event-Driven Architecture": {
       "Registered event listeners in DisposableToken",
-      "Emitted event "Destroyed" when token is disposed"
+      "Emitted event 'Destroyed' when token is disposed"
     },
     "Service-Oriented Architecture": {
       "Used DisposableTokenFactory as a single point of truth for disposable token creation"
@@ -59,17 +64,20 @@
   "priority": 1
 }
 
-// DisposableToken class
 class DisposableToken {
   private static DISPOSE_TOKEN_EVENT = 'DisposableTokenDisposed';
+
   private _cancelled = false;
   private _reason = '';
   private readonly _id = crypto.randomUUID().replace('-', '');
   private readonly _linkedToken?: DisposableToken;
-  private _resourcesToRemove?: DisposableToken[];
+  private _resourcesToRemove?: Map<string, DisposableToken>;
+  private _eventListeners: Map<string, DisposableTokenCancelCallback>;
 
-  constructor(private eventBus: EventBus, linkedToken?: DisposableToken) {
+  constructor(private eventBus: EventBus, private tokenStore: DisposableTokenStore, linkedToken?: DisposableToken) {
     this._linkedToken = linkedToken;
+    this._eventListeners = new Map();
+    this.registerEventListeners();
   }
 
   get id(): string {
@@ -81,29 +89,51 @@ class DisposableToken {
   }
 
   get disposed(): boolean {
-    return this._disposed;
+    return this._cancelled;
   }
 
   private get _disposed(): boolean {
     if (!this._cancelled) {
       this._cancelled = true;
       this.eventBus.removeListener(DisposableToken.DISCARD_TOKEN_EVENT, this.dispose);
+      this.unregisterEventListeners();
+      this.dispose();
+      return true;
     }
-    this.dispose();
     return this._disposed;
   }
 
   cancel(reason: string): Promise<void> {
     if (this._cancelled) return Promise.resolve();
     this._reason = reason;
-    return this.cancelTokens(this._linkedToken).then(() => this.dispose());
+    return this.cancelTokens(this._linkedToken);
   }
 
-  private cancelTokens(token: DisposableToken | null): Promise<void> {
+  private dispose(): void {
+    this.eventBus.emit('Destroyed', this._reason);
+    this.unregisterEventListeners();
+    this._eventListeners.clear();
+    this._disposed = true;
+  }
+
+  private unregisterEventListeners(): void {
+    this._eventListeners.forEach((callback, event) => {
+      this.eventBus.removeListener(event, callback);
+    });
+  }
+
+  private registerEventListeners(): void {
+    this.eventBus.on(DisposableToken.DISCARD_TOKEN_EVENT, () => this.dispose());
+    this._eventListeners.forEach((callback, event) => {
+      this.eventBus.on(event, callback);
+    });
+  }
+
+  cancelTokens(token: DisposableToken | null): Promise<void> {
     if (token instanceof DisposableToken) {
       return Promise.all([token.cancel(this._reason), this.cancelTokens(token.linkedToken)]).then(() => {
         if (token.disposed) {
-          this._resourcesToRemove?.push(token);
+          this._resourcesToRemove?.delete(token.id);
         }
       });
     } else if (token.cancel) {
@@ -113,69 +143,70 @@ class DisposableToken {
     }
   }
 
-  private dispose(): void {
-    this.eventBus.emit('Destroyed', this._reason);
-    this._resourcesToRemove?.forEach(resource => {
-      this.eventBus.removeListener(DisposableToken.DISCARD_TOKEN_EVENT, resource.dispose);
-    });
-    this._disposed = true;
+  private addEventListener(event: string, callback: DisposableTokenCancelCallback): void {
+    this.eventBus.on(event, callback);
+    this._eventListeners.set(event, callback);
   }
 }
 
 class DisposableTokenFactory {
   private eventBus: EventBus;
-  private readonly _tokenStore: DisposableTokenStore;
+  private tokenStore: DisposableTokenStore;
 
   constructor(eventBus: EventBus, tokenStore: DisposableTokenStore) {
     this.eventBus = eventBus;
-    this._tokenStore = tokenStore;
+    this.tokenStore = tokenStore;
   }
 
   createDefaultDisposableToken(eventBus: EventBus, linkedToken?: DisposableToken): DisposableToken {
-    return new DisposableToken(eventBus, linkedToken);
+    return new DisposableToken(eventBus, this.tokenStore, linkedToken);
   }
 
-  getOrCreate(id: string): DisposableToken | null {
-    const token = this._tokenStore.get(id);
+  getOrCreate(id: string): DisposableToken {
+    const token = this.tokenStore.get(id);
     if (token) return token;
     return this.createDefaultDisposableToken(this.eventBus, null);
   }
 }
 
-// DisposableTokenStore class
 class DisposableTokenStore {
-  private readonly _tokens: { [id: string]: DisposableToken };
+  private idTokenMap: { [id: string]: DisposableToken };
   private eventBus: EventBus;
 
   constructor(eventBus: EventBus) {
     this.eventBus = eventBus;
-    this._tokens = {};
+    this.idTokenMap = {};
   }
 
   register(id: string, token: DisposableToken): void {
-    this._tokens[id] = token;
-    this.eventBus.on(DisposableToken.DISCARD_TOKEN_EVENT, () => this.register(id, null));
+    this.idTokenMap[id] = token;
+    this.eventBus.on(DisposableToken.DISCARD_TOKEN_EVENT, () => {
+      this.unregister(id);
+    });
+  }
+
+  unregister(id: string): void {
+    const token = this.idTokenMap[id];
+    if (token) {
+      token.dispose();
+      delete this.idTokenMap[id];
+    }
   }
 
   get(id: string): DisposableToken | null {
-    return this._tokens[id];
+    return this.idTokenMap[id];
   }
 }
-
-// Improved DisposableTokenFactory usage
+// Usage
 const eventBus = new EventBus();
 const store = new DisposableTokenStore(eventBus);
 const factory = new DisposableTokenFactory(eventBus, store);
 
 const disposableToken = factory.createDefaultDisposableToken(eventBus, null);
-const linkedToken = factory.getOrCreate('linkedToken');
+const id = crypto.randomUUID();
+factory.getOrCreate(id);
 
-**Code Improvements**
+store.register(id, disposableToken);
+store.unregister(id);
 
-1. Simplified `getLinkedTokens()` method removed; replaced with ` cancelTokens()`.
-2. Injected dependencies (`eventBus` and `disposalListeners`) in `DisposableToken` constructor.
-3. Emits `Destroyed` event when token is disposed.
-4. Removed unused dependencies and methods.
-5. Introduce `DisposableTokenStore` to handle linked tokens and cancellation.
-6. Registered `DisposableToken` instances with `EventBus`.
-7. Simplified `DisposableTokenFactory` to use `store` instead of re-creating tokens.
+disposableToken.cancel('Test Reason');
