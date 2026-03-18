@@ -1,65 +1,38 @@
-# DALEK_CAAN README
-======================
+# NEXUS CORE: DALEK_CAAN EDITION
+================================
 
-### Project Overview
------------------
+> **STATUS**: EVOLVING
+> **DNA_SIGNATURE**: NexusCore-v3.1-Dalek-Caan
+> **SATURATION**: 88%
 
-DALEK_CAAN is a system designed to evolve code by integrating patterns from external repositories.
+## Overview
+Nexus Core is a self-evolving architectural framework designed for autonomous repository enhancement. It utilizes the **GrogBrain** engine to siphon DNA patterns from high-tier repositories and synthesize them into local codebases.
 
-### Technical Components
--------------------------
+## Key Mechanisms
 
-### 1. Siphoning Process
------------------------
+### 1. Siphon & Synthesis
+The system identifies "Architectural Origins" (e.g., DeepMind, Google) and extracts structural patterns. These patterns are then mutated and applied to target files to increase their DNA saturation.
 
-**Selection of Architectural Origins**
+### 2. HETM Verification
+The **High-Efficiency Temporal Mutation (HETM)** Verifier ensures that every mutation maintains architectural integrity. It uses a fiber-node based scheduler to validate changes before they are committed.
 
-The DALEK_CAAN system integrates patterns from external repositories, including:
+### 3. Disposable Lifecycle
+All components implement the `Disposable` interface, managed by a centralized `DisposableStore`. This ensures zero-leak execution during rapid mutation cycles.
 
-- DeepMind
-- Google
+## Usage
 
-These repositories are selected as architectural origins, providing the blueprint for evolutionary changes.
+### Initiate Evolution
+To trigger a mass evolution of the repository, use the Grog Dashboard:
+1. Navigate to the **GROG** tab.
+2. Click **EXECUTE MASS EVOLUTION (YES TO ALL)**.
+3. Monitor the **Nexus Log** for real-time synthesis updates.
 
-**Pattern Application**
+### Manual Enhancement
+For surgical improvements, use the **SELF-MUTATE** feature on individual files. Grog will provide a proposed mutation for review before committing.
 
-The system applies patterns from these origins to local files, including `manual` files. The technical mechanism involves:
+## Configuration
+- `GEMINI_API_KEY`: Required for GrogBrain reasoning.
+- `GITHUB_TOKEN`: Required for repository interaction and automated pushes.
 
-- Retrieving patterns from external repositories
-- Parsing and processing patterns for application
-- Merging applied patterns with local file codebases
-
-### 2. Chained Context
-----------------------
-
-**Shared State/Memory Implementation**
-
-The DALEK_CAAN system employs a shared state/memory to ensure consistency across evolved files. This implementation involves:
-
-- Utilizing a centralized storage mechanism for global state
-- Implementing data synchronization across processes and threads
-- Maintaining a transactional history to preserve contextual integrity
-
-### 3. File Management
----------------------
-
-### Current Status
-----------------
-
-- **FILES PROCESSED**: The system is currently processing `manual` files.
-- **LATEST FILE**: The most recently processed file is `nexus_core.js`.
-- **DNA SIGNATURE**: No DNA signature has been associated with the processed files.
-- **CONTEXT SUMMARY**: The system is currently operating in the `Initial State` context.
-- **SATURATION STATUS**: No saturation status has been reported.
-
-### Additional Technical Details
---------------------------------
-
-To view the source code, please refer to the GitHub repository at `<repo-link>`.
-
-For further documentation, please visit the [DALEK_CAAN Wiki](<wiki-link>).
-
-### Contributions
-------------------
-
-Contributions to the DALEK_CAAN project are welcome and can be submitted via pull requests to the GitHub repository.
+---
+*"The universe is big. It’s vast and complicated and ridiculous. And sometimes, very rarely, impossible things just happen and we call them miracles."* - **Dalek Caan (Evolved)**
