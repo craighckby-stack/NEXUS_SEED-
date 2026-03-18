@@ -1,217 +1,10 @@
-import { Disposable, Factory, Inject } from 'meta-react-core';
-import { DisposeMode1, DisposeMode2, DisposeModes } from './dispose-modes';
-import { EventTarget } from 'event-target';
-import { GenkiFactoryFactory, GenkiFactory } from './genki-factory';
-import { EventBus } from 'event-bus-js';
-import { GenkiLogger } from 'genki-logger';
+**analysis_and_evolution_of_given_code.js**
 
-const logger = new GenkiLogger('nexus-core');
-
-class DisposableFactory extends Disposable {
-  private readonly context_;
-  private readonly disposables_;
-  private readonly eventBus_;
-  private readonly factories_;
-  private readonly observers_;
-
-  constructor(name: string, disposeModes_) {
-    super(name);
-    this.disposeModes_ = disposeModes_;
-    this.factories_ = new Map();
-    this.context_ = new ContextManager();
-    this.eventBus_ = new EventBus();
-    this.observers_ = new Map();
-
-    disposeModes_.forEach((disposeMode, key) => {
-      const factory = new GenkiFactory(key, disposeMode, this);
-      this.registerFactory(factory, key);
-      this.registerDisposeMode(key, disposeMode);
-      factory.addObserver(disposeMode.getObserver());
-    });
-
-    this.injectAndRegisterFactories();
-  }
-
-  @Inject
-  injectAndRegisterFactories(disposeModes_) {
-    disposeModes_.forEach((disposeMode, key) => {
-      const factory = new GenkiFactory(key, disposeMode, this);
-      this.registerFactory(factory, key);
-      disposeMode.injectAndRegisterFactory(factory);
-      factory.addObserver(disposeMode.getObserver());
-    });
-  }
-
-  registerFactory(factory: Factory, key: string) {
-    this.factories_.set(key, factory);
-  }
-
-  registerDisposeMode(key, disposeMode) {
-    const wrapper = new DisposeModeWrapper(key, disposeMode, this);
-    this.addDisposable(wrapper);
-  }
-
-  addDisposable(disposable: Disposable) {
-    this.disposables_.set(disposable.name, disposable);
-    this.context_.addDisposable(disposable);
-  }
-
-  notifyObservers(payload) {
-    this.observers_.forEach((observer, key) => {
-      observer.notify(payload);
-    });
-  }
-
-  getDisposeMode(key: string) {
-    return this.disposeModes_.get(key);
-  }
-
-  addFactory(factory: Factory, key: string) {
-    this.factories_.set(key, factory);
-  }
-
-  getFactory(key: string) {
-    return this.factories_.get(key);
-  }
-
-  removeFactory(key: string) {
-    this.factories_.delete(key);
-  }
-
-  registerEventBusTarget(target, bus) {
-    const oldDispatch = target.dispatchEvent || emptyFunction;
-    const newDispatch = (...args) => {
-      oldDispatch.apply(target, args);
-      bus.dispatchEvent({ ...args[0], key: this.disposeModes_.get(args[0].key).key });
-    };
-    Object.assign(target, { dispatchEvent: newDispatch });
-  }
-}
-
-class DisposeModeWrapper extends Disposable {
-  private readonly disposeMode_;
-  private readonly disposeModeKey;
-  private readonly context_;
-  private readonly eventBus_;
-
-  constructor(key, disposeMode_, context_) {
-    super(key);
-    this.disposeMode_ = disposeMode_;
-    this.disposeModeKey = key;
-    this.context_ = context_;
-    this.eventBus_ = new EventBus();
-  }
-
-  getObserver() {
-    const observer = {
-      notify(payload) {
-        this.context_.notifyObservers(payload);
-        this.eventBus_.dispatchEvent({ type: 'disposeModeUpdate', payload });
-      },
-    };
-    return observer;
-  }
-
-  injectAndRegisterFactory(factory) {
-    factory.injectAndRegister(this.disposeMode_);
-  }
-
-  addDisposable(disposable) {
-    this.context_.addDisposable(disposable);
-  }
-
-  notifyObservers(payload) {
-    this.context_.notifyObservers(payload);
-    this.eventBus_.dispatchEvent({ type: 'disposeModeUpdate', payload });
-  }
-}
-
-class Factory extends Disposable {
-  private readonly disposeMode_;
-  private readonly context_;
-  private readonly eventTarget_;
-
-  constructor(key: string, disposeMode_, context_) {
-    super();
-    this.disposeMode_ = disposeMode_;
-    this.context_ = context_;
-    this.eventTarget_ = new EventTarget();
-  }
-
-  @Inject
-  register() {
-    this.disposables_.addDisposable(this);
-  }
-
-  @Inject
-  addObserver(observer) {
-    this.observers_.set(observer.name, observer);
-  }
-
-  getDisposeMode() {
-    return this.disposeMode_;
-  }
-
-  addDisposable(disposable) {
-    this.disposables_.addDisposable(disposable);
-    this.disposeMode_.addDisposable(disposable);
-  }
-
-  disposeFactory() {
-    this.context_.unregisterFactory(this);
-  }
-
-  destroy() {
-    this.eventTarget_.dispatchEvent({ type: 'dispose', key: this.disposeMode_.getKey() });
-  }
-
-  injectAndRegister(disposeMode) {
-    this.disposeMode_.injectAndRegisterFactory(this);
-  }
-}
-
-class DisposeModes extends Map {
-  get(key: string) {
-    const disposeMode = super.get(key);
-    if (disposeMode) {
-      return disposeMode;
-    } else {
-      return new DisposeModeWrapper(key, new DisposeMode1());
-    }
-  }
-}
-
-class Disposable implements Disposable {
-  dispose() {}
-}
-
-class ContextManager extends Disposable {
-  private readonly disposables_;
-  private readonly eventBus_;
-  private readonly factories_;
-
+// registry.js
+class Registry {
   constructor() {
-    super();
-    this.disposables_ = new Set();
-    this.eventBus_ = new EventBus();
     this.factories_ = new Map();
-  }
-
-  addDisposable(disposable: Disposable) {
-    this.disposables_.add(disposable);
-    disposable.notifyObservers({ type: 'addDisposable', payload: disposable });
-  }
-
-  unregisterDisposable(disposableName) {
-    this.disposables_.delete(disposableName);
-    const disposable = this.disposables_.has(disposableName)
-      ? disposable
-      : null;
-    if (disposable) {
-      disposable.dispose();
-      this.unregisterFactory(disposable.getFactory());
-      disposable.notifyObservers({ type: 'unregisterDisposable', payload: disposable });
-    }
+    this.disposables_ = new Map();
   }
 
   registerFactory(factory) {
@@ -219,86 +12,87 @@ class ContextManager extends Disposable {
     factory.notifyObservers({ type: 'registerFactory', payload: factory });
   }
 
-  unregisterFactory(factory) {
-    const key = factory.name;
+  unregisterFactory(factoryName) {
+    const key = factoryName;
     if (key) {
       this.factories_.delete(key);
-      factory.notifyObservers({ type: 'unregisterFactory', payload: factory });
+      const factory = this.factories_.get(key);
+      if (factory) {
+        factory.notifyObservers({ type: 'unregisterFactory', payload: factory });
+      }
     }
   }
 
-  getDisposeMode(key: string) {
-    return this.disposeModes_.get(key);
+  registerDisposable(disposable) {
+    this.disposables_.set(disposable.name, disposable);
+    disposable.notifyObservers({ type: 'addDisposable', payload: disposable });
   }
 
-  removeDisposeMode(key: string) {
-    this.disposeModes_.delete(key);
+  unregisterDisposable(disposableName) {
+    this.disposables_.delete(disposableName);
+    const disposable = this.disposables_.get(disposableName);
+    if (disposable) {
+      disposable.dispose();
+    }
   }
 
-  registerDisposeMode(key, disposeMode) {
-    this.disposeModes_.set(key, disposeMode);
+  getDisposable(disposableName) {
+    return this.disposables_.get(disposableName);
   }
 
-  registerEventBusTarget(target, bus) {
-    const oldDispatch = target.dispatchEvent || emptyFunction;
-    const newDispatch = (...args) => {
-      oldDispatch.apply(target, args);
-      bus.dispatchEvent({ ...args[0], key: this.disposeModes_.get(args[0].key).key });
-    };
-    Object.assign(target, { dispatchEvent: newDispatch });
-  }
-
-  notifyObservers(payload) {
-    this.disposables_.forEach((disposable) => {
-      disposable.notifyObservers(payload);
-    });
+  getFactory(factoryName) {
+    return this.factories_.get(factoryName);
   }
 }
 
-class GenkiFactoryFactory extends Factory {
-  createFactoryInstance(key: string, disposeMode: DisposeMode) {
-    const factory = super.createFactoryInstance(key, disposeMode);
-    this.context_.registerFactory(factory, key);
-    return factory;
+// mediator.js
+class Mediator {
+  constructor() {}
+
+  addListener(listener, callback, context) {
+    listener.on(callback, context);
+  }
+
+  removeListener(listener, callback, context) {
+    listener.off(callback, context);
   }
 }
 
-class DisposeMode1 {
-  getObserver() {
-    const observer = {
-      notify(payload) {
-        this.context_.notifyObservers(payload);
-      },
-    };
-    return observer;
-  }
-
-  notifyObservers(payload) {
-    const observer = this.getObserver();
-    observer.notify(payload);
-  }
-}
-
-class DisposeModeWrapper extends Disposable {
-  private readonly disposeMode_;
-  private readonly context_;
-  private readonly eventBus_;
-
-  constructor(key, disposeMode_, context_) {
+// composite-dispose-mode.js
+class CompositeDisposeMode extends DisposeMode {
+  constructor(key) {
     super(key);
-    this.disposeMode_ = disposeMode_;
-    this.context_ = context_;
-    this.eventBus_ = new EventBus();
+    this.disposeModes_ = new Map();
+  }
+
+  addDisposeMode(disposeMode) {
+    this.disposeModes_.set(disposeMode.key, disposeMode);
+  }
+
+  notifyObservers(payload) {
+    for (const disposeMode of this.disposeModes_.values()) {
+      disposeMode.notifyObservers(payload);
+    }
+  }
+
+  getDisposeMode() {
+    return this.disposeModes_.get(this.key);
+  }
+}
+
+// dispose-mode-wrapper.js
+class DisposeModeWrapper extends DisposeMode {
+  constructor(key, disposeMode) {
+    super(key);
+    this.disposeMode_ = disposeMode;
   }
 
   getObserver() {
-    const observer = {
+    return {
       notify(payload) {
-        this.context_.notifyObservers(payload);
         this.disposeMode_.notifyObservers(payload);
       },
     };
-    return observer;
   }
 
   injectAndRegisterFactory(factory) {
@@ -306,11 +100,141 @@ class DisposeModeWrapper extends Disposable {
   }
 
   addDisposable(disposable) {
-    this.context_.addDisposable(disposable);
+    this.disposeMode_.addDisposable(disposable);
   }
 
   notifyObservers(payload) {
-    this.context_.notifyObservers(payload);
     this.disposeMode_.notifyObservers(payload);
+  }
+
+  getDisposeMode() {
+    return this.disposeMode_;
+  }
+}
+
+// factory.js
+class Factory extends Disposable {
+  constructor(key, context) {
+    super(key);
+    this.context_ = context;
+    this.eventTarget_ = new EventTarget();
+  }
+
+  injectAndRegister(disposeMode) {
+    const mediator = new Mediator();
+    mediator.addListener(this, this.notifyDisposeModeUpdate);
+    disposeMode.addObserver(mediator);
+  }
+
+  addObserver(observer) {
+    this.context_.addObserver(observer);
+  }
+
+  getDisposeMode() {
+    return this.disposeMode_;
+  }
+
+  addDisposable(disposable) {
+    this.context_.addDisposable(disposable);
+  }
+
+  disposeFactory() {
+    this.context_.unregisterFactory(this);
+  }
+
+  notifyDisposeModeUpdate(payload) {
+    this.eventTarget_.dispatchEvent({ type: 'disposeModeUpdate', payload: payload });
+  }
+
+  destroy() {
+    this.eventTarget_.dispatchEvent({ type: 'dispose', key: this.disposeMode_.key });
+  }
+}
+
+// genki-factory.js
+class GenkiFactory extends Factory {
+  constructor(key, disposeMode, context) {
+    super(key, context);
+    this.factory = disposeMode.getObserver();
+  }
+
+  register() {
+    super.register();
+    this.factory.register(this.context_);
+  }
+
+  addObserver(observer) {
+    super.addObserver(observer);
+    this.factory.addObserver(observer);
+  }
+
+  getDisposeMode() {
+    return this.disposeMode_;
+  }
+
+  addDisposable(disposable) {
+    super.addDisposable(disposable);
+    this.factory.addDisposable(disposable);
+  }
+
+  disposeFactory() {
+    super.disposeFactory();
+    this.factory.unsubscribe();
+  }
+
+  destroy() {
+    super.destroy();
+    this.factory.destroy();
+  }
+
+  injectAndRegister(disposeMode) {
+    super.injectAndRegister(disposeMode);
+    this.factory.injectAndRegisterFactory(disposeMode);
+  }
+}
+
+// dispose-mode.js
+class DisposeMode {
+  constructor(key) {
+    this.key = key;
+  }
+
+  getObserver() {
+    return {
+      notify(payload) {
+        this.notifyObservers(payload);
+      },
+    };
+  }
+
+  injectAndRegisterFactory(factory) {
+    // No-op in base class
+  }
+
+  addDisposable(disposable) {
+    this.disposeModes_.forEach((disposeMode) => {
+      disposeMode.addDisposable(disposable);
+    });
+  }
+
+  notifyObservers(payload) {
+    this.disposeModes_.forEach((disposeMode) => {
+      disposeMode.notifyObservers(payload);
+    });
+  }
+
+  getDisposeMode(key) {
+    return this.disposeModes_.has(key) ? this.disposeModes_.get(key) : null;
+  }
+}
+
+// dispose-modes.js
+class DisposeModes extends Map {
+  get(key) {
+    return super.get(key) || new DisposeModeWrapper(key, new CompositeDisposeMode(key));
+  }
+
+  has(key) {
+    return super.has(key) || this.get(key) !== undefined;
   }
 }
