@@ -13,5 +13,10 @@
     "timestamp": "2026-03-18T12:13:00.151Z",
     "error": "AUDIT_FAILURE: CONTENT_LOSS: Significant logic reduction detected.",
     "context": ".zscripts/start.sh"
+  },
+  {
+    "timestamp": "2026-03-18T23:00:17.008Z",
+    "error": "AUDIT_FAILURE: CONTENT_LOSS: Significant logic reduction detected.",
+    "context": ".dockerignore"
   }
 ]
