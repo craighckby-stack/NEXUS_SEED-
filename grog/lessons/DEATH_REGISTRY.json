@@ -28,5 +28,10 @@
     "timestamp": "2026-03-18T23:11:16.964Z",
     "error": "AUDIT_FAILURE: CONTENT_LOSS: Significant logic reduction detected.",
     "context": ".dockerignore"
+  },
+  {
+    "timestamp": "2026-03-18T23:11:25.177Z",
+    "error": "AUDIT_FAILURE: NAMESPACE_COLLISION: Symbol 'SiphonLogger' is both imported and locally defined.",
+    "context": ".zscripts/mini-services-install.sh"
   }
 ]
