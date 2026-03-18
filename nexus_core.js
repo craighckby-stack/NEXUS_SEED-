@@ -69,7 +69,6 @@ class DisposableStoreDataStructure {
 
   init(options: any) {
     this.initialized = true;
-    // Initialize the data structure here
   }
 
   persist() {
@@ -116,29 +115,68 @@ class DisposableStore {
   }
 }
 
-class DisposableStoreFactoryEnhancer {
-  public static async getDisposableStore(
-    strategyName?: string,
-    options?: any,
-    disposeMode?: DisposeMode
-  ): Promise<DisposableStore> {
-    const cancellationStrategy = CancelationStrategyFactory.getCancellationStrategy(strategyName);
+class DisposeStoreObserver {
+  private disposablesStore: DisposableStore;
+  private observers: ((disposableStore: DisposableStore) => void)[];
+
+  constructor(disposablesStore: DisposableStore) {
+    this.disposablesStore = disposablesStore;
+    this.observers = [];
+  }
+
+  addObserver(observer: (disposableStore: DisposableStore) => void): void {
+    this.observers.push(observer);
+  }
+
+  notifyObservers(disposableStore: DisposableStore): void {
+    this.observers.forEach(observer => observer(disposableStore));
+  }
+
+  isDisposed(): boolean {
+    return this.disposablesStore._managedDispose;
+  }
+}
+
+class DisposableStoreFactoryWithStrategies {
+  private strategies: Map<string, CancelationStrategy> = new Map();
+  private disposeModes: Map<DisposeMode, CancelationStrategy[]> = new Map();
+  private contextStrategies: Map<string, CancelationStrategy[]> = new Map();
+
+  constructor(strategies: CancelationStrategy[], disposeModes: CancelationStrategy[], contextStrategies: CancelationStrategy[]) {
+    strategies.forEach(strategy => this.strategies.set(strategy.name, strategy));
+    disposeModes.forEach(strategy => this.disposeModes.set(strategy.name, strategy));
+    contextStrategies.forEach(strategy => this.contextStrategies.set(strategy.name, strategy));
+  }
+
+  getDisposableStore(context: string, disposeMode: DisposeMode): Promise<DisposableStore> {
+    const strategy = this.strategies.get(disposeMode);
+    if (!strategy) {
+      throw new Error(`Strategy not found for ${disposeMode}`);
+    }
+
+    const disposablesStore = new DisposableStore(strategy);
+    return Promise.all([
+      disposablesStore.init(new DisposableStoreDataStructure(context, disposeMode)),
+      disposablesStore.persist(),
+    ]).then(() => disposablesStore);
+  }
+}
+
+class DisposableStoreFactory {
+  private cancellationStrategyFactory: CancelationStrategyFactory;
+
+  constructor(cancellationStrategyFactory: CancelationStrategyFactory) {
+    this.cancellationStrategyFactory = cancellationStrategyFactory;
+  }
+
+  getDisposableStore(strategyName?: string, options?: any, disposeMode?: DisposeMode): Promise<DisposableStore> {
+    const cancellationStrategy = this.cancellationStrategyFactory.getCancellationStrategy(strategyName);
 
     if (!cancellationStrategy) {
       throw new Error(`Cancellation strategy not found for ${strategyName}.`);
     }
 
-    const dataStructure = new DisposableStoreDataStructure(strategyName, disposeMode);
-    return DisposableStoreFactoryEnhancer._getDisposableStoreInternal(cancellationStrategy, dataStructure);
-  }
-
-  private static async _getDisposableStoreInternal(
-    strategy: CancelationStrategy,
-    dataStructure: DisposableStoreDataStructure
-  ): Promise<DisposableStore> {
-    const disposablesStore = new DisposableStore(strategy);
-    await disposablesStore.init(dataStructure);
-    await disposablesStore.persist();
-    return disposablesStore;
+    const disposablesStore = new DisposableStore(cancellationStrategy, options, disposeMode);
+    return DisposableStoreFactoryWithStrategies.prototype.getDisposableStore.call(this, undefined, disposeMode, disposalStrategyFactory.getAvailableStrategies([strategyName]).map(strategy => strategy));
   }
 }
