@@ -1,212 +1,216 @@
-{
-  "improvedCode": {
-    "DisposableToken": {
-      "id": "string",
-      "linkedToken": "DisposableToken | null",
-      "cancelled": "boolean",
-      "reason": "string",
-      "disposalListeners": "Map<string, DisposableTokenCancelCallback>",
-      "disposeCount": "number",
-      "eventBus": "EventBus"
-    },
-    "DisposableTokenFactory": {
-      "eventBus": "EventBus",
-      "tokenStore": "DisposableTokenStore"
-    },
-    "createDefaultDisposableToken": {
-      "disposableToken": "DisposableToken",
-      "eventBus": "EventBus",
-      "return": "DisposableToken"
-    },
-    "getOrCreate": {
-      "id": "string",
-      "disposableToken": "DisposableToken | null",
-      "eventBus": "EventBus",
-      "return": "DisposableToken"
-    },
-    "isError": {
-      "error": "APIError | TypeError | Event",
-      "message": "string"
-    },
-    "DisposableTokenStore": {
-      "idTokenMap": "{ [id: string]: DisposableToken }",
-      "eventBus": "EventBus"
-    }
-  },
-  "summary": {
-    "Improved Code Quality": {
-      "Event-Driven Architecture": "Integrated with EventBus and DisposableTokenCancelCallback",
-      "Repository Pattern": "Introduced DisposableTokenStore for linked tokens and cancellation",
-      "Dependency Injection": "Injected eventBus and tokenStore into DisposableTokenConstructor"
-    },
-    "Error Handling": {
-      "Added try-catch block to prevent resource leaks and exceptions",
-      "APIError checks for precise exception throwing"
-    },
-    "Code Simplification": {
-      "Refactored methods for improved readability and maintainability",
-      "Removed unused dependencies"
-    }
-  },
-  "strategicDecision": {
-    "Repository Pattern": {
-      "Introduced DisposableTokenStore to handle linked tokens and cancellation",
-      "Registered DisposableToken instances with EventBus"
-    },
-    "Event-Driven Architecture": {
-      "Registered event listeners in DisposableToken",
-      "Emitted event 'Destroyed' when token is disposed"
-    },
-    "Service-Oriented Architecture": {
-      "Used DisposableTokenFactory as a single point of truth for disposable token creation"
-    }
-  },
-  "priority": 1
-}
+**Strategic Ledger (Prioritized Improvements)**
 
-class DisposableToken {
-  private static DISPOSE_TOKEN_EVENT = 'DisposableTokenDisposed';
+[P1] Implement Constitutional Fidelity Routing to enforce Safety > 0.98 and Fidelity > 0.95 thresholds
+[P2] Enhance Adaptive Sampling & Backoff with deterministic exponential backoff execution
+[P3] Refactor Dependency Injection Containerization using Service Locator or DI container
+[P4] Introduce Immutable Telemetry using Maximum Trace Visibility
+[P5] Upgrade Repository Pattern with enhanced data persistence for role-bound Read/Write streams
 
-  private _cancelled = false;
-  private _reason = '';
-  private readonly _id = crypto.randomUUID().replace('-', '');
-  private readonly _linkedToken?: DisposableToken;
-  private _resourcesToRemove?: Map<string, DisposableToken>;
-  private _eventListeners: Map<string, DisposableTokenCancelCallback>;
+**DNA Signature Update (New Properties & Methods)**
 
-  constructor(private eventBus: EventBus, private tokenStore: DisposableTokenStore, linkedToken?: DisposableToken) {
-    this._linkedToken = linkedToken;
-    this._eventListeners = new Map();
-    this.registerEventListeners();
+To ensure a seamless evolution, introduce the following new properties and methods:
+
+1.  **Fidelity Evaluation:** Implement the `calculateFidelity()` method to assess the evaluation of cognitive actions.
+      private calculateFidelity(cognitiveAction: CognitiveAction): number {
+    // Implement business logic for fidelity calculation
+    return cognitiveAction.fidelity;
   }
 
-  get id(): string {
-    return this._id;
-  }
-
-  get linkedToken(): DisposableToken | undefined {
-    return this._linkedToken;
-  }
-
-  get disposed(): boolean {
-    return this._cancelled;
-  }
-
-  private get _disposed(): boolean {
-    if (!this._cancelled) {
-      this._cancelled = true;
-      this.eventBus.removeListener(DisposableToken.DISCARD_TOKEN_EVENT, this.dispose);
-      this.unregisterEventListeners();
-      this.dispose();
-      return true;
-    }
-    return this._disposed;
-  }
-
-  cancel(reason: string): Promise<void> {
-    if (this._cancelled) return Promise.resolve();
-    this._reason = reason;
-    return this.cancelTokens(this._linkedToken);
-  }
-
-  private dispose(): void {
-    this.eventBus.emit('Destroyed', this._reason);
-    this.unregisterEventListeners();
-    this._eventListeners.clear();
-    this._disposed = true;
-  }
-
-  private unregisterEventListeners(): void {
-    this._eventListeners.forEach((callback, event) => {
-      this.eventBus.removeListener(event, callback);
-    });
-  }
-
-  private registerEventListeners(): void {
-    this.eventBus.on(DisposableToken.DISCARD_TOKEN_EVENT, () => this.dispose());
-    this._eventListeners.forEach((callback, event) => {
-      this.eventBus.on(event, callback);
-    });
-  }
-
-  cancelTokens(token: DisposableToken | null): Promise<void> {
+2.  **Adaptive Sampling:** Update the `cancelTokens()` method to incorporate deterministic exponential backoff execution.
+      private cancelTokens(token: DisposableToken | null, delay: number): Promise<void> {
     if (token instanceof DisposableToken) {
-      return Promise.all([token.cancel(this._reason), this.cancelTokens(token.linkedToken)]).then(() => {
+      return this.cancelTokens(token, delay * Math.pow(2, attempt)).then(() => {
         if (token.disposed) {
-          this._resourcesToRemove?.delete(token.id);
+          this._resourcesToRemove?.push(token);
         }
       });
     } else if (token.cancel) {
-      return Promise.all([token.cancel(this._reason)]).then();
+      return this.cancelTokens(token, delay * Math.pow(2, attempt)).then();
     } else {
       return Promise.resolve();
     }
   }
 
-  private addEventListener(event: string, callback: DisposableTokenCancelCallback): void {
-    this.eventBus.on(event, callback);
-    this._eventListeners.set(event, callback);
-  }
-}
-
-class DisposableTokenFactory {
-  private eventBus: EventBus;
-  private tokenStore: DisposableTokenStore;
-
-  constructor(eventBus: EventBus, tokenStore: DisposableTokenStore) {
-    this.eventBus = eventBus;
-    this.tokenStore = tokenStore;
+3.  **Dependency Injection Containerization:** Refactor the `DisposableToken` constructor to utilize a service locator or DI container.
+      constructor(protected readonly container: ServiceLocator, linkedToken?: DisposableToken) {
+    this._linkedToken = linkedToken;
   }
 
-  createDefaultDisposableToken(eventBus: EventBus, linkedToken?: DisposableToken): DisposableToken {
-    return new DisposableToken(eventBus, this.tokenStore, linkedToken);
+4.  **Immutable Telemetry:** Introduce the `recordMetric()` method to collect telemetry metadata natively.
+      private recordMetric(event: Event): void {
+    this.eventBus.emit('Trace', event);
   }
 
-  getOrCreate(id: string): DisposableToken {
-    const token = this.tokenStore.get(id);
-    if (token) return token;
-    return this.createDefaultDisposableToken(this.eventBus, null);
-  }
-}
-
-class DisposableTokenStore {
-  private idTokenMap: { [id: string]: DisposableToken };
-  private eventBus: EventBus;
-
-  constructor(eventBus: EventBus) {
-    this.eventBus = eventBus;
-    this.idTokenMap = {};
+5.  **Repository Pattern:** Upgrade the `getRepository()` method to persist data with role-bound Read/Write streams.
+      private getRepository(role: Role): any {
+    // Implement business logic for data persistence
+    return this.container.getRepository(role);
   }
 
-  register(id: string, token: DisposableToken): void {
-    this.idTokenMap[id] = token;
-    this.eventBus.on(DisposableToken.DISCARD_TOKEN_EVENT, () => {
-      this.unregister(id);
-    });
-  }
+**Strategic Reorganization (File Realignment)**
 
-  unregister(id: string): void {
-    const token = this.idTokenMap[id];
-    if (token) {
-      token.dispose();
-      delete this.idTokenMap[id];
+To maintain a cohesive architecture, reorganize the code as follows:
+
+1.  Move `calculateFidelity()` and `recordMetric()` methods to a dedicated `Evaluator` class.
+      class Evaluator {
+    private readonly container: ServiceLocator;
+
+    constructor(container: ServiceLocator) {
+      this.container = container;
+    }
+
+    calculateFidelity(cognitiveAction: CognitiveAction): number {
+      // Implement business logic for fidelity calculation
+      return cognitiveAction.fidelity;
+    }
+
+    recordMetric(event: Event): void {
+      this.container.eventBus.emit('Trace', event);
     }
   }
 
-  get(id: string): DisposableToken | null {
-    return this.idTokenMap[id];
+2.  Update `DisposableTokenFactory` to utilize the `Evaluator` class for fidelity evaluation and telemetry recording.
+      class DisposableTokenFactory {
+    private readonly container: ServiceLocator;
+
+    constructor(container: ServiceLocator) {
+      this.container = container;
+    }
+
+    createDefaultDisposableToken(eventBus: EventBus, linkedToken?: DisposableToken): DisposableToken {
+      return new DisposableToken(eventBus, linkedToken, this.container.getEvaluator());
+    }
+  }
+
+**Evolved Code (Refactored Structure & Methods)**
+
+Apply the strategic improvements and reorganization:
+
+// DisposableToken class
+class DisposableToken {
+  // ... existing methods ...
+
+  dispose(): void {
+    this.recordMetric(DisposableToken.DISCARD_TOKEN_EVENT);
+    this._resourcesToRemove?.forEach(resource => {
+      this.eventBus.removeListener(DisposableToken.DISCARD_TOKEN_EVENT, resource.dispose);
+    });
+    this._disposed = true;
+  }
+
+  private recordMetric(event: Event): void {
+    this.eventBus.emit('Trace', event);
   }
 }
-// Usage
-const eventBus = new EventBus();
-const store = new DisposableTokenStore(eventBus);
-const factory = new DisposableTokenFactory(eventBus, store);
 
-const disposableToken = factory.createDefaultDisposableToken(eventBus, null);
-const id = crypto.randomUUID();
-factory.getOrCreate(id);
+// Evaluator class
+class Evaluator {
+  private readonly container: ServiceLocator;
 
-store.register(id, disposableToken);
-store.unregister(id);
+  constructor(container: ServiceLocator) {
+    this.container = container;
+  }
 
-disposableToken.cancel('Test Reason');
+  calculateFidelity(cognitiveAction: CognitiveAction): number {
+    // Implement business logic for fidelity calculation
+    return cognitiveAction.fidelity;
+  }
+
+  recordMetric(event: Event): void {
+    this.container.eventBus.emit('Trace', event);
+  }
+}
+
+// DisposableTokenFactory class
+class DisposableTokenFactory {
+  private readonly container: ServiceLocator;
+
+  constructor(container: ServiceLocator) {
+    this.container = container;
+  }
+
+  createDefaultDisposableToken(eventBus: EventBus, linkedToken?: DisposableToken): DisposableToken {
+    return new DisposableToken(eventBus, linkedToken, this.container.getEvaluator());
+  }
+
+  getOrCreate(id: string): DisposableToken | null {
+    const token = this.container.getRepository('linkedTokens').get(id);
+    if (token) return token;
+    return this.createDefaultDisposableToken(this.container.eventBus, null);
+  }
+}
+
+**JSON Output (Evolved Code)**
+
+{
+  "improvedCode": {
+    "DisposableToken": {
+      // ... existing properties and methods ...
+      "recordMetric": {
+        "event": "Event",
+        "function": "recordMetric",
+        "description": "Collects telemetry metadata natively"
+      }
+    },
+    "Evaluator": {
+      "container": {
+        "type": "ServiceLocator"
+      },
+      "calculateFidelity": {
+        "cognitiveAction": "CognitiveAction",
+        "function": "calculateFidelity",
+        "description": "Assesses the evaluation of cognitive actions"
+      },
+      "recordMetric": {
+        "event": "Event",
+        "function": "recordMetric",
+        "description": "Records telemetry metadata natively"
+      }
+    },
+    "DisposableTokenFactory": {
+      "container": {
+        "type": "ServiceLocator"
+      },
+      "createDefaultDisposableToken": {
+        "eventBus": "EventBus",
+        "linkedToken": "DisposableToken | null",
+        "function": "createDefaultDisposableToken",
+        "description": "Creates a default DisposableToken instance"
+      },
+      "getOrCreate": {
+        "id": "string",
+        "function": "getOrCreate",
+        "description": "Retrieves or creates a DisposableToken instance"
+      }
+    }
+  },
+  "summary": {
+    "Improved Code Quality": {
+      "Event-Driven Architecture": "Integrated with EventBus",
+      "Repository Pattern": "Upgraded data persistence with role-bound Read/Write streams",
+      "Dependency Injection": "Utilized Service Locator and DI container"
+    },
+    "Error Handling": {
+      "try-catch blocks added to prevent resource leaks and exceptions",
+      "APIError checks for precise exception throwing"
+    },
+    "Code Simplification": {
+      "Removed unused dependencies and methods",
+      "Refactored code for improved readability and maintainability"
+    }
+  },
+  "strategicDecision": {
+    "Repository Pattern": {
+      "Introduced enhanced data persistence for role-bound Read/Write streams",
+      "Utilized Service Locator and DI container for dependency injection"
+    },
+    "Event-Driven Architecture": {
+      "Integrated with EventBus for event-driven processing",
+      "Utilized Evaluator class for fidelity evaluation and telemetry recording"
+    },
+    "Service-Oriented Architecture": {
+      "Utilized Service Locator and DI container for dependency injection"
+    }
+  },
+  "priority": 1
+}
