@@ -1,72 +1,61 @@
-# DALEK_CAAN System Documentation
-====================================
+# DALEK_CAAN
 
 ## Project Overview
------------------
 
 DALEK_CAAN is a system that evolves code by integrating patterns from external repositories.
 
-## Installation Instructions
----------------------------
+## Technical Requirements
 
-To install and run the DALEK_CAAN system, follow these steps:
+### Files Processed
 
-1. Clone the repository: `git clone https://github.com/your-repo/DALEK_CAAN`
-2. Change directory: `cd DALEK_CAAN`
-3. Install dependencies: `npm install`
-4. Run the system: `node nexus_core.js`
+The system currently processes manual files.
+
+### Latest File
+
+The latest processed file is `nexus_core.js`.
+
+### DNA Signature
+
+No DNA signature is applied to the evolving code.
+
+### Context Summary
+
+The system is currently operating in the Initial State context summary.
+
+### Saturation Status
+
+No saturation status is applicable to the system.
 
 ## Siphoning Process
-------------------
 
-The siphoning process selects architectural origins from external repositories (e.g., DeepMind, Google) and applies their patterns to local files. The technical mechanism involves the following steps:
+The technical mechanism of selecting architectural origins involves the following steps:
 
-1. Repository scraping: Collects patterns from external repositories using APIs or web scraping technologies.
-2. Pattern analysis: Analyzes the collected patterns to identify relevant architectural components.
-3. File mapping: Maps the identified patterns to local files based on file name, content, or other metadata.
+1. **External Repository Integration**: DALEK_CAAN retrieves patterns from external repositories, such as DeepMind and Google.
+2. **Pattern Selection**: The system selects patterns from the integrated external repositories based on predefined criteria.
+3. **Local File Application**: The selected patterns are applied to local files, evolving the code.
 
 ## Chained Context
------------------
 
-The chained context implementation ensures consistency across evolved files by sharing a common state/memory. This is achieved through:
+DALEK_CAAN implements a shared state/memory to ensure consistency across evolved files:
 
-1. Shared object creation: Creates a shared object to store the evolving state.
-2. Context propagation: Propagates the shared state across files using callbacks or event emitters.
-3. State synchronization: Synchronizes the shared state across files to maintain consistency.
+1. **Chained Store**: The system maintains a chained data store to keep track of evolving code patterns.
+2. **Contextual Updates**: Each evolved file updates the chained store with its new context, maintaining a shared understanding of the evolving code.
 
 ## Current Status
------------------
 
-Based on the provided counts and file names, the current status is as follows:
+Based on the provided counts and file names, DALEK_CAAN is currently at a stage of evolution, processing manual files with no saturation status applicable. The system maintains a shared state/memory to ensure consistency across evolved files.
 
-* Files processed: Manual
-* Latest file: nexus_core.js
-* DNA signature: None
-* Context summary: Initial State
-* Saturation status: None
+## File List
 
-## Future Directions
--------------------
+| File | Status |
+| --- | --- |
+| nexus_core.js | Evolving |
 
-To improve the DALEK_CAAN system, the following features are planned:
+### Repository Information
 
-* Integration with additional external repositories
-* Improvements to the siphoning process for better pattern selection
-* Enhancements to the chained context implementation for better state synchronization
+| Repository | Patterns |
+| --- | --- |
+| DeepMind | Not applicable |
+| Google | Not applicable |
 
-## Known Issues
-----------------
-
-* Potential issues with external repository APIs or web scraping technologies
-* Inconsistent state synchronization across files
-* Limited pattern selection based on file name or content analysis
-
-## Contributing
--------------
-
-Contributions to the DALEK_CAAN system are welcome. Please submit pull requests or issues through the GitHub repository.
-
-## License
----------
-
-The DALEK_CAAN system is released under the [MIT License](https://opensource.org/licenses/MIT).
+This document serves as a technical overview of DALEK_CAAN, outlining its operation, technical requirements, and current status.
