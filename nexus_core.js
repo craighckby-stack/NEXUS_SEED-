@@ -1,154 +1,204 @@
-class DisposableStoreFactoryEvolutor {
-  private disposeStoreFactory: DisposableStoreFactory;
+// NexusCoreFactoryEvolutor.ts
+class NexusCoreFactoryEvolutor {
+  private readonly disposeStoreFactoryMap: Map<string, DisposableStoreFactory>;
+  private readonly cancellatorStrategyFactory: CancelationStrategyFactory;
+  private readonly disposableStoreObserver: DisposableStoreObserver;
+  private readonly disposableStoreCacheMap: Map<string, DisposableStoreObserver>;
 
-  constructor(disposeStoreFactory: DisposableStoreFactory) {
-    this.disposeStoreFactory = disposeStoreFactory;
+  constructor(
+    disposeStoreFactoryMap: Map<string, DisposableStoreFactory>,
+    cancellatorStrategyFactory: CancelationStrategyFactory,
+    disposableStoreObserver: DisposableStoreObserver,
+  ) {
+    this.disposeStoreFactoryMap = disposeStoreFactoryMap;
+    this.cancellatorStrategyFactory = cancellatorStrategyFactory;
+    this.disposableStoreObserver = disposableStoreObserver;
+    this.disposableStoreCacheMap = new Map();
   }
 
-  getDisposableStoreFactoryWithStrategies(cancellationStrategyFactory: CancelationStrategyFactory) {
-    const disposeStoreFactory = new DisposableStoreFactory(cancellationStrategyFactory);
-    return {
-      getDisposableStore(strategies: CancelationStrategy[], disposeMode: DisposeMode) {
-        const disposablesStoreFactoryWithStrategies = new DisposableStoreFactoryWithStrategies(strategies);
-        return disposablesStoreFactoryWithStrategies.getDisposableStore(disposeMode);
-      }
-    };
+  async getDisposableStoreFactoryWithStrategies(
+    cancellationStrategyName: string,
+    disposeMode: DisposeMode,
+  ): Promise<DisposableStoreFactoryWithStrategies> {
+    if (this.disposeStoreFactoryMap.has(cancellationStrategyName)) {
+      return this.disposeStoreFactoryMap.get(cancellationStrategyName);
+    }
+
+    const disposeStoreFactory = await this.createDisposableStoreFactory(cancellationStrategyName, disposeMode);
+    this.disposeStoreFactoryMap.set(cancellationStrategyName, disposeStoreFactory);
+    return disposeStoreFactory;
   }
 
-  getDisposableStoreObserver(disposalStore: DisposableStore) {
-    const disposablesStoreObserver = new DisposeStoreObserver(disposalStore);
-    return {
-      addObserver(observer: (disposableStore: DisposableStore) => void) {
-        disposablesStoreObserver.addObserver(observer);
-      },
-      isDisposed() {
-        return disposablesStoreObserver.isDisposed();
-      }
-    };
+  private async createDisposableStoreFactory(
+    cancellationStrategyName: string,
+    disposeMode: DisposeMode,
+  ): Promise<DisposableStoreFactory> {
+    const strategy = this.cancellatorStrategyFactory.getCancellationStrategy(cancellationStrategyName);
+
+    if (!strategy) {
+      throw new Error(`Cancellation strategy not found for name: ${cancellationStrategyName}`);
+    }
+
+    const disposeStoreFactory = new DisposableStoreFactory(strategy, disposeMode);
+    await disposeStoreFactory.initialize();
+    return disposeStoreFactory;
+  }
+
+  async getDisposableStoreObserver(disposalStore: DisposableStore): Promise<DisposableStoreObserver> {
+    if (this.disposableStoreCacheMap.has(disposalStore.toString())) {
+      return this.disposableStoreCacheMap.get(disposalStore.toString());
+    }
+
+    const disposableStoreObserver = new DisposableStoreObserver(disposalStore);
+    this.disposableStoreCacheMap.set(disposalStore.toString(), disposableStoreObserver);
+    return disposableStoreObserver;
+  }
+
+  async clearDisposableStoreCache(): Promise<void> {
+    this.disposableStoreCacheMap.clear();
+  }
+
+  async initializeNexusCoreFactoryEvolutor(): Promise<void> {
+    const disposeModes = [
+      DisposeMode.TRANSACTIONAL_MODE,
+      DisposeMode.BATCH_MODE,
+      DisposeMode.STREAMING_MODE,
+    ];
+
+    for (const disposeMode of disposeModes) {
+      const disposableStoreFactory = await this.getDisposableStoreFactoryWithStrategies(DefaultCancellationStrategyName, disposeMode);
+      await disposableStoreFactory.initialize();
+    }
+
+    await this.disposableStoreObserver.initialize();
   }
 }
 
-class DisposableStoreFactory {
-  private strategies: CancelationStrategy[] = [];
+// DisposableStoreFactory.ts
+class DisposableStoreFactory implements DisposableStoreFactoryWithStrategies {
+  private readonly disposeMode: DisposeMode;
+  private readonly strategies: CancelationStrategy[];
+  private readonly cache: Map<string, DisposableStore>;
 
-  constructor(private cancellationStrategyFactory: CancelationStrategyFactory) {}
-
-  addStrategy(strategy: CancelationStrategy) {
-    this.strategies.push(strategy);
+  constructor(
+    strategy: CancelationStrategy,
+    disposeMode: DisposeMode,
+  ) {
+    this.disposeMode = disposeMode;
+    this.strategies = [strategy];
+    this.cache = new Map();
   }
 
-  getDisposableStore(disposeMode: DisposeMode, options: any): DisposableStore {
-    const disposablesStore = new DisposableStore(this.strategies[0], options, disposeMode);
-    disposablesStore.init(new DisposeStoreDataStructure(undefined, disposeMode));
-    return disposablesStore;
+  async getDisposableStoreAsync(disposeMode: DisposeMode, options: any): Promise<DisposableStore> {
+    const strategy = this.strategies[0];
+    const disposableStore = new DisposableStore(strategy, options, disposeMode);
+    await disposableStore.init();
+    this.cache.set(disposeMode.toString(), disposableStore);
+    return disposableStore;
+  }
+
+  async dispose(): Promise<void> {
+    this.cache.clear();
+  }
+
+  async initialize(): Promise<void> {
+    // Method not implemented, always returning
   }
 }
 
-class DisposableStoreFactoryWithStrategies {
-  private disposablesStoreFactory: DisposableStoreFactory;
-
-  constructor(disposablesStoreFactory: DisposableStoreFactory) {
-    this.disposablesStoreFactory = disposablesStoreFactory;
-  }
-
-  getDisposableStore(disposeMode: DisposeMode) {
-    return this.disposablesStoreFactory.getDisposableStore(disposeMode);
-  }
-}
-
+// DisposableStoreObserver.ts
 class DisposableStoreObserver {
-  private disposablesStore: DisposableStore;
-  private observers: ((disposableStore: DisposableStore) => void)[];
+  private readonly observedDisposeStore: DisposableStore;
+  private readonly cache: Map<string, DisposableStore>;
 
-  constructor(disposablesStore: DisposableStore) {
-    this.disposablesStore = disposablesStore;
-    this.observers = [];
+  constructor(private readonly disposablesStore: DisposableStore) {
+    this.observedDisposeStore = disposablesStore;
+    this.cache = new Map();
   }
 
-  addObserver(observer: (disposableStore: DisposableStore) => void) {
-    this.observers.push(observer);
+  async setObservedDisposableStore(disposalStore: DisposableStore): Promise<void> {
+    this.observedDisposeStore = disposalStore;
   }
 
-  notifyObservers(disposableStore: DisposableStore) {
-    this.observers.forEach(observer => observer(disposableStore));
+  async initialize(): Promise<void> {
+    // Method not implemented, always returning
   }
 
-  isDisposed() {
-    return this.disposablesStore._managedDispose;
-  }
-}
-
-class CancelationStrategyFactory {
-  private strategies: Map<string, CancelationStrategy> = new Map();
-
-  constructor() {}
-
-  registerCancellationStrategy(strategyName: string, strategyFn: () => void) {
-    this.strategies.set(strategyName, new CancelationStrategy(strategyName, strategyFn, []));
-  }
-
-  getCancellationStrategy(strategyName: string): CancelationStrategy | undefined {
-    const strategy = this.strategies.get(strategyName);
-    return strategy;
+  async dispose(): Promise<void> {
+    // Method not implemented, always returning
   }
 }
 
+// DisposableStore.ts
 class DisposableStore {
-  private _cancellationStrategy: CancelationStrategy;
-  private _managedDispose: boolean;
-  private _disposeMode?: DisposeMode;
-  private _disposables: any[];
+  private readonly disposeMode: DisposeMode;
+  private readonly observedDisposeStore: DisposableStoreObserver;
+  private readonly _disposables: any[];
 
   constructor(
     cancellationStrategy: CancelationStrategy,
     options?: any,
-    disposeMode?: DisposeMode
+    disposeMode?: DisposeMode,
   ) {
-    this._cancellationStrategy = cancellationStrategy;
-    this._managedDispose = false;
-    this._disposeMode = disposeMode || this.getDisposeModeFromOptions(options);
+    this.disposeMode = disposeMode || new DisposableStoreHelper().getDisposeMode(options);
     this._disposables = [];
   }
 
-  addDisposable(disposable: any) {
+  addDisposable(disposable: any): void {
     this._disposables.push(disposable);
   }
 
-  async dispose() {
-    if (this._managedDispose) {
+  async dispose(): Promise<void> {
+    if (this.disposeMode === DisposeMode.TRANSACTIONAL_MODE) {
       return;
     }
-    this._managedDispose = true;
-    this._cancellationStrategy.strategyFn();
+
+    await this.observedDisposeStore.dispose();
+    if (this.disposeMode === DisposeMode.BATCH_MODE) {
+      return;
+    }
+
     for (const disposable of this._disposables) {
       await disposable.dispose();
     }
   }
 
-  private getDisposeModeFromOptions(options: any): DisposeMode {
-    return options.disposeMode
-      ? options.disposeMode
-      : DisposeMode.TRANSACTIONAL_MODE;
+  private async init(): Promise<void> {
+    await this.observedDisposeStore.initialize();
   }
 }
 
+// DisposeStoreDataStructure.ts
 class DisposeStoreDataStructure {
-  disposeMode?: DisposeMode;
-  data?: any;
-  context?: string;
-  initialized: boolean;
+  private readonly disposeMode: DisposeMode;
 
-  constructor(context?: string, disposeMode?: DisposeMode) {
-    this.context = context;
+  constructor(private readonly disposeMode: DisposeMode) {
     this.disposeMode = disposeMode;
-    this.initialized = false;
   }
 
-  init(options: any) {
-    this.initialized = true;
+  persist(data: any): any {
+    return data;
+  }
+}
+
+// Default cancellation strategy
+class DefaultCancellationStrategy implements CancelationStrategy {
+  readonly name: string;
+
+  constructor(name: string) {
+    this.name = name;
   }
 
-  persist() {
-    // persist the data structure here
+  async dispose(): Promise<void> {
+    // Do nothing
+  }
+}
+
+// Default dispose mode
+class DefaultDisposeMode implements DisposeMode {
+  readonly name: string;
+
+  constructor(name: string) {
+    this.name = name;
   }
 }
