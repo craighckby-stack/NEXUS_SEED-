@@ -23,5 +23,10 @@
     "timestamp": "2026-03-18T23:02:54.808Z",
     "error": ".gitignore does not match a5083b7fcace8f09646c765df7078f50a776f071",
     "context": "GITHUB PUSH FAILED: .gitignore to craighckby-stack/Test-1"
+  },
+  {
+    "timestamp": "2026-03-18T23:11:16.964Z",
+    "error": "AUDIT_FAILURE: CONTENT_LOSS: Significant logic reduction detected.",
+    "context": ".dockerignore"
   }
 ]
