@@ -1,27 +1,44 @@
-import type { CancellationToken, CancellationTokenSource } from 'nexus-core';
+import type { IDisposable, CancellationToken, Disposable, Callback } from 'nexus-core';
 
+// Factory for creating DisposableStores with specific cancellation behavior
+class DisposableStoreFactory {
+  private static defaultCancellationStrategy: () => void = () => {};
+  private static cancellationStrategies: Map<string, () => void> = new Map();
+
+  static registerCancellationStrategy(strategyName: string, strategyFn: () => void): void {
+    DisposableStoreFactory.cancellationStrategies.set(strategyName, strategyFn);
+  }
+
+  static createDisposableStore(strategyName?: string): DisposableStore {
+    if (strategyName) {
+      const strategyFn = DisposableStoreFactory.cancellationStrategies.get(strategyName);
+      if (strategyFn) {
+        return new DisposableStore(strategyFn);
+      }
+    }
+    return new DisposableStore();
+  }
+}
+
+// DisposableStore with customized cancellation behavior
 class DisposableStore extends Disposable {
   private _cancellationTokens: Map<string, CancellationToken>;
   private _otherDisposables: Map<string, Disposable>;
 
-  constructor() {
+  constructor(strategyFn?: () => void) {
     super();
     this._cancellationTokens = new Map();
     this._otherDisposables = new Map();
   }
 
   dispose(): void {
+    this.cancel();
     super.dispose();
-    this._cancellationTokens.forEach((token) => token.dispose());
-    this._cancellationTokens.clear();
-    this._otherDisposables.forEach((disposable) => disposable.dispose());
-    this._otherDisposables.clear();
   }
 
-  clear(): void {
+  cancel(): void {
+    this._cancellationTokens.forEach((token) => token.dispose());
     this._cancellationTokens.clear();
-    this._otherDisposables.clear();
-    super.clear();
   }
 
   add(disposable: CancellationToken | Disposable): IDisposable {
@@ -68,46 +85,51 @@ class DisposableStore extends Disposable {
   }
 }
 
-class MutableDisposableStore extends DisposableStore {
-  constructor() {
-    super();
+// Decorator pattern for TokenStore
+class TokenStoreDecorator {
+  private readonly decoratedTokenStore: TokenStore;
+
+  constructor(decoratedTokenStore: TokenStore) {
+    this.decoratedTokenStore = decoratedTokenStore;
   }
 
-  set value(value: CancellationToken | Disposable) {
-    if (value instanceof CancellationToken) {
-      super.setDisposable(value);
-    } else {
-      super.value = value;
-    }
+  add(disposable: Disposable): IDisposable {
+    return this.decoratedTokenStore.add(disposable);
   }
 
-  get value(): CancellationToken | Disposable {
-    return super.getDisposable();
+  addMany(...disposables: Disposable[]): IDisposable[] {
+    return this.decoratedTokenStore.addMany(...disposables);
+  }
+
+  clear(): void {
+    this.decoratedTokenStore.clear();
+  }
+
+  dispose(): void {
+    this.decoratedTokenStore.dispose();
+  }
+
+  static decorateTokenStore(tokenStore: TokenStore): TokenStoreDecorator {
+    return new TokenStoreDecorator(tokenStore);
   }
 }
 
-class Event implements IDisposable {
+// Abstract Subject class for event handling
+abstract class Event {
   private listeners: Map<string, Callback>;
-  private _disposed: boolean;
 
   constructor() {
     this.listeners = new Map();
-    this._disposed = false;
   }
 
   on(callback: Callback): IDisposable {
     const key = callback.toString();
-    if (this._disposed) {
-      throw new Error('Event is disposed');
-    }
     this.listeners.set(key, callback);
     return {
       disposable: callback,
       uninstall: (): void => {
-        if (!this._disposed) {
-          this.listeners.delete(key);
-        }
-      }
+        this.listeners.delete(key);
+      },
     };
   }
 
@@ -116,46 +138,56 @@ class Event implements IDisposable {
   }
 
   dispose(): void {
-    this._disposed = true;
-    this.listeners.forEach((callback) => callback());
     this.listeners.clear();
   }
+
+  abstract subscribe(listener: Callback): IDisposable;
+
+  abstract unsubscribe(listener: Callback): void;
 }
 
-class Subject extends Event {}
-
-class TokenStore implements IDisposable {
-  private disposables: Set<Disposable>;
-
-  constructor() {
-    this.disposables = new Set();
+// Concrete Subject class
+class ConcreteEvent extends Event {
+  subscribe(listener: Callback): IDisposable {
+    return this.on(listener);
   }
 
-  add(disposable: Disposable): IDisposable {
-    this.disposables.add(disposable);
-    return {
-      disposable: disposable,
-      uninstall: (): void => {
-        this.disposables.delete(disposable);
-        disposable.dispose();
-      }
-    };
-  }
-
-  addMany(...disposables: Disposable[]): IDisposable[] {
-    return disposables.map((d) => this.add(d));
-  }
-
-  clear(): void {
-    this.disposables.forEach((d) => d.dispose());
-    this.disposables.clear();
-  }
-
-  dispose(): void {
-    this.clear();
+  unsubscribe(listener: Callback): void {
+    this.on(listener).uninstall();
   }
 }
 
+// Observer pattern for DisposableStore
+class DisposableStoreObserver extends DisposableStore {
+  private subject: Event;
+
+  constructor(subject: Event) {
+    super();
+    this.subject = subject;
+  }
+
+  observe(observer: Callback): IDisposable {
+    return this.subject.on(observer);
+  }
+}
+
+// DisposeObserver class for disposing of observers
+class DisposeObserver {
+  private subject: Event;
+  private disposableStore: DisposableStore;
+
+  constructor(subject: Event, disposableStore: DisposableStore) {
+    this.subject = subject;
+    this.disposableStore = disposableStore;
+  }
+
+  disposeObservers(): void {
+    this.subject.listeners.forEach((callback) => callback());
+    this.disposableStore.cancel();
+  }
+}
+
+// Factory for creating TokenStores with custom behavior
 class TokenStoreFactory {
   private tokenStoreCache: Map<string, TokenStore>;
 
@@ -165,17 +197,31 @@ class TokenStoreFactory {
 
   getTokenStore(tokenStore?: TokenStore): TokenStore {
     if (tokenStore) {
-      const key = JSON.stringify(tokenStore);
+      const key = TokenStore.toString();
       if (this.tokenStoreCache.has(key)) {
         return this.tokenStoreCache.get(key);
       }
-      this.tokenStoreCache.set(key, tokenStore);
-      return tokenStore;
     }
-    return this.createTokenStore();
+    return TokenStoreDecorator.decorateTokenStore(new TokenStore());
   }
 
   createTokenStore(): TokenStore {
-    return new TokenStore();
+    return TokenStoreDecorator.decorateTokenStore(new TokenStore());
   }
 }
+
+// Example usage:
+
+// Create a disposable store factory and register a custom cancellation strategy
+DisposableStoreFactory.registerCancellationStrategy('custom-cancellation-strategy', () => {
+  console.log('Custom cancellation strategy called');
+});
+
+// Create a disposable store with the custom cancellation strategy
+const disposableStore = DisposableStoreFactory.createDisposableStore('custom-cancellation-strategy');
+
+// Create a token store factory
+const tokenStoreFactory = new TokenStoreFactory();
+
+// Create a token store with decorated behavior
+const tokenStore = tokenStoreFactory.getTokenStore();
