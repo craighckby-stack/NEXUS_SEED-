@@ -1,227 +1,198 @@
-import type { IDisposable, CancellationToken, Disposable, Callback } from 'nexus-core';
-
-// Factory for creating DisposableStores with specific cancellation behavior
-class DisposableStoreFactory {
-  private static defaultCancellationStrategy: () => void = () => {};
-  private static cancellationStrategies: Map<string, () => void> = new Map();
+class DisposableStoreEvolver extends DisposableStoreFactory {
+  private static cache = new Map({
+    capacity: 10
+  });
 
   static registerCancellationStrategy(strategyName: string, strategyFn: () => void): void {
-    DisposableStoreFactory.cancellationStrategies.set(strategyName, strategyFn);
-  }
-
-  static createDisposableStore(strategyName?: string): DisposableStore {
-    if (strategyName) {
-      const strategyFn = DisposableStoreFactory.cancellationStrategies.get(strategyName);
-      if (strategyFn) {
-        return new DisposableStore(strategyFn);
-      }
-    }
-    return new DisposableStore();
-  }
-}
-
-// DisposableStore with customized cancellation behavior
-class DisposableStore extends Disposable {
-  private _cancellationTokens: Map<string, CancellationToken>;
-  private _otherDisposables: Map<string, Disposable>;
-
-  constructor(strategyFn?: () => void) {
-    super();
-    this._cancellationTokens = new Map();
-    this._otherDisposables = new Map();
-  }
-
-  dispose(): void {
-    this.cancel();
-    super.dispose();
-  }
-
-  cancel(): void {
-    this._cancellationTokens.forEach((token) => token.dispose());
-    this._cancellationTokens.clear();
-  }
-
-  add(disposable: CancellationToken | Disposable): IDisposable {
-    if (disposable instanceof CancellationToken) {
-      return this.addCancellationToken(disposable);
-    } else {
-      return this.addOtherDisposable(disposable);
+    if (!DisposableStoreEvolver.defaultCancellationStrategies.has(strategyName)) {
+      DisposableStoreEvolver.defaultCancellationStrategies.set(strategyName, strategyFn);
     }
   }
 
-  private addCancellationToken(token: CancellationToken): IDisposable {
-    const key = token.toString();
-    this._cancellationTokens.set(key, token);
-    return {
-      disposable: token,
-      uninstall: (): void => {
-        this._cancellationTokens.delete(key);
-        token.dispose();
-      }
-    };
+  static createDisposableStore(strategyName?: string): Promise<DisposableStore> {
+    const cachedStore = DisposableStoreEvolver.cache.get(strategyName);
+    if (cachedStore) {
+      return Promise.resolve(cachedStore);
+    }
+
+    const strategyFn = DisposableStoreEvolver.getCancellationStrategy(strategyName);
+    if (!strategyFn) {
+      throw new Error(`Cancellation strategy not found for ${strategyName}.`);
+    }
+
+    return DisposableStoreEvolver.createDisposableStoreSlow(strategyName, strategyFn).then((store) => {
+      DisposableStoreEvolver.cache.set(strategyName, store);
+      return store;
+    });
   }
 
-  private addOtherDisposable(disposable: Disposable): IDisposable {
-    const key = disposable.toString();
-    this._otherDisposables.set(key, disposable);
-    return {
-      disposable: disposable,
-      uninstall: (): void => {
-        this._otherDisposables.delete(key);
-        disposable.dispose();
-      }
-    };
+  static createDisposableStoreSlow(strategyName?: string, strategyFn?: () => void): Promise<DisposableStore> {
+    return Promise.resolve(new DisposableStore(strategyFn ? strategyFn : () => {}));
   }
 
-  addMany(...disposables: CancellationToken[] | Disposable[]): IDisposable[] {
-    const cancellationTokens = disposables.filter((d) => d instanceof CancellationToken);
-    const otherDisposables = disposables.filter((d) => !(d instanceof CancellationToken));
-    return [...cancellationTokens.map((token) => this.addCancellationToken(token)), ...otherDisposables.map((disposable) => this.addOtherDisposable(disposable))];
-  }
-
-  clearCancellations(): void {
-    this._cancellationTokens.entries().forEach((entry) => entry[1].dispose());
-    this._cancellationTokens.clear();
+  static getCancellationStrategy(strategyName: string): () => void {
+    return DisposableStoreEvolver.defaultCancellationStrategies.get(strategyName);
   }
 }
 
-// Decorator pattern for TokenStore
-class TokenStoreDecorator {
-  private readonly decoratedTokenStore: TokenStore;
+class DisposableStoreCache {
+  private static cache = new Map({
+    capacity: 10
+  });
 
-  constructor(decoratedTokenStore: TokenStore) {
-    this.decoratedTokenStore = decoratedTokenStore;
+  static clearCache(): void {
+    DisposableStoreCache.cache.clear();
   }
 
-  add(disposable: Disposable): IDisposable {
-    return this.decoratedTokenStore.add(disposable);
-  }
+  static getDisposableStore(strategyName?: string): Promise<DisposableStore> {
+    const cachedStore = DisposableStoreCache.cache.get(strategyName);
+    if (cachedStore) {
+      return Promise.resolve(cachedStore);
+    }
 
-  addMany(...disposables: Disposable[]): IDisposable[] {
-    return this.decoratedTokenStore.addMany(...disposables);
-  }
-
-  clear(): void {
-    this.decoratedTokenStore.clear();
-  }
-
-  dispose(): void {
-    this.decoratedTokenStore.dispose();
-  }
-
-  static decorateTokenStore(tokenStore: TokenStore): TokenStoreDecorator {
-    return new TokenStoreDecorator(tokenStore);
+    return DisposableStoreEvolver.createDisposableStore(strategyName);
   }
 }
 
-// Abstract Subject class for event handling
-abstract class Event {
-  private listeners: Map<string, Callback>;
-
-  constructor() {
-    this.listeners = new Map();
-  }
-
-  on(callback: Callback): IDisposable {
-    const key = callback.toString();
-    this.listeners.set(key, callback);
+class DisposableStoreObserverEvolved extends DisposableStoreObserver {
+  observe(observer: Callback): IDisposable {
+    const disposableStoreObserver = DisposableStoreObserverEvolved.prototype._disposableStore.observe(observer);
     return {
-      disposable: callback,
+      disposable: disposableStoreObserver.disposable,
       uninstall: (): void => {
-        this.listeners.delete(key);
+        disposableStoreObserver.uninstall();
+      },
+      disposeStore: (): void => {
+        DisposableStoreEvolver.cache.delete('default');
+        DisposableStoreCache.clearCache();
       },
     };
   }
 
-  fire(data: any): void {
-    this.listeners.forEach((callback) => callback(data));
+  disposeObservers(): void {
+    DisposableStoreEvolver.cache.delete('default');
+    DisposableStoreCache.clearCache();
+    super.disposeObservers();
+  }
+}
+
+class DisposableStoreDecorator {
+  private _decoratedTokenStore: DisposableStore;
+
+  constructor(_decoratedTokenStore: DisposableStore) {
+    this._decoratedTokenStore = _decoratedTokenStore;
+  }
+
+  add(disposable: CancellationToken | Disposable): IDisposable {
+    return this._decoratedTokenStore.add(disposable);
+  }
+
+  addMany(...disposables: CancellationToken[] | Disposable[]): IDisposable[] {
+    return this._decoratedTokenStore.addMany(...disposables);
+  }
+
+  clear(): void {
+    this._decoratedTokenStore.clear();
   }
 
   dispose(): void {
-    this.listeners.clear();
+    this._decoratedTokenStore.dispose();
   }
 
-  abstract subscribe(listener: Callback): IDisposable;
-
-  abstract unsubscribe(listener: Callback): void;
+  decorateTokenStore(tokenStore: DisposableStore): DisposableStoreDecorator {
+    return new DisposableStoreDecorator(tokenStore);
+  }
 }
 
-// Concrete Subject class
-class ConcreteEvent extends Event {
+abstract class EventEvolved extends Event {
+  private _lazyListeners: Map<string, Callback> = new Map();
+  private _pendingCallbacks: Map<string, Callback> = new Map();
+  private _disposed: boolean = false;
+
   subscribe(listener: Callback): IDisposable {
-    return this.on(listener);
+    if (this._disposed) {
+      throw new Error('Cannot subscribe to a disposed Event');
+    }
+    const key = listener.toString();
+    this._lazyListeners.set(key, listener);
+    return {
+      disposable: listener,
+      uninstall: (): void => {
+        this._lazyListeners.delete(key);
+      },
+      resolveCallback: (index: number, resolve: (value?: void | PromiseLike<void>) => void): void => {
+        if (this._disposed) {
+          throw new Error('Cannot resolve a pending callback for a disposed Event');
+        }
+        this._pendingCallbacks.set(index, listener);
+      },
+    };
   }
 
   unsubscribe(listener: Callback): void {
-    this.on(listener).uninstall();
-  }
-}
-
-// Observer pattern for DisposableStore
-class DisposableStoreObserver extends DisposableStore {
-  private subject: Event;
-
-  constructor(subject: Event) {
-    super();
-    this.subject = subject;
-  }
-
-  observe(observer: Callback): IDisposable {
-    return this.subject.on(observer);
-  }
-}
-
-// DisposeObserver class for disposing of observers
-class DisposeObserver {
-  private subject: Event;
-  private disposableStore: DisposableStore;
-
-  constructor(subject: Event, disposableStore: DisposableStore) {
-    this.subject = subject;
-    this.disposableStore = disposableStore;
-  }
-
-  disposeObservers(): void {
-    this.subject.listeners.forEach((callback) => callback());
-    this.disposableStore.cancel();
-  }
-}
-
-// Factory for creating TokenStores with custom behavior
-class TokenStoreFactory {
-  private tokenStoreCache: Map<string, TokenStore>;
-
-  constructor() {
-    this.tokenStoreCache = new Map();
-  }
-
-  getTokenStore(tokenStore?: TokenStore): TokenStore {
-    if (tokenStore) {
-      const key = TokenStore.toString();
-      if (this.tokenStoreCache.has(key)) {
-        return this.tokenStoreCache.get(key);
-      }
+    if (this._disposed) {
+      return;
     }
-    return TokenStoreDecorator.decorateTokenStore(new TokenStore());
+    this._lazyListeners.delete(listener.toString());
+    const pendingCallback = this._pendingCallbacks.get(listener.toString());
+    if (pendingCallback) {
+      this._pendingCallbacks.delete(listener.toString());
+    }
   }
 
-  createTokenStore(): TokenStore {
-    return TokenStoreDecorator.decorateTokenStore(new TokenStore());
+  fire(data: any): void {
+    this._lazyListeners.forEach((callback) => {
+      callback(data);
+    });
+    if (this._pendingCallbacks.size === 0) {
+      return;
+    }
+    this._pendingCallbacks.forEach((pendingCallback, index) => {
+      const resolveCallback = this._pendingCallbacksResolve.get(this._pendingCallbacks.keys().next().value);
+      if (resolveCallback) {
+        resolveCallback(data);
+      }
+    });
+  }
+
+  protected disposeLazyListeners(): void {
+    this._lazyListeners.clear();
+  }
+
+  dispose(): void {
+    this._disposed = true;
+    this.disposeLazyListeners();
+    this._pendingCallbacks.clear();
+    this._pendingCallbacksResolve.clear();
+    super.dispose();
   }
 }
 
-// Example usage:
+class ConcreteEventEvolved extends EventEvolved {
+  subscribe(listener: Callback): IDisposable {
+    return super.subscribe(listener);
+  }
 
-// Create a disposable store factory and register a custom cancellation strategy
-DisposableStoreFactory.registerCancellationStrategy('custom-cancellation-strategy', () => {
-  console.log('Custom cancellation strategy called');
-});
+  unsubscribe(listener: Callback): void {
+    super.unsubscribe(listener);
+  }
+}
 
-// Create a disposable store with the custom cancellation strategy
-const disposableStore = DisposableStoreFactory.createDisposableStore('custom-cancellation-strategy');
+class DisposableStoreConcurrentEvolver {
+  private _stores: DisposableStore[];
 
-// Create a token store factory
-const tokenStoreFactory = new TokenStoreFactory();
+  constructor(_stores: DisposableStore[]) {
+    this._stores = _stores;
+  }
 
-// Create a token store with decorated behavior
-const tokenStore = tokenStoreFactory.getTokenStore();
+  registerCancellationStrategy(strategyName: string, strategyFn: () => void): void {
+    DisposableStoreEvolver.registerCancellationStrategy(strategyName, strategyFn);
+    this._stores.forEach((store) => {
+      store.registerCancellationStrategy(strategyName, strategyFn);
+    });
+  }
+
+  createDisposableStore(strategyName?: string): Promise<DisposableStore> {
+    return DisposableStoreEvolver.createDisposableStore(strategyName);
+  }
+}
