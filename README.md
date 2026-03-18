@@ -2,67 +2,51 @@
 ================
 
 ## Project Overview
-----------------
 
-DALEK_CAAN is a system that evolves code by integrating patterns from external repositories.
+DALEK_CAAN is a system designed to evolve code by integrating patterns from external repositories.
 
-## Files Processed
------------------
+## Dependencies
 
-* Manual
+* Manual files
 
 ## Latest File
---------------
 
-* nexus_core.js
+- `nexus_core.js`
 
-## DNA Signature
-----------------
+## dnaSignature
 
-* None
+No DNA signature is associated with this system.
 
 ## Context Summary
------------------
 
-* Initial State
+- Initial State
 
 ## Saturation Status
--------------------
 
-* None
+No saturation status is provided for this system.
 
 ## Siphoning Process
--------------------
 
-The siphoning process involves the following technical components:
+The technical mechanism of selecting architectural origins involves the following steps:
 
-### Selecting Architectural Origins
-
-* DALEK_CAAN interfaces with external repositories, such as DeepMind and Google, to retrieve patterns and architectural inspirations.
-* A configurable repository framework enables the addition or removal of external sources.
-
-### Applying Patterns to Local Files
-
-* The system employs a pattern recognition algorithm to identify relevant elements from selected architectural patterns.
-* Local files are analyzed and transformed to incorporate the applied patterns, resulting in evolved code.
+* Retrieving patterns from predefined external repositories (e.g., DeepMind, Google)
+* Applying these patterns to local files based on a set of predefined selection criteria
+* Introducing these external patterns into the local codebase, thereby influencing its structure and behavior
 
 ## Chained Context
------------------
 
-The chained context implementation ensures consistency across evolved files by maintaining a shared state/memory:
+The chained context implementation involves the following components:
 
-* A data management framework stores and updates the evolving state, enabling concurrent access and synchronization.
-* A context propagation mechanism ensures that all evolved files adhere to the shared state, maintaining consistency throughout the evolution process.
+* A shared state/memory that ensures consistency across evolved files
+* Real-time synchronization of this shared state/memory across all participating files
+* Automated propagation of updated states across the system, thereby maintaining a cohesive codebase
 
 ## Current Status
------------------
 
-* Files processed: Manual
-* Latest file: nexus_core.js
-* DNA signature: None
-* Context summary: Initial State
-* Saturation status: None
+- Files processed: Manual files are being processed.
+- Latest file processed: `nexus_core.js` was the latest file processed in the system.
+- DNA signature: There is no DNA signature associated with this system.
+- Context Summary: The current context summary is set to 'Initial State'.
+- Saturation Status: No saturation status is reported for this system.
 
-### Evolution Status
-
-The system is currently operating within the initial state, having processed the manual file. The latest file processed is nexus_core.js, and no DNA signature has been applied. The evolution process is awaiting saturation status indicators.
+To obtain more information about the system or to contribute to its development, please refer to the [Contributing Guidelines](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md).
