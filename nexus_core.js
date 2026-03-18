@@ -1,22 +1,25 @@
-import { Disposable, Factory, Observable } from 'meta-react-core';
+import { Disposable, Factory, Inject } from 'meta-react-core';
 import { DisposeMode1, DisposeMode2, DisposeModes } from './dispose-modes';
-import { GenkiFactory, GenkiFactoryFactory } from './genki-factory';
-import { EventBus, EventTarget } from 'event-bus-js';
+import { GenkiFactoryFactory } from './genki-factory';
+import { EventBus } from 'event-bus-js';
 import { GenkiLogger } from 'genki-logger';
 
-const log = new GenkiLogger('nexus-core');
+const logger = new GenkiLogger('nexus-core');
 
 class DisposableFactory extends Disposable {
-  private readonly disposeModes_: Map<string, DisposeMode>;
-  private readonly factories_: Map<string, Factory>;
+  private readonly context_;
+  private disposeModes_;
+  private factories_;
 
-  constructor(name: string, disposeModes_: Map<string, DisposeMode>) {
+  constructor(name: string, disposeModes_) {
     super(name);
     this.disposeModes_ = disposeModes_;
     this.factories_ = new Map();
+    this.context_ = new ContextManager();
   }
 
-  addFactories(disposeModes_: Map<string, DisposeMode>) {
+  @Inject
+  addFactories(disposeModes_) {
     disposeModes_.forEach((disposeMode, key) => {
       const factory = new GenkiFactory(key, disposeMode, this);
       this.registerFactory(factory);
@@ -24,11 +27,11 @@ class DisposableFactory extends Disposable {
     });
   }
 
-  private registerFactory(factory: Factory) {
+  registerFactory(factory: Factory) {
     this.factories_.set(factory.getKey(), factory);
   }
 
-  private registerDisposeMode(key: string, disposeMode: DisposeMode) {
+  registerDisposeMode(key, disposeMode) {
     const wrapper = new DisposeModeWrapper(key, disposeMode, this);
     this.addDisposable(wrapper);
   }
@@ -36,95 +39,127 @@ class DisposableFactory extends Disposable {
 
 class DisposeModeWrapper extends Disposable {
   private readonly disposeMode_;
-  private readonly context_: DisposableFactory;
-  private eventBus_: EventBus;
+  private readonly key;
+  private readonly context_;
+  private readonly eventBus_;
 
-  constructor(key: string, disposeMode_: DisposeMode, context_: DisposableFactory) {
+  constructor(key, disposeMode_, context_) {
     super(key);
     this.disposeMode_ = disposeMode_;
+    this.key = key;
     this.context_ = context_;
     this.eventBus_ = new EventBus();
   }
 
-  getDisposeMode(): DisposeMode {
+  getDisposeMode() {
     return this.disposeMode_;
   }
 
-  notifyObservers(payload: any): void {
-    log.dump(`notifyObservers called with payload: ${payload}`);
+  notifyObservers(payload) {
+    logger.dump(`notifyObservers called with payload: ${payload}`);
     this.context_.notifyObservers(payload);
     this.eventBus_.dispatchEvent({ type: 'disposeModeUpdate', payload });
   }
 
-  addDisposable(disposable: Disposable): void {
-    log.dump(`adding disposable: ${disposable}`);
+  addDisposable(disposable) {
+    logger.dump(`adding disposable: ${disposable}`);
     this.context_.addDisposable(disposable);
   }
 }
 
-class Factory {
-  private readonly disposeMode_;
-  private readonly context_: DisposableFactory;
+class Disposable extends Object {
+  constructor(name: string) {
+    super();
+    this.name = name;
+  }
 
-  constructor(key: string, disposeMode_: DisposeMode, context_: DisposableFactory) {
+  @Inject
+  dispose() {}
+}
+
+class Factory extends Disposable {
+  private disposable_;
+  private readonly context_;
+
+  constructor(key: string, disposeMode_: DisposeMode, context_) {
+    super();
     this.disposeMode_ = disposeMode_;
     this.context_ = context_;
   }
 
-  getDisposeMode(): DisposeMode {
+  @Inject
+  register() {
+    this.context_.registerFactory(this);
+  }
+
+  getDisposeMode() {
     return this.disposeMode_;
   }
 
-  addDisposable(disposable: Disposable): void {
-    log.dump(`adding disposable: ${disposable}`);
+  addDisposable(disposable) {
+    logger.dump(`adding disposable: ${disposable}`);
     this.disposeMode_.addDisposable(disposable);
+  }
+
+  disposeFactory() {
+    this.context_.unregisterFactory(this);
   }
 }
 
-class GenkiFactory extends Disposable {
-  private readonly disposeMode_;
-  private readonly eventTarget_: EventTarget;
+class GenkiLogger {
+  constructor(name: string) {}
 
-  constructor(key: string, disposeMode_: DisposeMode, context_: DisposableFactory) {
-    super(key);
-    this.disposeMode_ = disposeMode_;
+  dump(message: string) {
+    console.log(message);
+  }
+}
+
+class GenkiFactory extends Factory {
+  private readonly eventTarget_;
+
+  constructor(key: string, disposeMode_: DisposeMode, context_) {
+    super(key, disposeMode_, context_);
     this.eventTarget_ = new EventTarget();
-    context_.addDisposable(this);
   }
 
-  getDisposeMode(): DisposeMode {
-    return this.disposeMode_;
-  }
-
-  notifyObservers(payload: any): void {
-    log.dump(`notifyObservers called with payload: ${payload}`);
+  notifyObservers(payload) {
+    logger.dump(`notifyObservers called with payload: ${payload}`);
     this.eventTarget_.dispatchEvent({ type: 'disposeModeUpdate', payload });
-    const disposeMode = this.getDisposeMode();
-    disposeMode.notifyObservers(payload);
+    this.disposeMode_.notifyObservers(payload);
   }
 }
 
 class GenkiFactoryFactory {
-  private context_: DisposableFactory;
+  context_;
 
-  constructor(context_: DisposableFactory) {
+  constructor(context_) {
     this.context_ = context_;
   }
 
-  createFactoryInstance(key: string, disposeMode: DisposeMode): GenkiFactory {
+  createFactoryInstance(key: string, disposeMode: DisposeMode) {
     return new GenkiFactory(key, disposeMode, this.context_);
   }
 }
 
-class Observer {
-  private readonly context_: DisposableFactory;
+class ContextManager {
+  disposables_;
 
-  constructor(context_: DisposableFactory) {
-    this.context_ = context_;
+  constructor() {
+    this.disposables_ = new Map();
   }
 
-  notifyObservers(payload: any): void {
-    log.dump(`notifyObservers called with payload: ${payload}`);
-    this.context_.notifyObservers(payload);
+  registerDisposable(disposable: Disposable) {
+    this.disposables_.set(disposable.name, disposable);
+  }
+
+  unregisterDisposable(disposableName) {
+    const disposable = this.disposables_.get(disposableName);
+    if (disposable) {
+      this.disposables_.delete(disposableName);
+    }
+  }
+
+  addDisposable(disposable: Disposable) {
+    this.registerDisposable(disposable);
   }
 }
