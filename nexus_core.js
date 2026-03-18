@@ -1,7 +1,7 @@
+{
+  "improvedCode": `
 class DisposableStoreEvolver extends DisposableStoreFactory {
-  private static cache = new Map({
-    capacity: 10
-  });
+  private static lruCache = new Map({ capacity: 10 });
 
   static registerCancellationStrategy(strategyName: string, strategyFn: () => void): void {
     if (!DisposableStoreEvolver.defaultCancellationStrategies.has(strategyName)) {
@@ -9,10 +9,25 @@ class DisposableStoreEvolver extends DisposableStoreFactory {
     }
   }
 
+  static getAvailableCancellationStrategies(): string[] {
+    return [...DisposableStoreEvolver.defaultCancellationStrategies.keys()];
+  }
+
+  static getDefaultCancellationStrategies(): Map<string, () => void> {
+    return new Map([
+      ['basic', () => {}],
+      ['timeout', () => setTimeout()],
+    ]);
+  }
+
+  static getCancellationStrategy(strategyName: string): (() => void) | undefined {
+    return DisposableStoreEvolver.defaultCancellationStrategies.get(strategyName);
+  }
+
   static createDisposableStore(strategyName?: string): Promise<DisposableStore> {
-    const cachedStore = DisposableStoreEvolver.cache.get(strategyName);
+    const cachedStore = DisposableStoreEvolver.lruCache.get(strategyName);
     if (cachedStore) {
-      return Promise.resolve(cachedStore);
+      return Promise.resolve(cachedStore.value);
     }
 
     const strategyFn = DisposableStoreEvolver.getCancellationStrategy(strategyName);
@@ -21,7 +36,7 @@ class DisposableStoreEvolver extends DisposableStoreFactory {
     }
 
     return DisposableStoreEvolver.createDisposableStoreSlow(strategyName, strategyFn).then((store) => {
-      DisposableStoreEvolver.cache.set(strategyName, store);
+      DisposableStoreEvolver.lruCache.set(strategyName, { key: strategyName, value: store });
       return store;
     });
   }
@@ -30,51 +45,27 @@ class DisposableStoreEvolver extends DisposableStoreFactory {
     return Promise.resolve(new DisposableStore(strategyFn ? strategyFn : () => {}));
   }
 
-  static getCancellationStrategy(strategyName: string): () => void {
-    return DisposableStoreEvolver.defaultCancellationStrategies.get(strategyName);
+  static registerLazyCallback(strategyName: string, callback: (strategyFn: () => void) => void): void {
+    DisposableStoreEvolver.lazyCallbacks.set(strategyName, callback);
+  }
+
+  static getLazyCallback(strategyName: string): (() => void) | undefined {
+    return DisposableStoreEvolver.lazyCallbacks.get(strategyName);
+  }
+
+  static dispose(): void {
+    DisposableStoreEvolver.defaultCancellationStrategies.clear();
+    DisposableStoreEvolver.lruCache.clear();
+    DisposableStoreEvolver.lazyCallbacks.clear();
   }
 }
 
-class DisposableStoreCache {
-  private static cache = new Map({
-    capacity: 10
-  });
-
-  static clearCache(): void {
-    DisposableStoreCache.cache.clear();
-  }
-
-  static getDisposableStore(strategyName?: string): Promise<DisposableStore> {
-    const cachedStore = DisposableStoreCache.cache.get(strategyName);
-    if (cachedStore) {
-      return Promise.resolve(cachedStore);
-    }
-
-    return DisposableStoreEvolver.createDisposableStore(strategyName);
-  }
-}
-
-class DisposableStoreObserverEvolved extends DisposableStoreObserver {
-  observe(observer: Callback): IDisposable {
-    const disposableStoreObserver = DisposableStoreObserverEvolved.prototype._disposableStore.observe(observer);
-    return {
-      disposable: disposableStoreObserver.disposable,
-      uninstall: (): void => {
-        disposableStoreObserver.uninstall();
-      },
-      disposeStore: (): void => {
-        DisposableStoreEvolver.cache.delete('default');
-        DisposableStoreCache.clearCache();
-      },
-    };
-  }
-
-  disposeObservers(): void {
-    DisposableStoreEvolver.cache.delete('default');
-    DisposableStoreCache.clearCache();
-    super.disposeObservers();
-  }
-}
+DisposableStoreEvolver.defaultCancellationStrategies = new Map([
+  new Map([['basic', () => {}]]),
+  new Map([['timeout', () => setTimeout()]]),
+]);
+DisposableStoreEvolver.lruCache = new Map({ capacity: 10 });
+DisposableStoreEvolver.lazyCallbacks = new Map();
 
 class DisposableStoreDecorator {
   private _decoratedTokenStore: DisposableStore;
@@ -102,12 +93,21 @@ class DisposableStoreDecorator {
   decorateTokenStore(tokenStore: DisposableStore): DisposableStoreDecorator {
     return new DisposableStoreDecorator(tokenStore);
   }
+
+  update(strategyName: string, strategyFn: () => void): void {
+    if (DisposableStoreEvolver.defaultCancellationStrategies.has(strategyName)) {
+      DisposableStoreEvolver.defaultCancellationStrategies.get(strategyName) = strategyFn;
+    } else {
+      DisposableStoreEvolver.registerCancellationStrategy(strategyName, strategyFn);
+    }
+  }
 }
 
-abstract class EventEvolved extends Event {
+class EventEvolved {
   private _lazyListeners: Map<string, Callback> = new Map();
   private _pendingCallbacks: Map<string, Callback> = new Map();
   private _disposed: boolean = false;
+  private _lazyCallbacks: Map<string, () => void> = new Map();
 
   subscribe(listener: Callback): IDisposable {
     if (this._disposed) {
@@ -120,11 +120,14 @@ abstract class EventEvolved extends Event {
       uninstall: (): void => {
         this._lazyListeners.delete(key);
       },
-      resolveCallback: (index: number, resolve: (value?: void | PromiseLike<void>) => void): void => {
+      resolvePendingCallback: (index: number, resolve: (value?: void | PromiseLike<void>) => void): void => {
         if (this._disposed) {
           throw new Error('Cannot resolve a pending callback for a disposed Event');
         }
-        this._pendingCallbacks.set(index, listener);
+        this._lazyCallbacks.get(key)();
+      },
+      get pendingCallback(): boolean {
+        return this._pendingCallbacks.has(key);
       },
     };
   }
@@ -134,65 +137,132 @@ abstract class EventEvolved extends Event {
       return;
     }
     this._lazyListeners.delete(listener.toString());
-    const pendingCallback = this._pendingCallbacks.get(listener.toString());
-    if (pendingCallback) {
-      this._pendingCallbacks.delete(listener.toString());
-    }
+    this._pendingCallbacks.delete(listener.toString());
   }
 
   fire(data: any): void {
-    this._lazyListeners.forEach((callback) => {
-      callback(data);
-    });
-    if (this._pendingCallbacks.size === 0) {
-      return;
-    }
-    this._pendingCallbacks.forEach((pendingCallback, index) => {
-      const resolveCallback = this._pendingCallbacksResolve.get(this._pendingCallbacks.keys().next().value);
-      if (resolveCallback) {
-        resolveCallback(data);
+    const pendingCallbacks = [...this._pendingCallbacks.values()];
+    pendingCallbacks.forEach((callback) => {
+      if (this._lazyListeners.has(callback.toString())) {
+        this._lazyListeners.get(callback.toString())(data);
+      } else {
+        callback.resolve(data);
       }
+    });
+    this._pendingCallbacks.clear();
+    this._lazyListeners.forEach((listener) => {
+      listener(data);
     });
   }
 
-  protected disposeLazyListeners(): void {
-    this._lazyListeners.clear();
+  _resolvePendingCallbacks(key: string, resolve: (value?: void | PromiseLike<void>) => void): void {
+    this._pendingCallbacks.get(key)?.resolve(resolve);
   }
 
   dispose(): void {
     this._disposed = true;
     this.disposeLazyListeners();
     this._pendingCallbacks.clear();
-    this._pendingCallbacksResolve.clear();
     super.dispose();
   }
-}
 
-class ConcreteEventEvolved extends EventEvolved {
-  subscribe(listener: Callback): IDisposable {
-    return super.subscribe(listener);
+  protected disposeLazyListeners(): void {
+    this._lazyListeners.clear();
+    this._lazyCallbacks.clear();
+    DisposableStoreEvolver.dispose();
   }
 
-  unsubscribe(listener: Callback): void {
-    super.unsubscribe(listener);
-  }
-}
-
-class DisposableStoreConcurrentEvolver {
-  private _stores: DisposableStore[];
-
-  constructor(_stores: DisposableStore[]) {
-    this._stores = _stores;
-  }
-
-  registerCancellationStrategy(strategyName: string, strategyFn: () => void): void {
-    DisposableStoreEvolver.registerCancellationStrategy(strategyName, strategyFn);
-    this._stores.forEach((store) => {
-      store.registerCancellationStrategy(strategyName, strategyFn);
+  addLazyListener(strategyName: string): void {
+    DisposableStoreEvolver.registerLazyCallback(strategyName, (strategyFn: () => void) => {
+      this._lazyCallbacks.set(strategyName, () => {
+        strategyFn();
+      });
     });
   }
 
-  createDisposableStore(strategyName?: string): Promise<DisposableStore> {
-    return DisposableStoreEvolver.createDisposableStore(strategyName);
+  addPendingCallback(callback: Callback): void {
+    const key = callback.toString();
+    this._pendingCallbacks.set(key, callback);
+    DisposableStoreEvolver.getLazyCallback(strategyName)?.();
   }
+}
+
+DisposableStoreEvolver.lazyCallbacks = new Map();
+
+class DisposeManager {
+  private _disposeQueue = [];
+
+  constructor() {
+    super();
+  }
+
+  add(tokenStore: DisposableStore): IDisposable {
+    return DisposableStoreEvolver.createDisposableStore(tokenStore.strategyName);
+  }
+
+  remove(tokenStore: DisposableStore): void {
+    DisposableStoreEvolver.lruCache.delete(tokenStore.strategyName);
+  }
+
+  dispose(): void {
+    this._disposeQueue.forEach((tokenStore) => {
+      DisposableStoreEvolver.remove(tokenStore);
+      DisposableStoreEvolver.dispose();
+    });
+    DisposableStoreEvolver.dispose();
+  }
+
+  manageDisposeQueue(disposableStore: DisposableStore): void {
+    this._disposeQueue.push(disposableStore);
+  }
+}
+
+class DisposableStore implements IDisposable {
+  private _cancellationStrategy: (() => void) | undefined;
+  private _managedDispose: boolean = false;
+
+  constructor(cancellationStrategy?: () => void) {
+    this._cancellationStrategy = cancellationStrategy;
+  }
+
+  add(disposable: CancellationToken | Disposable): IDisposable {
+    return {
+      disposable,
+      uninstall: (): void => {
+        // implementation not provided
+      },
+    };
+  }
+
+  addMany(...disposables: CancellationToken[] | Disposable[]): IDisposable[] {
+    return disposables.map((disposable) => this.add(disposable));
+  }
+
+  clear(): void {
+    // implementation not provided
+  }
+
+  dispose(strategyName: string): void {
+    if (this._managedDispose) {
+      return;
+    }
+    this._managedDispose = true;
+    DisposableStoreEvolver.getDefaultCancellationStrategies().get(strategyName)?.();
+  }
+
+  getCancellationStrategy(strategyName: string): () => void | undefined {
+    return DisposableStoreEvolver.getCancellationStrategy(strategyName);
+  }
+
+  manageDispose(tokenStore: DisposableStore): void {
+    DisposeManager.prototype.add(tokenStore);
+  }
+
+  dispose(): void {
+    DisposeManager.prototype.dispose();
+  }
+};
+`
+ 
+
 }
