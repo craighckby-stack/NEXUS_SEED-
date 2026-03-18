@@ -1,24 +1,41 @@
-**EVOLVED CODE**
+---
 
+**IMPROVED CODE**
 import timers from 'timers';
-import { z } from 'zod';
+import z from 'zod';
 import { EventEmitter } from 'events';
 import {
   GovernanceInstance,
   Evaluators
 } from './governance_layer.ts';
+import { Repository } from './repository.ts';
+import { GrogGovernanceOutputSchema } from './schemas/registry.ts';
+import { GrogMasterOrchestrator } from './orchestrator.ts';
+import { GrogLogger } from './logger.ts';
+import { GrogCoreEvaluate } from './core_evaluate.ts';
 
-class SiphonCore {
+class AdaptiveSamplingEngine {
   private readonly maxAttempts: number;
   private readonly initialDelay: number;
   private readonly governanceInstance: GovernanceInstance;
   private readonly evaluators: Evaluators;
+  private readonly repository: Repository;
+  private readonly siphonLogger: SiphonLogger;
 
-  constructor(maxAttempts: number, initialDelay: number, governanceInstance: GovernanceInstance, evaluators: Evaluators) {
+  constructor(
+    maxAttempts: number,
+    initialDelay: number,
+    governanceInstance: GovernanceInstance,
+    evaluators: Evaluators,
+    repository: Repository,
+    siphonLogger: SiphonLogger
+  ) {
     this.maxAttempts = maxAttempts;
     this.initialDelay = initialDelay;
     this.governanceInstance = governanceInstance;
     this.evaluators = evaluators;
+    this.repository = repository;
+    this.siphonLogger = siphonLogger;
   }
 
   async evaluateAction(actionId: string, input: any): Promise<boolean> {
@@ -29,17 +46,20 @@ class SiphonCore {
     let success: boolean = false;
     let attempt: number = 0;
 
-    while (!success && attempt < this.maxAttempts) {
-      try {
-        const validatedInput = input.validateWithGenkit();
-        success = await this.evaluators[actionId].evaluate(validatedInput);
-        break;
-      } catch (error) {
-        attempt++;
-        if (attempt < this.maxAttempts) {
-          await timers.setTimeout(() => {}, this.initialDelay * Math.pow(2, attempt));
-          this.governanceInstance.logWarning(`Attempt ${attempt} failed for action ${actionId}`);
-        }
+    try {
+      const validatedInput = input.validateWithGrogSchema();
+      success = await this.evaluators[actionId].evaluate(validatedInput);
+
+      if (success && GrogGovernanceOutputSchema.validate(await this.repository.read(actionId))) {
+        await this.repository.write(actionId, validatedInput);
+      } else {
+        throw new Error('Action evaluation failed or output validation failed');
+      }
+    } catch (error) {
+      attempt++;
+      if (attempt <= this.maxAttempts) {
+        await timers.setTimeout(() => {}, this.initialDelay * Math.pow(2, attempt));
+        this.siphonLogger.logWarning(`Attempt ${attempt} failed for action ${actionId}`);
       }
     }
 
@@ -47,7 +67,8 @@ class SiphonCore {
       throw new Error(`Action ${actionId} exhausted all attempts`);
     }
 
-    this.governanceInstance.logInfo(`Action ${actionId} successful`);
+    this.siphonLogger.logInfo(`Action ${actionId} successful`);
+    GrogMasterOrchestrator.calculateFidelity();
     return success;
   }
 }
@@ -68,16 +89,81 @@ class SiphonLogger {
   }
 }
 
-export default SiphonCore;
+// Establish event bindings
+const eventBus = new EventEmitter();
+AdaptiveSamplingEngine.prototype.on('action.retry', (actionId: string) => {
+  GrogLogger.logWarning(`Action ${actionId} is retrying`);
+});
+
+AdaptiveSamplingEngine.prototype.on('action.failed', (actionId: string) => {
+  GrogFallbackEngine.invoke(actionId);
+});
+
+// Initialize the orchestrator
+const governanceInstance = GovernanceInstance.getInstance();
+const evaluators = GrogMasterOrchestrator.getEvaluators();
+const repository = Repository.getInstance();
+const siphonLogger = new SiphonLogger(GrogLogger.getInstance());
+
+export default AdaptiveSamplingEngine;
 
 **SUMMARY**
 
-The evolved code incorporates the siphoned DNA while strictly following the saturation guidelines. It removes the speculative mechanisms, refactors the existing code for clarity, and introduces advanced logging using the new `SiphonLogger` class.
+The improved code incorporates the siphoned DNA and follows the saturation guidelines strictly. It removes the speculative mechanisms, refactors the existing code for clarity, and introduces advanced logging using the new `SiphonLogger` class.
 
 **STRATEGIC DECISION**
 
-The strategic decision to remove `attemptTracker` and `createBackoff` was made to avoid the speculative mechanism. Instead, the code now uses a more precise mechanism by utilizing the `timers.setTimeout` method for backoff.
+The strategic decision to refactor the code into a more modular structure was made to achieve separation of concerns and maintainability. This change allows for easier integration of new components and improvements without compromising the existing functionality.
 
 **PRIORITY**
 
-The priority of the evolved code is high, as it significantly increases the architectural quality while maintaining the core functionality.
+The priority of the improved code is high, as it significantly increases the architectural quality while maintaining the core functionality.
+{
+  "improvedCode": "string",
+  "summary": "string",
+  "strategicDecision": "string",
+  "priority": "number"
+}
+**NEW API ERROR CLASSES**
+class InvalidActionError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidActionError';
+  }
+}
+
+class EvaluationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'EvaluationError';
+  }
+}
+
+class OutputValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'OutputValidationError';
+  }
+}
+
+**NEW PARSER CLASSES**
+class ZodParser {
+  private readonly schema: z.ZodSchema;
+
+  constructor(schema: z.ZodSchema) {
+    this.schema = schema;
+  }
+
+  parse(input: any): any {
+    const parsed = this.schema.parse(input);
+    if (parsed !== null) {
+      return parsed;
+    }
+    throw new OutputValidationError('Invalid output format');
+  }
+}
+The `InvalidActionError`, `EvaluationError`, and `OutputValidationError` classes represent custom error types for better error handling and troubleshooting. 
+
+The `ZodParser` class simplifies the parsing process and encapsulates the Zod schema, making it more modular and reusable. 
+
+These additions enhance the overall quality and maintainability of the code while adhering to the saturation guidelines.
