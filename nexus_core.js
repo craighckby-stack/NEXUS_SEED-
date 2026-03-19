@@ -1,280 +1,163 @@
-import Registry from './registry.js';
-import DisposeMode from './dispose-mode.js';
-import Factory from './factory.js';
-import DisposeModeWrapper from './dispose-mode-wrapper.js';
-import CompositeDisposeMode from './composite-dispose-mode.js';
-import Logger from './logger.js';
-import EventTarget from './event-target.js';
-
-/**
- * DisposeModeFactory class responsible for creating dispose modes.
- */
+// Dispose Mode Factory
 class DisposeModeFactory {
-  constructor(key, disposeModes) {
+  constructor(key, disposeModes, factoryMap) {
     this.key = key;
     this.disposeModes = disposeModes;
+    this.factoryMap = factoryMap;
     this.logger = new Logger(this.key);
   }
 
-  /**
-   * Creates a composite dispose mode.
-   * @param {DisposeMode} disposeMode
-   * @returns {CompositeDisposeMode}
-   */
-  static createDisposeModes(disposeMode) {
-    return new CompositeDisposeMode(this.key, [disposeMode]);
+  static createDisposeMode(key, disposeMode, disposeModeMap = new DisposeModeMap()) {
+    const disposeModeInstance = new DisposeMode(key, disposeMode, disposeModeMap)
+    return { disposeModeInstance, disposeModeMap };
   }
 
-  /**
-   * Injects and registers a factory.
-   * @param {Factory} factory
-   * @param {DisposeModeWrapper} disposeModeWrapper
-   */
+  static createCompositeDisposeMode(key, disposeModes) {
+    const compositeDisposeMode = new CompositeDisposeMode(key, disposeModes);
+    return compositeDisposeMode;
+  }
+
   injectAndRegisterFactory(factory, disposeModeWrapper) {
-    factory.injectAndRegister(disposeModeWrapper.disposeMode);
-    disposeModeWrapper.injectAndRegisterFactory(factory);
+    disposeModeWrapper.disposeModeMap.registerDisposeMode(factory.key, this.disposeModes.find(mode => mode.key === factory.key));
+    this.factoryMap.set(factory.key, disposeModeWrapper);
+  }
+
+  deregisterDisposeMode(key, disposeModeMap) {
+    const disposeMode = this.disposeModes.find(mode => mode.key === key);
+    if (disposeMode) {
+      disposeModeMap.deregisterDisposeMode(key);
+      this.disposeModes.splice(this.disposeModes.indexOf(disposeMode), 1);
+    }
   }
 }
 
-/**
- * DisposeModeWrapper class serving as an abstraction for dispose modes.
- */
-class DisposeModeWrapper {
-  constructor(key, disposeMode) {
-    this.key = key;
-    this.disposeMode = disposeMode;
-  }
-
-  /**
-   * Injects and registers a factory.
-   * @param {Factory} factory
-   */
-  injectAndRegisterFactory(factory) {
-    this.disposeMode.injectAndRegisterFactory(factory);
-  }
-
-  /**
-   * Adds a disposable to the dispose mode.
-   * @param {*} disposable
-   */
-  addDisposable(disposable) {
-    this.disposeMode.addDisposable(disposable);
-  }
-
-  /**
-   * Notifies observers with a payload.
-   * @param {*} payload
-   */
-  notifyObservers(payload) {
-    this.disposeMode.notifyObservers(payload);
-  }
-
-  /**
-   * Deregisters dispose mode wrapper.
-   */
-  deregister() {
-    this.disposeMode.deregister(this.key);
-  }
-}
-
-/**
- * DisposeMode class serving as an abstraction for dispose logic.
- */
+// Dispose Mode
 class DisposeMode {
-  constructor(key) {
+  constructor(key, notifyObservers, disposeModeMap = new DisposeModeMap()) {
     this.key = key;
+    this.notifyObservers = notifyObservers;
+    this.disposeModeMap = disposeModeMap;
   }
 
-  /**
-   * Adds disposable to the dispose mode.
-   * @param {*} disposable
-   */
-  addDisposable(disposable) {}
+  addDisposable(disposable) {
+    this.disposeModeMap.addDisposable(disposable);
+  }
 
-  /**
-   * Removes disposable from the dispose mode.
-   * @param {*} disposable
-   */
-  removeDisposable(disposable) {}
+  removeDisposable(disposable) {
+    this.disposeModeMap.removeDisposable(disposable);
+  }
 
-  /**
-   * Injects and registers a factory.
-   * @param {Factory} factory
-   */
-  injectAndRegisterFactory(factory) {}
-
-  /**
-   * Deregisters dispose mode key.
-   * @param {*} key
-   */
-  deregister(key) {}
+  deregister() {
+    this.disposeModeMap.deregisterDisposeMode(this.key);
+    this.disposeModeMap = null;
+  }
 }
 
-/**
- * CompositeDisposeMode class extending DisposeMode for multiple modes.
- */
+// Composite Dispose Mode
 class CompositeDisposeMode extends DisposeMode {
   constructor(key, disposeModes) {
-    super(key);
+    super(key, () => {
+      disposeModes.forEach((disposeMode) => disposeMode.notifyObservers());
+    });
     this.disposeModes = disposeModes;
+    this.disposeModes.forEach(disposeMode => disposeMode.disposeModeMap = null);
   }
 
-  /**
-   * Adds disposable to the dispose mode.
-   * @param {*} disposable
-   */
   addDisposable(disposable) {
     this.disposeModes.forEach((disposeMode) => disposeMode.addDisposable(disposable));
   }
 
-  /**
-   * Removes disposable from the dispose mode.
-   * @param {*} disposable
-   */
   removeDisposable(disposable) {
     this.disposeModes.forEach((disposeMode) => disposeMode.removeDisposable(disposable));
   }
-
-  /**
-   * Injects and registers a factory.
-   * @param {Factory} factory
-   */
-  injectAndRegisterFactory(factory) {
-    this.disposeModes.forEach((disposeMode) => disposeMode.injectAndRegisterFactory(factory));
-  }
-
-  /**
-   * Deregisters dispose mode key.
-   * @param {*} key
-   */
-  deregister(key) {}
 }
 
-/**
- * Factory class responsible for creating instances.
- */
+// Dispose Mode Map
+class DisposeModeMap {
+  registerDisposeMode(key, disposeMode) {
+    this.disposeModeMap.set(key, disposeMode);
+  }
+
+  deregisterDisposeMode(key) {
+    this.disposeModeMap.delete(key);
+  }
+
+  addDisposable(disposable) {
+    this.disposeModeMap.forEach((disposeMode) => disposeMode.addDisposable(disposable));
+  }
+
+  removeDisposable(disposable) {
+    this.disposeModeMap.forEach((disposeMode) => disposeMode.removeDisposable(disposable));
+  }
+
+  getDisposeMode(key) {
+    return this.disposeModeMap.get(key);
+  }
+}
+
+// Factory
 class Factory {
   constructor(key, classToWrap, eventTarget, context) {
     this.key = key;
     this.classToWrap = classToWrap;
     this.eventTarget = eventTarget;
     this.context = context;
+    this.disposableMap = new WeakMap();
   }
 
-  /**
-   * Injects a dependency.
-   */
   inject() {}
 
-  /**
-   * Registers the factory with disposal modes.
-   * @param {DisposeMode} disposeMode
-   */
-  injectAndRegister(disposeMode) {}
-
-  /**
-   * Creates an instance of the wrapped class.
-   */
   createInstance() {
     return new this.classToWrap(this.eventTarget, this.context);
   }
-}
 
-/**
- * EventTarget class for providing event target functionality.
- */
-class EventTarget {
-  constructor() {}
-}
-
-/**
- * GenkiFactory class extending the Factory class for Genki.
- */
-class GenkiFactory extends Factory {
-  createInstance() {
-    const instance = super.createInstance();
-    instance.initialize(this.context);
-    return instance;
-  }
-
-  initialize(context) {
-    // Implementation for initialization.
-  }
-}
-
-/**
- * Disposable class serving as a base class for disposables.
- */
-class Disposable {
-  constructor() {}
-}
-
-/**
- * CompositeDisposable class extending Disposable for multiple disposables.
- */
-class CompositeDisposable extends Disposable {
-  constructor(...disposables) {
-    super();
-    this.disposables = disposables;
-  }
-
-  deregister() {
-    this.disposables.forEach((disposable) => disposable.deregister());
-  }
-}
-
-class Registry {}
-
-class Logger {
-  constructor(key) {
-    this.key = key;
-  }
-
-  log(message) {
-    console.log(`[${this.key}] ${message}`);
-  }
-}
-
-class Nexus extends Disposable {
-  constructor(disposeMode = new CompositeDisposeMode('default-mode', [])) {
-    super();
-    this.disposeMode_ = disposeMode;
-    this.factories_ = new WeakMap();
-    this.disposables_ = new WeakMap();
-    this.registry_ = new Registry();
-    this.logger = new Logger('Nexus');
+  createFactoryInstance() {
+    const factory = new this.classToWrap(this.eventTarget, this.context);
+    this.registerFactory(factory);
+    return factory;
   }
 
   registerFactory(factory) {
-    this.factories_.set(factory, factory);
-    this.disposeMode_.injectAndRegisterFactory(factory);
-    this.logger.log('Factory registered successfully');
+    this.disposableMap.set(factory.key, factory);
+    this.disposeModeMap.registerDisposeMode(factory.key, factory.disposeMode);
+  }
+}
+
+// Nexus
+class Nexus {
+  constructor(nexusConfig) {
+    this.nexusConfig = nexusConfig;
+    this.factories = new WeakMap();
+    this.disposableMap = new WeakMap();
+    this.disposeMode = new DisposeMode('nexus', () => {});
+  }
+
+  registerFactory(factory) {
+    factory.disposeMode = this.disposeMode;
+    factory.disposableMap = this.disposableMap;
+    this.factories.set(factory.key, factory);
+    this.disposeModeMap.registerDisposeMode(factory.key, factory.disposeMode);
   }
 
   unregisterFactory(factory) {
-    if (this.factories_.has(factory)) {
-      this.disposeMode_.deregister(factory.key);
-      this.factories_.delete(factory);
-      this.logger.log('Factory unregistered successfully');
-    }
+    this.factories.delete(factory.key);
+    this.disposeModeMap.deregisterDisposeMode(factory.key);
+    factory.disposeMode = null;
   }
 
   registerDisposable(disposable) {
-    this.disposables_.set(disposable.key, disposable);
-    this.disposeMode_.addDisposable(disposable);
-    this.logger.log('Disposable registered successfully');
+    this.disposableMap.set(disposable.key, disposable);
   }
 
   unregisterDisposable(disposable) {
-    this.disposeMode_.removeDisposable(disposable);
-    this.logger.log('Disposable unregistered successfully');
+    this.disposableMap.delete(disposable.key);
   }
 
-  getDisposable(disposableName) {
-    return this.disposables_.get(disposableName);
+  getDisposable(key) {
+    return this.disposableMap.get(key);
   }
 
-  getFactory(factoryName) {
-    return this.factories_.get(factoryName);
+  getFactory(factoryKey) {
+    return this.factories.get(factoryKey);
   }
 }
