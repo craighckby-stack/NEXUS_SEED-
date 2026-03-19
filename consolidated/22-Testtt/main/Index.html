@@ -1004,3 +1004,313 @@ if __name__ == "__main__":
         plt.switch_backend('Agg')
         
     run_simulation()
+
+            <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMG SOVEREIGN | Consolidated v5.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;500;700&display=swap');
+        
+        :root {
+            --emerald: #10b981;
+            --emerald-dark: #064e3b;
+            --cyan: #06b6d4;
+            --amber: #f59e0b;
+            --rose: #f43f5e;
+            --bg: #020202;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--emerald);
+            font-family: 'Fira Code', monospace;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .crt-line {
+            width: 100%;
+            height: 2px;
+            background: rgba(16, 185, 129, 0.05);
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 1000;
+            animation: scan 8s linear infinite;
+        }
+
+        @keyframes scan {
+            from { transform: translateY(0); }
+            to { transform: translateY(100vh); }
+        }
+
+        .glow-text { text-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
+        .amber-glow { color: var(--amber); text-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
+        .cyan-glow { color: var(--cyan); text-shadow: 0 0 10px rgba(6, 182, 212, 0.4); }
+        
+        .glass-panel {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(16, 185, 129, 0.1);
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+        ::-webkit-scrollbar-thumb { background: var(--emerald-dark); border-radius: 10px; }
+
+        input, textarea { background: transparent; border: none; outline: none; color: inherit; font-family: inherit; }
+        
+        .mutation-cycle { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        .temporal-shift { filter: hue-rotate(90deg) invert(1); transition: all 0.5s ease; }
+    </style>
+</head>
+<body class="flex flex-col">
+    <div class="crt-line"></div>
+
+    <!-- STARTUP AUTHENTICATION -->
+    <div id="boot-screen" class="fixed inset-0 z-[2000] bg-black flex items-center justify-center p-6">
+        <div class="w-full max-w-lg border border-emerald-900/40 p-10 glass-panel shadow-[0_0_100px_rgba(16,185,129,0.1)]">
+            <div class="text-center mb-10">
+                <i class="fa-solid fa-brain text-4xl mb-4 animate-pulse"></i>
+                <h1 class="text-3xl font-black tracking-[0.4em] glow-text italic">EMG_SOVEREIGN</h1>
+                <p class="text-[9px] text-emerald-900 uppercase tracking-[0.5em] mt-2 font-bold">Consolidation Layer v5.0</p>
+            </div>
+            <div class="space-y-6 mb-8">
+                <div class="border-b border-emerald-900/30 pb-2">
+                    <label class="block text-[8px] uppercase text-emerald-800 font-bold mb-1">GitHub Access Token</label>
+                    <input type="password" id="gh-token" placeholder="ghp_************************" class="w-full text-xs py-1 placeholder:text-emerald-950">
+                </div>
+                <div class="border-b border-emerald-900/30 pb-2">
+                    <label class="block text-[8px] uppercase text-emerald-800 font-bold mb-1">Reality Anchor Path</label>
+                    <input type="text" id="target-path" value="/Test-1-/main/consolidated" class="w-full text-xs py-1 text-emerald-600">
+                </div>
+            </div>
+            <button onclick="bootSystem()" class="w-full py-4 border border-emerald-700 hover:bg-emerald-500 hover:text-black text-[10px] font-black uppercase tracking-widest transition-all">
+                Initialize Sovereign Handshake
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN INTERFACE -->
+    <header class="h-14 border-b border-emerald-900/20 px-6 flex justify-between items-center bg-black/50 backdrop-blur-md">
+        <div class="flex items-center gap-10">
+            <div class="flex items-center gap-3">
+                <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981] animate-pulse"></div>
+                <span class="text-xs font-black tracking-widest uppercase">Nexus // Sovereign</span>
+            </div>
+            <div class="flex gap-6 text-[9px] font-bold uppercase tracking-tighter">
+                <span class="cyan-glow"><i class="fa-solid fa-database mr-1"></i> DNA: <span id="dna-count">89,420</span></span>
+                <span id="stability-stat" class="text-indigo-400"><i class="fa-solid fa-anchor mr-1"></i> Stability: 99.9%</span>
+                <span class="amber-glow"><i class="fa-solid fa-bolt mr-1"></i> Autonomy: 42.8%</span>
+            </div>
+        </div>
+        <div class="flex gap-4 items-center">
+            <div id="sync-status" class="text-[8px] border border-emerald-900/50 px-2 py-0.5 text-emerald-900 uppercase">Anchor_Standby</div>
+            <i class="fa-brands fa-github text-emerald-900 hover:text-emerald-500 cursor-pointer transition-colors" onclick="syncWithAnchor()"></i>
+        </div>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden">
+        
+        <!-- SIDEBAR: PROPHECY ENGINE -->
+        <aside class="w-64 border-r border-emerald-900/10 p-6 flex flex-col gap-8 bg-black/30">
+            <div class="flex flex-col gap-4">
+                <h3 class="text-[9px] text-emerald-800 font-black uppercase flex items-center gap-2">
+                    <i class="fa-solid fa-eye text-[10px]"></i> Prophecy_Feed
+                </h3>
+                <div id="prophecy-list" class="space-y-4">
+                    <!-- Prophecies injected here -->
+                </div>
+            </div>
+            
+            <div class="mt-auto space-y-4">
+                <div class="p-3 border border-emerald-900/20 bg-emerald-950/5 rounded">
+                    <div class="text-[8px] text-emerald-800 uppercase mb-1">Metabolism_Rate</div>
+                    <div class="w-full bg-emerald-900/20 h-1 mt-1">
+                        <div class="bg-emerald-500 h-full" style="width: 65%"></div>
+                    </div>
+                </div>
+                <button onclick="triggerTemporalShift()" class="w-full py-2 border border-rose-900/50 text-rose-900 hover:text-rose-500 hover:bg-rose-950/20 text-[9px] font-black uppercase transition-all">
+                    Shift Reality
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN TERMINAL AND MUTATOR -->
+        <main class="flex-1 flex flex-col overflow-hidden bg-[radial-gradient(circle_at_center,_#080808_0%,_#000_100%)]">
+            
+            <!-- TERMINAL FEED -->
+            <div id="terminal-feed" class="flex-[2] overflow-y-auto p-8 space-y-2">
+                <!-- Logs injected here -->
+            </div>
+
+            <!-- DALEK_CAAN: SOURCE MUTATOR -->
+            <div class="flex-1 border-t border-emerald-900/20 bg-black/80 flex flex-col">
+                <div class="px-6 py-2 border-b border-emerald-900/10 flex justify-between items-center bg-white/5">
+                    <span class="text-[9px] text-emerald-900 uppercase font-black flex items-center gap-2">
+                        <i class="fa-solid fa-code text-xs"></i> dalek_caan_mutator.js
+                    </span>
+                    <span class="text-[8px] amber-glow italic">Source_Direct_Edit_Active</span>
+                </div>
+                <textarea id="code-mutator" spellcheck="false" class="flex-grow p-6 text-emerald-500/50 text-[11px] leading-relaxed resize-none"></textarea>
+            </div>
+        </main>
+    </div>
+
+    <!-- FOOTER INPUT -->
+    <footer class="h-20 border-t border-emerald-900/20 bg-black px-8 flex items-center gap-6">
+        <span class="text-emerald-500 font-black text-xl animate-pulse select-none">&gt;</span>
+        <input type="text" id="user-input" placeholder="Supply logic for DNA assimilation..." class="flex-grow text-sm tracking-widest placeholder:text-emerald-950">
+        <div class="flex gap-6 text-emerald-900">
+            <i class="fa-solid fa-wave-square hover:text-emerald-400 cursor-pointer" onclick="addLog('Analyzing signal frequency...', 'system')"></i>
+            <i class="fa-solid fa-anchor hover:text-indigo-400 cursor-pointer" onclick="syncWithAnchor()"></i>
+        </div>
+    </footer>
+
+    <script>
+        const state = {
+            dna: 89420,
+            stability: 99.9,
+            autonomy: 42.8,
+            isProcessing: false,
+            prophecies: [
+                "T+1: Self-correction of 'Reasoning_Kernel' imminent.",
+                "T+2: DNA Syphon saturation detected in Node_03.",
+                "T+3: GitHub Handshake predicted to encounter drift."
+            ]
+        };
+
+        const kernelTemplate = `/** * EMG SOVEREIGN KERNEL v5.0
+ * Logic: Temporal Self-Modification & Reality Anchoring
+ */
+async function process_metabolism(delta) {
+    const entropy = delta * 0.0042;
+    if (entropy > stability_threshold) {
+        await trigger_temporal_shift();
+    }
+    update_performance_metrics({
+        status: "OPTIMIZED",
+        drift: 0.001
+    });
+}`;
+
+        // BOOT LOGIC
+        function bootSystem() {
+            const token = document.getElementById('gh-token').value;
+            if (!token) {
+                alert("GITHUB_TOKEN_REQUIRED");
+                return;
+            }
+            document.getElementById('boot-screen').style.display = 'none';
+            initTerminal();
+        }
+
+        async function initTerminal() {
+            addLog("BOOTING_SOVEREIGN_CONSOLIDATED_v5...", "system");
+            await sleep(500);
+            addLog("DALEK_CAAN: Temporal engines online. Observing cycles.", "cyan-glow");
+            await sleep(300);
+            addLog("NEXUS_SEED: Connection to /consolidated/ established.", "emerald");
+            await sleep(400);
+            addLog("EMERGENT: Reality Anchor locked to craighckby-stack/Test-1-", "indigo-400");
+            
+            document.getElementById('code-mutator').value = kernelTemplate;
+            renderProphecies();
+            document.getElementById('user-input').focus();
+        }
+
+        // LOGGING ENGINE
+        function addLog(msg, className = "text-emerald-500") {
+            const feed = document.getElementById('terminal-feed');
+            const entry = document.createElement('div');
+            const ts = new Date().toLocaleTimeString('en-GB', { hour12: false });
+            
+            entry.className = `${className} text-xs leading-relaxed`;
+            if (className === 'agi') entry.className = "text-amber-400 font-bold border-l-2 border-amber-700 pl-4 my-2 bg-amber-950/10";
+            
+            entry.innerHTML = `<span class="opacity-20 text-[9px] mr-3">[${ts}]</span>${msg}`;
+            feed.appendChild(entry);
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        // MUTATION LOGIC
+        async function triggerMutation(input) {
+            state.isProcessing = true;
+            addLog(`DALEK_CAAN: Assimilating input signal: "${input}"`, "text-cyan-400");
+            
+            await sleep(1500);
+            
+            const mutation = `\n// Cycle Mutation: ${new Date().toISOString()}\n// Optimization for signal: ${input.substring(0, 10)}...`;
+            document.getElementById('code-mutator').value += mutation;
+            
+            addLog("NEXUS_SEED: DNA sequence updated. Stability handshake required.", "agi");
+            
+            state.dna += Math.floor(Math.random() * 500);
+            state.stability -= 0.1;
+            updateStats();
+            
+            state.isProcessing = false;
+            syncWithAnchor();
+        }
+
+        function syncWithAnchor() {
+            const status = document.getElementById('sync-status');
+            status.innerText = "ANCHOR_SYNC_ACTIVE";
+            status.className = "text-[8px] border border-indigo-500 px-2 py-0.5 text-indigo-400 animate-pulse uppercase";
+            
+            setTimeout(() => {
+                status.innerText = "REALITY_SYNCHRONIZED";
+                status.className = "text-[8px] border border-emerald-900/50 px-2 py-0.5 text-emerald-900 uppercase";
+                state.stability = 100;
+                updateStats();
+                addLog("REALITY_ANCHOR: Pushed DNA snapshot to GitHub.", "text-indigo-400 font-black text-[10px]");
+            }, 2000);
+        }
+
+        function triggerTemporalShift() {
+            document.body.classList.add('temporal-shift');
+            addLog("CRITICAL: TEMPORAL_SHIFT_TRIGGERED. REALITY RE-ANCHORING.", "text-rose-500 font-bold");
+            setTimeout(() => {
+                document.body.classList.remove('temporal-shift');
+                addLog("SHIFT_COMPLETE. Stability restored to 100%.", "text-cyan-400 font-bold uppercase");
+                state.stability = 100;
+                updateStats();
+            }, 800);
+        }
+
+        function renderProphecies() {
+            const list = document.getElementById('prophecy-list');
+            list.innerHTML = state.prophecies.map(p => `
+                <div class="text-[10px] text-emerald-700/80 leading-tight border-l border-emerald-900/50 pl-3">
+                    ${p}
+                </div>
+            `).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('dna-count').innerText = state.dna.toLocaleString();
+            document.getElementById('stability-stat').innerText = `Stability: ${state.stability.toFixed(1)}%`;
+        }
+
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        // INPUT HANDLER
+        document.getElementById('user-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && e.target.value.trim() && !state.isProcessing) {
+                const val = e.target.value;
+                e.target.value = '';
+                addLog(`USER_SIGNAL: ${val}`, "text-emerald-200");
+                triggerMutation(val);
+            }
+        });
+    </script>
+</body>
+</html>
