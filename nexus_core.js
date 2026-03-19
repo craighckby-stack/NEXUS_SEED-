@@ -1,166 +1,164 @@
-class DisposeModeFactory implements Disposable {
-  private readonly disposeModeCache: DisposeModeMap;
-  private readonly asyncContext: AsyncContext;
+import { Disposable } from './Disposable';
+import { Observer } from './Observer';
+import { DisposeMode } from './DisposeMode';
+import { AsyncContext } from './AsyncContext';
 
-  constructor(private disposeModeCache: DisposeModeMap = new DisposeModeMap(), private asyncContext: AsyncContext = new AsyncContext()) {
-    this.disposeModeCache = disposeModeCache;
-    this.asyncContext = asyncContext;
+class DisposeModeFactory {
+  private disposeModes: DisposeMode[];
+
+  constructor(private disposeModes: DisposeMode[]) {
+    this.disposeModes = disposeModes;
   }
 
-  public getInstance(disposeModeCache: DisposeModeMap = this.disposeModeCache, asyncContext: AsyncContext = this.asyncContext): DisposeModeFactory {
-    return new DisposeModeFactory(disposeModeCache, asyncContext);
-  }
-
-  public async registerDisposeMode(key: string, disposeMode: DisposeMode): Promise<void> {
-    await this.disposeModeCache.registerDisposeMode(key, disposeMode);
-    await this.asyncContext.invokeObserver('DISPOSE_MODE_REGISTERED', disposeMode);
-  }
-
-  public async deregisterDisposeMode(key: string): Promise<void> {
-    await this.disposeModeCache.deregisterDisposeMode(key);
-  }
-
-  public async injectDependencies(): Promise<void> {
-    const disposeModes = await this.disposeModeCache.getDisposeModes(Object.keys(this.disposeModeCache.cache));
-    for (const key in disposeModes) {
-      const disposeMode = disposeModes[key];
-      await disposeMode.enterState('DEPENDENCIES_INJECTED');
-      this.asyncContext.invokeObserver('DEPENDENCIES_INJECTED', disposeMode);
-    }
+  public getInstance(key: string): DisposeMode {
+    return new DisposeMode(this.disposeModes, key);
   }
 }
 
-class DisposeMode implements Observer {
-  private state: DisposeModeStateType;
-  private observers: Disposable[];
+class FactorObserver implements Disposable {
+  private key: string;
 
-  constructor(private disposeModeFactory: DisposeModeFactory) {
+  constructor(private key: string) {
+    this.key = key;
+  }
+
+  public async notify(): Promise<void> {
+    console.log(`Modified Factor Observer: ${this.key} notified`);
+  }
+
+  public async dispose(): Promise<void> {
+  }
+}
+
+class DisposeMode extends FactorObserver implements Disposable {
+  private state: DisposeModeStateType;
+  private disposeModeFactory: DisposeModeFactory;
+  private key: string;
+
+  constructor(private disposeModeFactory: DisposeModeFactory, key: string) {
+    super(key);
+    this.disposeModeFactory = disposeModeFactory;
     this.state = null;
-    this.observers = [];
+    this.key = key;
   }
 
   public async enterState(state: DisposeModeStateType): Promise<void> {
     this.state = state;
-    this.observers.forEach((observer) => observer.notify());
   }
 
-  public async registerObserver(observer: Disposable): Promise<void> {
-    this.observers.push(observer);
-  }
-
-  public async unregisterObserver(observer: Disposable): Promise<void> {
-    this.observers = this.observers.filter((o) => o !== observer);
-  }
-
-  public async notify(): Promise<void> {
-    throw new Error('Method not implemented.');
+  public get disposeModeFactory(): DisposeModeFactory {
+    return this.disposeModeFactory;
   }
 }
 
 class DisposeModeMap {
-  private cache: { [key: string]: DisposeMode };
+  private cache: Map<string, DisposeMode>;
 
   constructor() {
-    this.cache = {};
+    this.cache = new Map();
   }
 
   public async registerDisposeMode(key: string, disposeMode: DisposeMode): Promise<void> {
-    this.cache[key] = disposeMode;
-  }
-
-  public async deregisterDisposeMode(key: string): Promise<void> {
-    delete this.cache[key];
-  }
-
-  public async getDisposeModes(keys: string[]): Promise<{ [key: string]: DisposeMode }> {
-    const disposeModes = await this.asyncContext.invokeAsyncCallback(() => {
-      return keys.reduce((acc, key) => {
-        acc[key] = this.cache[key];
-        return acc;
-      }, {});
-    });
-    return disposeModes;
-  }
-}
-
-class DisposeModeServiceProxy {
-  private disposeModeFactory: DisposeModeFactory;
-
-  constructor(private disposeModeFactory: DisposeModeFactory) {
-    this.disposeModeFactory = disposeModeFactory;
-  }
-
-  public async getDisposeModes(): Promise<DisposeMode[]> {
-    return Object.values(this.disposeModeFactory.disposeModeCache.cache);
-  }
-
-  public async registerDisposeMode(key: string, disposeMode: DisposeMode): Promise<void> {
-    await this.disposeModeFactory.registerDisposeMode(key, disposeMode);
-  }
-
-  public async deregisterDisposeMode(key: string): Promise<void> {
-    await this.disposeModeFactory.deregisterDisposeMode(key);
-  }
-}
-
-class Disposable {
-  public async notify(): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
-}
-
-class Observer {
-  public async notify(): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
-
-  public async registerObserver(observer: Disposable): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
-
-  public async unregisterObserver(observer: Disposable): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
-}
-
-class AsyncContext {
-  private readonly observers: Disposable[];
-
-  constructor() {
-    this.observers = [];
-  }
-
-  public async invokeObserver(event: string, observer: Disposable): Promise<void> {
-    this.observers.push(observer);
-    if (event === 'DEPENDENCIES_INJECTED') {
-      for (const observer of this.observers) {
-        await observer.notify();
-        this.observers = this.observers.filter((o) => o !== observer);
-      }
+    if (!this.cache.has(key)) {
+      this.cache.set(key, disposeMode);
     }
   }
 
-  public async invokeAsyncCallback(callback: () => Promise<any>): Promise<any> {
-    return callback();
+  public async getDisposeModes(): Promise<DisposeMode[]> {
+    return Array.from(this.cache.values());
   }
 }
 
-async function main() {
-  const disposeModeCache = new DisposeModeMap();
-  const disposeModeFactory = new DisposeModeFactory(disposeModeCache, new AsyncContext());
-  await disposeModeFactory.injectDependencies();
+class Disposable {}
 
-  const disposeModeServiceProxy = new DisposeModeServiceProxy(disposeModeFactory);
+class ObserverRegistry {
+  private observerRegistry: { [key: string]: Disposable[] };
 
-  while (true) {
-    console.log('DisposeModes Registered:', await disposeModeServiceProxy.getDisposeModes());
-    console.log('DisposeModes Deregistered:', await disposeModeServiceProxy.getDisposeModes());
+  constructor() {
+    this.observerRegistry = {};
+  }
 
-    const disposeMode = new DisposeMode(disposeModeFactory);
-    await disposeModeServiceProxy.registerDisposeMode('test', disposeMode);
+  public registerObserver(observer: Disposable): void {
+    const key = observer.key;
+    if (!this.observerRegistry[key]) {
+      this.observerRegistry[key] = [observer];
+    } else {
+      this.observerRegistry[key].push(observer);
+    }
+  }
 
-    await disposeModeServiceProxy.deregisterDisposeMode('test');
+  public unregisterObserverByDisposeMode(key: string): void {
+    delete this.observerRegistry[key];
+  }
+
+  public getObserversForDisposeMode(key: string): Disposable[] {
+    return this.observerRegistry[key] || [];
   }
 }
 
-main();
+class AsyncContext implements Disposable {
+  private asyncOperations: Promise<void>[];
+  private observerRegistry: ObserverRegistry;
+
+  constructor(private asyncOperations: Promise<void>[], private observerRegistry: ObserverRegistry) {
+    this.asyncOperations = asyncOperations;
+    this.observerRegistry = observerRegistry;
+  }
+
+  public async dispatchObservers(observer: Disposable): Promise<void> {
+    const observers = this.observerRegistry.getObserversForDisposeMode(observer.key);
+    for await (const o of observers) {
+      await o.notify();
+    }
+  }
+
+  public async invokeObserver(event: string, observer: Disposable): Promise<void> {
+    this.observerRegistry.registerObserver(observer);
+    if (event === 'DEPENDENCIES_INJECTED') {
+      await this.dispatchObservers(observer);
+    }
+  }
+}
+
+class FactoryBasedNexusCore implements Disposable {
+  private readonly disposeModes: DisposeModeMap;
+  private readonly asyncContext: AsyncContext;
+  private readonly observerRegistry: ObserverRegistry;
+
+  constructor(private initialDisposeModes: DisposeModeMap = new DisposeModeMap(),
+              private initialAsyncContext: AsyncContext = new AsyncContext([], new ObserverRegistry()),
+              private initialObserverRegistry: ObserverRegistry = new ObserverRegistry()) {
+    this.disposeModes = initialDisposeModes;
+    this.asyncContext = initialAsyncContext;
+    this.observerRegistry = initialObserverRegistry;
+  }
+
+  public getInstance(initialDisposeModes: DisposeModeMap = this.disposeModes,
+                     initialAsyncContext: AsyncContext = this.asyncContext,
+                     initialObserverRegistry: ObserverRegistry = this.observerRegistry): FactoryBasedNexusCore {
+    return new FactoryBasedNexusCore(initialDisposeModes, initialAsyncContext, initialObserverRegistry);
+  }
+
+  public async registerDisposeMode(key: string, disposeMode: DisposeMode): Promise<void> {
+    await this.disposeModes.registerDisposeMode(key, disposeMode);
+    this.observerRegistry.registerObserver(disposeMode);
+  }
+
+  public async deregisterDisposeMode(key: string): Promise<void> {
+    await this.disposeModes.deregisterDisposeMode(key);
+    this.observerRegistry.unregisterObserverByDisposeMode(key);
+  }
+
+  public async injectDependencies(): Promise<void> {
+    const disposeModeFactories: DisposeModeFactory[] = Array.from(this.disposeModes.cache.values()).map(disposeMode => new DisposeModeFactory([disposeMode]));
+    const factoryBasedDisposeModes = disposeModeFactories.map(factory => factory.getInstance());
+    await this.injectDependenciesUsingObserver(factoryBasedDisposeModes);
+  }
+
+  public async injectDependenciesUsingObserver(disposeModes: DisposeMode[]): Promise<void> {
+    for await (const disposeMode of disposeModes) {
+      await disposeMode.enterState('DEPENDENCIES_INJECTED');
+      await this.asyncContext.invokeObserver('DEPENDENCIES_INJECTED', disposeMode);
+    }
+  }
+}
