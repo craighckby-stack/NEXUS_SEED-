@@ -1,0 +1,1 @@
+Gemini and Grok Errors: Reduce concurrency to 1, Delay retries to 10s
