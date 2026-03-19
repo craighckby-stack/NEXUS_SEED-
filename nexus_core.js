@@ -1,163 +1,232 @@
 // Dispose Mode Factory
 class DisposeModeFactory {
-  constructor(key, disposeModes, factoryMap) {
-    this.key = key;
-    this.disposeModes = disposeModes;
-    this.factoryMap = factoryMap;
-    this.logger = new Logger(this.key);
-  }
+    private disposeModeLogger: IDisposeModeLogger;
+    private notificationObserver: INotificationObserver;
+    private disposeModeHelper: DisposeModeHelper;
+    private factoryLogger: IFactoryLogger;
+    private factoryMapper: IFactoryMapper;
 
-  static createDisposeMode(key, disposeMode, disposeModeMap = new DisposeModeMap()) {
-    const disposeModeInstance = new DisposeMode(key, disposeMode, disposeModeMap)
-    return { disposeModeInstance, disposeModeMap };
-  }
-
-  static createCompositeDisposeMode(key, disposeModes) {
-    const compositeDisposeMode = new CompositeDisposeMode(key, disposeModes);
-    return compositeDisposeMode;
-  }
-
-  injectAndRegisterFactory(factory, disposeModeWrapper) {
-    disposeModeWrapper.disposeModeMap.registerDisposeMode(factory.key, this.disposeModes.find(mode => mode.key === factory.key));
-    this.factoryMap.set(factory.key, disposeModeWrapper);
-  }
-
-  deregisterDisposeMode(key, disposeModeMap) {
-    const disposeMode = this.disposeModes.find(mode => mode.key === key);
-    if (disposeMode) {
-      disposeModeMap.deregisterDisposeMode(key);
-      this.disposeModes.splice(this.disposeModes.indexOf(disposeMode), 1);
+    constructor(disposeModeLogger: IDisposeModeLogger, notificationObserver: INotificationObserver, disposeModeHelper: DisposeModeHelper, factoryLogger: IFactoryLogger, factoryMapper: IFactoryMapper) {
+        this.disposeModeLogger = disposeModeLogger;
+        this.notificationObserver = notificationObserver;
+        this.disposeModeHelper = disposeModeHelper;
+        this.factoryLogger = factoryLogger;
+        this.factoryMapper = factoryMapper;
     }
-  }
+
+    static createDisposeMode(key: string, disposeMode: DisposeMode, disposeModeMap = new DisposeModeMap()) {
+        const disposeModeInstance = new DisposeMode(key, disposeMode, disposeModeMap);
+        return disposeModeInstance;
+    }
+
+    static createCompositeDisposeMode(key: string, disposeModes: DisposeMode[]) {
+        const compositeDisposeMode = new CompositeDisposeMode(key, disposeModes);
+        return compositeDisposeMode;
+    }
+
+    async injectAndRegisterFactory(factory: Factory, disposeModeWrapper: DisposeMode) {
+        this.disposeModeHelper.registerDisposeMode(factory.key, disposeModeWrapper);
+        this.factoryLogger.logFactory(factory);
+    }
+
+    async handleDisposeModeInjectionRequest(factoryKey: string, disposeModeKey: string) {
+        const factory = await this.factoryMapper.mapFactoryKey(factoryKey);
+        const disposeMode = await disposalContext.getDisposeMode(disposeModeKey);
+        disposablityGraph.injectDisposeMode(factoryKey, disposeModeKey);
+    }
 }
 
-// Dispose Mode
 class DisposeMode {
-  constructor(key, notifyObservers, disposeModeMap = new DisposeModeMap()) {
-    this.key = key;
-    this.notifyObservers = notifyObservers;
-    this.disposeModeMap = disposeModeMap;
-  }
+    private disposeModeLogger: IDisposeModeLogger;
+    private disposableList: IDisposable[];
+    private graphDependencies: { [key: string]: DisposeMode[] };
 
-  addDisposable(disposable) {
-    this.disposeModeMap.addDisposable(disposable);
-  }
+    constructor(key: string, disposeModeLogger: IDisposeModeLogger, disposableList: IDisposable[]) {
+        this.disposeModeLogger = disposeModeLogger;
+        this.disposableList = disposableList;
+        this.graphDependencies = {};
+        this.key = key;
+    }
 
-  removeDisposable(disposable) {
-    this.disposeModeMap.removeDisposable(disposable);
-  }
+    addDisposable(disposable: IDisposable) {
+        this.disposableList.push(disposable);
+        this.addGraphDependencies(disposable);
+    }
 
-  deregister() {
-    this.disposeModeMap.deregisterDisposeMode(this.key);
-    this.disposeModeMap = null;
-  }
+    addGraphDependencies(disposable: IDisposable) {
+        if (!this.graphDependencies[disposable.key]) {
+            const dependencies = await disposablityGraph.getGraphDependencies(disposable.key);
+            this.graphDependencies[disposable.key] = dependencies;
+        }
+    }
+
+    removeDisposable(disposable: IDisposable) {
+        this.disposableList = this.disposableList.filter(d => d !== disposable);
+        this.removeGraphDependencies(disposable);
+    }
+
+    removeGraphDependencies(disposable: IDisposable) {
+        delete this.graphDependencies[disposable.key];
+    }
+
+    deregister() {
+        this.disposeModeLogger.logDisposeMode(this);
+        this.disposableList = [];
+        this.graphDependencies = {};
+    }
 }
 
-// Composite Dispose Mode
-class CompositeDisposeMode extends DisposeMode {
-  constructor(key, disposeModes) {
-    super(key, () => {
-      disposeModes.forEach((disposeMode) => disposeMode.notifyObservers());
-    });
-    this.disposeModes = disposeModes;
-    this.disposeModes.forEach(disposeMode => disposeMode.disposeModeMap = null);
-  }
-
-  addDisposable(disposable) {
-    this.disposeModes.forEach((disposeMode) => disposeMode.addDisposable(disposable));
-  }
-
-  removeDisposable(disposable) {
-    this.disposeModes.forEach((disposeMode) => disposeMode.removeDisposable(disposable));
-  }
-}
-
-// Dispose Mode Map
 class DisposeModeMap {
-  registerDisposeMode(key, disposeMode) {
-    this.disposeModeMap.set(key, disposeMode);
-  }
+    private disposalContext: DisposalContext;
+    private disposablityGraph: DisposabilityGraph;
 
-  deregisterDisposeMode(key) {
-    this.disposeModeMap.delete(key);
-  }
+    constructor(disposalContext: DisposalContext, disposablityGraph: DisposabilityGraph) {
+        this.disposalContext = disposalContext;
+        this.disposablityGraph = disposablityGraph;
+    }
 
-  addDisposable(disposable) {
-    this.disposeModeMap.forEach((disposeMode) => disposeMode.addDisposable(disposable));
-  }
+    registerDisposeMode(key: string, disposeMode: DisposeMode) {
+        this.disposalContext.registerDisposeMode(key, disposeMode);
+        this.disposablityGraph.injectDisposeMode(key, disposeMode.key);
+        disposeMode.addGraphDependencies(disposeMode);
+    }
 
-  removeDisposable(disposable) {
-    this.disposeModeMap.forEach((disposeMode) => disposeMode.removeDisposable(disposable));
-  }
+    deregisterDisposeMode(key: string) {
+        this.disposalContext.deregisterDisposeMode(key);
+        this.disposablityGraph.deregisterDisposeMode(key);
+    }
 
-  getDisposeMode(key) {
-    return this.disposeModeMap.get(key);
-  }
+    getDisposeMode(key: string) {
+        return this.disposalContext.getDisposeMode(key);
+    }
 }
 
-// Factory
+class DisposalContext {
+    private disposeModeMap: DisposeModeMap;
+    private disposabilityGraph: DisposabilityGraph;
+
+    constructor(disposeModeMap: DisposeModeMap, disposabilityGraph: DisposabilityGraph) {
+        this.disposeModeMap = disposeModeMap;
+        this.disposabilityGraph = disposabilityGraph;
+    }
+
+    registerDisposeMode(key: string, disposeMode: DisposeMode) {
+        this.disposeModeMap.registerDisposeMode(key, disposeMode);
+    }
+
+    deregisterDisposeMode(key: string) {
+        this.disposeModeMap.deregisterDisposeMode(key);
+    }
+
+    async getDisposeMode(key: string) {
+        const disposeMode = await this.disposeModeMap.getDisposeMode(key);
+        const graphDependencies = await this.disposabilityGraph.getGraphDependencies(key);
+        disposeMode.graphDependencies = graphDependencies;
+        return disposeMode;
+    }
+}
+
+class DisposabilityGraph {
+    private nodes: DisposeMode[];
+    private edges: { [key: string]: DisposeMode[] };
+
+    constructor(nodes: DisposeMode[]) {
+        this.nodes = nodes;
+        this.edges = {};
+    }
+
+    async injectDisposeMode(key: string, disposeModeKey: string) {
+        if (!this.edges[disposeModeKey]) {
+            const dependencies = await this.getGraphDependencies(disposeModeKey);
+            this.edges[disposeModeKey] = dependencies;
+        }
+        this.addEdge(key, disposeModeKey);
+    }
+
+    async getGraphDependencies(key: string) {
+        const dependencies: DisposeMode[] = [];
+        for (const edge in this.edges) {
+            if (this.edges[edge].includes(key)) {
+                dependencies.push(edge);
+            }
+        }
+        return dependencies;
+    }
+
+    edge(key: string, disposeModeKey: string) {
+        this.addEdge(key, disposeModeKey);
+    }
+
+    private addEdge(key: string, disposeModeKey: string) {
+        if (!this.edges[key]) {
+            this.edges[key] = [];
+        }
+        this.edges[key].push(disposeModeKey);
+    }
+
+    deregisterDisposeMode(key: string) {
+        delete this.edges[key];
+        this.removeNode(key);
+    }
+
+    private removeNode(key: string) {
+        this.nodes = this.nodes.filter(node => node.key !== key);
+    }
+}
+
+interface IDisposable {
+    key: string;
+}
+
+class NotificationObserver {
+    notify(disposable: IDisposable, notifyType: string) {
+        // Implement notification logic
+    }
+}
+
+class DisposeModeHelper {
+    private notificationObserver: INotificationObserver;
+    private disposeModeLogger: IDisposeModeLogger;
+
+    constructor(notificationObserver: INotificationObserver, disposeModeLogger: IDisposeModeLogger) {
+        this.notificationObserver = notificationObserver;
+        this.disposeModeLogger = disposeModeLogger;
+    }
+
+    notifyObservers(disposable: IDisposable, notifyType: string) {
+        if (this.notificationObserver) {
+            this.notificationObserver.notify(disposable, notifyType);
+        }
+    }
+
+    logDisposeMode(disposeMode: DisposeMode) {
+        this.disposeModeLogger.logDisposeMode(disposeMode);
+    }
+}
+
 class Factory {
-  constructor(key, classToWrap, eventTarget, context) {
-    this.key = key;
-    this.classToWrap = classToWrap;
-    this.eventTarget = eventTarget;
-    this.context = context;
-    this.disposableMap = new WeakMap();
-  }
+    private factoryLogger: IFactoryLogger;
+    private eventTarget: any;
+    private context: object;
+    private key: string;
 
-  inject() {}
+    constructor(factoryLogger: IFactoryLogger, key: string, eventTarget: any, context: object) {
+        this.factoryLogger = factoryLogger;
+        this.eventTarget = eventTarget;
+        this.context = context;
+        this.key = key;
+    }
 
-  createInstance() {
-    return new this.classToWrap(this.eventTarget, this.context);
-  }
+    async inject(factoryLogger: IFactoryLogger, key: string) {
+        // Implement factory injection logic
+    }
 
-  createFactoryInstance() {
-    const factory = new this.classToWrap(this.eventTarget, this.context);
-    this.registerFactory(factory);
-    return factory;
-  }
+    createInstance() {
+        return new this.eventTarget(this.context);
+    }
 
-  registerFactory(factory) {
-    this.disposableMap.set(factory.key, factory);
-    this.disposeModeMap.registerDisposeMode(factory.key, factory.disposeMode);
-  }
-}
-
-// Nexus
-class Nexus {
-  constructor(nexusConfig) {
-    this.nexusConfig = nexusConfig;
-    this.factories = new WeakMap();
-    this.disposableMap = new WeakMap();
-    this.disposeMode = new DisposeMode('nexus', () => {});
-  }
-
-  registerFactory(factory) {
-    factory.disposeMode = this.disposeMode;
-    factory.disposableMap = this.disposableMap;
-    this.factories.set(factory.key, factory);
-    this.disposeModeMap.registerDisposeMode(factory.key, factory.disposeMode);
-  }
-
-  unregisterFactory(factory) {
-    this.factories.delete(factory.key);
-    this.disposeModeMap.deregisterDisposeMode(factory.key);
-    factory.disposeMode = null;
-  }
-
-  registerDisposable(disposable) {
-    this.disposableMap.set(disposable.key, disposable);
-  }
-
-  unregisterDisposable(disposable) {
-    this.disposableMap.delete(disposable.key);
-  }
-
-  getDisposable(key) {
-    return this.disposableMap.get(key);
-  }
-
-  getFactory(factoryKey) {
-    return this.factories.get(factoryKey);
-  }
+    registerFactory(factoryLogger: IFactoryLogger) {
+        this.factoryLogger.logFactory(this);
+        return this;
+    }
 }
