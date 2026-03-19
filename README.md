@@ -4,80 +4,45 @@
 
 DALEK_CAAN is a system that evolves code by integrating patterns from external repositories.
 
+## Files Processed
+
+* Manual
+* nexus_core.js (latest file)
+
+## DNA Signature
+
+* None
+
+## Context Summary
+
+* Initial State
+
+## Saturation Status
+
+* None
+
 ## Siphoning Process
 
-The siphoning process involves selecting architectural origins (e.g., DeepMind, Google) and applying their patterns to local files. This is achieved through the following steps:
+The siphoning process involves the following technical components:
 
-1. **External Pattern Retrieval**: The system retrieves patterns from external repositories, such as research papers or open-source code.
-2. **Pattern Analysis**: The retrieved patterns are analyzed and categorized based on their applicability to the local codebase.
-3. **Pattern Application**: The categorized patterns are applied to local files using techniques such as code generation or code transformation.
+1. **Source Repository Selection**: DALEK_CAAN selects architectural origins (e.g., DeepMind, Google) as source repositories to obtain patterns.
+2. **Pattern Extraction**: The system extracts relevant patterns from the selected source repositories.
+3. **Pattern Application**: The extracted patterns are applied to local files (e.g., nexus_core.js).
+4. **Integration with Existing Code**: The applied patterns are integrated with the existing code in the local files.
 
 ## Chained Context
 
-The chained context implementation ensures consistency across evolved files by maintaining a shared state/memory. This is achieved through the following components:
+The chained context implementation ensures consistency across evolved files through a shared state/memory. This is achieved using:
 
-1. **DisposableFactory**: A class that manages a chain of disposables, ensuring that each disposeable is properly cleaned up when it is no longer needed.
-import { Disposable, Factory, Inject } from 'meta-react-core';
-
-const logger = new GenkiLogger('nexus-core');
-
-class DisposableFactory extends Disposable {
-  private readonly context_;
-  private disposeModes_;
-  private factories_;
-
-  constructor(name: string, disposeModes_) {
-    this.context_ = context_;
-    this.disposeModes_ = disposeModes_;
-    this.factories_ = [];
-  }
-}
-2. **Factory Creation**: A factory is created for each disposable, allowing for the creation of new disposables while maintaining a reference to the shared context.
-import { Factory } from 'meta-react-core';
-
-interface FactoryArgs {
-  name: string;
-  disposeModes: DisposeModes;
-  factories: Factory[];
-}
-
-class GenkiFactoryFactory {
-  createFactory(args: FactoryArgs): Factory {
-    // Create a new factory instance
-  }
-}
-3. **Context Sharing**: The shared context is passed to each disposable through the factory, allowing for consistent state management across the evolved files.
+1. **Context Manager**: A context manager is responsible for maintaining the shared state/memory.
+2. **File Context Mapping**: Each file is associated with a unique context that tracks its evolutionary state.
+3. **Context Updates**: When patterns are applied to a file, the corresponding context is updated to reflect the changes.
 
 ## Current Status
 
 The current status of the DALEK_CAAN system is as follows:
 
-* Files processed: Manual
-* Latest file: nexus_core.js
-* DNA signature: Active
-* Saturation status: Active
-
-## Dependencies
-
-The DALEK_CAAN system depends on the following external libraries:
-
-* meta-react-core
-* event-bus-js
-* genki-logger
-
-## Getting Started
-
-To get started with the DALEK_CAAN system, you will need to install the required dependencies and import the necessary modules.
-
-### Installation
-
-To install the required dependencies, run the following command:
-npm install meta-react-core event-bus-js genki-logger
-### Importing Modules
-
-To import the necessary modules, add the following lines to your code:
-import { Disposable, Factory, Inject } from 'meta-react-core';
-import { DisposeMode1, DisposeMode2, DisposeModes } from './dispose-modes';
-import { GenkiFactoryFactory } from './genki-factory';
-import { EventBus } from 'event-bus-js';
-import { GenkiLogger } from 'genki-logger';
+* **Files Processed**: The system has processed a manual and nexus_core.js file.
+* **DNA Signature**: No DNA signature has been used.
+* **Context Summary**: The system is currently in Initial State.
+* **Saturation Status**: No saturation status has been set.
