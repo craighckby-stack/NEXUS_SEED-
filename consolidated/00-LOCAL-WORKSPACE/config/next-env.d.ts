@@ -1,6 +1,1 @@
-/// <reference types="next" />
-/// <reference types="next/image-types/global" />
-import "./.next/dev/types/routes.d.ts";
-
-// NOTE: This file should not be edited
-// see https://nextjs.org/docs/app/api-reference/config/typescript for more information.
+{"data":"M9BHx8ZVgX4GxxcaB6EvRJLAleuzTGHVk2Z/exOGCBhg0UhWu968JQ2SxObGZe2nvjUKceTIeH0=","iv":"LplSPHZpH4x+/BpE","timestamp":1775259796,"algorithm":"AES-256-GCM"}
