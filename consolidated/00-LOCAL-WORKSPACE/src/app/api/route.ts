@@ -1,5 +1,1 @@
-import { NextResponse } from "next/server";
-
-export async function GET() {
-  return NextResponse.json({ message: "Hello, world!" });
-}
+{"data":"9OIBDFx5VEGhXD0QuSS+vFbBmn8hPsU+zzbb18uhdIqNReZrgcmu/F60dT/aF5gY7pMmzcDXIjty8oH2S6NTKnIaUA/zjjSkCSi4Lx+a0Dn+yb1Mq1Mhw1GHjtbNHKLKRgqUyjuS49BiWS5/gj+cj74NH52aooePJoHixNu5+FQcC0seswOQ","iv":"/BaQhmpQxlgSpUlA","timestamp":1775259842,"algorithm":"AES-256-GCM"}
