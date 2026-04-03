@@ -1,12 +1,1 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  output: "standalone",
-  /* config options here */
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  reactStrictMode: false,
-};
-
-export default nextConfig;
+{"data":"KHfeJf0Ri0O9hjFs4gqwu7NCDd++oHWSN4vIw/Ljnzr42mxLFuOaLAb6gQMdG1OU2qhDXF6w0Wwj7WWS1JtKEb34NIagRE1I4vjcNK8nU04NkgnuwkvsV9kzSB3HBvRjVnIeultJiBxXC4RJw69AX4eIF0m+qs4+TydZin/gNvCRQllTxd0aYX2cdRJ3lgOhysWwjPJQnrcRNIU8I4PSJsScl49NUpNagsV4a+x+XxgRPOKjUBvavF+/Kg==","iv":"7TGZIugBg60y0gIA","timestamp":1775259798,"algorithm":"AES-256-GCM"}
