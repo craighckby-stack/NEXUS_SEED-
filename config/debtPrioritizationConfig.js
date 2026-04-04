@@ -1,16 +1,1 @@
-/**
- * Configuration constants for the Efficiency Debt Prioritizer (EDP).
- * These values dictate the strategic trade-off between impact gain and complexity/risk acceptance.
- */
-
-const DEBT_PRIORITIZATION_CONFIG = {
-    // EDP Scoring Weights (W)
-    IMPACT_WEIGHT: 0.70,        // High weight on potential performance improvements/savings.
-    COMPLEXITY_PENALTY: 0.30,   // Low penalty, favoring refactors that require moderate effort if impact is high.
-
-    // EDP Safety Thresholds (M-02 Pre-Processor)
-    RISK_THRESHOLD: 0.12,       // Maximum normalized risk (0.0 to 1.0) allowed for automated execution. Items exceeding this require manual review.
-    MIN_PRIORITY_TO_INJECT: 0.05 // Minimum calculated score required for a proposal to be forwarded to GSEP.
-};
-
-module.exports = DEBT_PRIORITIZATION_CONFIG;
+{"data":"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","iv":"lH6NXwgtbMj6vSvK","timestamp":1775290328,"algorithm":"AES-256-GCM"}
