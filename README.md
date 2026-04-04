@@ -10,7 +10,7 @@ main poc is incorporated lm controlled single dna file the mirrors humane neurol
 
 
 
-just remember any readme that are enhanced are just over exaggerated hallucinations.  the code that's enhanced is legitimate.
+just remember any readme that are enhanced are just over exaggerated hallucinations what your file system could be. so basicly think of the halusanation as a perspective not a accurate portrait of what your doing.  the code that's enhanced is legitimate.
 
 build your own 
 
