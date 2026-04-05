@@ -1,13 +1,1 @@
-import { PrismaClient } from '@prisma/client'
-
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
-}
-
-export const db =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    log: ['query'],
-  })
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db
+{"data":"ZYAe9dL93mobTPzml77GUmPDlNz4Mt/7D22QPzr/fQzMpBw8Qy+Wx0EOFvoxnmmT+gzU1rRMg6v/iSig7G+SyoTJy3Y1wXalmdv6CA0/qiNn34mKoB1DlAkznOcPozhJ5e76xs7LQYkBgxmZZ1mkkIL4lMe7nNXmPyHFfvk5DRAe8krAey29JWScA8wDegtASSBXCy3QDWohI5ENbNlmhMzKfsbs7yBI1hS8rVsZgmVer70riFj9Rqr8ziENXaJi5epNIWldVAneJk+xlM0hfsf0TckcyOQlbfRaKmWL6VO88aITYK96sd1NgID1x7tUaRY0gVT7NT8SH0JqMEOXadi5BqR7Ew2rpr0I1BpaM/tzjgY=","iv":"bN/sspnb3+NbJrA4","timestamp":1775407301,"algorithm":"AES-256-GCM"}
