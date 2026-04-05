@@ -1,17 +1,1 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  output: "standalone",
-  /* config options here */
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  // 禁用 Next.js 热重载，由 nodemon 处理重编译
-  reactStrictMode: false,
-  eslint: {
-    // 构建时忽略ESLint错误
-    ignoreDuringBuilds: true,
-  },
-};
-
-export default nextConfig;
+{"data":"tNE9EYZfMT1UHNuCdGwt8VSXFEQWTcUPra1Y3i5BovNZn9YwMKqa7vuScKY6nNwFCQd9Cuc821i9MVByRaWm2fE4eKI/FlbytsX+d2QbaRj7IeFqsLpL2GvFySdaug8HpEEsvkDFga/ORi/MXnSbgYoAaz3SsHqxb3nWyRKqnyLhIrCDWnktk/iV0am067vGy9zOPk15K4XYWX1ZLOnA8Cql0zYr49N+SjMq/6v7VgJAexmu/wqLIc/JlWzMdKJjU+0lwA/XPHE3bxpThoRozzM4+PNuFPi13uBrObc=","iv":"LmRBRaOADMU6iNmg","timestamp":1775407633,"algorithm":"AES-256-GCM"}
