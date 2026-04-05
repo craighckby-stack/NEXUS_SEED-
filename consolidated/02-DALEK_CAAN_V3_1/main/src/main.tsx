@@ -1,10 +1,1 @@
-import {StrictMode} from 'react';
-import {createRoot} from 'react-dom/client';
-import App from './App.tsx';
-import './index.css';
-
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);
+{"data":"4m99T084AoQsZ3tJUgsYgaAwsa66UCq7YpXRmcwzIgGJs5QOytgcEixqu9RSAGZcUP+ZCnOdln7re9tXiWh0LTNDBJ7lgMRDrgrJfUhJMHx2Mv+MQ/AsLM2p0pwUrrYdS94LMvxyDCu4naQiO3gJKT3n9TQi5jsFEBuS9HHL+v/8sAtHNmIqXWqbwsHvGOU9TgeK/B0wxJvtmqZdUVSQpjKlC0egAtkjvQfRPycxctL4eDAhUp0NXgkespZAS6ujMwIsd145/4YmkLkaWc1yrwlLJLNLJGsPq1a5Lc3lI1Y=","iv":"CwhFYVM0nG6+hWJK","timestamp":1775407422,"algorithm":"AES-256-GCM"}
