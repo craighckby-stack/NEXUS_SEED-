@@ -1,14 +1,1 @@
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
-};
-
-const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+{"data":"OqLG17AUc2Qd9LyTTPzJc39UoBaSTvokQRVVrl9/ylO3W2OGHeTwl189v12UhiQGcnMguYxYihLZf3JFvVXD4D4HwVtEj7Oa39/JG7Xmb9r3cixlfMVZnOVsrJOhV1YVpZgD/Op6fUqgd50uPnFziKNtaUQEM90/5KO84wB4kV77UOtFo+IoNlHj/YF708cfnK+TewiPKOwjvxiU55F/yeYJ5HvovodPMfuqbY5shLKJeW+1lR192G89x+/j6K0vbSmgefpi+3/vaWo7a57t3Px6tDxqn5dC31mt1flFZmgxWK1hYUE3EX6W12M118aFUdJZynBXpvSHs8QO0zrYNBNwrC4hvE0SlMOxBC22LrRRwXI9wT09+hmQugBjeE1UA848a9ka6S2zgbJJ5KLCQXkWweF0yVyX5t/H7Ungc+OimkFzW3S52Kz/+5zzf8VNIWbWsdMx2yVX65uSTeB3iUDPXxRKh0E0tif9S9c2q8lDa4FhoarR5QwceXE14/Qut8SHxAGKC6pFllywIO1QcYmE96EeVeU1hgM4WpcDh9Twbaim5ChTQ5LbmDHWQLMY1bZbTZz90E/BriOSK9EcTw19Dj4KjlqqEtt4a3PlMZY+Mta9EAJcgtXfumddKRwlXxyz8jWCx4vVQc2HZMzq7YTnrdhlFTKV+sgDuF2bi8+K2jE0+TV6","iv":"s7sRn5cc+C+dS2R7","timestamp":1775407414,"algorithm":"AES-256-GCM"}
