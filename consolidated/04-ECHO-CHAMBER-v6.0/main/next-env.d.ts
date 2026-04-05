@@ -1,5 +1,1 @@
-/// <reference types="next" />
-/// <reference types="next/image-types/global" />
-
-// NOTE: This file should not be edited
-// see https://nextjs.org/docs/app/api-reference/config/typescript for more information.
+{"data":"ZLqqMLdVdWvfziGdMpKCHK0=","iv":"IJ9CEIvdZkIi+LNm","timestamp":1775407491,"algorithm":"AES-256-GCM"}
