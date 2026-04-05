@@ -1,14 +1,1 @@
-/// <reference types="vite/client" />
-
-interface ImportMetaEnv {
-  readonly VITE_FIREBASE_API_KEY: string
-  readonly VITE_FIREBASE_AUTH_DOMAIN: string
-  readonly VITE_FIREBASE_PROJECT_ID: string
-  readonly VITE_FIREBASE_STORAGE_BUCKET: string
-  readonly VITE_FIREBASE_MESSAGING_SENDER_ID: string
-  readonly VITE_FIREBASE_APP_ID: string
-}
-
-interface ImportMeta {
-  readonly env: ImportMetaEnv
-}
+{"data":"3BC55mGNPCSyNlVeRf4tXdLsCGAca1TJtIs2xpaWKxVSDnXJP4oHaonGhf9dNTwxzrBRkThtqgAJ/awbrY1j6eSCCrtFiB97U8kNq9q3rwrPb6M/LeOFt2nbhsr0khUvHR2YE+CwN4L/3SyY3ktq78Yt7gRCb7GMYFsHUGIG8qmerPWgfI/7iCNKUAZI4+yDV2AqQ8t8nW+96Sz5iJ18N/C+PCP8tx5CrwWlbMhLlJmsiSodixvUhAQqAjoSYN/nQVkF4Ad2nI39oQxY4YajHILLn+JQCgQ0ORXguxTc3LLurBckrd+fJ2gkWfhjN3dmiVDDD/Za/ZiHweM0uV9oExmkEuU75EXJIbaHdB3+gHcVjFJidurQraGMLOIspOqN+wj00BtEJIwcO9VcIwmfJa6z0wmpO7W4KkTiFpw2BmdtDJb8ocgdkAfVkzn+lviyyyXQQRzj","iv":"Sfw/pea87LqTufVv","timestamp":1775407437,"algorithm":"AES-256-GCM"}
