@@ -1,5 +1,1 @@
-const config = {
-  plugins: ["@tailwindcss/postcss"],
-};
-
-export default config;
+{"data":"2lZ28+gdUi/aVeldynuCxC8/78TLS86FWudz05kP5iQJ4brYqUNvWVwIUpP18EyVcf+KXFgDC9rDcOxrGiP1H3RPPUj9bLxfaGXaH3qO3A7pOfxWaQJE","iv":"F6/0o6bwAKxw7Xfn","timestamp":1775407507,"algorithm":"AES-256-GCM"}
