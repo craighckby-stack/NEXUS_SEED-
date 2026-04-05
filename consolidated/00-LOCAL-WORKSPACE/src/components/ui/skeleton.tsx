@@ -1,13 +1,1 @@
-import { cn } from "@/lib/utils"
-
-function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="skeleton"
-      className={cn("bg-accent animate-pulse rounded-md", className)}
-      {...props}
-    />
-  )
-}
-
-export { Skeleton }
+{"data":"1Y5XEFEEu1SQBiRXJJRf0k83Bg9PUPSFrgKJXtdtaEdKvF9XdUiIWbsyZGEEs70ijiVzbnIYKoLI59cwgcZBOFpvAZepCFoNZ7wki/znGMKRs/gzDHy2c22KrUG/3t4A4yIxOKBFZ8YtAuIbiaXBQAHRnjgCNtqE/+AkgfrCvTXnpPCLShvc+lTOheVGAfLK2Y24RgK28tT2j5fQX0FvjSVHad9Dhq/XJub40jQ7AChM/zF25x0rJIkoTEv18bSxcRBgI6Yq/nnQowuVS7WgvhFRzcs/FlNDIy9H/UCZiE7ntaGOgrdnVu2TDJW03Q==","iv":"5Thev9HUQgRUHC0u","timestamp":1775407226,"algorithm":"AES-256-GCM"}
