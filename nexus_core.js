@@ -1,28 +1,24 @@
-VOTE: Meta/React-Core
-
-MUTATED CODE:
-
 class Config {
   static get staticConfig() {
-    return {
+    return Object.freeze({
       VERSION: "1.0.0",
       env: process.env.NODE_ENV || "development"
-    };
+    });
   }
 
   constructor(values = {}) {
-    this.setValues(values);
+    this.merge(values);
   }
 
-  setValues(values) {
+  merge(values) {
     Object.assign(this, values);
   }
 
   static get defaultConfig() {
-    return {
+    return Object.freeze({
       foo: 'bar',
       baz: true
-    };
+    });
   }
 
   static get configSchema() {
@@ -46,23 +42,22 @@ class Config {
 }
 
 class AbstractLifecycleEvent {
-  constructor(event) {
-    this.event = event;
+  constructor(event, handler) {
+    this.handler = handler;
   }
 
-  bind(target = this) {
+  bind(target = this, event = this.event) {
     return this;
   }
 
-  execute(target) {
+  execute() {
     return this.handler(target);
   }
 }
 
 class LifecycleEvent extends AbstractLifecycleEvent {
   constructor(handler, event) {
-    super(event);
-    this.handler = handler.bind(this);
+    super(event, handler.bind(this));
   }
 }
 
@@ -119,7 +114,7 @@ class NexusCore {
 
   async configure(config) {
     if (await this.validateConfig(config)) {
-      this.onLifecycleEvent("CONFIGURED");
+      await this.onLifecycleEvent("CONFIGURED");
       this.#state.lifecycle.configured = true;
       this.config = config;
     }
@@ -136,26 +131,30 @@ class NexusCore {
     }
   }
 
-  async onLifecycleEvent(event, handler) {
-    const lifecycleHandler = new LifecycleHandler(handler);
-    this.#state.lifecycle[event] = lifecycleHandler;
+  async onLifecycleEvent(event) {
+    const lifecycleHandler = new LifecycleHandler(async (target) => {
+      target.#state.lifecycle[event] = new LifecycleEvent(async (target) => {
+        return await target.#state.lifecycle[event].execute(target);
+      }, event);
+    });
+    this.#state.lifecycle[event] = lifecycleHandler.execute(this);
   }
 
   on(event, handler) {
     const lifecycleEvent = new LifecycleEvent(handler, event);
-    this.onLifecycleEvent(event, handler);
+    this.onLifecycleEvent(event);
   }
 
   async executeLifecycleEvent(event) {
     if (this.#state.lifecycle[event]) {
       const handler = this.#state.lifecycle[event];
-      this.#state.lifecycle[event] = handler.execute(this);
+      this.#state.lifecycle[event] = await handler.execute(this);
     }
   }
 
   get on() {
     return async (event, handler) => {
-      await this.onLifecycleEvent(event, handler);
+      await this.onLifecycleEvent(event);
     };
   }
 
