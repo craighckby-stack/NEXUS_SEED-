@@ -1,16 +1,16 @@
 {
   "name": "Meta-123",
   "status": "Instantiated",
-  "round": 10,
+  "round": 1,
   "lifecycle": "READY",
   "config": {
     "Core": {
-      "version": "1.0.10",
+      "version": "1.0.1",
       "mode": "Active"
     }
   },
   "logs": [
-    "Round 10 sync completed for nexus_core.js. Vote: Google/Genkit"
+    "Round 1 sync completed. Vote: "
   ],
   "license": "MTCL-V1 (Proprietary)"
 }
