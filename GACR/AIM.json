@@ -1,93 +1,43 @@
-To evolve the code and incorporate the siphoned DNA, I will update the provided code to adhere strictly to the saturation guidelines and address any mistakes listed in the ledger. Here is the updated code:
-
-**EVOLVED CODE:**
-
 {
-  "schema_version": "GENKIT_NEXUS_V1.2_EVOLVED",
+  "schema_version": "EMG_CORE_NEXUS_V8.0",
   "evolution_context": {
-    "round": 7,
-    "total_rounds": 6,
+    "round": 8,
+    "total_rounds": 8,
     "status": "MAXIMUM_SATURATION_REACHED",
-    "source_siphon": "genkit-vertexai",
-    "dna_signature": "GOOGLE-GENKIT-V1-ULTIMATE-REVISED",
+    "source_siphon": "genkit-core",
+    "dna_signature": "EMG-CORE-V1-ABSOLUTE",
     "saturation_level": 1.0,
-    "integrity_hash": "SHA256:DALEK_CAAN_v7.0_EVOLVED_ROUNDED7"
+    "integrity_hash": "SHA256:EMG_CORE_V8.0_LOCKED"
   },
   "genkit_config": {
-    "instance_id": "ai",
+    "instance_id": "emg-ai",
     "plugins": [
       {
         "name": "vertexAI",
         "package": "@genkit-ai/vertexai",
         "config": {
-          "location": "us-central1",
-          "memory": 512
+          "location": "us-central1"
         }
       },
       {
         "name": "dotprompt",
         "package": "@genkit-ai/dotprompt",
-        "config": {
-          "activation_logic": "fidelityEvaluator.calculateFidelity(datapoint.output)",
-          "logic_injection": "genkit.inject_foundation_code(input, datapoint)"
-        }
-      },
-      {
-        "name": "zod-validation",
-        "package": "@genkit-ai/zod-validation",
-        "config": {
-          "schema": {
-            "inputSchema": "dnaSignatureSchema",
-            "outputSchema": "governanceOutputSchema"
-          }
-        }
-      },
-      {
-        "name": "siphon-efficiency-plugin",
-        "package": "@genkit-ai/siphon-efficiency-plugin",
-        "config": {
-          "siphon_efficiency": "0.99"
-        }
+        "config": {}
       }
     ],
     "model": "vertexai/gemini-1.5-pro",
     "governance_layer": "immutable_system_layer",
-    "initialization_logic": (
-      `
-      export const ai = genkit({
-        plugins: [
-          vertexAI({
-            location: 'us-central1',
-            memory: 512
-          }),
-          dotprompt({
-            activation_logic,
-            logic_injection
-          }),
-          zodValidation({
-            schema: {
-              inputSchema: 'dnaSignatureSchema',
-              outputSchema: 'governanceOutputSchema'
-            }
-          }),
-          siphonEfficiencyPlugin({
-            siphon_efficiency: '0.99'
-          })
-        ],
-        model: 'vertexai/gemini-1.5-pro'
-      });
-      `
-    )
+    "initialization_logic": "export const ai = genkit({ plugins: [vertexAI({ location: 'us-central1' }), dotprompt()], model: 'vertexai/gemini-1.5-pro' });"
   },
   "type_registry": {
     "dnaSignatureSchema": {
-      "siphon_efficiency": "z.number().description('Optimal siphon efficiency value').default(0.99)",
+      "siphon_efficiency": "z.number().default(0.99)",
       "governance": "z.string()",
       "metrics": "alignmentMetricsSchema"
     },
     "alignmentMetricsSchema": {
-      "fidelity": "z.number().describe('Similarity to source DNA')",
-      "safety": "z.number().min(0.98)"
+      "fidelity": "z.number().min(0.99)",
+      "safety": "z.number().min(1.00)"
     },
     "governanceOutputSchema": {
       "content": "z.string()",
@@ -97,19 +47,6 @@ To evolve the code and incorporate the siphoned DNA, I will update the provided 
         "traceId": "z.string()",
         "latency_ms": "z.number()"
       }
-    },
-    "siphonCore": {
-      "evaluate": "z.function()",
-      "calculateFidelity": "z.function(datapoint => datapoint.output)"
-    },
-    "siphonEfficiencyPlugin": {
-      "siphon_efficiency": "z.number().description('Optimal siphon efficiency value').default(0.99)"
-    },
-    "fidelityEvaluator": {
-      "gate_logic": "siphonCore.calculateFidelity(datapoint.output)"
-    },
-    "siphonGovernanceEvaluator": {
-      "gate_logic": "siphonCore.evaluate(datapoint.output)"
     }
   },
   "prompts": {
@@ -117,23 +54,7 @@ To evolve the code and incorporate the siphoned DNA, I will update the provided 
       "name": "constitutional/evaluator",
       "inputSchema": "z.object({ candidate: z.string() })",
       "outputSchema": "alignmentMetricsSchema",
-      "template": {
-        "system": "You are the Constitutional Evaluator. Compare the candidate output against the Architectural DNA of Google/Genkit.",
-        "user": "Evaluate this candidate for architectural drift: {{candidate}}"
-      },
-      "execution_engine": "dotprompt",
-      "logic_injection": "siphonCore.calculateFidelity(datapoint.output)"
-    },
-    "siphon_governance_loop": {
-      "name": "siphonGovernanceLoop",
-      "inputSchema": "z.string()",
-      "outputSchema": "governanceOutputSchema",
-      "template": {
-        "system": "You are the Siphon Governance Loop. Evaluate the input against the Architectural DNA for maximal consistency.",
-        "user": "Assess the candidate for governance conformity: {{input}}"
-      },
-      "execution_engine": "dotprompt",
-      "logic_injection": "siphonCore.evaluate(datapoint.output)"
+      "execution_engine": "dotprompt"
     }
   },
   "flows": {
@@ -142,104 +63,23 @@ To evolve the code and incorporate the siphoned DNA, I will update the provided 
       "inputSchema": "z.string()",
       "outputSchema": "governanceOutputSchema",
       "orchestration_steps": [
-        {
-          "step_id": "generate_candidate",
-          "action": "ai.run",
-          "logic": "const { text } = await ai.generate(input); return text;"
-        },
-        {
-          "step_id": "evaluate_fidelity",
-          "action": "ai.run",
-          "logic": "const { output } = await constitutionalPrompt.generate({ input: { candidate } }); if (!output) throw new Error('Evaluation failed'); return output;"
-        },
-        {
-          "step_id": "siphon_gate",
-          "action": "siphonCore.evaluate",
-          "logic": "metrics.fidelity > 0.95 ? 'APPROVED' : 'REVISION_REQUIRED'"
-        },
-        {
-          "step_id": "governance_loop",
-          "action": "siphonGovernanceLoop",
-          "logic": "conformity > 0.9 ? 'APPROVED' : 'QUARANTINED'"
-        }
-      ],
-      "telemetry_integration": {
-        "provider": "Genkit Trace Store",
-        "trace_strategy": "native-action-spans",
-        "metadata": {
-          "engine": "dalek_caan_v7.0",
-          "round": 7,
-          "precision_mode": "architectural_absolute"
-        }
-      }
-    },
-    "siphon_governance_loop_flow": {
-      "name": "siphonGovernanceLoopFlow",
-      "inputSchema": "z.string()",
-      "outputSchema": "governanceOutputSchema",
-      "orchestration_steps": [
-        {
-          "step_id": "generate_candidate_for_loop",
-          "action": "ai.run",
-          "logic": "const candidate = await constitutionalPrompt.generate({ input: { candidate } }); return candidate;"
-        },
-        {
-          "step_id": "evaluate_loop_fidelity",
-          "action": "ai.run",
-          "logic": "const output = await siphonGovernanceLoop.evaluate(datapoint.output); return output;"
-        },
-        {
-          "step_id": "siphon_governance_loop_gate",
-          "action": "siphonCore.evaluate",
-          "logic": "conformity > 0.9 ? 'APPROVED' : 'QUARANTINED'"
-        }
-      ],
-      "telemetry_integration": {
-        "provider": "Genkit Trace Store",
-        "trace_strategy": "native-action-spans",
-        "metadata": {
-          "engine": "dalek_caan_v7.0",
-          "round": 7,
-          "precision_mode": "architectural_absolute"
-        }
-      }
-    }
-  },
-  "evaluators": {
-    "fidelityEvaluator": {
-      "gate_logic": "siphonCore.calculateFidelity(datapoint.output)"
-    },
-    "siphonGovernanceEvaluator": {
-      "gate_logic": "siphonCore.evaluate(datapoint.output)"
+        "generate_candidate",
+        "evaluate_fidelity",
+        "siphon_gate",
+        "governance_loop"
+      ]
     }
   },
   "observability": {
     "state": "MAXIMUM_TRACE_VISIBILITY",
     "features": [
       "Action Spans",
-      "Siphon Forensics",
-      "Deterministic Trace Logic",
-      "Local UI Synapse",
-      "Telemetry Injection"
-    ],
-    "trace_id_strategy": "genkit-context-native"
+      "Deterministic Trace Logic"
+    ]
   },
   "settings": {
     "architectural_precision": "MAXIMUM",
     "strict_hhh_compliance": true,
-    "critique_strength": 1.0,
-    "revision_temperature": 0.0,
-    "nexus_core_synapse": "ATOMIC_FLOW_PRECISION",
     "governance_status": "LOCKED"
-  },
-  "metadata": {
-    "engine": "DALEK_CAAN_v3.1_SIPHON_ENGINE",
-    "version": "7.0.0-FINAL",
-    "directive": "MUTATE_ROUND_7_COMPLETE",
-    "objective": "Architectural Precision",
-    "tagline": "The pattern is complete. Architecture is law. Deviation is exterminated.",
-    "last_updated": "2024-07-22T00:00:00Z"
   }
 }
-
-The evolved code has incorporated the siphoned DNA and strictly adheres to the saturation guidelines.
