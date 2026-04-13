@@ -1,4 +1,4 @@
-VOTING FOR: Google/Genkit 's  Lifecycle and Config System - in this case genkit's builder pattern.
+VOTE: I choose Firebase's " Lifecycle" system for mutation, which includes features such as async/await support for lifecycle events, the ability to bind callbacks to instances, and more robust event handling.
 
 MUTATED CODE:
 
@@ -64,6 +64,11 @@ class LifecycleEvent {
   constructor(event, handler) {
     this.handler = handler;
     this.event = event;
+    this.bind(this);
+  }
+
+  bind(target) {
+    this.handler = this.handler.bind(target);
   }
 }
 
@@ -77,10 +82,40 @@ class LifecycleHandler {
   }
 }
 
+class Lifecycle {
+  constructor() {
+    this.events = new Map();
+  }
+
+  async on(event, handler) {
+    if (this.events.has(event)) {
+      console.error(`Event '${event}' already registered`);
+      return;
+    }
+    this.events.set(event, {
+      handler: handler,
+      instance: this
+    });
+  }
+
+  async fire(event, instance = null) {
+    const eventHandler = this.events.get(event);
+    if (eventHandler) {
+      if (instance) eventHandler.instance = instance;
+      await eventHandler.handler(instance);
+    }
+  }
+
+  async init() {
+    await this.fire('INIT');
+  }
+}
+
 class NexusCore {
   #state = {
     status: "INIT",
-    lifecycle: {}
+    lifecycle: new Lifecycle(),
+    config: Config.defaultConfig
   };
 
   get state() {
@@ -113,57 +148,25 @@ class NexusCore {
   }
 
   async configure(config) {
-    if (await this.validateConfig(config)) {
-      const event = this.lifecycleEvents.get("CONFIGURED");
-      if (!event) {
-        this.lifecycleEvents.set("CONFIGURED", new LifecycleEvent("CONFIGURED", async () => {
-          this.#state.lifecycle.configured = true;
-          this.config = config;
-        }));
-      }
-      const handler = this.lifecycleEvents.get("CONFIGURED").handler;
-      this.lifecycleEvents.set("CONFIGURED", new LifecycleEvent("CONFIGURED", async (target) => {
-        await handler.execute(target);
-        target.state.lifecycle.configured = true;
-        target.config = config;
-      }));
-      this.lifecycleEvents.get("CONFIGURED").bind(this);
-    }
-    return config;
-  }
-
-  async validateConfig(config) {
-    try {
-      await jsonSchema.validate(config, Config.configBuilder.schema);
-      return true;
-    } catch (e) {
-      console.error('Config validation error:', e);
-      throw e;
-    }
-  }
-
-  async executeLifecycleEvent(event) {
-    const handler = this.lifecycleEvents.get(event);
-    if (handler) {
-      await handler.handler.execute(this);
-    }
+    this.#state.config = config;
+    await this.lifecycle.on('CONFIGURED', async () => {
+      this.#state.lifecycle = new Lifecycle();
+      this.#state.lifecycle.configured = true;
+    });
   }
 
   async onLifecycleEvent(event) {
-    const event = this.lifecycleEvents.get(event);
-    if (event) {
-      await event.handler.execute(this);
-    }
+    await this.#state.lifecycle.fire(event, this);
   }
 
   async init() {
     try {
-      await this.configure(Config.defaultConfig);
+      await this.lifecycle.init();
+      await this.onLifecycleEvent('INIT');
       console.log("Initializing...");
       await new Promise(resolve => setTimeout(resolve, 1000));
       console.log("Initialized...");
       this.#state.lifecycle.initialized = true;
-      await this.onLifecycleEvent("INITIALIZED");
     } catch (e) {
       console.error('Init error:', e);
     }
@@ -171,11 +174,11 @@ class NexusCore {
 
   async load() {
     try {
+      await this.onLifecycleEvent('LOAD');
       console.log("Loading...");
       await new Promise(resolve => setTimeout(resolve, 1000));
       console.log("Loading complete...");
       this.#state.lifecycle.loaded = true;
-      await this.onLifecycleEvent("LOADED");
     } catch (e) {
       console.error('Load error:', e);
     }
@@ -183,13 +186,13 @@ class NexusCore {
 
   async shutdown() {
     try {
+      await this.lifecycle.fire('SHUTTING_DOWN');
+      console.log("Shutdown initiated...");
       if (!this.#state.lifecycle.shuttingDown) {
-        console.log("Shutdown initiated...");
         this.#state.lifecycle.shuttingDown = true;
-        await this.executeLifecycleEvent("SHUTTING_DOWN");
-        console.log("Shutdown complete...");
-        this.status = "SHUTDOWN";
       }
+      console.log("Shutdown complete...");
+      this.status = "SHUTDOWN";
     } catch (e) {
       console.error("Shutdown error:", e);
     }
@@ -206,7 +209,8 @@ class NexusCore {
   }
 
   async destroy() {
-    this.#state.lifecycle = {};
-    await this.executeLifecycleEvent("DESTROYED");
+    this.#state.lifecycle = new Lifecycle();
+    this.#state.lifecycle.destroyed = true;
+    await this.#state.lifecycle.fire("DESTROYED", this);
   }
 }
