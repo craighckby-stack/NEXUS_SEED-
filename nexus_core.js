@@ -1,250 +1,217 @@
-class AdvancedDisposeModeFactory {
-  private disposeModes = new Map<string, DisposeMode>();
-  private readonly eventBroker: IEventBroker;
-  private readonly observerRegistry: ObserverRegistry;
-  private readonly disposeModeFactory: IDisposableFactory;
+VOTE: Meta/React-Core
 
-  constructor(
-    eventBroker: IEventBroker,
-    observerRegistry: ObserverRegistry,
-    disposeModeFactory: IDisposableFactory
-  ) {
-    this.eventBroker = eventBroker;
-    this.observerRegistry = observerRegistry;
-    this.disposeModeFactory = disposeModeFactory;
+MUTATED CODE:
+
+class Config {
+  static get staticConfig() {
+    return {
+      VERSION: "1.0.0",
+      env: process.env.NODE_ENV || "development"
+    };
   }
 
-  async getInstance(key: string): Promise<DisposeMode> {
-    if (!this.disposeModes.has(key)) {
-      const disposeMode = await this.disposeModeFactory.createDisposeMode(key);
-      this.disposeModes.set(key, disposeMode);
-      this.observerRegistry.registerObserver(key, disposeMode);
-    }
-    return this.disposeModes.get(key);
+  constructor(values = {}) {
+    this.setValues(values);
   }
 
-  async injectDependencies(disposeModes: DisposeMode[]): Promise<void> {
-    const eventBrokerDispatch = this.eventBroker.dispatch.bind(this.eventBroker);
-    for (const disposeMode of disposeModes) {
-      await disposeMode.enterState('DEPENDENCIES_INJECTED');
-      await this.observerRegistry.notifyObserversOnDisposeMode(disposeMode.key);
-    }
+  setValues(values) {
+    Object.assign(this, values);
   }
 
-  async registerDisposeMode(key: string, disposeMode: DisposeMode, isGlobal = false): Promise<void> {
-    this.disposeModes.set(key, disposeMode);
-    this.observerRegistry.registerObserver(key, disposeMode);
-    this.eventBroker.dispatch('disposeModeRegistered', { disposeMode, isGlobal });
+  static get defaultConfig() {
+    return {
+      foo: 'bar',
+      baz: true
+    };
   }
 
-  async deregisterDisposeMode(key: string): Promise<void> {
-    const disposeMode = this.disposeModes.get(key);
-    if (disposeMode) {
-      this.disposeModes.delete(key);
-      this.observerRegistry.unregisterObserverByDisposeMode(key);
-      this.eventBroker.dispatch('disposeModeDeregistered', { disposeMode });
+  static get configSchema() {
+    return {
+      type: 'object',
+      properties: {
+        foo: { type: 'string' },
+        baz: { type: 'boolean' }
+      }
+    };
+  }
+
+  validate(validators = [jsonSchema.validate]) {
+    try {
+      validators.forEach(validator => validator(this, Config.configSchema));
+    } catch (e) {
+      console.error('Config validation error:', e);
+      throw e;
     }
   }
 }
 
-class AdaptiveDisposeModeFactory extends AdvancedDisposeModeFactory {
-  async createDisposeMode(key: string): Promise<DisposeMode> {
-    const disposeMode = new DisposeModeImpl(key, this.disposeModeFactory);
-    await disposeMode.init();
-    return disposeMode;
+class AbstractLifecycleEvent {
+  constructor(event) {
+    this.event = event;
+  }
+
+  bind(target = this) {
+    return this;
+  }
+
+  execute(target) {
+    return this.handler(target);
   }
 }
 
-class DisposeModeImpl implements DisposeMode {
-  private readonly key: string;
-  private readonly disposeModeFactory: DisposeModeFactory;
-  private state?: DisposeModeStateType;
-  private readonly observers: CompositeDisposable[] = [];
-  private readonly isGlobal: boolean;
+class LifecycleEvent extends AbstractLifecycleEvent {
+  constructor(handler, event) {
+    super(event);
+    this.handler = handler.bind(this);
+  }
+}
 
-  constructor(key: string, disposeModeFactory: DisposeModeFactory) {
-    this.key = key;
-    this.disposeModeFactory = disposeModeFactory;
+class LifecycleHandler {
+  constructor(handler) {
+    this.handler = handler;
   }
 
-  async enterState(state: DisposeModeStateType): Promise<void> {
-    this.state = state;
-    this.observers = [];
-    this.eventBroker.dispatch('disposeModeStateChanged', { key: this.key, state });
+  bind(target = this) {
+    this.handler = this.handler.bind(target);
   }
 
-  async init(): Promise<void> {
-    await this.disposeModeFactory.injectDependencies([this]);
+  execute(target) {
+    return this.handler(target);
+  }
+}
+
+class NexusCore {
+  #state = {
+    status: "INIT",
+    lifecycle: {
+      configured: false,
+      loaded: false,
+      shuttingDown: false
+    }
+  };
+
+  get state() {
+    return this.#state;
   }
 
-  async dispose(): Promise<void> {
-    for (const observer of this.observers) {
-      await observer.dispose();
+  static get lifecycle() {
+    return ["CONFIGURED", "LOADED", "SHUTTING_DOWN"];
+  }
+
+  get status() {
+    return this.#state.status;
+  }
+
+  set status(value) {
+    this.#state.status = value;
+    const currentState = this.#state.status;
+    const lifecycle = this.#state.lifecycle;
+    if (value !== 'INIT') {
+      console.log(`NexusCore instance is ${value}.`);
+      if (value === 'SHUTDOWN') {
+        lifecycle.shuttingDown = false;
+      }
+    }
+    if (currentState === 'INIT' && value !== 'INIT') {
+      lifecycle.configured = true;
     }
   }
 
-  async observe(observer: Disposable): Promise<void> {
-    const newObservers = new CompositeDisposable(observer);
-    this.observers.push(newObservers);
+  async configure(config) {
+    if (await this.validateConfig(config)) {
+      this.onLifecycleEvent("CONFIGURED");
+      this.#state.lifecycle.configured = true;
+      this.config = config;
+    }
+    return config;
   }
-}
 
-class ObservableDisposeMode implements DisposeMode {
-  private readonly key: string;
-
-  constructor(key: string) {
-    this.key = key;
-  }
-}
-
-class ObserverRegistry {
-  private readonly observerRegistry = new Map<string, CompositeDisposable>();
-
-  registerObserver(key: string, observer: Disposable): void {
-    const existingObservers = this.observerRegistry.get(key);
-    if (existingObservers) {
-      existingObservers.add(observer);
-    } else {
-      this.observerRegistry.set(key, new CompositeDisposable(observer));
+  async validateConfig(config) {
+    try {
+      await jsonSchema.validate(config, Config.configSchema);
+      return true;
+    } catch (e) {
+      console.error('Config validation error:', e);
+      throw e;
     }
   }
 
-  unregisterObserverByDisposeMode(key: string): void {
-    this.observerRegistry.delete(key);
+  async onLifecycleEvent(event, handler) {
+    const lifecycleHandler = new LifecycleHandler(handler);
+    this.#state.lifecycle[event] = lifecycleHandler;
   }
 
-  async notifyObserversOnDisposeMode(key: string): Promise<void> {
-    const observers = this.observerRegistry.get(key);
-    if (observers) {
-      await Promise.all(observers.map(observer => observer.notify()));
-    }
-  }
-}
-
-class IEventBroker {
-  dispatch(event: string, data: { [key: string]: any }): void;
-}
-
-class AsyncContext implements Disposable {
-  private readonly asyncOperations: Promise<void>[];
-  private readonly observerRegistry: ObserverRegistry;
-  private readonly eventBroker: IEventBroker;
-
-  constructor(
-    asyncOperations: Promise<void>[],
-    observerRegistry: ObserverRegistry,
-    eventBroker: IEventBroker
-  ) {
-    this.asyncOperations = asyncOperations;
-    this.observerRegistry = observerRegistry;
-    this.eventBroker = eventBroker;
-  }
-}
-
-interface IDisposableFactory {
-  createDisposeMode(key: string): Promise<DisposeMode>;
-}
-
-class DisposableDisposeModeFactory implements IDisposableFactory {
-  async createDisposeMode(key: string): Promise<DisposeMode> {
-    const disposeMode = new DisposeModeImpl(key, this.disposeModeFactory);
-    await disposeMode.init();
-    return disposeMode;
-  }
-}
-
-interface DisposeMode {
-  enterState(state: DisposeModeStateType): Promise<void>;
-  init(): Promise<void>;
-  dispose(): Promise<void>;
-  observe(observer: Disposable): Promise<void>;
-}
-
-abstract class NexusCore implements Disposable {
-  protected eventBroker: IEventBroker;
-  private asyncOperations: Promise<void>[] = [];
-  private registeredDisposables: { [key: string]: Disposable } = {};
-
-  constructor(
-    private observerRegistry: ObserverRegistry,
-    private asyncContext: AsyncContext,
-    eventBroker: IEventBroker = new DefaultEventBroker(),
-    disposeModes?: DisposeMode[]
-  ) {
-    this.eventBroker = eventBroker;
-    this.asyncContext = asyncContext;
-    this.registerDisposeModes(disposeModes);
+  on(event, handler) {
+    const lifecycleEvent = new LifecycleEvent(handler, event);
+    this.onLifecycleEvent(event, handler);
   }
 
-  async registerDisposeMode(key: string, disposeMode: DisposeMode, isGlobal = false): Promise<void> {
-    this.registerDispose(disposeMode);
-    this.eventBroker.dispatch('disposeModeRegistered', { disposeMode, isGlobal });
-  }
-
-  async deregisterDisposeMode(key: string): Promise<void> {
-    this.deregisterDispose(disposeMode);
-  }
-
-  async injectDependencies(disposeModes?: DisposeMode[]): Promise<void> {
-    const eventBrokerDispatch = this.eventBroker.dispatch.bind(this.eventBroker);
-    for (const disposeMode of disposeModes || this.disposeModes.values()) {
-      await disposeMode.enterState('DEPENDENCIES_INJECTED');
-      await this.observerRegistry.notifyObserversOnDisposeMode(disposeMode.key);
+  async executeLifecycleEvent(event) {
+    if (this.#state.lifecycle[event]) {
+      const handler = this.#state.lifecycle[event];
+      this.#state.lifecycle[event] = handler.execute(this);
     }
   }
 
-  registerDisposeModeFactory(disposeModeFactory: DisposeModeFactory): void {
-    this.disposeModeFactory = disposeModeFactory;
+  get on() {
+    return async (event, handler) => {
+      await this.onLifecycleEvent(event, handler);
+    };
   }
 
-  private async registerDispose(disposeMode: DisposeMode): Promise<void> {
-    const key = disposeMode.key;
-    if (!this.registeredDisposables[key]) {
-      this.disposeModeFactory.registerDisposeMode(key, disposeMode);
-      this.observerRegistry.registerObserver(key, disposeMode);
-    } else {
-      this.disposeModeFactory.deregisterDisposeMode(key);
-      this.observerRegistry.unregisterObserverByDisposeMode(key);
+  async load() {
+    try {
+      await this.executeLifecycleEvent("CONFIGURED");
+      console.log("Loading...");
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log("Loading complete...");
+      this.#state.lifecycle.loaded = true;
+      await this.executeLifecycleEvent("LOADED");
+    } catch (e) {
+      console.error('Load error:', e);
     }
   }
 
-  registerDisposeModes(disposeModes?: DisposeMode[]): void {
-    this.disposeModes.clear();
-    if (disposeModes) {
-      for (const disposeMode of disposeModes) {
-        this.registerDispose(disposeMode);
+  async shutdown() {
+    try {
+      if (!this.#state.lifecycle.shuttingDown) {
+        console.log("Shutdown initiated...");
+        this.#state.lifecycle.shuttingDown = true;
+        await this.executeLifecycleEvent("SHUTTING_DOWN");
+        console.log("Shutdown complete...");
+        this.status = "SHUTDOWN";
+      }
+    } catch (e) {
+      console.error("Shutdown error:", e);
+    }
+  }
+
+  async start() {
+    const startMethodOrder = ["configure", "load", "shutdown"];
+    for (const methodName of startMethodOrder) {
+      if (this[methodName] instanceof Function) {
+        await this[methodName]();
       }
     }
   }
-}
 
-abstract class Disposable implements IDisposable {
-  dispose(): Promise<void> {
-    return Promise.resolve();
+  async destroy() {
+    this.state.status = "DESTROYED";
+    this.#state.lifecycle = {
+      configured: false,
+      loaded: false,
+      shuttingDown: false
+    };
   }
 }
 
-interface DisposeModeStateType {
-  // Add the state type definition here
-}
-
-class DefaultEventBroker implements IEventBroker {
-  dispatch(event: string, data: { [key: string]: any }): void {
-    // dispatch event logic here
-  }
-}
-
-class CompositeDisposable extends Disposable {
-  protected disposables: Disposable[] = [];
-
-  add(disposable: Disposable): void {
-    this.disposables.push(disposable);
-  }
-
-  async dispose(): Promise<void> {
-    for (const disposable of this.disposables) {
-      await disposable.dispose();
-    }
-    this.disposables.length = 0;
-  }
-}
+const jsonSchema = require('jsonschema');
+const nexusCore = new NexusCore();
+nexusCore.on('DESTROYED', () => {
+  console.log("NexusCore instance destroyed.");
+});
+nexusCore.configure(Config.defaultConfig);
+nexusCore.start();
+nexusCore.load();
+nexusCore.shutdown();
+nexusCore.destroy();
