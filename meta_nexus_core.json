@@ -1,16 +1,16 @@
 {
   "name": "Meta-123",
   "status": "Instantiated",
-  "round": 3,
+  "round": 4,
   "lifecycle": "READY",
   "config": {
     "Core": {
-      "version": "1.0.3",
+      "version": "1.0.4",
       "mode": "Active"
     }
   },
   "logs": [
-    "Round 3 sync completed. Vote: "
+    "Round 4 sync completed. Vote: "
   ],
   "license": "MTCL-V1 (Proprietary)"
 }
