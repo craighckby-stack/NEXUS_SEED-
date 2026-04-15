@@ -1,22 +1,27 @@
-# 🌌 Test-1: Recursive AGI-Kernel Simulation
+# 🌌 Test-1- : AGI-Governance & Recursive Evolution Kernel
 
-![Maturity](https://img.shields.io/badge/Maturity-Functional%20Prototype-orange) ![Environment](https://img.shields.io/badge/Stack-React%20%7C%20Firebase%20%7C%20Python-blue) ![Intelligence](https://img.shields.io/badge/Core-Gemini%202.5%20Flash-green)
+![Maturity](https://img.shields.io/badge/Maturity-Functional_Prototype-orange?style=for-the-badge) ![Version](https://img.shields.io/badge/Kernel_v7.12.1-Evolutionary-blueviolet?style=for-the-badge) ![Status](https://img.shields.io/badge/System_Status-Active-green?style=for-the-badge)
 
-## 🔍 Project Overview
-Based on a factual audit of the codebase, **Test-1-** is a **FUNCTIONAL PROTOTYPE** designed to simulate an evolving Artificial General Intelligence (AGI) kernel. It combines a sophisticated React-based dashboard with real-world integrations (Firebase, Google Gemini) and a robust back-end suite for OOXML document manipulation and schema validation.
+A high-fidelity experimental framework designed to simulate autonomous agent governance, recursive software evolution, and policy-driven system orchestration. This repository consolidates a multi-agent ecosystem (GAX, VMO, FIA) with a central React-based AGI Kernel for real-time lifecycle monitoring.
 
-While the project uses grandiose terminology like "Recursive Evolution" and "DNA Analysis," it serves as a highly advanced state-management harness that automates cycles of repository optimization and tool generation.
+## 🛠 Factual Audit
 
-## 🛠 Technical Highlights
+**Classification:** **Functional Prototype / Architectural Simulation**
+
+While this repository contains production-grade utility scripts (e.g., Python-based OpenXML manipulation), the primary "AGI Kernel" and "Governance Protocol" logic are **simulated environments**. 
+- **Evidence:** `KERNAL/V1.js` contains a `CYCLE_DELAY` and `MILESTONE_STEP` (50) to trigger "recursive updates," which are state-machine simulations of an evolving AI. 
+- **Persistence:** Uses Firebase Firestore as a live-synced "global memory" rather than local hardcoding, making it a functional networked prototype.
+
+## 🚀 Technical Highlights
 
 ### 1. Dynamic Synergy Manager (Hot-Swapping)
-The `SynergyManager` class in `V1.js` demonstrates a senior-level approach to runtime capability expansion. It allows the kernel to "learn" new tools by fetching code from a database and injecting it into the runtime environment.
+Found in `KERNAL/V1.js`, this class implements a runtime plugin system that fetches executable code from Firestore and injects it into the kernel's capability window.
 
 javascript
 hotSwap(data) {
   if (!data || !data.interfaceName || !data.code) return false;
   try {
-    // Dynamic factory for runtime plugin injection
+    // Evaluation factory for dynamic tool loading
     const factory = new Function('return ' + data.code);
     const plugin = factory();
     
@@ -29,35 +34,48 @@ hotSwap(data) {
       window.KERNEL_SYNERGY_CAPABILITIES[data.interfaceName] = plugin;
     }
     return true;
-  } catch (e) { 
-    console.error("HotSwap Failed:", e); 
-    return false; 
-  }
+  } catch (e) { console.error("HotSwap Failed:", e); return false; }
 }
 
 
-### 2. High-Fidelity OOXML Manipulation
-In `skills/docx/scripts/document.py`, the system implements a professional-grade XML editor specifically for `.docx` structures, handling complex namespaces and automated RSID (Revision Save ID) tracking.
+### 2. Low-Level OOXML Manifest Editor
+Located in `skills/docx/scripts/document.py`, this snippet shows senior-level handle of XML namespaces and RSID (Revision Save ID) tracking for Microsoft Word document synthesis.
 
 python
 def _inject_attributes_to_nodes(self, nodes):
-    # Precise attribute injection for Word compatibility
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    for elem in nodes:
-        if elem.tagName == "w:p":
+    def add_rsid_to_p(elem):
+        if not elem.hasAttribute("w:rsidR"):
             elem.setAttribute("w:rsidR", self.rsid)
-            elem.setAttribute("w:rsidRDefault", self.rsid)
-            if not elem.hasAttribute("w14:paraId"):
-                elem.setAttribute("w14:paraId", _generate_hex_id())
+        if not elem.hasAttribute("w14:paraId"):
+            self._ensure_w14_namespace()
+            elem.setAttribute("w14:paraId", _generate_hex_id())
 
 
-## 📐 Architecture & Data Flow
+### 3. Evolutionary Log Analysis
+`Learning-by-death-logs.json` manages a "Trial and Error" dataset for a simulated agent named "Grog," tracking memory errors and recursion depths as evolutionary selection pressures.
 
-1.  **Orchestration Layer**: The React Frontend (`V1.js`) acts as the "Cortex," managing state cycles (Milestone Steps every 50 cycles).
-2.  **Intelligence Interface**: External calls are routed to `Gemini-2.5-flash-preview` to generate repo optimizations or new code snippets.
-3.  **Persistence Layer**: Firebase Firestore stores the `SYNERGY_CAPABILITIES` and `Audit Logs`.
-4.  **Validation Engine**: The `GACR` (Governance, Audit, Compliance & Reporting) module uses JSON Schemas to validate every state transition and telemetry packet.
-5.  **Forensics/Logging**: `Learning-by-death-logs.json` tracks "Grog" experiments, documenting failure points (e.g., RecursionErrors) to prevent future state collapse.
+## 🏗 Architecture & Data Flow
 
-## 🚩 Truth in Advertising
-**Design Simulation Notice**: While the document manipulation (`document.py`) and UI components are production-ready, the "AGI" aspects—specifically the `Evolutionary Maturity` and `Consciousness` metrics in `Learning-by-death-logs.json`—are **Visual Simulations**. They represent a gamified state machine intended to test how an automated system might log its own self-optimization attempts.
+1.  **Frontend (React/Vite):** Orchestrates the `AGI-KERNEL`. It provides a dashboard for monitoring "Evolutionary Cycles" and manually triggering policy overrides.
+2.  **State Management (useReducer):** Uses a complex core reducer to handle system booting, metric normalization, and milestone completion.
+3.  **Governance Layer:** A massive collection of JSON schemas (`GACR`, `VSEC`) defines the constraints under which the simulated agents (GAX) must operate.
+4.  **Database (Firebase):** Acts as the Source of Truth (SoT) for agent telemetry and live-swapping scripts.
+
+## 🔍 Truth in Advertising
+- **Backend:** The AGI logic is not a black-box neural network; it is a **Structured State Machine** that interacts with the Gemini 2.5 Flash API for content generation (see `CONFIG.GEMINI_ENDPOINT`).
+- **Governance:** Policies defined in `/Governance/Protocol/` are schema-validated but require the user to provide the enforcement engine (or use the provided `ConstraintAdherenceValidator.js`).
+- **Evolution:** The system "re-writes" its own versioning to Firestore; it does not yet physically refactor its own React components on disk without external script assistance (`.zscripts/`).
+
+## 📦 Setup
+
+bash
+# 1. Initialize simulation scripts
+chmod +x .zscripts/*.sh
+./.zscripts/mini-services-install.sh
+
+# 2. Configure Environment
+# Ensure __firebase_config and __app_id are provided via environment variables.
+
+# 3. Start Kernel
+npm run dev # If using the Vite-based UI
