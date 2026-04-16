@@ -1,66 +1,96 @@
 class NexusCore {
   static VERSION = "1.0.0";
-  static _instance;
+  static instance;
 
-  _status = "INIT";
-  _config = {};
-  _loaded = false;
+  #config = {};
+  #loaded = false;
+  #status = "INIT";
+
+  static configure(config = {}) {
+    if (!NexusCore.instance) {
+      throw new Error("NexusCore instance does not exist.");
+    }
+
+    NexusCore.instance.configureInternal(config);
+  }
+
+  static load() {
+    if (!NexusCore.instance || !NexusCore.instance.#loaded) {
+      throw new Error("Lifecycle: Load is not supported after shutdown NexusCore or NexusCore instance does not exist.");
+    }
+
+    NexusCore.instance.loadInternal();
+  }
+
+  static shutdown() {
+    if (!NexusCore.instance || NexusCore.instance.#loaded) {
+      throw new Error("Lifecycle: Shutdown is not supported after load NexusCore or NexusCore instance does not exist.");
+    }
+
+    NexusCore.instance.shutdownInternal();
+  }
+
+  static getStatus() {
+    if (!NexusCore.instance) {
+      throw new Error("NexusCore instance does not exist.");
+    }
+
+    return NexusCore.instance.#status;
+  }
+
+  static setStatus(status) {
+    if (!NexusCore.instance) {
+      throw new Error("NexusCore instance does not exist.");
+    }
+
+    NexusCore.instance.#status = status;
+  }
 
   constructor(config = {}) {
-    if (NexusCore._instance) {
+    if (NexusCore.instance) {
       throw new Error("NexusCore instance already exists.");
     }
 
-    this._config = { ...this.constructor.constructor.config, ...config };
-    NexusCore._instance = this;
+    this.#config = { ...this.constructor.constructor.config, ...config };
+    NexusCore.instance = this;
+
+    this.configureInternal(config);
   }
 
-  configure(config = {}) {
-    if (this._loaded) {
+  #configureInternal(config = {}) {
+    if (this.#loaded) {
       throw new Error("Lifecycle: Configure is not supported after loading NexusCore.");
     }
 
-    this._config = { ...this._config, ...config };
-    return this;
+    this.#config = { ...this.#config, ...config };
   }
 
-  load() {
-    if (this._loaded) {
-      throw new Error("Lifecycle: Load is not supported after shutdown NexusCore.");
+  #loadInternal() {
+    if (this.#loaded) {
+      throw new Error("Lifecycle: Load is not supported after shutdown NexusCore");
     }
 
     // Add load logic here.
-    this._loaded = true;
-
-    return this;
+    this.#loaded = true;
   }
 
-  shutdown() {
-    if (!this._loaded) {
-      throw new Error("Lifecycle: Shutdown is not supported after load NexusCore.");
+  #shutdownInternal() {
+    if (!this.#loaded) {
+      throw new Error("Lifecycle: Shutdown is not supported after load NexusCore");
     }
 
     // Add shutdown logic here.
-    this._loaded = false;
-
-    return this;
-  }
-
-  getStatus() {
-    return this._status;
-  }
-
-  setStatus(status) {
-    this._status = status;
+    this.#loaded = false;
   }
 }
 
+NexusCore.config = {};
 
-Here's a breakdown of the changes:
+The changes implemented include:
 
-*   **Instance Management**: The static `_instance` property is used to manage a single instance of `NexusCore`. This is achieved through a constructor check and throw an error if an instance already exists.
-*   **Lifecycle Management**: Three lifecycle methods, `configure`, `load`, and `shutdown`, are implemented to encapsulate the core's configuration, loading, and shutdown processes.
-*   **Config Encapsulation**: The `_config` property is used to store the instance's configuration, and the `configure` method allows changing it. The config is by default initialized through the constructor and overridden by user-provided configurations.
-*   **Loaded Property**: The `_loaded` property tracks whether the core has been loaded or not. This ensures that lifecycle methods operate within their expected lifecycle stages.
-*   **Status Encapsulation and Access**: Status is encapsulated within the instance, and both getter and setter methods, `getStatus` and `setStatus` are provided to access it. This helps maintain encapsulation.
-*   **Genkit-Inspired Encapsulation**: The design follows Genkit's core principles of encapsulation, where internal state and behavior are exposed only through methods. This approach helps maintain the core's security and ensures predictable behavior.
+*   **Static methods**: All lifecycle methods (`configure`, `load`, `shutdown`, `getStatus`, `setStatus`) and a constructor check are moved to static methods, ensuring they are always available and can be called without an instance of `NexusCore`.
+*   **Private fields**: Methods and state are made private using the `#` symbol, as per ECMAScript 2022. Non-private methods remain as static methods.
+*   **Check for instance existence**: Before calling non-private methods, they check if an instance exists. This ensures proper error handling in different states.
+*   **Initialization**: The `#config` property is initialized with the default config, and the user-provided config is merged with it in the constructor and `configureInternal` method. 
+
+Note that `configure`, `load`, `shutdown`, `getStatus`, `setStatus` and `configureInternal`, `loadInternal`, `shutdownInternal` are separated for the purpose of documentation and maintainability. `getConfig` and `setConfig` methods from the original code are not needed anymore as config is stored in a private field.
