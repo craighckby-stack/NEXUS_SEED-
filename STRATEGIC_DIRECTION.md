@@ -1,1 +1,0 @@
-Optimize Gemini performance, improve Grog's DNA validation, and adapt evolution concurrency.

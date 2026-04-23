@@ -1,5 +1,0 @@
-Optimization of the provided RuntimeConfigProcessor.js file has been achieved through the following improvements:
-1. Input validation: Added checks to ensure that the input config, environment, and overrideSet are valid before proceeding with the merge operation.
-2. Improved deepMerge function: Utilized the Object.prototype.hasOwnProperty.call() method to prevent prototype pollution and ensured that the function handles cyclical references correctly.
-3. Enhanced code readability: Improved code formatting, added comments, and used more descriptive variable names to enhance readability and maintainability.
-4. Removal of unnecessary operations: Eliminated the JSON.parse(JSON.stringify(config)) operation, which can be costly for large configurations, and replaced it with a more efficient method to create a deep copy of the base configuration.

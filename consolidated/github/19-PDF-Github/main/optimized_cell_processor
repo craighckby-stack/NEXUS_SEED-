@@ -1,4 +1,0 @@
-async def process_cell(self, payload):
-    # Asynchronous data processing
-    result = await asyncio.get_event_loop().run_in_executor(None, self._process_cell_blocking, payload)
-    return result

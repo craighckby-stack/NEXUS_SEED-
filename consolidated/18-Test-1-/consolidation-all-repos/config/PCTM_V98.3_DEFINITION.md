@@ -1,3 +1,0 @@
-The architecture mandated by the PCTM V99.1 specification requires immediate implementation of a Configuration Integrity Validation (CIV) module to ensure governance asset integrity and provenance prior to execution. This functional requirement is now scaffolded into the `/governance` structure.
-
-NOTE: The discrepancy between the filename (V98.3) and the internal standard (V99.1) has been noted, and the scaffold implements the V99.1 standard detailed in this document.

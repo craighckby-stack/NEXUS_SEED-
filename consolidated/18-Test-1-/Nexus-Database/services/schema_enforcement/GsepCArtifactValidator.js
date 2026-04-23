@@ -1,1 +1,0 @@
-Optimized GsepCArtifactValidator class for maximum computational efficiency and recursive abstraction

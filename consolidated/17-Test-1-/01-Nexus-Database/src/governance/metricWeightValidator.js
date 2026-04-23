@@ -1,1 +1,0 @@
-Optimized the metricWeightValidator function for maximum computational efficiency and recursive abstraction. The updated function includes input validation, reduces the number of iterations, and provides informative error messages.

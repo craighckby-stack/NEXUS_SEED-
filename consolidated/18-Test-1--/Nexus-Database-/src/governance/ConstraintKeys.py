@@ -1,1 +1,0 @@
-Optimizing src/governance/ConstraintKeys.py for maximum computational efficiency and recursive abstraction is not directly applicable as the provided code is a simple enumeration. However, to maintain consistency and readability, consider adding type hints for better code understanding and potential future optimizations.

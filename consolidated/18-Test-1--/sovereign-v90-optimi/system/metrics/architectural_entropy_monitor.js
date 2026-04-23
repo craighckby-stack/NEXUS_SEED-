@@ -1,1 +1,0 @@
-Optimizations for maximum computational efficiency and recursive abstraction are applied to the Architectural Entropy Monitor (AEM) code.

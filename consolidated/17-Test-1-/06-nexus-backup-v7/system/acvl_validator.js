@@ -1,1 +1,0 @@
-Optimization of the provided ACVL Validator & Constraint Loader (ACVL) code for maximum computational efficiency and recursive abstraction may involve several steps:

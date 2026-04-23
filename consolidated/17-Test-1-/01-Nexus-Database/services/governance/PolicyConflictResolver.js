@@ -1,1 +1,0 @@
-Optimized PolicyConflictResolver for maximum computational efficiency and recursive abstraction

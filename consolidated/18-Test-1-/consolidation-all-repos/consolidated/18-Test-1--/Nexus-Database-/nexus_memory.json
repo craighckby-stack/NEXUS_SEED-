@@ -1,1 +1,0 @@
-{"version": 25, "data": {"source": "Nexus-Database", "integration": {"blockchain": "Polygon", "ai": {"type": "Transformers", "config": {"model": "llama-3.3-70b", "tokenizer": "LlamaTokenizer"}}, "federatedLearning": {"type": "Decentralized", "config": {"peers": 512, "sharedModel": "GlobalModel"}}}}

@@ -1,1 +1,0 @@
-Refactored schema structure enforces strict modularity by decoupling system configuration, runtime policy constraints, and operational metadata. Standardized reusable component definitions (e.g., Metadata, ConfigurationUnit, TaskPolicy) are introduced to reduce boilerplate, improve indexability, and ensure future compatibility for V2 extensions.

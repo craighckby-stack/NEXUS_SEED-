@@ -1,1 +1,0 @@
-Optimized IResolutionStrategy interface definition for maximum computational efficiency and recursive abstraction, preserving strict parity.

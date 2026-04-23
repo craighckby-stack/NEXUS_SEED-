@@ -1,1 +1,0 @@
-1. Add `SYSTEM_PROMPT` and `MAX_FILE_SIZE` to `CORE_CONFIG`. 2. Implement a health-check gate in the `worker` function to respect cooldown periods. 3. Refine the AI request payload to enforce raw code output using the new system prompt logic.

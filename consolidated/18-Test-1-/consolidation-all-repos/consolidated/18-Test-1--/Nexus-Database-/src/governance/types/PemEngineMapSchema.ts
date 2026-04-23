@@ -1,1 +1,0 @@
-Optimized PemEngineMapSchema.ts for maximum computational efficiency and recursive abstraction

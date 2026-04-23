@@ -1,7 +1,0 @@
-Contact: mailto:security@example.com
-Expires: 2026-12-31T23:59:59Z
-Preferred-Languages: en, es
-Policy: https://github.com/craighckby-stack/ai-scaffold/security.md
-Canonical: https://github.com/craighckby-stack/ai-scaffold/security.md
-Encryption: https://github.com/craighckby-stack/ai-scaffold/pgp-key.txt
-Acknowledgments: https://github.com/craighckby-stack/ai-scaffold/blob/main/AUTHORS

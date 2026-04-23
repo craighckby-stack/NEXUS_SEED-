@@ -1,4 +1,0 @@
-User-agent: *
-Disallow: /admin/
-Disallow: /api/
-Sitemap: https://craighckby-stack.github.io/ai-scaffold/sitemap.xml

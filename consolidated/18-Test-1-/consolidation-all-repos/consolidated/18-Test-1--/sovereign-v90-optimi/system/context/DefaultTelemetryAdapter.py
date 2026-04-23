@@ -1,1 +1,0 @@
-Optimized computational efficiency and recursive abstraction for DefaultTelemetryAdapter

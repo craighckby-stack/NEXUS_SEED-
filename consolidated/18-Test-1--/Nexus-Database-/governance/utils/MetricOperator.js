@@ -1,1 +1,0 @@
-The provided code for MetricOperator.js defines a set of standardized operators for threshold comparison and includes a validate function to check numeric values against policy thresholds. The function handles type checking, supports multiple operators, and includes a default return value for unknown operators.

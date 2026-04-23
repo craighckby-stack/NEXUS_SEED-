@@ -1,1 +1,0 @@
-Optimized configuration for maximum computational efficiency and recursive abstraction

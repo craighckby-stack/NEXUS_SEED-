@@ -1,1 +1,0 @@
-Optimizing TelemetryAggregationStrategy for computational efficiency and recursive abstraction

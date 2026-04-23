@@ -1,1 +1,0 @@
-Optimized AveragingManager.js code is provided for maximum computational efficiency and recursive abstraction

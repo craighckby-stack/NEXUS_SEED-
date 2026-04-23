@@ -1,1 +1,0 @@
-{"quantum_circuit": "QuantumCircuit(5, 5)", "hadamard": "QuantumCircuit().h(0)", "cx": ["QuantumCircuit().cx(0, 1)", "QuantumCircuit().cx(0, 2)", "QuantumCircuit().cx(0, 3)", "QuantumCircuit().cx(0, 4)"], "measure": ["QuantumCircuit().measure([0, 1, 2, 3, 4], [0, 1, 2, 3, 4])"]}

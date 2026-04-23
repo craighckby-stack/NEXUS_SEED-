@@ -1,1 +1,0 @@
-Optimized IsolatedFailureReporter for maximum computational efficiency and recursive abstraction.

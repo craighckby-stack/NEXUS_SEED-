@@ -1,3 +1,0 @@
-This is a placeholder for favicon.ico
-Replace with actual ICO file for browser tab icon.
-Recommended size: 32x32 or 16x16 pixels.

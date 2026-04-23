@@ -1,1 +1,0 @@
-Optimization for maximum computational efficiency and recursive abstraction has been successfully applied to C01_axiomatic_definitions.py

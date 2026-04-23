@@ -1,1 +1,0 @@
-Optimized Configuration Service code

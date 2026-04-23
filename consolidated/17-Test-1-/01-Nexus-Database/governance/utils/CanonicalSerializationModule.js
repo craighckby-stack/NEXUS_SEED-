@@ -1,1 +1,0 @@
-Optimized Canonical Serialization Module
